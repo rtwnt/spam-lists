@@ -61,6 +61,7 @@ class DNSBL(object):
         if self.lists_uris:
             for hostname in host_collection.hostnames:
                 hostname = str(hostname)
+                
                 yield hostname, hostname.rstrip('.')
         
         
