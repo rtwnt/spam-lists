@@ -12,6 +12,8 @@ class UnknownCodeError(SpamBLError):
 class DNSBLItem(object):
     ''' Represents a host listed on a DNS blacklist '''
     
+    _classification = None
+    
     def __init__(self, host, source, return_code):
         ''' Create a new instance of DNSBLItem 
         
@@ -22,6 +24,14 @@ class DNSBLItem(object):
         self.host = host
         self.source = source
         self._return_code = return_code
+        
+    @property
+    def classification(self):
+        ''' Classification of this host according to provider of the list from which it has been extracted '''
+        if not self._classification:
+            self._classification = self.source.get_classification(self._return_code)
+            
+        return self._classification
 
 class DNSBL(object):
     ''' Represents a DNSBL service provider '''
