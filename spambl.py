@@ -44,6 +44,25 @@ class DNSBL(object):
             msg_template = 'Using a code value "{}" unsupported by DNSBL instance representing {}'
             raise UnknownCodeError(msg_template.format(code, self.identifier)), None, exc_info()[2]
         
+    def _get_host_and_query_prefix(self, host_collection):
+        ''' Get valid hosts and  query prefixes from hosts given in host_collection
+        
+        :param host_collection: a container with valid host values
+        :returns: a tuple with original host and a value prepared for lookup
+        '''
+        if self.lists_ips:
+            for ip in host_collection.ips:
+                ip = str(ip)
+                suffix = '.in-addr.arpa' if ip.version == 4 else '.ip6.arpa'
+                reverse = ip.replace(suffix, '')
+                
+                yield ip, reverse
+            
+        if self.lists_uris:
+            for hostname in host_collection.hostnames:
+                hostname = str(hostname)
+                yield hostname, hostname.rstrip('.')
+        
         
 if __name__ == '__main__':
     pass
