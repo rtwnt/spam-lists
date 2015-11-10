@@ -3,6 +3,9 @@
 
 class SpamBLError(Exception):
     ''' Base exception class for spambl module '''
+    
+class UnknownCodeError(SpamBLError):
+    ''' Raise when trying to use an unexpected value of dnsbl return code '''
 
 class DNSBL(object):
     ''' Represents a DNSBL service provider '''
