@@ -1,6 +1,8 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
+from sys import exc_info
+
 class SpamBLError(Exception):
     ''' Base exception class for spambl module '''
     
@@ -25,6 +27,22 @@ class DNSBL(object):
         self._code_item_class = code_item_class
         self.lists_ips = lists_ips
         self.lists_uris = lists_uris
+        
+    def get_classification(self, code):
+        ''' Return classification for given code
+        
+        :param code: a valid return code extracted from response to DNSBL query
+        :raises UnknownCodeError: raised when given code is not specified in self._code_item_class
+        :returns: a value associated with a valid return code
+        '''
+        
+        try:
+            return self._code_item_class[code]
+        
+        except KeyError:
+            
+            msg_template = 'Using a code value "{}" unsupported by DNSBL instance representing {}'
+            raise UnknownCodeError(msg_template.format(code, self.identifier)), None, exc_info()[2]
         
         
 if __name__ == '__main__':
