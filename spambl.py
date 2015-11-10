@@ -1,6 +1,9 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
+class SpamBLError(Exception):
+    ''' Base exception class for spambl module '''
+
 class DNSBL(object):
     ''' Represents a DNSBL service provider '''
     
