@@ -8,6 +8,20 @@ class SpamBLError(Exception):
     
 class UnknownCodeError(SpamBLError):
     ''' Raise when trying to use an unexpected value of dnsbl return code '''
+    
+class DNSBLItem(object):
+    ''' Represents a host listed on a DNS blacklist '''
+    
+    def __init__(self, host, source, return_code):
+        ''' Create a new instance of DNSBLItem 
+        
+        :param host: the host value listed on a DNS blacklist, either host name or ip address
+        :param source: dnsbl service object
+        :param return_code: last octet of ip address returned after querying the source for the host
+        '''
+        self.host = host
+        self.source = source
+        self._return_code = return_code
 
 class DNSBL(object):
     ''' Represents a DNSBL service provider '''
