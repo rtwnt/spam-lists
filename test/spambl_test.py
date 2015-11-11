@@ -16,6 +16,14 @@ hosts_with_spam = mock.Mock()
 hosts_with_spam.ips = spam_ips + (IP(u'127.180.0.18'),)
 hosts_with_spam.hostnames = spam_hostnames + ('valid.com',)
 
+empty_hosts = mock.Mock()
+empty_hosts.ips = ()
+empty_hosts.hostnames = ()
+
+non_spam_hosts = mock.Mock()
+non_spam_hosts.ips = IP(u'150.99.0.2'), IP(u'150.99.0.3')
+non_spam_hosts.hostnames = 't4.pl', 't5.com.pl'
+
 
 class DNSBLTest(unittest.TestCase):
     
@@ -79,9 +87,10 @@ class DNSBLTest(unittest.TestCase):
         
 
     def testContainsAny(self):
-        msg = 'Test failed'
         
-        self.assertTrue(self.dnsbl.contains_any(hosts_with_spam), msg)
+        self.assertTrue(self.dnsbl.contains_any(hosts_with_spam), 'Failed to detect spam existing in given host collection')
+        self.assertFalse(self.dnsbl.contains_any(empty_hosts), 'Spam has been detected in empty host collection')
+        self.assertFalse(self.dnsbl.contains_any(non_spam_hosts), 'Spam has been detected in host collection with no spam')
         
     @classmethod
     def tearDownClass(cls):
