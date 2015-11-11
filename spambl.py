@@ -106,6 +106,13 @@ class DNSBL(object):
                 last_octet = response[0].to_text().split('.')[-1]
                 yield DNSBLItem(host, self, last_octet)
                 
+    def contains_any(self, host_collection):
+        ''' Check if given host collection contains any items listed on this DNSBL
+        
+        :param host_collection: a container with valid host values
+        '''
+        
+        return any(self._query_for(host_collection))
         
         
 if __name__ == '__main__':

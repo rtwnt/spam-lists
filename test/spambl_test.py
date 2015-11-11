@@ -64,6 +64,12 @@ class DNSBLTest(unittest.TestCase):
         
         self.assertRaises(UnknownCodeError, self.dnsbl.get_classification, 4)
         
+
+    def testContainsAny(self):
+        msg = 'Test failed'
+        
+        self.assertTrue(self.dnsbl.contains_any(hosts_with_spam), msg)
+        
     @classmethod
     def tearDownClass(cls):
         cls.patcher.stop()
