@@ -77,8 +77,8 @@ class DNSBL(object):
         '''
         if self.lists_ips:
             for ip in host_collection.ips:
-                ip = str(ip)
                 suffix = '.in-addr.arpa' if ip.version == 4 else '.ip6.arpa'
+                ip = str(ip)
                 reverse = ip.replace(suffix, '')
                 
                 yield ip, reverse
