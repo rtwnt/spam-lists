@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from sys import exc_info
+from dns.resolver import query, NXDOMAIN
 
 class SpamBLError(Exception):
     ''' Base exception class for spambl module '''
@@ -87,6 +88,24 @@ class DNSBL(object):
                 hostname = str(hostname)
                 
                 yield hostname, hostname.rstrip('.')
+                
+    def _query_for(self, host_collection):
+        ''' Get hosts that are included both in this blocklist and in host_collection
+        
+        :param host_collection: a container with valid host values
+        :returns: an item listed on this DNSBL, as an instance of DNSBLItem
+        '''
+        for host, prefix in self._get_host_and_query_prefix(host_collection):
+            try:
+                response = query(prefix+'.'+self._query_suffix)
+                
+            except NXDOMAIN:
+                pass
+            
+            else:
+                last_octet = response[0].to_text().split('.')[-1]
+                yield DNSBLItem(host, self, last_octet)
+                
         
         
 if __name__ == '__main__':
