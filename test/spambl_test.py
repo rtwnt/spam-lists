@@ -92,6 +92,15 @@ class DNSBLTest(unittest.TestCase):
         self.assertFalse(self.dnsbl.contains_any(empty_hosts), 'Spam has been detected in empty host collection')
         self.assertFalse(self.dnsbl.contains_any(non_spam_hosts), 'Spam has been detected in host collection with no spam')
         
+    def testLookup(self):
+        
+        actual_host_strings = [h.host for h in self.dnsbl.lookup(hosts_with_spam)]
+        expected_host_strings = [str(n) for n in spam_ips + spam_hostnames]
+        
+        self.assertSequenceEqual(actual_host_strings, expected_host_strings)
+        self.assertSequenceEqual(self.dnsbl.lookup(empty_hosts), [])
+        self.assertSequenceEqual(self.dnsbl.lookup(non_spam_hosts), [])
+        
     @classmethod
     def tearDownClass(cls):
         cls.patcher.stop()

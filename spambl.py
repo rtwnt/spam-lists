@@ -113,6 +113,14 @@ class DNSBL(object):
         '''
         
         return any(self._query_for(host_collection))
+    
+    def lookup(self, host_collection):
+        ''' Get items from this dns blocklist
+        
+        :param host_collection: a container with valud host values
+        :returns: all hosts from this dns blocklist that are also included in host_collection
+        '''
+        return tuple(self._query_for(host_collection))
         
         
 if __name__ == '__main__':
