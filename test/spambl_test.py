@@ -21,11 +21,24 @@ class DNSBLTest(unittest.TestCase):
     
     @classmethod
     def setUpDNSBLInstance(cls, code_item_class, query_suffix):
-                
+        ''' Create DNSBL instance used for testing
+        :param code_item_class: a map of return code values to spam host classifications
+        :param query_suffix: a value attached to host to create a query name
+        '''
+        
         cls.dnsbl = DNSBL('test.dnsbl', query_suffix, code_item_class, True, True)
         
     @classmethod
     def setUpQueryPatch(cls, return_codes, existent_addr_suffix):
+        ''' Patch query function in spambl module
+        
+        The query function was originally imported from dns.resolver module
+        
+        :param return_codes: dnsbl return codes to be used for testing
+        :param existent_addr_suffix: a suffix used to create qname arguments that
+        do not cause raising NXDOMAIN error
+        '''
+        
         cls.patcher = mock.patch('spambl.query')
         cls.mocked_query = cls.patcher.start()
         
