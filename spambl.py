@@ -121,6 +121,21 @@ class DNSBL(object):
         :returns: all hosts from this dns blocklist that are also included in host_collection
         '''
         return tuple(self._query_for(host_collection))
+    
+class HpHosts(object):
+    ''' hpHosts client
+    
+    http://www.hosts-file.net/
+    '''
+    
+    def __init__(self, client_name):
+        '''
+        Constructor
+        
+        :param client_name: name of client using the service
+        '''
+        
+        self.app_id = client_name
         
         
 if __name__ == '__main__':
