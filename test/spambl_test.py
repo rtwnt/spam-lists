@@ -11,6 +11,7 @@ from __builtin__ import classmethod
 
 spam_hostnames  = 't1.pl', 't2.com', 't3.com.pl'
 spam_ips = IP(u'255.255.0.1'), IP(u'2001:DB8:abc:123::42')
+inverted_ips =  '1.0.255.255', '2.4.0.0.0.0.0.0.0.0.0.0.0.0.0.0.3.2.1.0.c.b.a.0.8.b.d.0.1.0.0.2'
 
 hosts_with_spam = mock.Mock()
 hosts_with_spam.ips = spam_ips + (IP(u'127.180.0.18'),)
@@ -50,7 +51,6 @@ class DNSBLTest(unittest.TestCase):
         cls.patcher = mock.patch('spambl.query')
         cls.mocked_query = cls.patcher.start()
         
-        inverted_ips = tuple(str(ip).replace('.in-addr.arpa' if ip.version == 4 else '.ip6.arpa', '') for ip in spam_ips)
         dns_queries = [h + '.' + existent_addr_suffix for h in spam_hostnames + inverted_ips]
         
         existent_responses = cycle('127.0.0.%d' % n for n in return_codes)
@@ -95,7 +95,7 @@ class DNSBLTest(unittest.TestCase):
     def testLookup(self):
         
         actual_host_strings = [h.host for h in self.dnsbl.lookup(hosts_with_spam)]
-        expected_host_strings = [str(n) for n in spam_ips + spam_hostnames]
+        expected_host_strings = [n for n in spam_ips + spam_hostnames]
         
         self.assertSequenceEqual(actual_host_strings, expected_host_strings)
         self.assertSequenceEqual(self.dnsbl.lookup(empty_hosts), [])
