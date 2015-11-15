@@ -3,7 +3,7 @@
 
 import unittest
 from spambl import DNSBL, UnknownCodeError, NXDOMAIN, HpHosts
-import mock
+from mock import Mock, patch
 from ipaddress import ip_address as IP
 from itertools import cycle
 from __builtin__ import classmethod
@@ -11,11 +11,11 @@ from __builtin__ import classmethod
 hostnames  = 't1.pl', 't2.com', 't3.com.pl'
 ips = IP(u'255.255.0.1'), IP(u'2001:DB8:abc:123::42')
 
-host_collection = mock.Mock()
+host_collection = Mock()
 host_collection.ips = ips
 host_collection.hostnames = hostnames
 
-empty_host_collection = mock.Mock()
+empty_host_collection = Mock()
 empty_host_collection.ips = ()
 empty_host_collection.hostnames = ()
 
@@ -38,7 +38,7 @@ class DNSBLTest(unittest.TestCase):
         The query function was originally imported from dns.resolver module
         '''
         
-        cls.patcher = mock.patch('spambl.query')
+        cls.patcher = patch('spambl.query')
         cls.mocked_query = cls.patcher.start()
         
     def setUpQuerySideEffect(self, nxdomain = False):
@@ -50,7 +50,7 @@ class DNSBLTest(unittest.TestCase):
         side_effects = []
         
         for n in self.code_item_class:
-            m = mock.Mock()
+            m = Mock()
             m.to_text.side_effect = '127.0.0.%d' % n
             side_effects.append([m])
         
@@ -106,7 +106,7 @@ class HpHostsTest(unittest.TestCase):
     def setUpClass(cls):
         cls.hp_hosts = HpHosts('spambl_test_suite')
         
-        cls.patcher = mock.patch('spambl.get')
+        cls.patcher = patch('spambl.get')
         cls.mocked_get = cls.patcher.start()
         
     def prepareGetReturnValue(self, listed, classification = False):
