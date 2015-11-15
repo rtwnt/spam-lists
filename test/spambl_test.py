@@ -13,17 +13,13 @@ spam_hostnames  = 't1.pl', 't2.com', 't3.com.pl'
 spam_ips = IP(u'255.255.0.1'), IP(u'2001:DB8:abc:123::42')
 inverted_ips =  '1.0.255.255', '2.4.0.0.0.0.0.0.0.0.0.0.0.0.0.0.3.2.1.0.c.b.a.0.8.b.d.0.1.0.0.2'
 
-hosts_with_spam = mock.Mock()
-hosts_with_spam.ips = spam_ips + (IP(u'127.180.0.18'),)
-hosts_with_spam.hostnames = spam_hostnames + ('valid.com',)
+host_collection = mock.Mock()
+host_collection.ips = spam_ips
+host_collection.hostnames = spam_hostnames
 
-empty_hosts = mock.Mock()
-empty_hosts.ips = ()
-empty_hosts.hostnames = ()
-
-non_spam_hosts = mock.Mock()
-non_spam_hosts.ips = IP(u'150.99.0.2'), IP(u'150.99.0.3')
-non_spam_hosts.hostnames = 't4.pl', 't5.com.pl'
+empty_host_collection = mock.Mock()
+empty_host_collection.ips = ()
+empty_host_collection.hostnames = ()
 
 
 class DNSBLTest(unittest.TestCase):
@@ -94,19 +90,23 @@ class DNSBLTest(unittest.TestCase):
         
 
     def testContainsAny(self):
+        self.setUpQuerySideEffect()
+        self.assertTrue(self.dnsbl.contains_any(host_collection))
         
-        self.assertTrue(self.dnsbl.contains_any(hosts_with_spam), 'Failed to detect spam existing in given host collection')
-        self.assertFalse(self.dnsbl.contains_any(empty_hosts), 'Spam has been detected in empty host collection')
-        self.assertFalse(self.dnsbl.contains_any(non_spam_hosts), 'Spam has been detected in host collection with no spam')
+        self.setUpQuerySideEffect(True)
+        self.assertFalse(self.dnsbl.contains_any(empty_host_collection))
+        self.assertFalse(self.dnsbl.contains_any(host_collection))
         
     def testLookup(self):
-        
-        actual_host_strings = [h.host for h in self.dnsbl.lookup(hosts_with_spam)]
+        self.setUpQuerySideEffect()
+        actual_host_strings = [h.host for h in self.dnsbl.lookup(host_collection)]
         expected_host_strings = [n for n in spam_ips + spam_hostnames]
         
         self.assertSequenceEqual(actual_host_strings, expected_host_strings)
-        self.assertSequenceEqual(self.dnsbl.lookup(empty_hosts), [])
-        self.assertSequenceEqual(self.dnsbl.lookup(non_spam_hosts), [])
+        
+        self.setUpQuerySideEffect(True)
+        self.assertSequenceEqual(self.dnsbl.lookup(empty_host_collection), [])
+        self.assertSequenceEqual(self.dnsbl.lookup(host_collection), [])
         
     @classmethod
     def tearDownClass(cls):
