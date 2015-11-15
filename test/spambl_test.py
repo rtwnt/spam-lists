@@ -168,6 +168,22 @@ class DNSBLServiceTest(unittest.TestCase):
         
         self.assertRaises(UnknownCodeError, self.dnsbl_service.get_classification, 4)
         
+    @patch('spambl.query')
+    def queryTest(self, mocked_query):
+        
+        return_codes = cycle(self.code_item_class.keys())
+        mocked_query.side_effect = return_codes
+        
+        self.assertEqual('test.com', next(return_codes))
+        
+        self.assertEqual('1.0.0.127', next(return_codes))
+        
+        mocked_query.side_effect = NXDOMAIN('test NXDOMAIN exception')
+        
+        self.assertEqual('test.com', None)
+        
+        self.assertEqual('1.0.0.127', None)
+        
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
     unittest.main()
