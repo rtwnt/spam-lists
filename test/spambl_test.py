@@ -8,13 +8,12 @@ from ipaddress import ip_address as IP
 from itertools import cycle
 from __builtin__ import classmethod
 
-
-spam_hostnames  = 't1.pl', 't2.com', 't3.com.pl'
+hostnames  = 't1.pl', 't2.com', 't3.com.pl'
 spam_ips = IP(u'255.255.0.1'), IP(u'2001:DB8:abc:123::42')
 
 host_collection = mock.Mock()
 host_collection.ips = spam_ips
-host_collection.hostnames = spam_hostnames
+host_collection.hostnames = hostnames
 
 empty_host_collection = mock.Mock()
 empty_host_collection.ips = ()
@@ -85,7 +84,7 @@ class DNSBLTest(unittest.TestCase):
     def testLookup(self):
         self.setUpQuerySideEffect()
         actual_host_strings = [h.host for h in self.dnsbl.lookup(host_collection)]
-        expected_host_strings = [n for n in spam_ips + spam_hostnames]
+        expected_host_strings = [n for n in spam_ips + hostnames]
         
         self.assertSequenceEqual(actual_host_strings, expected_host_strings)
         
@@ -139,12 +138,12 @@ class HpHostsTest(unittest.TestCase):
         
         self.prepareGetReturnValue(True, True)
          
-        for host in spam_ips + spam_hostnames:
+        for host in spam_ips + hostnames:
             self.assertEqual(self.hp_hosts.lookup(host).host, host)
             
         self.prepareGetReturnValue(False)
         
-        for host in spam_ips + spam_hostnames:
+        for host in spam_ips + hostnames:
             self.assertEqual(self.hp_hosts.lookup(host), None)
             
     @classmethod
