@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import unittest
-from spambl import DNSBL, UnknownCodeError, NXDOMAIN, HpHosts, HpHostsItem
+from spambl import DNSBL, UnknownCodeError, NXDOMAIN, HpHosts
 import mock
 from ipaddress import ip_address as IP
 from itertools import cycle
