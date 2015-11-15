@@ -148,6 +148,14 @@ class HpHosts(object):
         url = url + '&class=true' if classification else url
         
         return get(url).content
+    
+    def __contains__(self, host):
+        ''' Check if given host is present in hpHosts blacklist
+        
+        :param host: a valid host string
+        :returns: a boolean value True if given host is listed on hpHosts, False otherwise
+        '''
+        return self._LISTED in self._query(host)
         
 if __name__ == '__main__':
     pass

@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import unittest
-from spambl import DNSBL, UnknownCodeError, NXDOMAIN
+from spambl import DNSBL, UnknownCodeError, NXDOMAIN, HpHosts
 import mock
 from ipaddress import ip_address as IP
 from itertools import cycle
@@ -104,6 +104,27 @@ class DNSBLTest(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         cls.patcher.stop()
+        
+        
+class HpHostsTest(unittest.TestCase):
+    ''' Tests HpHosts methods '''
+    
+    @classmethod
+    def setUpClass(cls):
+        cls.hp_hosts = HpHosts('spambl_test_suite')
+    
+    @mock.patch('spambl.get')
+    def testContains(self, patched_get):
+        ''' Test __contains__ method
+        
+        :patam patched_get: a Mock instance replacing get() imported into spambl module from requests module
+        '''
+        
+        for content, listed in {'Listed': True, 'Not listed': False}.iteritems():
+            patched_get.return_value.content = content
+            
+            for k in spam_ips:
+                self.assertEqual(k in self.hp_hosts, listed)
         
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
