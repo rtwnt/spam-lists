@@ -122,10 +122,9 @@ class DNSBL(object):
         return tuple(self._query_for(host_collection))
     
 class HpHosts(object):
-    ''' hpHosts client
+    ''' hpHosts client '''
     
-    http://www.hosts-file.net/
-    '''
+    identifier = ' http://www.hosts-file.net/'
     
     def __init__(self, client_name):
         '''
@@ -135,7 +134,6 @@ class HpHosts(object):
         '''
         
         self.app_id = client_name
-        
         
 if __name__ == '__main__':
     pass
