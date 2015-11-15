@@ -165,6 +165,22 @@ class HpHosts(object):
         :returns: a boolean value True if given host is listed on hpHosts, False otherwise
         '''
         return self._LISTED in self._query(host)
+    
+    def lookup(self, host):
+        ''' Get an object representing a value for a given host, if listed in hpHosts
+        
+        :param host: a valid host string
+        :returns: a HpHostItem object, or None if host is not listed
+        '''
+        data = self._query(host, True)
+        
+        if self._LISTED in data:
+            elements = data.split(',')
+            classification = elements[1] if len(elements) > 1 else None
+            
+            return HpHostsItem(host, self.identifier, classification)
+        return None
+        
         
 if __name__ == '__main__':
     pass

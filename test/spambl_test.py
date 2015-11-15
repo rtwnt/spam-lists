@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import unittest
-from spambl import DNSBL, UnknownCodeError, NXDOMAIN, HpHosts
+from spambl import DNSBL, UnknownCodeError, NXDOMAIN, HpHosts, HpHostsItem
 import mock
 from ipaddress import ip_address as IP
 from itertools import cycle
@@ -141,6 +141,19 @@ class HpHostsTest(unittest.TestCase):
             
             for k in spam_ips:
                 self.assertEqual(k in self.hp_hosts, listed)
+                
+    def testLookup(self):
+        ''' Test lookup method'''
+        
+        self.prepareGetReturnValue(True, True)
+         
+        for host in spam_ips + spam_hostnames:
+            self.assertEqual(self.hp_hosts.lookup(host).host, host)
+            
+        self.prepareGetReturnValue(False)
+        
+        for host in spam_ips + spam_hostnames:
+            self.assertEqual(self.hp_hosts.lookup(host), None)
             
     @classmethod
     def tearDownClass(cls):
