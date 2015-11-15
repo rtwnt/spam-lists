@@ -86,7 +86,7 @@ class DNSBLService(object):
         else:
             last_octet = response[0].to_text().split('.')[-1]
             
-            return last_octet
+            return int(last_octet)
 
 class DNSBL(object):
     ''' Represents a DNSBL service provider '''
