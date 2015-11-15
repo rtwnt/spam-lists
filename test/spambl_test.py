@@ -65,6 +65,14 @@ class DNSBLTest(unittest.TestCase):
         
         cls.mocked_query.side_effect = mocked_query
         
+    def setUpQuerySideEffect(self, nxdomain = False):
+        ''' Set up side effect of patched query
+        
+        :param nxdomain: if True, the side effect will be raising NXDOMAIN exception, otherwise
+        it will be an iterator cycling through supported return values
+        '''
+        return_codes = 1, 2
+        self.mocked_query.side_effect = NXDOMAIN('test NXDOMAIN exception') if nxdomain else cycle('127.0.0.%d' % n for n in return_codes)
     
     @classmethod
     def setUpClass(cls):
