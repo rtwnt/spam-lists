@@ -126,6 +126,7 @@ class HpHosts(object):
     ''' hpHosts client '''
     
     identifier = ' http://www.hosts-file.net/'
+    _LISTED = 'Listed'
     
     def __init__(self, client_name):
         '''
