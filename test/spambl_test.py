@@ -69,7 +69,7 @@ class DNSBLTest(unittest.TestCase):
         '''
         side_effects = []
         
-        for n in self.code_item_class.keys():
+        for n in self.code_item_class:
             m = mock.Mock()
             m.to_text.side_effect = '127.0.0.%d' % n
             side_effects.append([m])
