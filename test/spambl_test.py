@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import unittest
-from spambl import DNSBL, UnknownCodeError, NXDOMAIN, HpHosts
+from spambl import DNSBL, UnknownCodeError, NXDOMAIN, HpHosts, DNSBLService
 from mock import Mock, patch
 from ipaddress import ip_address as IP
 from itertools import cycle
@@ -149,6 +149,24 @@ class HpHostsTest(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         cls.patcher.stop()
+
+class DNSBLServiceTest(unittest.TestCase):
+    
+    code_item_class = {1: 'Class #1', 2: 'Class #2'}
+    
+    @classmethod
+    def setUpClass(cls):
+        
+        cls.dnsbl_service = DNSBL('test_service', 'test.suffix', cls.code_item_class, True, True)
+        
+    def testGetClassification(self):
+        ''' Test get_classification method of DNSBL instance '''
+        
+        for key, value in self.code_item_class.iteritems():
+            actual = self.dnsbl_service.get_classification(key)
+            self.assertEqual(actual, value)
+        
+        self.assertRaises(UnknownCodeError, self.dnsbl_service.get_classification, 4)
         
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
