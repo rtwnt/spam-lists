@@ -109,22 +109,42 @@ class DNSBLTest(unittest.TestCase):
 class HpHostsTest(unittest.TestCase):
     ''' Tests HpHosts methods '''
     
+    classification = '[TEST]'
+    
     @classmethod
     def setUpClass(cls):
         cls.hp_hosts = HpHosts('spambl_test_suite')
-    
-    @mock.patch('spambl.get')
-    def testContains(self, patched_get):
-        ''' Test __contains__ method
         
-        :patam patched_get: a Mock instance replacing get() imported into spambl module from requests module
+        cls.patcher = mock.patch('spambl.get')
+        cls.mocked_get = cls.patcher.start()
+        
+    def prepareGetReturnValue(self, listed, classification = False):
+        ''' Set up return value of get 
+        
+        :param listed: if True, the content will contain 'Listed' string, else it will contain 'Not listed'
+        :param classification: if True, a classification will be added to the content
         '''
         
-        for content, listed in {'Listed': True, 'Not listed': False}.iteritems():
-            patched_get.return_value.content = content
+        if listed:
+            c = self.classification if classification else ''
+            content = ','.join(('Listed', c))
+        else:
+            content = 'Not listed'
+            
+        self.mocked_get.return_value.content = content
+    
+    def testContains(self):
+        ''' Test __contains__ method '''
+        
+        for listed in True, False:
+            self.prepareGetReturnValue(listed)
             
             for k in spam_ips:
                 self.assertEqual(k in self.hp_hosts, listed)
+            
+    @classmethod
+    def tearDownClass(cls):
+        cls.patcher.stop()
         
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
