@@ -122,6 +122,15 @@ class DNSBL(object):
         '''
         return tuple(self._query_for(host_collection))
     
+class HpHostsItem(object):
+    ''' Represents a host listed in hpHosts'''
+    
+    def __init__(self, host, source, classification):
+        
+        self.host = host
+        self.source = source
+        self.classification = classification
+    
 class HpHosts(object):
     ''' hpHosts client '''
     
