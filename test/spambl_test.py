@@ -8,10 +8,8 @@ from ipaddress import ip_address as IP
 from itertools import cycle
 from __builtin__ import classmethod
 
-
 hostnames  = 't1.pl', 't2.com', 't3.com.pl'
 ips = IP(u'255.255.0.1'), IP(u'2001:DB8:abc:123::42')
-inverted_ips =  '1.0.255.255', '2.4.0.0.0.0.0.0.0.0.0.0.0.0.0.0.3.2.1.0.c.b.a.0.8.b.d.0.1.0.0.2'
 
 host_collection = Mock()
 host_collection.ips = ips
@@ -172,6 +170,8 @@ class DNSBLServiceTest(unittest.TestCase):
         
     @patch('spambl.query')
     def queryTest(self, mocked_query):
+        
+        inverted_ips =  '1.0.255.255', '2.4.0.0.0.0.0.0.0.0.0.0.0.0.0.0.3.2.1.0.c.b.a.0.8.b.d.0.1.0.0.2'
         
         return_codes = cycle(self.code_item_class.keys())
         mocked_query.side_effect = return_codes
