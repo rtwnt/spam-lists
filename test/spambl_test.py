@@ -67,8 +67,14 @@ class DNSBLTest(unittest.TestCase):
         :param nxdomain: if True, the side effect will be raising NXDOMAIN exception, otherwise
         it will be an iterator cycling through supported return values
         '''
-        return_codes = self.code_item_class.keys()
-        self.mocked_query.side_effect = NXDOMAIN('test NXDOMAIN exception') if nxdomain else cycle('127.0.0.%d' % n for n in return_codes)
+        side_effects = []
+        
+        for n in self.code_item_class.keys():
+            m = mock.Mock()
+            m.to_text.side_effect = '127.0.0.%d' % n
+            side_effects.append([m])
+        
+        self.mocked_query.side_effect = NXDOMAIN('test NXDOMAIN exception') if nxdomain else cycle(side_effects)
     
     @classmethod
     def setUpClass(cls):
