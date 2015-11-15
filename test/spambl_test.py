@@ -157,7 +157,7 @@ class DNSBLServiceTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         
-        cls.dnsbl_service = DNSBL('test_service', 'test.suffix', cls.code_item_class, True, True)
+        cls.dnsbl_service = DNSBLService('test_service', 'test.suffix', cls.code_item_class, True, True)
         
     def testGetClassification(self):
         ''' Test get_classification method of DNSBL instance '''
