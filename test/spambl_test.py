@@ -87,7 +87,7 @@ class DNSBLTest(unittest.TestCase):
         
         msg = 'The expected value {} is not equal to received value {}'
         
-        for key, value in self.dnsbl._code_item_class.iteritems():
+        for key, value in self.code_item_class.iteritems():
             actual = self.dnsbl.get_classification(key)
             self.assertEqual(actual, value, msg.format(value, actual))
         
