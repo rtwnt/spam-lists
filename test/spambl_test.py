@@ -43,20 +43,6 @@ class DNSBLTest(unittest.TestCase):
         cls.patcher = mock.patch('spambl.query')
         cls.mocked_query = cls.patcher.start()
         
-        dns_queries = [h + '.' + cls.query_suffix for h in spam_hostnames + inverted_ips]
-        
-        existent_responses = cycle('127.0.0.%d' % n for n in cls.code_item_class.keys())
-        cls.mocked_query.query_responses = {q: next(existent_responses) for q in dns_queries}
-        
-        def mocked_query(address):
-            if address in cls.mocked_query.query_responses:
-                m = mock.Mock()
-                m.to_text = mock.Mock(return_value = cls.mocked_query.query_responses[address])
-                return m,
-            raise NXDOMAIN('test NXDOMAIN exception')
-        
-        cls.mocked_query.side_effect = mocked_query
-        
     def setUpQuerySideEffect(self, nxdomain = False):
         ''' Set up side effect of patched query
         
