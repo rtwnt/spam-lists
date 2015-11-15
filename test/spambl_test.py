@@ -28,17 +28,20 @@ non_spam_hosts.hostnames = 't4.pl', 't5.com.pl'
 
 class DNSBLTest(unittest.TestCase):
     
+    code_item_class = {1: 'Class #1', 2: 'Class #2'}
+    query_suffix = 'query.suffix'
+    
     @classmethod
-    def setUpDNSBLInstance(cls, code_item_class, query_suffix):
+    def setUpDNSBLInstance(cls):
         ''' Create DNSBL instance used for testing
         :param code_item_class: a map of return code values to spam host classifications
         :param query_suffix: a value attached to host to create a query name
         '''
         
-        cls.dnsbl = DNSBL('test.dnsbl', query_suffix, code_item_class, True, True)
+        cls.dnsbl = DNSBL('test.dnsbl', cls.query_suffix, cls.code_item_class, True, True)
         
     @classmethod
-    def setUpQueryPatch(cls, return_codes, existent_addr_suffix):
+    def setUpQueryPatch(cls):
         ''' Patch query function in spambl module
         
         The query function was originally imported from dns.resolver module
@@ -51,9 +54,9 @@ class DNSBLTest(unittest.TestCase):
         cls.patcher = mock.patch('spambl.query')
         cls.mocked_query = cls.patcher.start()
         
-        dns_queries = [h + '.' + existent_addr_suffix for h in spam_hostnames + inverted_ips]
+        dns_queries = [h + '.' + cls.query_suffix for h in spam_hostnames + inverted_ips]
         
-        existent_responses = cycle('127.0.0.%d' % n for n in return_codes)
+        existent_responses = cycle('127.0.0.%d' % n for n in cls.code_item_class.keys())
         cls.mocked_query.query_responses = {q: next(existent_responses) for q in dns_queries}
         
         def mocked_query(address):
@@ -76,11 +79,8 @@ class DNSBLTest(unittest.TestCase):
     
     @classmethod
     def setUpClass(cls):
-        code_item_class = {1: 'Class #1', 2: 'Class #2'}
-        query_suffix = 'query.suffix'
-        
-        cls.setUpDNSBLInstance(code_item_class, query_suffix)
-        cls.setUpQueryPatch(code_item_class.keys(), query_suffix)
+        cls.setUpDNSBLInstance()
+        cls.setUpQueryPatch()
         
     def testGetClassification(self):
         ''' Test get_classification method of DNSBL instance '''
