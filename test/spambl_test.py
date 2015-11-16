@@ -159,6 +159,9 @@ class DNSBLServiceTest(unittest.TestCase):
         
         cls.dnsbl_service = DNSBLService('test_service', 'test.suffix', cls.code_item_class, True, True)
         
+        cls.patcher = patch('spambl.query')
+        cls.mocked_query = cls.patcher.start()
+        
     def testGetClassification(self):
         ''' Test get_classification method of DNSBL instance '''
         
@@ -168,8 +171,7 @@ class DNSBLServiceTest(unittest.TestCase):
         
         self.assertRaises(UnknownCodeError, self.dnsbl_service.get_classification, 4)
         
-    @patch('spambl.query')
-    def testQuery(self, mocked_query):
+    def testQuery(self):
         ''' Test query method
         
         The method is tested against a set of host values, which are expected to be recognized
@@ -187,17 +189,21 @@ class DNSBLServiceTest(unittest.TestCase):
             m.to_text.return_value = '127.0.0.%d' % n
             side_effects.append([m])
             
-        mocked_query.side_effect = cycle(side_effects)
+        self.mocked_query.side_effect = cycle(side_effects)
         
         return_code_iterator = cycle(self.code_item_class.keys())
         
         for v in values:
             self.assertEqual(self.dnsbl_service.query(v), next(return_code_iterator))
         
-        mocked_query.side_effect = NXDOMAIN('test NXDOMAIN exception')
+        self.mocked_query.side_effect = NXDOMAIN('test NXDOMAIN exception')
         
         for v in values:
             self.assertEqual(self.dnsbl_service.query(v), None)
+            
+    @classmethod
+    def tearDownClass(cls):
+        cls.patcher.stop()
         
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
