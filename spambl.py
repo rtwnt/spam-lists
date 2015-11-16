@@ -87,6 +87,24 @@ class DNSBLService(object):
             last_octet = response[0].to_text().split('.')[-1]
             
             return int(last_octet)
+        
+class DNSBLClient(object):
+    ''' Responsible for querying DNSBL services '''
+    
+    def __init__(self, *dnsbl_services):
+        ''' Create new DNSBLClitent instance
+        
+        :param dnsbl_services: a list of objects representing DNSBL services
+        '''
+        self.dnsbls = []
+        self.uri_dnsbls = []
+        
+        for d in dnsbl_services:
+            if d.lists_ips:
+                self.dnsbls.append(d)
+                
+            if d.lists_uris:
+                self.uri_dnsbls.append(d)
 
 class DNSBL(object):
     ''' Represents a DNSBL service provider '''
