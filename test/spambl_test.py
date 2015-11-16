@@ -203,21 +203,14 @@ class DNSBLServiceTest(unittest.TestCase):
         inverted_ips =  '1.0.255.255', '2.4.0.0.0.0.0.0.0.0.0.0.0.0.0.0.3.2.1.0.c.b.a.0.8.b.d.0.1.0.0.2'
         values = hostnames + inverted_ips
         
-        side_effects = []
-        
-        for n in self.code_item_class:
-            m = Mock()
-            m.to_text.return_value = '127.0.0.%d' % n
-            side_effects.append([m])
-            
-        self.mocked_query.side_effect = cycle(side_effects)
+        self.setUpQuerySideEffect()
         
         return_code_iterator = cycle(self.code_item_class.keys())
         
         for v in values:
             self.assertEqual(self.dnsbl_service.query(v), next(return_code_iterator))
         
-        self.mocked_query.side_effect = NXDOMAIN('test NXDOMAIN exception')
+        self.setUpQuerySideEffect(True)
         
         for v in values:
             self.assertEqual(self.dnsbl_service.query(v), None)
