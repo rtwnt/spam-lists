@@ -169,22 +169,29 @@ class DNSBLServiceTest(unittest.TestCase):
         self.assertRaises(UnknownCodeError, self.dnsbl_service.get_classification, 4)
         
     @patch('spambl.query')
-    def queryTest(self, mocked_query):
+    def testQuery(self, mocked_query):
         
         inverted_ips =  '1.0.255.255', '2.4.0.0.0.0.0.0.0.0.0.0.0.0.0.0.3.2.1.0.c.b.a.0.8.b.d.0.1.0.0.2'
+        values = hostnames + inverted_ips
         
-        return_codes = cycle(self.code_item_class.keys())
-        mocked_query.side_effect = return_codes
+        side_effects = []
         
-        self.assertEqual('test.com', next(return_codes))
+        for n in self.code_item_class:
+            m = Mock()
+            m.to_text.return_value = '127.0.0.%d' % n
+            side_effects.append([m])
+            
+        mocked_query.side_effect = cycle(side_effects)
         
-        self.assertEqual('1.0.0.127', next(return_codes))
+        return_code_iterator = cycle(self.code_item_class.keys())
+        
+        for v in values:
+            self.assertEqual(self.dnsbl_service.query(v), next(return_code_iterator))
         
         mocked_query.side_effect = NXDOMAIN('test NXDOMAIN exception')
         
-        self.assertEqual('test.com', None)
-        
-        self.assertEqual('1.0.0.127', None)
+        for v in values:
+            self.assertEqual(self.dnsbl_service.query(v), None)
         
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
