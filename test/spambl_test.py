@@ -170,7 +170,13 @@ class DNSBLServiceTest(unittest.TestCase):
         
     @patch('spambl.query')
     def testQuery(self, mocked_query):
+        ''' Test query method
         
+        The method is tested against a set of host values, which are expected to be recognized
+        as spam or not, depending on configuration of side effect of mocked query function.
+        
+        :param mocked_query: a patched instance of query function
+        '''
         inverted_ips =  '1.0.255.255', '2.4.0.0.0.0.0.0.0.0.0.0.0.0.0.0.3.2.1.0.c.b.a.0.8.b.d.0.1.0.0.2'
         values = hostnames + inverted_ips
         
