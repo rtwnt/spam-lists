@@ -162,6 +162,27 @@ class DNSBLServiceTest(unittest.TestCase):
         cls.patcher = patch('spambl.query')
         cls.mocked_query = cls.patcher.start()
         
+    def setUpQuerySideEffect(self, nxdomain = False):
+        ''' Prepare side effects of mocked query function for tests
+        
+        :param nxdomain: if True, the side effect of calling query is set to be a sequence of
+        return values, otherwise it is raising NXDOMAIN exception
+        '''
+        
+        side_effect = NXDOMAIN('test NXDOMAIN exception')
+        
+        if not nxdomain:
+            return_values = []
+        
+            for n in self.code_item_class:
+                m = Mock()
+                m.to_text.return_value = '127.0.0.%d' % n
+                return_values.append([m])
+            
+            side_effect = cycle(return_values)
+                
+        self.mocked_query.side_effect = side_effect
+        
     def testGetClassification(self):
         ''' Test get_classification method of DNSBL instance '''
         
