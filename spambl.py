@@ -91,6 +91,7 @@ class DNSBLService(object):
 class BaseDNSBLClient(object):
     ''' Implements basic feaures of DNSBL client classes '''
     
+
     _LISTS_ATTR_NAME = None
     
     def __init__(self):
@@ -98,26 +99,9 @@ class BaseDNSBLClient(object):
         
 class DNSBLClient(object):
     ''' Responsible for querying DNSBL services that list ip addresses'''
-    
-    def __init__(self, dnsbl_services):
-        ''' Create new instance
-        
-        :param dnsbl_services: a list of objects representing DNSBL services
-        '''
-        
-        self.dnsbl_services = [d for d in dnsbl_services if d.lists_ips]
                 
 class URIDNSBLClient(object):
     ''' Responsible for querying DNSBL services that list hostnames '''
-    
-    def __init__(self, dnsbl_services):
-        ''' Create new instance
-        
-        :param dnsbl_services: a list of objects representing DNSBL services
-        '''
-        
-        self.dnsbl_services = [d for d in dnsbl_services if d.lists_uris]
-        
     
 class DNSBL(object):
     ''' Represents a DNSBL service provider '''
