@@ -108,10 +108,12 @@ class BaseDNSBLClient(object):
         '''
         
         if not hasattr(dnsbl_service, self._LISTS_ATTR_NAME):
-            raise TypeError('DNSBL service object must have an attribute named {}'.format(self._LISTS_ATTR_NAME))
+            msg_tpl = 'DNSBL service object must have an attribute named {}'
+            raise TypeError(msg_tpl.format(self._LISTS_ATTR_NAME))
             
         if not getattr(dnsbl_service, self._LISTS_ATTR_NAME):
-            raise NoRequiredContentError('This DNSBL service does not contain required type of entries ')
+            msg_tpl = 'This instance of {} does not list items required for {}'
+            raise NoRequiredContentError(msg_tpl.format(dnsbl_service.__class__.__name__, self.__class__.__name__))
             
         self.dnsbl_services.append(dnsbl_service)
         
