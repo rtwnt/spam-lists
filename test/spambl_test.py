@@ -225,19 +225,31 @@ class BaseDNSBLClientTest(unittest.TestCase):
     def setUp(self):
         self.base_dnsbl_client = BaseDNSBLClient()
         self.base_dnsbl_client._LISTS_ATTR_NAME = self.test_lists_attr_name
-    
+        
+    def getDNSBLMock(self, required_property = True, query_return_value = None):
+        ''' Create a Mock instance for dnsbl service object
+        
+        :param required_property: boolean value set to value of the required property
+        to which BaseDNSBLClient._LISTS_ATTR_NAME is set
+        :returns: an instance of Mock with all necessary attributes
+        '''
+        
+        dnsbl = Mock()
+        setattr(dnsbl, self.test_lists_attr_name, bool(required_property))
+        dnsbl.query.return_value = query_return_value
+        
+        return dnsbl
+        
     def testAddDNSBL(self):
         ''' Test add_dnsbl method of BaseDNSBLClient '''
         
-        valid_dnsbl = Mock()
-        setattr(valid_dnsbl, self.test_lists_attr_name, True)
+        valid_dnsbl = self.getDNSBLMock()
         
         self.base_dnsbl_client.add_dnsbl(valid_dnsbl)
          
         self.assertEqual(self.base_dnsbl_client.dnsbl_services[0], valid_dnsbl)
          
-        invalid_dnsbl = Mock()
-        setattr(invalid_dnsbl, self.test_lists_attr_name, False)
+        invalid_dnsbl = self.getDNSBLMock(False)
 
         self.assertRaises(NoRequiredContentError, self.base_dnsbl_client.add_dnsbl, invalid_dnsbl)
         
@@ -247,15 +259,14 @@ class BaseDNSBLClientTest(unittest.TestCase):
         
     def testContains(self):
         ''' Test __contains__ method '''
+        return_value = 3
+        test_host = 'test'
         
-        valid_dnsbl = Mock()
-        valid_dnsbl.query.return_value = 3
+        valid_dnsbl = self.getDNSBLMock(query_return_value = return_value)
         
         self.base_dnsbl_client.dnsbl_services.append(valid_dnsbl)
         
-        self.assertTrue('test' in self.base_dnsbl_client)
-
-        
+        self.assertTrue(test_host in self.base_dnsbl_client)
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
