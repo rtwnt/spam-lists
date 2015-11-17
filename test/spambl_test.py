@@ -222,6 +222,7 @@ class DNSBLServiceTest(unittest.TestCase):
 class BaseDNSBLClientTest(unittest.TestCase):
     
     test_lists_attr_name = 'test_lists_attr'
+    
     def setUp(self):
         self.base_dnsbl_client = BaseDNSBLClient()
         self.base_dnsbl_client._LISTS_ATTR_NAME = self.test_lists_attr_name
@@ -241,20 +242,16 @@ class BaseDNSBLClientTest(unittest.TestCase):
         return dnsbl
         
     def testAddDNSBL(self):
-        ''' Test add_dnsbl method of BaseDNSBLClient '''
+        ''' Test add_dnsbl method '''
         
         valid_dnsbl = self.getDNSBLMock()
-        
         self.base_dnsbl_client.add_dnsbl(valid_dnsbl)
-         
         self.assertEqual(self.base_dnsbl_client.dnsbl_services[0], valid_dnsbl)
          
         invalid_dnsbl = self.getDNSBLMock(False)
-
         self.assertRaises(NoRequiredContentError, self.base_dnsbl_client.add_dnsbl, invalid_dnsbl)
         
         no_dnsbl = Mock(spec=[])
-         
         self.assertRaises(TypeError, self.base_dnsbl_client.add_dnsbl, no_dnsbl)
         
     def testContains(self):
@@ -262,9 +259,8 @@ class BaseDNSBLClientTest(unittest.TestCase):
         return_value = 3
         test_host = 'test'
         
-        valid_dnsbl = self.getDNSBLMock(query_return_value = return_value)
-        
-        self.base_dnsbl_client.dnsbl_services.append(valid_dnsbl)
+        dnsbl = self.getDNSBLMock(query_return_value = return_value)
+        self.base_dnsbl_client.dnsbl_services.append(dnsbl)
         
         self.assertTrue(test_host in self.base_dnsbl_client)
 
