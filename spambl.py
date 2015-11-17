@@ -89,23 +89,28 @@ class DNSBLService(object):
             return int(last_octet)
         
 class DNSBLClient(object):
-    ''' Responsible for querying DNSBL services '''
+    ''' Responsible for querying DNSBL services that list ip addresses'''
     
-    def __init__(self, *dnsbl_services):
-        ''' Create new DNSBLClitent instance
+    def __init__(self, dnsbl_services):
+        ''' Create new instance
         
         :param dnsbl_services: a list of objects representing DNSBL services
         '''
-        self.dnsbls = []
-        self.uri_dnsbls = []
         
-        for d in dnsbl_services:
-            if d.lists_ips:
-                self.dnsbls.append(d)
+        self.dnsbl_services = [d for d in dnsbl_services if d.lists_ips]
                 
-            if d.lists_uris:
-                self.uri_dnsbls.append(d)
-
+class URIDNSBLClient(object):
+    ''' Responsible for querying DNSBL services that list hostnames '''
+    
+    def __init__(self, dnsbl_services):
+        ''' Create new instance
+        
+        :param dnsbl_services: a list of objects representing DNSBL services
+        '''
+        
+        self.dnsbl_services = [d for d in dnsbl_services if d.lists_uris]
+        
+    
 class DNSBL(object):
     ''' Represents a DNSBL service provider '''
     
