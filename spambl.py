@@ -116,6 +116,17 @@ class BaseDNSBLClient(object):
             raise NoRequiredContentError(msg_tpl.format(dnsbl_service.__class__.__name__, self.__class__.__name__))
             
         self.dnsbl_services.append(dnsbl_service)
+    
+    def _get_item_data(self, host):
+        ''' Query registerd dnsbl services for data on given host
+        
+        :param host: a valid host
+        :returns: a tuple containing host, source and return code for listed host, or
+        an empty tuple for not listed one
+        '''
+        for source in self.dnsbl_services:
+            return_code = source.query(host)
+            yield (host, source, return_code) if return_code else ()
         
 class DNSBLClient(object):
     ''' Responsible for querying DNSBL services that list ip addresses'''
