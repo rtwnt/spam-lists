@@ -221,30 +221,31 @@ class DNSBLServiceTest(unittest.TestCase):
         
 class BaseDNSBLClientTest(unittest.TestCase):
     
+    test_lists_attr_name = 'test_lists_attr'
+    def setUp(self):
+        self.base_dnsbl_client = BaseDNSBLClient()
+        self.base_dnsbl_client._LISTS_ATTR_NAME = self.test_lists_attr_name
+    
     def testAddDNSBL(self):
         ''' Test add_dnsbl method of BaseDNSBLClient '''
         
-        test_lists_attr_name = 'test_lists_attr'
-        base_dnsbl_client = BaseDNSBLClient()
-        base_dnsbl_client._LISTS_ATTR_NAME = test_lists_attr_name
-        
         valid_dnsbl = Mock()
-        setattr(valid_dnsbl, test_lists_attr_name, True)
+        setattr(valid_dnsbl, self.test_lists_attr_name, True)
         
-        base_dnsbl_client.add_dnsbl(valid_dnsbl)
-        
-        self.assertEqual(base_dnsbl_client.dnsbl_services[0], valid_dnsbl)
-        
+        self.base_dnsbl_client.add_dnsbl(valid_dnsbl)
+         
+        self.assertEqual(self.base_dnsbl_client.dnsbl_services[0], valid_dnsbl)
+         
         invalid_dnsbl = Mock()
-        setattr(invalid_dnsbl, test_lists_attr_name, False)
-        
-        self.assertRaises(NoRequiredContentError, base_dnsbl_client.add_dnsbl, invalid_dnsbl)
+        setattr(invalid_dnsbl, self.test_lists_attr_name, False)
+
+        self.assertRaises(NoRequiredContentError, self.base_dnsbl_client.add_dnsbl, invalid_dnsbl)
         
         no_dnsbl = Mock(spec=[])
+         
+        self.assertRaises(TypeError, self.base_dnsbl_client.add_dnsbl, no_dnsbl)
         
-        self.assertRaises(TypeError, base_dnsbl_client.add_dnsbl, no_dnsbl)
         
-                
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
