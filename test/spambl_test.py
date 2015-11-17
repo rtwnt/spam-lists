@@ -263,6 +263,12 @@ class BaseDNSBLClientTest(unittest.TestCase):
         self.base_dnsbl_client.dnsbl_services.append(dnsbl)
         
         self.assertTrue(test_host in self.base_dnsbl_client)
+        
+        dnsbl.query.return_value = None
+        
+        self.assertEqual(next(self.base_dnsbl_client._get_item_data(test_host)), ())
+        self.assertFalse(test_host in self.base_dnsbl_client)
+        
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
