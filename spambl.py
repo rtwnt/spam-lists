@@ -118,7 +118,7 @@ class BaseDNSBLClient(object):
         self.dnsbl_services.append(dnsbl_service)
     
     def _get_item_data(self, host):
-        ''' Query registerd dnsbl services for data on given host
+        ''' Query registered dnsbl services for data on given host
         
         :param host: a valid host
         :returns: a tuple containing host, source and return code for listed host, or
