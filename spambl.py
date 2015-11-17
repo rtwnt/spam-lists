@@ -88,6 +88,14 @@ class DNSBLService(object):
             
             return int(last_octet)
         
+class BaseDNSBLClient(object):
+    ''' Implements basic feaures of DNSBL client classes '''
+    
+    _LISTS_ATTR_NAME = None
+    
+    def __init__(self):
+        self.dnsbl_services = []
+        
 class DNSBLClient(object):
     ''' Responsible for querying DNSBL services that list ip addresses'''
     
