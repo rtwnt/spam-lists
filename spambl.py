@@ -11,6 +11,11 @@ class SpamBLError(Exception):
 class UnknownCodeError(SpamBLError):
     ''' Raise when trying to use an unexpected value of dnsbl return code '''
     
+class NoRequiredContentError(ValueError):
+    ''' Raise when trying to use an instance of DNSBL service that doesn't
+    support expected type of items
+    '''
+    
 class DNSBLItem(object):
     ''' Represents a host listed on a DNS blacklist '''
     
