@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import unittest
-from spambl import DNSBL, UnknownCodeError, NXDOMAIN, HpHosts, DNSBLService
+from spambl import DNSBL, UnknownCodeError, NXDOMAIN, HpHosts, DNSBLService, BaseDNSBLClient, NoRequiredContentError
 from mock import Mock, patch
 from ipaddress import ip_address as IP
 from itertools import cycle
@@ -219,6 +219,33 @@ class DNSBLServiceTest(unittest.TestCase):
     def tearDownClass(cls):
         cls.patcher.stop()
         
+class BaseDNSBLClientTest(unittest.TestCase):
+    
+    def testAddDNSBL(self):
+        ''' Test add_dnsbl method of BaseDNSBLClient '''
+        
+        test_lists_attr_name = 'test_lists_attr'
+        base_dnsbl_client = BaseDNSBLClient()
+        base_dnsbl_client._LISTS_ATTR_NAME = test_lists_attr_name
+        
+        valid_dnsbl = Mock()
+        setattr(valid_dnsbl, test_lists_attr_name, True)
+        
+        base_dnsbl_client.add_dnsbl(valid_dnsbl)
+        
+        self.assertEqual(base_dnsbl_client.dnsbl_services[0], valid_dnsbl)
+        
+        invalid_dnsbl = Mock()
+        setattr(invalid_dnsbl, test_lists_attr_name, False)
+        
+        self.assertRaises(NoRequiredContentError, base_dnsbl_client.add_dnsbl, invalid_dnsbl)
+        
+        no_dnsbl = Mock(spec=[])
+        
+        self.assertRaises(TypeError, base_dnsbl_client.add_dnsbl, no_dnsbl)
+        
+                
+
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
     unittest.main()

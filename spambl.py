@@ -96,11 +96,24 @@ class DNSBLService(object):
 class BaseDNSBLClient(object):
     ''' Implements basic feaures of DNSBL client classes '''
     
-
     _LISTS_ATTR_NAME = None
     
     def __init__(self):
         self.dnsbl_services = []
+    
+    def add_dnsbl(self, dnsbl_service):
+        ''' Create new instance
+        
+        :param dnsbl_service: an object representing dnsbl service
+        '''
+        
+        if not hasattr(dnsbl_service, self._LISTS_ATTR_NAME):
+            raise TypeError('DNSBL service object must have an attribute named {}'.format(self._LISTS_ATTR_NAME))
+            
+        if not getattr(dnsbl_service, self._LISTS_ATTR_NAME):
+            raise NoRequiredContentError('This DNSBL service does not contain required type of entries ')
+            
+        self.dnsbl_services.append(dnsbl_service)
         
 class DNSBLClient(object):
     ''' Responsible for querying DNSBL services that list ip addresses'''
