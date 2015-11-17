@@ -127,6 +127,9 @@ class BaseDNSBLClient(object):
         for source in self.dnsbl_services:
             return_code = source.query(host)
             yield (host, source, return_code) if return_code else ()
+            
+    def __contains__(self, host):
+        return any(self._get_item_data(host))
         
 class DNSBLClient(object):
     ''' Responsible for querying DNSBL services that list ip addresses'''

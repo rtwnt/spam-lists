@@ -245,6 +245,16 @@ class BaseDNSBLClientTest(unittest.TestCase):
          
         self.assertRaises(TypeError, self.base_dnsbl_client.add_dnsbl, no_dnsbl)
         
+    def testContains(self):
+        ''' Test __contains__ method '''
+        
+        valid_dnsbl = Mock()
+        valid_dnsbl.query.return_value = 3
+        
+        self.base_dnsbl_client.dnsbl_services.append(valid_dnsbl)
+        
+        self.assertTrue('test' in self.base_dnsbl_client)
+
         
 
 if __name__ == "__main__":
