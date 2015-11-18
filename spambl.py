@@ -10,7 +10,16 @@ class SpamBLError(Exception):
     
 class UnknownCodeError(SpamBLError):
     ''' Raise when trying to use an unexpected value of dnsbl return code '''
+
+class DNSBLClientError(SpamBLError):
+    ''' A base for some exceptions raised by BaseDNSBLClient '''
     
+    msg_tpl = None
+    def __init__(self, client, dnsbl_service, *args):
+        msg = self.msg_tpl.format(client.__class__.__name__, dnsbl_service.__class__.__name__)
+        
+        super(DNSBLClientError, self).__init__(msg, *args)
+
 class DNSBLContentError(ValueError):
     ''' Raise when trying to use an instance of DNSBL service that doesn't
     support expected type of items
