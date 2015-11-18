@@ -309,6 +309,24 @@ class HpHosts(object):
             return HpHostsItem(host, self.identifier, classification)
         return None
         
+class GoogleSafeBrowsing(object):
+    ''' Google Safe Browsing lookup API client '''
+    
+    protocol_version = '3.1'
+    max_urls_per_request = 500
+    
+    def __init__(self, client_name, app_version, api_key):
+        ''' Create new instance
         
+        :param client_name: name of application using the API
+        :param app_version: version of the application
+        :param api_key: API key given by Google: 
+        https://developers.google.com/safe-browsing/key_signup
+        '''
+        
+        self.api_key = api_key
+        self.client_name = client_name
+        self.app_version = app_version
+
 if __name__ == '__main__':
     pass
