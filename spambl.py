@@ -130,6 +130,16 @@ class BaseDNSBLClient(object):
             
     def __contains__(self, host):
         return any(self._get_item_data(host))
+    
+    def lookup(self, host):
+        ''' Get all items listed in registered dnsbl services for given host 
+        
+        :params host: a valid host
+        :returns: a list of objects representing host on different dns blocklists on which
+        it is listed
+        '''
+        
+        return tuple(DNSBLItem(*data) for data in self._get_item_data(host) if data)
         
 class DNSBLClient(object):
     ''' Responsible for querying DNSBL services that list ip addresses'''

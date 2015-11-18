@@ -5,7 +5,7 @@ import unittest
 from spambl import DNSBL, UnknownCodeError, NXDOMAIN, HpHosts, DNSBLService, BaseDNSBLClient, NoRequiredContentError
 from mock import Mock, patch
 from ipaddress import ip_address as IP
-from itertools import cycle
+from itertools import cycle, izip
 from __builtin__ import classmethod
 
 hostnames  = 't1.pl', 't2.com', 't3.com.pl'
@@ -268,6 +268,41 @@ class BaseDNSBLClientTest(unittest.TestCase):
         
         self.assertEqual(next(self.base_dnsbl_client._get_item_data(test_host)), ())
         self.assertFalse(test_host in self.base_dnsbl_client)
+        
+    def makeAssertionsForLookup(self, return_values):
+        ''' Test lookup method using dnsbl mocks
+        
+        The method tests type of returned value, return codes and sources assigned to each item.
+        
+        :param return_values: a sequence of integers representing return codes of each 
+        dnsbl service in response to test host value
+        '''
+        
+        dnsbls = [self.getDNSBLMock(query_return_value = r) for r in return_values]
+        
+        self.base_dnsbl_client.dnsbl_services = dnsbls
+        result = self.base_dnsbl_client.lookup('test')
+        
+        self.assertIsInstance(result, tuple)
+        
+        actual = [o._return_code for o in result]
+        expected = [r for r in return_values if r]
+        
+        self.assertEqual(actual, expected)
+        
+        actual = [o.source for o in result]
+        expected = [d for d, n in izip(dnsbls, return_values) if n]
+        
+        self.assertEqual(actual, expected)
+        
+    def testLookup(self):
+        ''' Test lookup method '''
+        
+        return_value_sets = (1, 2, None, 3, None), (1,), (None,), (1, 2, 3), (None, None, None)
+        
+        for _set in return_value_sets:
+            self.makeAssertionsForLookup(_set)
+        
         
 
 if __name__ == "__main__":
