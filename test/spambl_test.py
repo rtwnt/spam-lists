@@ -225,7 +225,8 @@ class BaseDNSBLClientTest(unittest.TestCase):
     
     def setUp(self):
         self.base_dnsbl_client = BaseDNSBLClient()
-        self.base_dnsbl_client._LISTS_ATTR_NAME = self.test_lists_attr_name
+        
+        self.base_dnsbl_client._required_content_in = lambda e: getattr(e, self.test_lists_attr_name) == True
         
     def getDNSBLMock(self, required_property = True, query_return_value = None):
         ''' Create a Mock instance for dnsbl service object

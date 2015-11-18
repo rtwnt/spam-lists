@@ -96,8 +96,6 @@ class DNSBLService(object):
 class BaseDNSBLClient(object):
     ''' Implements basic feaures of DNSBL client classes '''
     
-    _LISTS_ATTR_NAME = None
-    
     def __init__(self):
         self.dnsbl_services = []
     
@@ -107,11 +105,12 @@ class BaseDNSBLClient(object):
         :param dnsbl_service: an object representing dnsbl service
         '''
         
-        if not hasattr(dnsbl_service, self._LISTS_ATTR_NAME):
-            msg_tpl = 'DNSBL service object must have an attribute named {}'
-            raise TypeError(msg_tpl.format(self._LISTS_ATTR_NAME))
+        try:
+            required_content_in = self._required_content_in(dnsbl_service)
+        except AttributeError:
+            raise TypeError, 'DNSBL service object does not contain a required attribute', exc_info()[2]
             
-        if not getattr(dnsbl_service, self._LISTS_ATTR_NAME):
+        if not required_content_in:
             msg_tpl = 'This instance of {} does not list items required for {}'
             raise NoRequiredContentError(msg_tpl.format(dnsbl_service.__class__.__name__, self.__class__.__name__))
             
