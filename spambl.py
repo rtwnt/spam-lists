@@ -20,15 +20,19 @@ class DNSBLClientError(SpamBLError):
         
         super(DNSBLClientError, self).__init__(msg, *args)
 
-class DNSBLContentError(ValueError):
+class DNSBLContentError(DNSBLClientError, ValueError):
     ''' Raise when trying to use an instance of DNSBL service that doesn't
     support expected type of items
-    '''
+    ''' 
     
-class DNSBLTypeError(TypeError):
+    msg_tpl = 'This instance of {} does not list items required by {}'
+    
+class DNSBLTypeError(DNSBLClientError, TypeError):
     ''' Raise when trying to use an object that is expected to represent dnsbl service
     but doesn't have required attributes
     '''
+    
+    msg_tpl = 'This instance of {} does not have an attribute required by {}'
     
 class DNSBLItem(object):
     ''' Represents a host listed on a DNS blacklist '''
@@ -122,11 +126,10 @@ class BaseDNSBLClient(object):
         try:
             required_content_in = self._required_content_in(dnsbl_service)
         except AttributeError:
-            raise DNSBLTypeError, 'DNSBL service object does not contain a required attribute', exc_info()[2]
-            
+            raise DNSBLTypeError(self, dnsbl_service), None, exc_info()[2]
+        
         if not required_content_in:
-            msg_tpl = 'This instance of {} does not list items required for {}'
-            raise DNSBLContentError(msg_tpl.format(dnsbl_service.__class__.__name__, self.__class__.__name__))
+            raise DNSBLContentError(self, dnsbl_service)
             
         self.dnsbl_services.append(dnsbl_service)
     
