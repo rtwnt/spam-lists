@@ -16,6 +16,11 @@ class DNSBLContentError(ValueError):
     support expected type of items
     '''
     
+class DNSBLTypeError(TypeError):
+    ''' Raise when trying to use an object that is expected to represent dnsbl service
+    but doesn't have required attributes
+    '''
+    
 class DNSBLItem(object):
     ''' Represents a host listed on a DNS blacklist '''
     
@@ -108,7 +113,7 @@ class BaseDNSBLClient(object):
         try:
             required_content_in = self._required_content_in(dnsbl_service)
         except AttributeError:
-            raise TypeError, 'DNSBL service object does not contain a required attribute', exc_info()[2]
+            raise DNSBLTypeError, 'DNSBL service object does not contain a required attribute', exc_info()[2]
             
         if not required_content_in:
             msg_tpl = 'This instance of {} does not list items required for {}'

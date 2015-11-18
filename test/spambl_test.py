@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import unittest
-from spambl import DNSBL, UnknownCodeError, NXDOMAIN, HpHosts, DNSBLService, BaseDNSBLClient, DNSBLContentError
+from spambl import DNSBL, UnknownCodeError, NXDOMAIN, HpHosts, DNSBLService, BaseDNSBLClient, DNSBLContentError, DNSBLTypeError
 from mock import Mock, patch
 from ipaddress import ip_address as IP
 from itertools import cycle, izip
@@ -253,7 +253,7 @@ class BaseDNSBLClientTest(unittest.TestCase):
         self.assertRaises(DNSBLContentError, self.base_dnsbl_client.add_dnsbl, invalid_dnsbl)
         
         no_dnsbl = Mock(spec=[])
-        self.assertRaises(TypeError, self.base_dnsbl_client.add_dnsbl, no_dnsbl)
+        self.assertRaises(DNSBLTypeError, self.base_dnsbl_client.add_dnsbl, no_dnsbl)
         
     def testContains(self):
         ''' Test __contains__ method '''
