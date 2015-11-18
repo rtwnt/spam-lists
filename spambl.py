@@ -11,7 +11,7 @@ class SpamBLError(Exception):
 class UnknownCodeError(SpamBLError):
     ''' Raise when trying to use an unexpected value of dnsbl return code '''
     
-class NoRequiredContentError(ValueError):
+class DNSBLContentError(ValueError):
     ''' Raise when trying to use an instance of DNSBL service that doesn't
     support expected type of items
     '''
@@ -112,7 +112,7 @@ class BaseDNSBLClient(object):
             
         if not required_content_in:
             msg_tpl = 'This instance of {} does not list items required for {}'
-            raise NoRequiredContentError(msg_tpl.format(dnsbl_service.__class__.__name__, self.__class__.__name__))
+            raise DNSBLContentError(msg_tpl.format(dnsbl_service.__class__.__name__, self.__class__.__name__))
             
         self.dnsbl_services.append(dnsbl_service)
     
