@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import unittest
-from spambl import DNSBL, UnknownCodeError, NXDOMAIN, HpHosts, DNSBLService, BaseDNSBLClient, DNSBLContentError, DNSBLTypeError
+from spambl import UnknownCodeError, NXDOMAIN, HpHosts, DNSBLService, BaseDNSBLClient, DNSBLContentError, DNSBLTypeError
 from mock import Mock, patch
 from ipaddress import ip_address as IP
 from itertools import cycle, izip
@@ -18,84 +18,6 @@ host_collection.hostnames = hostnames
 empty_host_collection = Mock()
 empty_host_collection.ips = ()
 empty_host_collection.hostnames = ()
-
-
-class DNSBLTest(unittest.TestCase):
-    
-    code_item_class = {1: 'Class #1', 2: 'Class #2'}
-    query_suffix = 'query.suffix'
-    
-    @classmethod
-    def setUpDNSBLInstance(cls):
-        ''' Create DNSBL instance used for testing '''
-        
-        cls.dnsbl = DNSBL('test.dnsbl', cls.query_suffix, cls.code_item_class, True, True)
-        
-    @classmethod
-    def setUpQueryPatch(cls):
-        ''' Patch query function in spambl module
-        
-        The query function was originally imported from dns.resolver module
-        '''
-        
-        cls.patcher = patch('spambl.query')
-        cls.mocked_query = cls.patcher.start()
-        
-    def setUpQuerySideEffect(self, nxdomain = False):
-        ''' Set up side effect of patched query
-        
-        :param nxdomain: if True, the side effect will be raising NXDOMAIN exception, otherwise
-        it will be an iterator cycling through supported return values
-        '''
-        side_effects = []
-        
-        for n in self.code_item_class:
-            m = Mock()
-            m.to_text.side_effect = '127.0.0.%d' % n
-            side_effects.append([m])
-        
-        self.mocked_query.side_effect = NXDOMAIN('test NXDOMAIN exception') if nxdomain else cycle(side_effects)
-    
-    @classmethod
-    def setUpClass(cls):
-        cls.setUpDNSBLInstance()
-        cls.setUpQueryPatch()
-        
-    def testGetClassification(self):
-        ''' Test get_classification method of DNSBL instance '''
-        
-        msg = 'The expected value {} is not equal to received value {}'
-        
-        for key, value in self.code_item_class.iteritems():
-            actual = self.dnsbl.get_classification(key)
-            self.assertEqual(actual, value, msg.format(value, actual))
-        
-        self.assertRaises(UnknownCodeError, self.dnsbl.get_classification, 4)
-        
-
-    def testContainsAny(self):
-        self.setUpQuerySideEffect()
-        self.assertTrue(self.dnsbl.contains_any(host_collection))
-        
-        self.setUpQuerySideEffect(True)
-        self.assertFalse(self.dnsbl.contains_any(empty_host_collection))
-        self.assertFalse(self.dnsbl.contains_any(host_collection))
-        
-    def testLookup(self):
-        self.setUpQuerySideEffect()
-        actual_host_strings = [h.host for h in self.dnsbl.lookup(host_collection)]
-        expected_host_strings = [n for n in ips + hostnames]
-        
-        self.assertSequenceEqual(actual_host_strings, expected_host_strings)
-        
-        self.setUpQuerySideEffect(True)
-        self.assertSequenceEqual(self.dnsbl.lookup(empty_host_collection), [])
-        self.assertSequenceEqual(self.dnsbl.lookup(host_collection), [])
-        
-    @classmethod
-    def tearDownClass(cls):
-        cls.patcher.stop()
-        
         
 class HpHostsTest(unittest.TestCase):
     ''' Tests HpHosts methods '''
