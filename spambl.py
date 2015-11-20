@@ -116,6 +116,15 @@ class BaseDNSBLClient(object):
     
     def __init__(self):
         self.dnsbl_services = []
+        
+    def _get_relative_domain(self, host):
+        ''' Get relative domain name for given host
+        
+        :param host: a valid host
+        :returns: a dns name object
+        '''
+        
+        raise NotImplementedError('The method is not implemented')
     
     def add_dnsbl(self, dnsbl_service):
         ''' Create new instance
