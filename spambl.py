@@ -354,7 +354,7 @@ class HostCollection(object):
     * this collection contains a subdomain of a domain in the other collection
     '''
     
-    def __init__(self, hosts):
+    def __init__(self, hosts=()):
         ''' Create new instance
         
         :param hosts: a sequence of ip adresses and hostnames
