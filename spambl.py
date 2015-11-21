@@ -257,6 +257,7 @@ class GoogleSafeBrowsing(object):
         self.api_key = api_key
         self.client_name = client_name
         self.app_version = app_version
+        self._request_address_val = ''
 
 if __name__ == '__main__':
     pass
