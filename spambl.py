@@ -343,5 +343,27 @@ class GoogleSafeBrowsing(object):
         return tuple(items)
     
 
+class HostCollection(object):
+    ''' Provides a container for ip addresses and domain names
+    
+    Contains methods for testing if the collection matches partly with 
+    another instance. The match is detected when:
+    
+    * both collections have at least one the same ip address in them
+    * this collection contains a subdomain of a domain in the other collection
+    '''
+    
+    def __init__(self, hosts):
+        ''' Create new instance
+        
+        :param hosts: a sequence of ip adresses and hostnames
+        '''
+        
+        self.ip_addresses = set()
+        self.hostnames = set()
+        
+        for host in hosts:
+            self.add(host)
+
 if __name__ == '__main__':
     pass
