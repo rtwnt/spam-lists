@@ -183,8 +183,8 @@ class DNSBLClient(object):
 class URIDNSBLClient(object):
     ''' Responsible for querying DNSBL services that list hostnames '''
     
-class HpHostsItem(object):
-    ''' Represents a host listed in hpHosts'''
+class ListItem(object):
+    ''' Represents a host listed on a blocklist'''
     
     def __init__(self, host, source, classification):
         
@@ -231,7 +231,7 @@ class HpHosts(object):
         ''' Get an object representing a value for a given host, if listed in hpHosts
         
         :param host: a valid host string
-        :returns: a HpHostItem object, or None if host is not listed
+        :returns: a ListItem object, or None if host is not listed
         '''
         data = self._query(host, True)
         
@@ -239,7 +239,7 @@ class HpHosts(object):
             elements = data.split(',')
             classification = elements[1] if len(elements) > 1 else None
             
-            return HpHostsItem(host, self.identifier, classification)
+            return ListItem(host, self.identifier, classification)
         return None
         
 class GoogleSafeBrowsing(object):
