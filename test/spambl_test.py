@@ -308,7 +308,27 @@ class GoogleSafeBrowsingTest(unittest.TestCase):
             
             self.assertEqual(actual_result, expected_result)
             self.assertRaises(UnathorizedAPIKeyError, self.invalid_key_gbs.contains_any, urls)
+            
+    def testLookup(self):
         
+        results_1 = self.google_safe_browsing.lookup(self.spam_urls_classification.keys())
+        
+        for i, item in enumerate(results_1):
+            self.assertEqual(item.host, self.spam_urls_classification.keys()[i])
+            self.assertEqual(item.source, self.google_safe_browsing)
+            self.assertEqual(item.classification, self.spam_urls_classification[item.host].split(','))
+            
+        results_2 = self.google_safe_browsing.lookup(self.all_urls)
+        
+        for i, item in enumerate(results_2):
+            self.assertEqual(item.host, self.spam_urls_classification.keys()[i])
+            self.assertEqual(item.source, self.google_safe_browsing)
+            self.assertEqual(item.classification, self.spam_urls_classification[item.host].split(','))
+        
+        results_3 = self.google_safe_browsing.lookup(self.non_spam_urls)
+        
+        self.assertEqual(results_3, tuple())
+
     @classmethod
     def tearDownClass(cls):
         cls.patcher.stop()

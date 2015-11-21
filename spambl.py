@@ -4,6 +4,7 @@
 from sys import exc_info
 from dns.resolver import query, NXDOMAIN
 from requests import get, post, HTTPError
+from itertools import izip
 
 class SpamBLError(Exception):
     ''' Base exception class for spambl module '''
@@ -322,6 +323,25 @@ class GoogleSafeBrowsing(object):
         '''
         
         return any(self._query(urls))
+    
+    def lookup(self, urls):
+        ''' Get items for all listed urls
+        
+        :param urls: a sequence of urls to be tested
+        :returns: a tuple containing listed url objects
+        '''
+        
+        items = []
+        
+        for url_list, response in self._query(urls):
+            classification_set = response.content.splitlines()
+            
+            for url, _class in izip(url_list, classification_set):
+                if _class != 'ok':
+                    items.append(ListItem(url, self, _class.split(',')))
+                    
+        return tuple(items)
+    
 
 if __name__ == '__main__':
     pass
