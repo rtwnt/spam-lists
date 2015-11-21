@@ -258,6 +258,16 @@ class GoogleSafeBrowsing(object):
         self.client_name = client_name
         self.app_version = app_version
         self._request_address_val = ''
+        
+    @property
+    def _request_address(self):
+        ''' Get address of POST request to the service '''
+        
+        if not self._request_address_val:
+            tpl = 'https://sb-ssl.google.com/safebrowsing/api/lookup?client={0}&key={1}&appver={2}&pver={3}'
+            self._request_address_val = tpl.format(self.client_name, self.api_key, self.app_version, self.protocol_version)
+            
+        return self._request_address_val
 
 if __name__ == '__main__':
     pass
