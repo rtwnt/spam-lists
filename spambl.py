@@ -126,6 +126,14 @@ class BaseDNSBLClient(object):
         
         raise NotImplementedError('The method is not implemented')
     
+    def _required_content_in(self, dnsbl):
+        ''' Check if dnsbl has content required by this client
+        
+        :param dnsbl: an object representing dnsbl service
+        '''
+        
+        raise NotImplementedError('The method is not implemented')
+    
     def add_dnsbl(self, dnsbl):
         ''' Create new instance
         
