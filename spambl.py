@@ -412,6 +412,18 @@ class HostCollection(object):
         for sub, _super in product(self.hostnames, other.hostnames):
             if sub.is_subdomain(_super):
                 yield sub
+    
+    def contains_match(self, other):
+        ''' Test if the other contains a matching value 
+        
+        :param other: an instance of HostCollection
+        :returns: True if any match between the collections is detected
+        '''
+        if any(ip in self.ip_addresses for ip in other.ip_addresses):
+            return True
+        
+        return any(self.get_domain_matches(other))
+        
         
 
 if __name__ == '__main__':

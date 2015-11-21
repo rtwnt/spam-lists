@@ -340,6 +340,8 @@ class HostCollectionTest(unittest.TestCase):
         self.host_collection = HostCollection()
         self.hostname_strings = 'google.com', 'test1.pl'
         self.ip_address_strings = u'127.0.0.1', u'2001:DB8:abc:123::42'
+        
+        self.not_listed = 'a.com', u'255.0.0.1'
         self.all_host_strings = self.hostname_strings + self.ip_address_strings
         
     def testAddHostnames(self):
@@ -358,6 +360,27 @@ class HostCollectionTest(unittest.TestCase):
         test_host = '-k.'
         
         self.assertRaises(ValueError, self.host_collection.add, test_host)
+        
+    def testContainsMatch(self):
+        
+        for host in self.all_host_strings:
+            self.host_collection.add(host)
+            
+        matching = HostCollection(self.all_host_strings+self.not_listed)
+        
+        self.assertTrue(self.host_collection.contains_match(matching))
+        
+        non_empty_not_matching = HostCollection(self.not_listed)
+        
+        self.assertFalse(self.host_collection.contains_match(non_empty_not_matching))
+        
+        empty = HostCollection()
+        
+        self.assertFalse(self.host_collection.contains_match(empty))
+        
+        
+        
+        
         
         
 
