@@ -5,6 +5,7 @@ from sys import exc_info
 from dns.resolver import query, NXDOMAIN
 from requests import get, post, HTTPError
 from itertools import izip
+import re
 
 class SpamBLError(Exception):
     ''' Base exception class for spambl module '''
@@ -364,6 +365,21 @@ class HostCollection(object):
         
         for host in hosts:
             self.add(host)
+        
+    def is_valid_hostname(self, host):
+        ''' Test if given value is a valid hostname string 
+        
+        :param host: a value to be tested
+        '''
+        
+        if host[-1] == '.':
+            host = host[:-1]
+            
+        label = '(?!-)[a-z0-9-]{1,63}(?<!-)'
+        
+        return 1 < len(host) < 253 and re.match('^(?:'+label+'\.)*'+label+'$', host)
+                
+        
 
 if __name__ == '__main__':
     pass
