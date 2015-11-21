@@ -424,7 +424,18 @@ class HostCollection(object):
         
         return any(self.get_domain_matches(other))
         
+    def difference(self, other):
+        ''' Return a new host collection without matches from the other
         
+        :param other: an instance of HostCollection
+        :returns: new instance of HostCollection
+        '''
+        
+        new  = HostCollection()
+        new.ip_addresses = self.ip_addresses - other.ip_addresses
+        new.hostnames = self.hostnames - {x for x in self.get_domain_matches(other)}
+        
+        return new
 
 if __name__ == '__main__':
     pass

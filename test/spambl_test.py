@@ -378,7 +378,36 @@ class HostCollectionTest(unittest.TestCase):
         
         self.assertFalse(self.host_collection.contains_match(empty))
         
+    def testDifference(self):
         
+        for host in self.all_host_strings:
+            self.host_collection.add(host)
+            
+        matching = HostCollection(self.all_host_strings+self.not_listed)
+        non_empty_not_matching = HostCollection(self.not_listed)
+        empty = HostCollection()
+        
+        ''' matching - set up '''
+        actual = matching.difference(self.host_collection)
+        expected = non_empty_not_matching
+        
+        self.assertItemsEqual(actual.hostnames, expected.hostnames)
+        self.assertItemsEqual(actual.ip_addresses, expected.ip_addresses)
+        
+        '''set up - matching'''
+        actual = self.host_collection.difference(matching)
+        expected = empty
+        
+        self.assertItemsEqual(actual.hostnames, expected.hostnames)
+        self.assertItemsEqual(actual.ip_addresses, expected.ip_addresses)
+        
+        ''' set up - empty '''
+        
+        actual = self.host_collection.difference(empty)
+        expected = self.host_collection
+        
+        self.assertItemsEqual(actual.hostnames, expected.hostnames)
+        self.assertItemsEqual(actual.ip_addresses, expected.ip_addresses)
         
         
         
