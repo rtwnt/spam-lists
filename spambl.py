@@ -4,6 +4,7 @@
 from sys import exc_info
 from dns.resolver import query, NXDOMAIN
 from requests import get, post, HTTPError
+from itertools import izip, product
 from ipaddress import ip_address
 import re
 from dns import name
@@ -399,6 +400,18 @@ class HostCollection(object):
         else:
             self.ip_addresses.add(host)
             return
+            
+    def get_domain_matches(self, other):
+        ''' Get domains from the other that are subdomains
+        of domains in this host collection 
+        
+        :param other: an instance of HostCollection
+        :returns: a subdomain of a domain in the other
+        '''
+        
+        for sub, _super in product(self.hostnames, other.hostnames):
+            if sub.is_subdomain(_super):
+                yield sub
         
 
 if __name__ == '__main__':
