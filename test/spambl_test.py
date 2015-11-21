@@ -2,11 +2,15 @@
 # -*- coding: utf-8 -*-
 
 import unittest
-from spambl import UnknownCodeError, NXDOMAIN, HpHosts, DNSBLService, BaseDNSBLClient, DNSBLContentError, DNSBLTypeError
+from spambl import UnknownCodeError, NXDOMAIN, HpHosts, DNSBLService, BaseDNSBLClient, DNSBLContentError, DNSBLTypeError, GoogleSafeBrowsing, UnathorizedAPIKeyError
 from mock import Mock, patch
 from ipaddress import ip_address as IP
 from itertools import cycle, izip
 from __builtin__ import classmethod
+
+from urlparse import urlparse, parse_qs
+from requests import HTTPError
+
 
 hostnames  = 't1.pl', 't2.com', 't3.com.pl'
 ips = IP(u'255.255.0.1'), IP(u'2001:DB8:abc:123::42')
@@ -225,6 +229,88 @@ class BaseDNSBLClientTest(unittest.TestCase):
         
         for _set in return_value_sets:
             self.makeAssertionsForLookup(_set)
+        
+class GoogleSafeBrowsingTest(unittest.TestCase):
+    
+    @classmethod
+    def setUpClass(cls):
+        cls.valid_key = 'test.key'
+        
+        cls.google_safe_browsing = GoogleSafeBrowsing('test_client', '0.1', cls.valid_key)
+        cls.invalid_key_gbs = GoogleSafeBrowsing('test_client', '0.1', 'invalid.key')
+        
+        cls.setUpUrls()
+        cls.setUpPost()
+        
+    @classmethod    
+    def setUpUrls(cls):
+        
+        hosts = hostnames + ips
+        classifications = 'phishing', 'malware', 'unwanted'
+        classification_ranges = cycle(range(1, len(classifications)))
+        
+        cls.spam_urls_classification = dict()
+        
+        for n, k in izip(hosts, classification_ranges):
+            cls.spam_urls_classification['http://{}'.format(n)] = ','.join(classifications[:k])
+            
+        cls.non_spam_urls = tuple('http://{}'.format(n) for n in ('nonspam1.com', 'nonspam2.com'))
+        cls.all_urls = tuple(cls.spam_urls_classification.keys()) + cls.non_spam_urls
+        
+    @classmethod
+    def setUpPost(cls):
+        
+        cls.patcher = patch('spambl.post')
+        cls.mocked_post = cls.patcher.start()        
+        cls.mocked_post.side_effect = cls.post
+        
+    @classmethod
+    def post(cls, request_address, request_body):
+        urls = request_body.splitlines()[1:]
+        
+        results = []
+        for u in urls:
+            a = cls.spam_urls_classification[u] if u in cls.spam_urls_classification else 'ok'
+            results.append(a)
+            
+        return cls.getPostResponse(request_address, results)
+    
+    @classmethod
+    def getPostResponse(cls, request_address, results):
+        
+        response = Mock(spec=['content', 'raise_for_status', 'status_code'])
+        
+        response.status_code = 204
+        
+        if any((n != 'ok' for n in results)):
+            response.status_code = 200
+            response.content = '\n'.join(results)
+            
+        parsed_url = urlparse(request_address)
+        params = parse_qs(parsed_url.query)
+        
+        if params['key'][0] != cls.valid_key:
+            response.status_code = 401
+            response.raise_for_status.side_effect = HTTPError('Test http error')
+            
+        return response
+        
+        
+    def testContainsAny(self):
+        
+        url_result_1 = self.spam_urls_classification.keys(), True
+        url_result_2 = self.all_urls, True
+        url_result_3 = self.non_spam_urls, False
+         
+        for urls, expected_result in (url_result_1, url_result_2, url_result_3):
+            actual_result = self.google_safe_browsing.contains_any(urls)
+            
+            self.assertEqual(actual_result, expected_result)
+            self.assertRaises(UnathorizedAPIKeyError, self.invalid_key_gbs.contains_any, urls)
+        
+    @classmethod
+    def tearDownClass(cls):
+        cls.patcher.stop()
         
         
 
