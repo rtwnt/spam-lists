@@ -3,7 +3,7 @@
 
 import unittest
 from spambl import (UnknownCodeError, NXDOMAIN, HpHosts, DNSBLService, BaseDNSBLClient, 
-                     DNSBLContentError, DNSBLTypeError, GoogleSafeBrowsing, UnathorizedAPIKeyError)
+                     DNSBLContentError, DNSBLTypeError, GoogleSafeBrowsing, UnathorizedAPIKeyError, HostCollection)
 from mock import Mock, patch
 from ipaddress import ip_address as IP
 from itertools import cycle, izip
@@ -11,7 +11,7 @@ from __builtin__ import classmethod
 
 from urlparse import urlparse, parse_qs
 from requests import HTTPError
-
+from dns import name
 
 hostnames  = 't1.pl', 't2.com', 't3.com.pl'
 ips = IP(u'255.255.0.1'), IP(u'2001:DB8:abc:123::42')
@@ -332,6 +332,32 @@ class GoogleSafeBrowsingTest(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         cls.patcher.stop()
+        
+        
+class HostCollectionTest(unittest.TestCase):
+    
+    def setUp(self):
+        self.host_collection = HostCollection()
+        self.hostname_strings = 'google.com', 'test1.pl'
+        self.ip_address_strings = u'127.0.0.1', u'2001:DB8:abc:123::42'
+        self.all_host_strings = self.hostname_strings + self.ip_address_strings
+        
+    def testAddHostnames(self):
+        for h in self.hostname_strings:
+            self.host_collection.add(h)
+            
+        self.assertItemsEqual(self.host_collection.hostnames, {name.from_text(h) for h in self.hostname_strings})
+            
+    def testAddIps(self):
+        for ip in self.ip_address_strings:
+            self.host_collection.add(ip)
+            
+        self.assertItemsEqual(self.host_collection.ip_addresses, {IP(ip) for ip in self.ip_address_strings})
+        
+    def testAddInvalidHost(self):
+        test_host = '-k.'
+        
+        self.assertRaises(ValueError, self.host_collection.add, test_host)
         
         
 

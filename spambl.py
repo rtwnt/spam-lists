@@ -4,8 +4,9 @@
 from sys import exc_info
 from dns.resolver import query, NXDOMAIN
 from requests import get, post, HTTPError
-from itertools import izip
+from ipaddress import ip_address
 import re
+from dns import name
 
 class SpamBLError(Exception):
     ''' Base exception class for spambl module '''
@@ -378,7 +379,26 @@ class HostCollection(object):
         label = '(?!-)[a-z0-9-]{1,63}(?<!-)'
         
         return 1 < len(host) < 253 and re.match('^(?:'+label+'\.)*'+label+'$', host)
+        
+    def add(self, host):
+        ''' Add the given value to collection
+        
+        :param host: an ip address or a hostname
+        :raises ValueError: raised when the given value is not a valid ip address nor a hostname
+        '''
+        try:
+            host = ip_address(host)
+            
+        except ValueError:
+            if self.is_valid_hostname(host):
+                self.hostnames.add(name.from_text(host))
                 
+            else:
+                raise ValueError, "The value '{}' is not a valid host".format(host), exc_info()[2]
+            
+        else:
+            self.ip_addresses.add(host)
+            return
         
 
 if __name__ == '__main__':
