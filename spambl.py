@@ -126,21 +126,21 @@ class BaseDNSBLClient(object):
         
         raise NotImplementedError('The method is not implemented')
     
-    def add_dnsbl(self, dnsbl_service):
+    def add_dnsbl(self, dnsbl):
         ''' Create new instance
         
-        :param dnsbl_service: an object representing dnsbl service
+        :param dnsbl: an object representing dnsbl service
         '''
         
         try:
-            required_content_in = self._required_content_in(dnsbl_service)
+            required_content_in = self._required_content_in(dnsbl)
         except AttributeError:
-            raise DNSBLTypeError(self, dnsbl_service), None, exc_info()[2]
-        
-        if not required_content_in:
-            raise DNSBLContentError(self, dnsbl_service)
+            raise DNSBLTypeError(self, dnsbl), None, exc_info()[2]
             
-        self.dnsbl_services.append(dnsbl_service)
+        if not required_content_in:
+            raise DNSBLContentError(self, dnsbl)
+            
+        self.dnsbl_services.append(dnsbl)
     
     def _get_item_data(self, host):
         ''' Query registered dnsbl services for data on given host
