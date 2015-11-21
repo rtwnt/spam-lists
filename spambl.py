@@ -292,6 +292,23 @@ class GoogleSafeBrowsing(object):
                 raise UnathorizedAPIKeyError('The API key is not authorized'), None, exc_info()[2]
             
         return response
+        
+    def _query(self, urls):
+        ''' Test urls for being listed by the service
+        
+        :param urls: a sequence of urls  to be tested
+        :returns: a tuple containing chunk of urls and a response pertaining to them
+        if the code of response was 200, which means at least one of the queried URLs 
+        is matched in either the phishing, malware, or unwanted software lists.
+        '''
+        
+        for i in range(0, len(urls), self.max_urls_per_request):
+            
+            chunk = urls[i:i+self.max_urls_per_request]
+            response = self._query_once(chunk)
+            
+            if response.status_code == 200:
+                yield chunk, response
 
 if __name__ == '__main__':
     pass
