@@ -287,8 +287,8 @@ class GoogleSafeBrowsing(object):
         try:
                 response.raise_for_status()
                 
-        except HTTPError as e:
-            if e.code == 401:
+        except HTTPError:
+            if response.status_code == 401:
                 raise UnathorizedAPIKeyError('The API key is not authorized'), None, exc_info()[2]
             
         return response
