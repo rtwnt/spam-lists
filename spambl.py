@@ -34,6 +34,9 @@ class DNSBLTypeError(DNSBLClientError, TypeError):
     
     msg_tpl = 'This instance of {} does not have an attribute required by {}'
     
+class UnathorizedAPIKeyError(SpamBLError):
+    ''' Raise when trying to use an unathorized api key '''
+    
 class DNSBLItem(object):
     ''' Represents a host listed on a DNS blacklist '''
     
