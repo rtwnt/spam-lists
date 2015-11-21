@@ -279,6 +279,8 @@ class GoogleSafeBrowsing(object):
         :returns: a response object
         :raises UnathorizedAPIKeyError: when the API key for this instance 
         is not valid
+        :raises HTTPError: if the HTTPError was raised for a HTTP code
+        other than 401, the exception is reraised
         '''
         
         request_body = '{}\n{}'.format(len(urls), '\n'.join(urls))
@@ -290,6 +292,8 @@ class GoogleSafeBrowsing(object):
         except HTTPError:
             if response.status_code == 401:
                 raise UnathorizedAPIKeyError('The API key is not authorized'), None, exc_info()[2]
+            else:
+                raise
             
         return response
         
