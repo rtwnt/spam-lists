@@ -2,7 +2,8 @@
 # -*- coding: utf-8 -*-
 
 import unittest
-from spambl import UnknownCodeError, NXDOMAIN, HpHosts, DNSBLService, BaseDNSBLClient, DNSBLContentError, DNSBLTypeError, GoogleSafeBrowsing, UnathorizedAPIKeyError
+from spambl import (UnknownCodeError, NXDOMAIN, HpHosts, DNSBLService, BaseDNSBLClient, 
+                     DNSBLContentError, DNSBLTypeError, GoogleSafeBrowsing, UnathorizedAPIKeyError)
 from mock import Mock, patch
 from ipaddress import ip_address as IP
 from itertools import cycle, izip
