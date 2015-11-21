@@ -3,7 +3,7 @@
 
 from sys import exc_info
 from dns.resolver import query, NXDOMAIN
-from requests import get
+from requests import get, post, HTTPError
 
 class SpamBLError(Exception):
     ''' Base exception class for spambl module '''
@@ -271,6 +271,27 @@ class GoogleSafeBrowsing(object):
             self._request_address_val = tpl.format(self.client_name, self.api_key, self.app_version, self.protocol_version)
             
         return self._request_address_val
+    
+    def _query_once(self, urls):
+        ''' Perform a single POST request using lookup API
+        
+        :param urls: a sequence of urls to put in request body
+        :returns: a response object
+        :raises UnathorizedAPIKeyError: when the API key for this instance 
+        is not valid
+        '''
+        
+        request_body = '{}\n{}'.format(len(urls), '\n'.join(urls))
+        response = post(self._request_address, request_body)
+            
+        try:
+                response.raise_for_status()
+                
+        except HTTPError as e:
+            if e.code == 401:
+                raise UnathorizedAPIKeyError('The API key is not authorized'), None, exc_info()[2]
+            
+        return response
 
 if __name__ == '__main__':
     pass
