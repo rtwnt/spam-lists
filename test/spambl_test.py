@@ -140,13 +140,16 @@ class DNSBLServiceTest(unittest.TestCase):
 class BaseDNSBLClientTest(unittest.TestCase):
     
     test_lists_attr_name = 'test_lists_attr'
+    hosts_listed = 'a.com', 'b.com', 'c.com'
+    hosts_not_listed = 'lorem.com', 'ipsum.pl'
+    return_code = 3
     
     def setUp(self):
         self.base_dnsbl_client = BaseDNSBLClient()
         
         self.base_dnsbl_client._required_content_in = lambda e: getattr(e, self.test_lists_attr_name) == True
         
-    def getDNSBLMock(self, required_property = True, query_return_value = None):
+    def getDNSBLMockForAdd(self, required_property = True):
         ''' Create a Mock instance for dnsbl service object
         
         :param required_property: boolean value set to value of the required property
@@ -156,18 +159,30 @@ class BaseDNSBLClientTest(unittest.TestCase):
         
         dnsbl = Mock()
         setattr(dnsbl, self.test_lists_attr_name, bool(required_property))
-        dnsbl.query.return_value = query_return_value
         
         return dnsbl
+    
+    def query(self, host):
+        
+        if host in self.hosts_listed:
+            return self.return_code
+        return
+    
+    def getDNSBLMockListingHosts(self):
+        ''' Get dnsbl mock that lists hosts specified in self.hosts_listed '''
+        dnsbl = Mock()
+        dnsbl.query.side_effect = self.query
+        return dnsbl
+        
         
     def testAddDNSBL(self):
         ''' Test add_dnsbl method '''
         
-        valid_dnsbl = self.getDNSBLMock()
+        valid_dnsbl = self.getDNSBLMockForAdd()
         self.base_dnsbl_client.add_dnsbl(valid_dnsbl)
         self.assertEqual(self.base_dnsbl_client.dnsbl_services[0], valid_dnsbl)
          
-        invalid_dnsbl = self.getDNSBLMock(False)
+        invalid_dnsbl = self.getDNSBLMockForAdd(False)
         self.assertRaises(DNSBLContentError, self.base_dnsbl_client.add_dnsbl, invalid_dnsbl)
         
         no_dnsbl = Mock(spec=[])
@@ -175,52 +190,35 @@ class BaseDNSBLClientTest(unittest.TestCase):
         
     def testContains(self):
         ''' Test __contains__ method '''
-        return_value = 3
-        test_host = 'test'
-        
-        dnsbl = self.getDNSBLMock(query_return_value = return_value)
+        dnsbl = self.getDNSBLMockListingHosts()
         self.base_dnsbl_client.dnsbl_services.append(dnsbl)
         
-        self.assertTrue(test_host in self.base_dnsbl_client)
         
-        dnsbl.query.return_value = None
-        
-        self.assertEqual(next(self.base_dnsbl_client._get_item_data(test_host)), ())
-        self.assertFalse(test_host in self.base_dnsbl_client)
-        
-    def makeAssertionsForLookup(self, return_values):
-        ''' Test lookup method using dnsbl mocks
-        
-        The method tests type of returned value, return codes and sources assigned to each item.
-        
-        :param return_values: a sequence of integers representing return codes of each 
-        dnsbl service in response to test host value
-        '''
-        
-        dnsbls = [self.getDNSBLMock(query_return_value = r) for r in return_values]
-        
-        self.base_dnsbl_client.dnsbl_services = dnsbls
-        result = self.base_dnsbl_client.lookup('test')
-        
-        self.assertIsInstance(result, tuple)
-        
-        actual = [o._return_code for o in result]
-        expected = [r for r in return_values if r]
-        
-        self.assertEqual(actual, expected)
-        
-        actual = [o.source for o in result]
-        expected = [d for d, n in izip(dnsbls, return_values) if n]
-        
-        self.assertEqual(actual, expected)
+        for host in self.hosts_listed:
+            self.assertTrue(host in self.base_dnsbl_client)
+            
+        for host in self.hosts_not_listed:
+            self.assertFalse(host in self.base_dnsbl_client)
         
     def testLookup(self):
         ''' Test lookup method '''
+        empty_dnsbl = Mock()
+        empty_dnsbl.query.return_value = None
         
-        return_value_sets = (1, 2, None, 3, None), (1,), (None,), (1, 2, 3), (None, None, None)
+        dnsbls = [self.getDNSBLMockListingHosts() for _ in range(1)]
+        dnsbls.append(empty_dnsbl)
         
-        for _set in return_value_sets:
-            self.makeAssertionsForLookup(_set)
+        self.base_dnsbl_client.dnsbl_services = dnsbls
+        
+        for host in self.hosts_listed:
+            lookup_results = self.base_dnsbl_client.lookup(host)
+            for obj in lookup_results:
+                self.assertEqual(obj._return_code, self.return_code)
+                self.assertEqual(obj.host, host)
+                
+        for host in self.hosts_not_listed:
+            lookup_results = self.base_dnsbl_client.lookup(host)
+            self.assertEqual(lookup_results, tuple())
         
 class GoogleSafeBrowsingTest(unittest.TestCase):
     
