@@ -13,17 +13,7 @@ from urlparse import urlparse, parse_qs
 from requests import HTTPError
 from dns import name
 
-hostnames  = 't1.pl', 't2.com', 't3.com.pl'
-ips = IP(u'255.255.0.1'), IP(u'2001:DB8:abc:123::42')
 
-host_collection = Mock()
-host_collection.ips = ips
-host_collection.hostnames = hostnames
-
-empty_host_collection = Mock()
-empty_host_collection.ips = ()
-empty_host_collection.hostnames = ()
-        
 class HpHostsTest(unittest.TestCase):
     ''' Tests HpHosts methods '''
     
@@ -35,6 +25,10 @@ class HpHostsTest(unittest.TestCase):
         
         cls.patcher = patch('spambl.get')
         cls.mocked_get = cls.patcher.start()
+        
+        cls.hostnames = 't1.pl', 't2.com', 't3.com.pl'
+        cls.ips = IP(u'255.255.0.1'), IP(u'2001:DB8:abc:123::42')
+        cls.hosts = cls.hostnames + cls.ips
         
     def prepareGetReturnValue(self, listed, classification = False):
         ''' Set up return value of get 
@@ -57,7 +51,7 @@ class HpHostsTest(unittest.TestCase):
         for listed in True, False:
             self.prepareGetReturnValue(listed)
             
-            for k in ips:
+            for k in self.ips:
                 self.assertEqual(k in self.hp_hosts, listed)
                 
     def testLookup(self):
@@ -65,12 +59,12 @@ class HpHostsTest(unittest.TestCase):
         
         self.prepareGetReturnValue(True, True)
          
-        for host in ips + hostnames:
+        for host in self.hosts:
             self.assertEqual(self.hp_hosts.lookup(host).host, host)
             
         self.prepareGetReturnValue(False)
         
-        for host in ips + hostnames:
+        for host in self.hosts:
             self.assertEqual(self.hp_hosts.lookup(host), None)
             
     @classmethod
@@ -88,6 +82,8 @@ class DNSBLServiceTest(unittest.TestCase):
         
         cls.patcher = patch('spambl.query')
         cls.mocked_query = cls.patcher.start()
+        
+        cls.hostnames = 't1.pl', 't2.com', 't3.com.pl'
         
     def setUpQuerySideEffect(self, nxdomain = False):
         ''' Prepare side effects of mocked query function for tests
@@ -128,7 +124,7 @@ class DNSBLServiceTest(unittest.TestCase):
         :param mocked_query: a patched instance of query function
         '''
         inverted_ips =  '1.0.255.255', '2.4.0.0.0.0.0.0.0.0.0.0.0.0.0.0.3.2.1.0.c.b.a.0.8.b.d.0.1.0.0.2'
-        values = hostnames + inverted_ips
+        values = self.hostnames + inverted_ips
         
         self.setUpQuerySideEffect()
         
@@ -245,8 +241,7 @@ class GoogleSafeBrowsingTest(unittest.TestCase):
         
     @classmethod    
     def setUpUrls(cls):
-        
-        hosts = hostnames + ips
+        hosts = 't1.pl', 't2.com', 't3.com.pl', IP(u'255.255.0.1'), IP(u'2001:DB8:abc:123::42')
         classifications = 'phishing', 'malware', 'unwanted'
         classification_ranges = cycle(range(1, len(classifications)))
         
