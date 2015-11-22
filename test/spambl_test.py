@@ -18,53 +18,52 @@ class HpHostsTest(unittest.TestCase):
     ''' Tests HpHosts methods '''
     
     classification = '[TEST]'
+    hosts_listed = 't1.pl', 't2.com', 't3.com.pl', '255.255.0.1', '2001:DB8:abc:123::42'
+    hosts_not_listed = 'at.pl', 'lorem.com', 'impsum.com', '200.170.0.1'
     
     @classmethod
     def setUpClass(cls):
         cls.hp_hosts = HpHosts('spambl_test_suite')
+        cls.setUpMockedGet()
         
+    @classmethod
+    def get(cls, url):
+        parsed_url = urlparse(url)
+        params = parse_qs(parsed_url.query)
+        
+        content = 'Not listed'
+        
+        if params['s'][0] in cls.hosts_listed:
+            c = cls.classification if 'class' in params else ''
+            content = ','.join(('Listed', c))
+            
+        response = Mock(spec=['content'])
+        response.content = content
+        
+        return response
+        
+    @classmethod
+    def setUpMockedGet(cls):
         cls.patcher = patch('spambl.get')
         cls.mocked_get = cls.patcher.start()
-        
-        cls.hostnames = 't1.pl', 't2.com', 't3.com.pl'
-        cls.ips = IP(u'255.255.0.1'), IP(u'2001:DB8:abc:123::42')
-        cls.hosts = cls.hostnames + cls.ips
-        
-    def prepareGetReturnValue(self, listed, classification = False):
-        ''' Set up return value of get 
-        
-        :param listed: if True, the content will contain 'Listed' string, else it will contain 'Not listed'
-        :param classification: if True, a classification will be added to the content
-        '''
-        
-        if listed:
-            c = self.classification if classification else ''
-            content = ','.join(('Listed', c))
-        else:
-            content = 'Not listed'
-            
-        self.mocked_get.return_value.content = content
+        cls.mocked_get.side_effect = cls.get
     
     def testContains(self):
         ''' Test __contains__ method '''
         
-        for listed in True, False:
-            self.prepareGetReturnValue(listed)
-            
-            for k in self.ips:
-                self.assertEqual(k in self.hp_hosts, listed)
+        for host in self.hosts_listed:
+            self.assertTrue(host in self.hp_hosts)
+        
+        for host in self.hosts_not_listed:
+            self.assertFalse(host in self.hp_hosts)
                 
     def testLookup(self):
         ''' Test lookup method'''
         
-        self.prepareGetReturnValue(True, True)
-         
-        for host in self.hosts:
+        for host in self.hosts_listed:
             self.assertEqual(self.hp_hosts.lookup(host).host, host)
             
-        self.prepareGetReturnValue(False)
-        
-        for host in self.hosts:
+        for host in self.hosts_not_listed:
             self.assertEqual(self.hp_hosts.lookup(host), None)
             
     @classmethod
