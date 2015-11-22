@@ -12,7 +12,7 @@ from __builtin__ import classmethod
 from urlparse import urlparse, parse_qs
 from requests import HTTPError
 from dns import name
-
+import re
 
 class HpHostsTest(unittest.TestCase):
     ''' Tests HpHosts methods '''
@@ -73,37 +73,40 @@ class HpHostsTest(unittest.TestCase):
 class DNSBLServiceTest(unittest.TestCase):
     
     code_item_class = {1: 'Class #1', 2: 'Class #2'}
+    hosts_listed = 't1.pl', 't2.com', 't3.com.pl'
+    hosts_not_listed = 'lorem.pl', 'ipsum.com'
+    test_suffix = 'test.suffix'
     
     @classmethod
     def setUpClass(cls):
         
         cls.dnsbl_service = DNSBLService('test_service', 'test.suffix', cls.code_item_class, True, True)
         
+        cls.setUpMockedQuery()
+        
+    @classmethod
+    def query(cls, query_name):
+        host = re.sub(r'.'+cls.test_suffix+'$', '', query_name)
+        
+        if host in cls.host_return_codes:
+            return_code = cls.host_return_codes[host]
+            
+            answer = Mock()
+            answer.to_text.return_value = '127.0.0.%d' % return_code
+            return [answer]
+        
+        raise NXDOMAIN('test NXDOMAIN exception')
+    
+    @classmethod
+    def setUpMockedQuery(cls):
         cls.patcher = patch('spambl.query')
         cls.mocked_query = cls.patcher.start()
         
-        cls.hostnames = 't1.pl', 't2.com', 't3.com.pl'
+        return_codes = cycle(cls.code_item_class.keys())
         
-    def setUpQuerySideEffect(self, nxdomain = False):
-        ''' Prepare side effects of mocked query function for tests
+        cls.host_return_codes = {n: next(return_codes) for n in cls.hosts_listed}
         
-        :param nxdomain: if True, the side effect of calling query is set to be a sequence of
-        return values, otherwise it is raising NXDOMAIN exception
-        '''
-        
-        side_effect = NXDOMAIN('test NXDOMAIN exception')
-        
-        if not nxdomain:
-            return_values = []
-        
-            for n in self.code_item_class:
-                m = Mock()
-                m.to_text.return_value = '127.0.0.%d' % n
-                return_values.append([m])
-            
-            side_effect = cycle(return_values)
-                
-        self.mocked_query.side_effect = side_effect
+        cls.mocked_query.side_effect = cls.query
         
     def testGetClassification(self):
         ''' Test get_classification method of DNSBL instance '''
@@ -122,20 +125,13 @@ class DNSBLServiceTest(unittest.TestCase):
         
         :param mocked_query: a patched instance of query function
         '''
-        inverted_ips =  '1.0.255.255', '2.4.0.0.0.0.0.0.0.0.0.0.0.0.0.0.3.2.1.0.c.b.a.0.8.b.d.0.1.0.0.2'
-        values = self.hostnames + inverted_ips
         
-        self.setUpQuerySideEffect()
+        for host in self.hosts_listed:
+            
+            self.assertEqual(self.dnsbl_service.query(host), self.host_return_codes[host])
         
-        return_code_iterator = cycle(self.code_item_class.keys())
-        
-        for v in values:
-            self.assertEqual(self.dnsbl_service.query(v), next(return_code_iterator))
-        
-        self.setUpQuerySideEffect(True)
-        
-        for v in values:
-            self.assertEqual(self.dnsbl_service.query(v), None)
+        for host in self.hosts_not_listed:
+            self.assertEqual(self.dnsbl_service.query(host), None)
             
     @classmethod
     def tearDownClass(cls):
