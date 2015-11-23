@@ -14,62 +14,6 @@ from requests import HTTPError
 from dns import name
 import re
 
-class HpHostsTest(unittest.TestCase):
-    ''' Tests HpHosts methods '''
-    
-    classification = '[TEST]'
-    hosts_listed = 't1.pl', 't2.com', 't3.com.pl', '255.255.0.1', '2001:DB8:abc:123::42'
-    hosts_not_listed = 'at.pl', 'lorem.com', 'impsum.com', '200.170.0.1'
-    
-    @classmethod
-    def setUpClass(cls):
-        cls.hp_hosts = HpHosts('spambl_test_suite')
-        cls.setUpMockedGet()
-        
-    @classmethod
-    def get(cls, url):
-        parsed_url = urlparse(url)
-        params = parse_qs(parsed_url.query)
-        
-        content = 'Not listed'
-        
-        if params['s'][0] in cls.hosts_listed:
-            c = cls.classification if 'class' in params else ''
-            content = ','.join(('Listed', c))
-            
-        response = Mock(spec=['content'])
-        response.content = content
-        
-        return response
-        
-    @classmethod
-    def setUpMockedGet(cls):
-        cls.patcher = patch('spambl.get')
-        cls.mocked_get = cls.patcher.start()
-        cls.mocked_get.side_effect = cls.get
-    
-    def testContains(self):
-        ''' Test __contains__ method '''
-        
-        for host in self.hosts_listed:
-            self.assertTrue(host in self.hp_hosts)
-        
-        for host in self.hosts_not_listed:
-            self.assertFalse(host in self.hp_hosts)
-                
-    def testLookup(self):
-        ''' Test lookup method'''
-        
-        for host in self.hosts_listed:
-            self.assertEqual(self.hp_hosts.lookup(host).host, host)
-            
-        for host in self.hosts_not_listed:
-            self.assertEqual(self.hp_hosts.lookup(host), None)
-            
-    @classmethod
-    def tearDownClass(cls):
-        cls.patcher.stop()
-
 class DNSBLServiceTest(unittest.TestCase):
     
     code_item_class = {1: 'Class #1', 2: 'Class #2'}
@@ -136,7 +80,7 @@ class DNSBLServiceTest(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         cls.patcher.stop()
-        
+
 class BaseDNSBLClientTest(unittest.TestCase):
     
     test_lists_attr_name = 'test_lists_attr'
@@ -219,6 +163,62 @@ class BaseDNSBLClientTest(unittest.TestCase):
         for host in self.hosts_not_listed:
             lookup_results = self.base_dnsbl_client.lookup(host)
             self.assertEqual(lookup_results, tuple())
+
+class HpHostsTest(unittest.TestCase):
+    ''' Tests HpHosts methods '''
+    
+    classification = '[TEST]'
+    hosts_listed = 't1.pl', 't2.com', 't3.com.pl', '255.255.0.1', '2001:DB8:abc:123::42'
+    hosts_not_listed = 'at.pl', 'lorem.com', 'impsum.com', '200.170.0.1'
+    
+    @classmethod
+    def setUpClass(cls):
+        cls.hp_hosts = HpHosts('spambl_test_suite')
+        cls.setUpMockedGet()
+        
+    @classmethod
+    def get(cls, url):
+        parsed_url = urlparse(url)
+        params = parse_qs(parsed_url.query)
+        
+        content = 'Not listed'
+        
+        if params['s'][0] in cls.hosts_listed:
+            c = cls.classification if 'class' in params else ''
+            content = ','.join(('Listed', c))
+            
+        response = Mock(spec=['content'])
+        response.content = content
+        
+        return response
+        
+    @classmethod
+    def setUpMockedGet(cls):
+        cls.patcher = patch('spambl.get')
+        cls.mocked_get = cls.patcher.start()
+        cls.mocked_get.side_effect = cls.get
+    
+    def testContains(self):
+        ''' Test __contains__ method '''
+        
+        for host in self.hosts_listed:
+            self.assertTrue(host in self.hp_hosts)
+        
+        for host in self.hosts_not_listed:
+            self.assertFalse(host in self.hp_hosts)
+                
+    def testLookup(self):
+        ''' Test lookup method'''
+        
+        for host in self.hosts_listed:
+            self.assertEqual(self.hp_hosts.lookup(host).host, host)
+            
+        for host in self.hosts_not_listed:
+            self.assertEqual(self.hp_hosts.lookup(host), None)
+            
+    @classmethod
+    def tearDownClass(cls):
+        cls.patcher.stop()
         
 class GoogleSafeBrowsingTest(unittest.TestCase):
     
