@@ -30,6 +30,13 @@ class DNSBLServiceTest(unittest.TestCase):
         
     @classmethod
     def query(cls, query_name):
+        ''' Perform dns query using this mocked implementation
+        
+        :param query_name: name of queried domain
+        :returns: an instance of Mock representing response to the
+        query, as required by DNSBLService
+        '''
+        
         host = re.sub(r'.'+cls.test_suffix+'$', '', query_name)
         
         if host in cls.host_return_codes:
@@ -62,13 +69,7 @@ class DNSBLServiceTest(unittest.TestCase):
         self.assertRaises(UnknownCodeError, self.dnsbl_service.get_classification, 4)
         
     def testQuery(self):
-        ''' Test query method
-        
-        The method is tested against a set of host values, which are expected to be recognized
-        as spam or not, depending on configuration of side effect of mocked query function.
-        
-        :param mocked_query: a patched instance of query function
-        '''
+        ''' Test query method'''
         
         for host in self.hosts_listed:
             
@@ -178,6 +179,13 @@ class HpHostsTest(unittest.TestCase):
         
     @classmethod
     def get(cls, url):
+        ''' Perform GET request using this mocked implementation
+        
+        :param url: address of resource
+        :returns: an instance of Mock representing response object,
+        as required by HpHosts class
+        '''
+        
         parsed_url = urlparse(url)
         params = parse_qs(parsed_url.query)
         
@@ -255,6 +263,13 @@ class GoogleSafeBrowsingTest(unittest.TestCase):
         
     @classmethod
     def post(cls, request_address, request_body):
+        ''' Perform POST request using this mocked implementation
+        
+        :param request_address: address of the resource to be queried
+        :param request_body: content of the request
+        :returns: an instance of Mock representing response object, as
+        requred by GoogleSafeBrowsing class
+        '''
         urls = request_body.splitlines()[1:]
         
         results = []
@@ -266,7 +281,12 @@ class GoogleSafeBrowsingTest(unittest.TestCase):
     
     @classmethod
     def getPostResponse(cls, request_address, results):
+        ''' Prepare Mock instance representing response object
         
+        :param request_address: address of the request
+        :param results: results of the request, to be put in the response body
+        :returns: an instance of Mock representing response object
+        '''
         response = Mock(spec=['content', 'raise_for_status', 'status_code'])
         
         response.status_code = 204
