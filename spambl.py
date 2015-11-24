@@ -244,7 +244,7 @@ class BaseDNSBLClient(object):
         it is listed
         '''
         
-        return tuple(DNSBLItem(*data) for data in self._get_item_data(host) if data)
+        return tuple(DNSBLItem(host, source, classification) for source, classification in self._get_item_data(host))
         
 class DNSBLClient(object):
     ''' Responsible for querying DNSBL services that list ip addresses'''
