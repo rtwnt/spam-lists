@@ -171,6 +171,22 @@ class SumClassificationMap(CodeClassificationMap):
         
         return (2**y for y, x in enumerate(bin(index)[:1:-1]) if int(x))
     
+    def __getitem__(self, index):
+        ''' Get taxonomical units for given index
+        
+        :param index: an integer that is supposed to represent a sum
+        of indexes mapping to classes
+        :returns: a tuple containing taxonomical units
+        '''
+        classifications = []
+        
+        for code in self._get_codes(index):
+            _class = CodeClassificationMap.__getitem__(self, code)
+            classifications.append(_class)
+            
+        return tuple(classifications)
+        
+        
 class BaseDNSBLClient(object):
     ''' Implements basic feaures of DNSBL client classes '''
     

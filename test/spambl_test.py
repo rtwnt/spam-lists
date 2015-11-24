@@ -4,10 +4,10 @@
 import unittest
 from spambl import (UnknownCodeError, NXDOMAIN, HpHosts, DNSBLService, BaseDNSBLClient, 
                      DNSBLContentError, DNSBLTypeError, GoogleSafeBrowsing, UnathorizedAPIKeyError, HostCollection,
-                     CodeClassificationMap)
+                     CodeClassificationMap, SumClassificationMap)
 from mock import Mock, patch, MagicMock
 from ipaddress import ip_address as IP
-from itertools import cycle, izip
+from itertools import cycle, izip, combinations, product
 from __builtin__ import classmethod
 
 from urlparse import urlparse, parse_qs
@@ -179,6 +179,43 @@ class CodeClassificationMapTest(unittest.TestCase):
             
         for key in self.invalid_keys:
             self.assertRaises(UnknownCodeError, self.map.__getitem__, key)
+            
+class SumClassificationMapTest(unittest.TestCase):
+    
+    @classmethod
+    def setUpClass(cls):
+        
+        cls.code_item_class = {2: 'Class #1', 4: 'Class #2'}
+    
+        cls.invalid_keys = 8, 16, 17, 21
+        
+        cls.map = SumClassificationMap(cls.code_item_class)
+            
+            
+    def testGetItemForASimpleValidKey(self):
+        ''' For a simple listed key, __getitem__ should return an expected classification'''
+        for key in self.code_item_class:
+            self.assertEqual(self.map[key], tuple([self.code_item_class[key]]))
+            
+    def testGetItemForAnInvalidKey(self):
+        ''' For a non-listed key, __getitem__ should raise UnknownCodeError '''
+        for key in self.invalid_keys:
+            self.assertRaises(UnknownCodeError, self.map.__getitem__, key)
+    
+    def testGetItemForASumOfValidKeys(self):
+        ''' For a sum of valid keys, __getitem__ should return a tuple of expected classifications '''
+        for key_1, key_2 in combinations(self.code_item_class.keys(), 2):
+            
+            expected  = tuple([x for n, x in self.code_item_class.iteritems() if n in (key_1, key_2)])
+            self.assertEqual(self.map[key_1+key_2], expected)
+        
+    def testGetItemForASumWithAnInvalidKey(self):
+        ''' For a sum of keys, including at least one invalid, __getitem__ should
+        raise UnknownCodeError
+        '''
+        for key_1, key_2 in product(self.code_item_class.keys(), self.invalid_keys):
+            
+            self.assertRaises(UnknownCodeError, self.map.__getitem__, key_1+key_2)
             
 class BaseDNSBLClientTest(unittest.TestCase):
     
