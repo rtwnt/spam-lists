@@ -93,7 +93,7 @@ class DNSBLService(object):
             msg_template = 'Unexpected code value for dnsbl service {}: {}'
             raise UnknownCodeError(msg_template.format(self.identifier, code)), None, exc_info()[2]
     
-    def query(self, value):
+    def _query(self, host):
         ''' Query DNSBL service for given value
         
         :param value: a valid hostname or a valid inverted ip address
