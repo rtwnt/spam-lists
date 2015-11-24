@@ -3,7 +3,8 @@
 
 import unittest
 from spambl import (UnknownCodeError, NXDOMAIN, HpHosts, DNSBLService, BaseDNSBLClient, 
-                     DNSBLContentError, DNSBLTypeError, GoogleSafeBrowsing, UnathorizedAPIKeyError, HostCollection)
+                     DNSBLContentError, DNSBLTypeError, GoogleSafeBrowsing, UnathorizedAPIKeyError, HostCollection,
+                     CodeClassificationMap)
 from mock import Mock, patch, MagicMock
 from ipaddress import ip_address as IP
 from itertools import cycle, izip
@@ -155,6 +156,30 @@ class DNSBLServiceTest(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         cls.patcher.stop()
+        
+        
+class CodeClassificationMapTest(unittest.TestCase):
+    
+    @classmethod
+    def setUpClass(cls):
+        cls.code_item_class = {1: 'Class #1', 2: 'Class #2'}
+        cls.invalid_keys = 3, 4
+        
+        cls.map = CodeClassificationMap(cls.code_item_class)
+        
+        
+    def testGetItemForValidKeys(self):
+        ''' For a listed key, __getitem__ should return expected classification '''
+        
+        for key in self.code_item_class:
+            self.assertEqual(self.map[key], self.code_item_class[key])
+            
+    def testGetItemForInvalidKeys(self):
+        ''' For a not listed key, __getitem__ should raise an UnknownCodeError '''
+            
+        for key in self.invalid_keys:
+            self.assertRaises(UnknownCodeError, self.map.__getitem__, key)
+            
 class BaseDNSBLClientTest(unittest.TestCase):
     
     @classmethod

@@ -134,6 +134,20 @@ class CodeClassificationMap(object):
         '''
         self.classification = classification
         
+    def __getitem__(self, index):
+        ''' Get taxonomical unit for given index 
+        :param index: an integer value that's supposed to map to a class
+        :raises UnknownCodeError: raised when given index does not
+        map to a class
+        '''
+        _class = self.classification.get(index)
+        
+        if _class is None:
+            msg = 'The classification code {} was not recognized'.format(index)
+            raise UnknownCodeError(msg)
+        
+        return _class
+        
 class BaseDNSBLClient(object):
     ''' Implements basic feaures of DNSBL client classes '''
     
