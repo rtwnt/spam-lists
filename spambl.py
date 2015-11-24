@@ -70,8 +70,8 @@ class DNSBLService(object):
         :param lists_uris: information if this object represents a domain name blocklist
         '''
         
-        self.identifier = identifier
-        self._query_suffix = query_suffix
+        self._identifier = identifier
+        self._query_suffix = name.from_text(query_suffix)
         self._code_item_class = code_item_class
         self.lists_ips = lists_ips
         self.lists_uris = lists_uris
