@@ -125,14 +125,20 @@ class DNSBLService(object):
         except UnknownCodeError as e:
             raise type(e), 'Source:'+str(self), exc_info()[2]
         
+class CodeClassificationMap(object):
+    ''' A map containing taxonomical units assigned to integer codes'''
+    def __init__(self, classification):
+        ''' Create new instance
+        
+        :param classification: a dictionary mapping integer codes to taxonomical units
+        '''
+        self.classification = classification
+        
 class BaseDNSBLClient(object):
     ''' Implements basic feaures of DNSBL client classes '''
     
     def __init__(self):
         self.dnsbl_services = []
-        
-        
-        
     
     def _required_content_in(self, dnsbl):
         ''' Check if dnsbl has content required by this client
