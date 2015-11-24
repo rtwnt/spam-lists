@@ -119,6 +119,9 @@ class DNSBLService(object):
     def __str__(self):
         return str(self._identifier)
         
+    def __contains__(self, host):
+        return bool(self._query(host))
+    
 class BaseDNSBLClient(object):
     ''' Implements basic feaures of DNSBL client classes '''
     
@@ -164,7 +167,10 @@ class BaseDNSBLClient(object):
             yield (host, source, return_code) if return_code else ()
             
     def __contains__(self, host):
-        return any(self._get_item_data(host))
+        ''' Test if any dnsbl services contain given host
+        :param host: a valid host
+        '''
+        return any(host in source for source in self.dnsbl_services)
     
     def lookup(self, host):
         ''' Get all items listed in registered dnsbl services for given host 
