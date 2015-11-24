@@ -154,6 +154,23 @@ class SumClassificationMap(CodeClassificationMap):
     Multiple items in the instance of this class may be accessed by
     providing a sum of valid indexes as index'''
     
+    
+    def _get_codes(self, index):
+        ''' Get codes from given index
+        
+        The valid codes are different powers of 2. This method transforms
+        given integer to a binary string. A reversed value limited to digits
+        of binary number is extracted from it, and each of its characters
+        is enumerated. If it's not 0, it represents one of the powers
+        of 2 whose sums result in index
+        
+        :param index: an integer that is supposed to represent a sum
+        of indexes mapping to classes
+        :returns a list of powers of 2 whose sum is equal to index
+        '''
+        
+        return (2**y for y, x in enumerate(bin(index)[:1:-1]) if int(x))
+    
 class BaseDNSBLClient(object):
     ''' Implements basic feaures of DNSBL client classes '''
     
