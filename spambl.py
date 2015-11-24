@@ -116,14 +116,8 @@ class BaseDNSBLClient(object):
     def __init__(self):
         self.dnsbl_services = []
         
-    def _get_relative_domain(self, host):
-        ''' Get relative domain name for given host
         
-        :param host: a valid host
-        :returns: a dns name object
-        '''
         
-        raise NotImplementedError('The method is not implemented')
     
     def _required_content_in(self, dnsbl):
         ''' Check if dnsbl has content required by this client
