@@ -221,12 +221,14 @@ class BaseDNSBLClient(object):
         ''' Query registered dnsbl services for data on given host
         
         :param host: a valid host
-        :returns: a tuple containing host, source and return code for listed host, or
-        an empty tuple for not listed one
+        :returns: a tuple containing source and classification for listed host
         '''
+        
         for source in self.dnsbl_services:
-            return_code = source.query(host)
-            yield (host, source, return_code) if return_code else ()
+            classification = source.get_classification(host)
+            
+            if classification:
+                yield str(source), classification
             
     def __contains__(self, host):
         ''' Test if any dnsbl services contain given host
