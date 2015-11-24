@@ -71,6 +71,7 @@ class DNSBLService(object):
         '''
         
         self._identifier = identifier
+
         self._query_suffix = name.from_text(query_suffix)
         self._code_item_class = code_item_class
         self.lists_ips = lists_ips
@@ -114,6 +115,9 @@ class DNSBLService(object):
             last_octet = response[0].to_text().split('.')[-1]
             
             return int(last_octet)
+        
+    def __str__(self):
+        return str(self._identifier)
         
 class BaseDNSBLClient(object):
     ''' Implements basic feaures of DNSBL client classes '''
