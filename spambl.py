@@ -46,7 +46,7 @@ class DNSBLItem(object):
     
     _classification = None
     
-    def __init__(self, host, source, return_code):
+    def __init__(self, host, source, classification):
         ''' Create a new instance of DNSBLItem 
         
         :param host: the host value listed on a DNS blacklist, either host name or ip address
@@ -55,15 +55,7 @@ class DNSBLItem(object):
         '''
         self.host = host
         self.source = source
-        self._return_code = return_code
-        
-    @property
-    def classification(self):
-        ''' Classification of this host according to provider of the list from which it has been extracted '''
-        if not self._classification:
-            self._classification = self.source.get_classification(self._return_code)
-            
-        return self._classification
+        self.classification = classification
     
 
 class DNSBLService(object):
