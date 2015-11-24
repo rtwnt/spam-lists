@@ -148,6 +148,12 @@ class CodeClassificationMap(object):
         
         return _class
         
+class SumClassificationMap(CodeClassificationMap):
+    ''' A map containing taxonomical units assigned to integer codes
+    
+    Multiple items in the instance of this class may be accessed by
+    providing a sum of valid indexes as index'''
+    
 class BaseDNSBLClient(object):
     ''' Implements basic feaures of DNSBL client classes '''
     
