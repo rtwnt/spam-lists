@@ -99,6 +99,9 @@ class DNSBLService(object):
         :returns: an integer representing classification code for given value, if it is listed. Otherwise,
         it returns None
         '''
+        if host.is_absolute():
+            raise ValueError('The value {} is not a relative host!'.format(host))
+        
         query_name = host.derelativize(self._query_suffix)
         
         try:
