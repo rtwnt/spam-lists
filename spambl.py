@@ -99,8 +99,10 @@ class DNSBLService(object):
         :returns: an integer representing classification code for given value, if it is listed. Otherwise,
         it returns None
         '''
+        query_name = host.derelativize(self._query_suffix)
+        
         try:
-            response = query(value+'.'+self._query_suffix)
+            response = query(query_name)
                 
         except NXDOMAIN:
             return None
