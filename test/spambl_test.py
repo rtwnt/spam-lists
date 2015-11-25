@@ -570,84 +570,92 @@ class GoogleSafeBrowsingTest(unittest.TestCase):
         cls.patcher.stop()
         
         
-class HostCollectionTest(unittest.TestCase):    
+class HostCollectionTest(unittest.TestCase):
+    
     def setUp(self):
-        self.host_collection = HostCollection()
-        self.hostname_strings = 'google.com', 'test1.pl'
-        self.ip_address_strings = u'127.0.0.1', u'2001:DB8:abc:123::42'
+        self.listed_hostnames = 'google.com', 'test1.pl'
+        self.listed_ips = u'127.0.0.1', u'2001:DB8:abc:123::42'
         
-        self.not_listed = 'a.com', u'255.0.0.1'
-        self.all_host_strings = self.hostname_strings + self.ip_address_strings
+        self.not_listed_hosts = 'a.com', u'255.0.0.1'
+        
+        self.listed_hosts = self.listed_hostnames + self.listed_ips
+        
+        self.host_collection_A = HostCollection(self.listed_hosts)
+        
+        self.matching_A = HostCollection(self.listed_hosts+self.not_listed_hosts)
+        self.not_matching_a = HostCollection(self.not_listed_hosts)
+        self.empty = HostCollection()
         
     def testAddHostnames(self):
-        for h in self.hostname_strings:
-            self.host_collection.add(h)
-            
-        self.assertItemsEqual(self.host_collection.hostnames, {name.from_text(h) for h in self.hostname_strings})
+        ''' Adding a valid hostname should result in inclusion of a
+        Name object representing it in the collection '''
+        
+        for h in self.listed_hostnames:
+            self.host_collection_A.add(h)
+            self.assertIn(name.from_text(h), self.host_collection_A.hostnames)
             
     def testAddIps(self):
-        for ip in self.ip_address_strings:
-            self.host_collection.add(ip)
-            
-        self.assertItemsEqual(self.host_collection.ip_addresses, {IP(ip) for ip in self.ip_address_strings})
+        ''' Adding a valid ip address should result in inclusion of a
+        valid ip address object representing it in the collection '''
         
+        for ip in self.listed_ips:
+            self.host_collection_A.add(ip)
+            self.assertIn(IP(ip), self.host_collection_A.ip_addresses)
+            
     def testAddInvalidHost(self):
+        ''' Adding an invalid host should result in an error '''
+        
         test_host = '-k.'
+        self.assertRaises(ValueError, self.host_collection_A.add, test_host)
         
-        self.assertRaises(ValueError, self.host_collection.add, test_host)
+    def testContainsMatchForMatchingHostCollection(self):
+        ''' contains_match should return True for a HostCollection
+        that includes matching values '''
         
-    def testContainsMatch(self):
+        self.assertTrue(self.host_collection_A.contains_match(self.matching_A))
         
-        for host in self.all_host_strings:
-            self.host_collection.add(host)
-            
-        matching = HostCollection(self.all_host_strings+self.not_listed)
+    def testContainsMatchForNotMatchingHostCollection(self):
+        ''' contains_match should return False for a HostCollection
+        that does not have any values in common with the other '''
         
-        self.assertTrue(self.host_collection.contains_match(matching))
+        self.assertFalse(self.host_collection_A.contains_match(self.not_matching_a))
         
-        non_empty_not_matching = HostCollection(self.not_listed)
+    def testContainsMatchForEmptyHostCollection(self):
+        ''' contains_match should return False for an empty
+        HostCollection '''
         
-        self.assertFalse(self.host_collection.contains_match(non_empty_not_matching))
+        self.assertFalse(self.host_collection_A.contains_match(self.empty))
         
-        empty = HostCollection()
+    def testDifferenceForHostCollectionAandMatchingA(self):
+        ''' The difference between a host collection and another host
+        collection matching some of its elements should be a host
+        collection with only elements not matching the second one '''
         
-        self.assertFalse(self.host_collection.contains_match(empty))
-        
-    def testDifference(self):
-        
-        for host in self.all_host_strings:
-            self.host_collection.add(host)
-            
-        matching = HostCollection(self.all_host_strings+self.not_listed)
-        non_empty_not_matching = HostCollection(self.not_listed)
-        empty = HostCollection()
-        
-        ''' matching - set up '''
-        actual = matching.difference(self.host_collection)
-        expected = non_empty_not_matching
+        actual = self.matching_A.difference(self.host_collection_A)
+        expected = self.not_matching_a
         
         self.assertItemsEqual(actual.hostnames, expected.hostnames)
         self.assertItemsEqual(actual.ip_addresses, expected.ip_addresses)
         
-        '''set up - matching'''
-        actual = self.host_collection.difference(matching)
-        expected = empty
+    def testDifferenceForMatchingAandHostCollectionA(self):
+        ''' The difference between a host collection and a host
+        collection matching it should be empty host collection'''
+        actual = self.host_collection_A.difference(self.matching_A)
+        expected = self.empty
         
         self.assertItemsEqual(actual.hostnames, expected.hostnames)
         self.assertItemsEqual(actual.ip_addresses, expected.ip_addresses)
         
-        ''' set up - empty '''
-        
-        actual = self.host_collection.difference(empty)
-        expected = self.host_collection
+    def testDifferenceForHostCollectionAandEmpty(self):
+        ''' The difference between a host collection and an empty host
+        collection should be equal to the non-empty host
+        collection '''
+        actual = self.host_collection_A.difference(self.empty)
+        expected = self.host_collection_A
         
         self.assertItemsEqual(actual.hostnames, expected.hostnames)
         self.assertItemsEqual(actual.ip_addresses, expected.ip_addresses)
         
-        
-        
-        
-
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
     unittest.main()
