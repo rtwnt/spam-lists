@@ -157,15 +157,24 @@ class DNSBLServiceTest(unittest.TestCase):
         cls.patcher.stop()
 class BaseDNSBLClientTest(unittest.TestCase):
     
-    test_lists_attr_name = 'test_lists_attr'
-    hosts_listed = 'a.com', 'b.com', 'c.com'
-    hosts_not_listed = 'lorem.com', 'ipsum.pl'
-    return_code = 3
+    @classmethod
+    def setUpClass(cls):
+        cls.test_lists_attr_name = 'test_lists_attr'
+        cls.hosts_listed = map(relative_name, ('a.com', 'b.com', 'c.com'))
+        cls.hosts_not_listed = map(relative_name, ('lorem.com', 'ipsum.pl'))
+        cls.classification = 'TEST CLASS'
     
     def setUp(self):
         self.base_dnsbl_client = BaseDNSBLClient()
         
         self.base_dnsbl_client._required_content_in = lambda e: getattr(e, self.test_lists_attr_name) == True
+        
+        empty_dnsbl = self.getEmptyDNSBLMock()
+        
+        dnsbls = [self.getDNSBLMockListingHosts() for _ in range(1)]
+        dnsbls.append(empty_dnsbl)
+        
+        self.base_dnsbl_client.dnsbl_services = dnsbls
         
     def getDNSBLMockForAdd(self, required_property = True):
         ''' Create a Mock instance for dnsbl service object
@@ -186,58 +195,91 @@ class BaseDNSBLClientTest(unittest.TestCase):
             return self.return_code
         return
     
+    def contains(self, host):
+        ''' Test membership
+        An implementation for side effect of mocked dnsbl.__contains__ method
+        
+        :param host: a host value used in test
+        '''
+        
+        return host in self.hosts_listed
+    
+    def get_classification(self, host):
+        
+        ''' Get classification for given host
+        An implementation for side effect of mocked dnsbl.get_classification method
+        
+        :param host: a host value used in test
+        '''
+        
+        if host in self.hosts_listed:
+            return self.classification
+        
+        return
+    
     def getDNSBLMockListingHosts(self):
         ''' Get dnsbl mock that lists hosts specified in self.hosts_listed '''
-        dnsbl = Mock()
-        dnsbl.query.side_effect = self.query
+        
+        dnsbl = MagicMock()
+        dnsbl.__contains__.side_effect = self.contains
+        dnsbl.get_classification.side_effect = self.get_classification
+        
+        return dnsbl
+    
+    def getEmptyDNSBLMock(self):
+        
+        dnsbl = MagicMock()
+        dnsbl.__contains__.return_value = False
+        dnsbl.get_classification.return_value = None
+        
         return dnsbl
         
-        
-    def testAddDNSBL(self):
-        ''' Test add_dnsbl method '''
+    def testAddDNSBLForValidDNSBL(self):
+        ''' Adding dnsbl objects that satisfy the content requirement of
+        DNSBLClientinstance should be successful '''
         
         valid_dnsbl = self.getDNSBLMockForAdd()
         self.base_dnsbl_client.add_dnsbl(valid_dnsbl)
-        self.assertEqual(self.base_dnsbl_client.dnsbl_services[0], valid_dnsbl)
-         
+        self.assertTrue(valid_dnsbl in self.base_dnsbl_client.dnsbl_services)
+        
+    def testAddDNSBLForInvalidDNSBL(self):
+        ''' Trying to add a dnsbl service that does not satify the requirements
+        should result in an error '''
+        
         invalid_dnsbl = self.getDNSBLMockForAdd(False)
         self.assertRaises(DNSBLContentError, self.base_dnsbl_client.add_dnsbl, invalid_dnsbl)
+        
+    def testAddDNSBLForNoDNSBL(self):
+        ''' Trying to add an object that does not even has interface required to test
+        if it fulfils the content requirements should result in another error '''
         
         no_dnsbl = Mock(spec=[])
         self.assertRaises(DNSBLTypeError, self.base_dnsbl_client.add_dnsbl, no_dnsbl)
         
-    def testContains(self):
-        ''' Test __contains__ method '''
-        dnsbl = self.getDNSBLMockListingHosts()
-        self.base_dnsbl_client.dnsbl_services.append(dnsbl)
-        
-        
+    def testContainsForListedHosts(self):
+        ''' For listed hosts, __contains__ should return True'''
         for host in self.hosts_listed:
             self.assertTrue(host in self.base_dnsbl_client)
             
+    def testContainsForNotListedHosts(self):
+        ''' For not listed hosts, __contains__ should return False'''
         for host in self.hosts_not_listed:
             self.assertFalse(host in self.base_dnsbl_client)
-        
-    def testLookup(self):
-        ''' Test lookup method '''
-        empty_dnsbl = Mock()
-        empty_dnsbl.query.return_value = None
-        
-        dnsbls = [self.getDNSBLMockListingHosts() for _ in range(1)]
-        dnsbls.append(empty_dnsbl)
-        
-        self.base_dnsbl_client.dnsbl_services = dnsbls
-        
+            
+    def testLookupForListedHosts(self):
+        ''' For listed hosts, lookup should return a tuple containing
+        objects representing these hosts '''
         for host in self.hosts_listed:
             lookup_results = self.base_dnsbl_client.lookup(host)
             for obj in lookup_results:
-                self.assertEqual(obj._return_code, self.return_code)
+                self.assertEqual(obj.classification, self.classification)
                 self.assertEqual(obj.host, host)
                 
+    def testLookupForNotListedHosts(self):
+        ''' For not listed hosts, lookup should return an empty tuple '''
         for host in self.hosts_not_listed:
             lookup_results = self.base_dnsbl_client.lookup(host)
             self.assertEqual(lookup_results, tuple())
-
 class HpHostsTest(unittest.TestCase):
     ''' Tests HpHosts methods '''
     
