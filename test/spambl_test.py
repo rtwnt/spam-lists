@@ -14,12 +14,16 @@ from requests import HTTPError
 from dns import name
 import re
 
-class DNSBLServiceTest(unittest.TestCase):
+def relative_name(hostname):
+    ''' Create an object representing partially qualified domain name 
+    for given hostname
     
-    code_item_class = {1: 'Class #1', 2: 'Class #2'}
-    hosts_listed = 't1.pl', 't2.com', 't3.com.pl'
-    hosts_not_listed = 'lorem.pl', 'ipsum.com'
-    test_suffix = 'test.suffix'
+    :param host: a hostname
+    :returns: dns.name.Name instance relative to the root
+    '''
+    return name.from_text(hostname).relativize(name.root) 
+
+class DNSBLServiceTest(unittest.TestCase):
     
     @classmethod
     def setUpClass(cls):
