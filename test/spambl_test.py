@@ -425,10 +425,10 @@ class HpHostsTest(unittest.TestCase):
 class GoogleSafeBrowsingTest(unittest.TestCase):    
     @classmethod
     def setUpClass(cls):
-        cls.valid_key = 'test.key'
+        cls.valid_key = 'test_key'
         
         cls.google_safe_browsing = GoogleSafeBrowsing('test_client', '0.1', cls.valid_key)
-        cls.invalid_key_gbs = GoogleSafeBrowsing('test_client', '0.1', 'invalid.key')
+        cls.invalid_key_gbs = GoogleSafeBrowsing('test_client', '0.1', 'invalid_key')
         
         cls.setUpUrls()
         cls.setUpPost()
@@ -443,6 +443,9 @@ class GoogleSafeBrowsingTest(unittest.TestCase):
         
         for n, k in izip(hosts, classification_ranges):
             cls.spam_urls_classification['http://{}'.format(n)] = ','.join(classifications[:k])
+            
+            
+        cls.spam_urls = cls.spam_urls_classification.keys()
             
         cls.non_spam_urls = tuple('http://{}'.format(n) for n in ('nonspam1.com', 'nonspam2.com'))
         cls.all_urls = tuple(cls.spam_urls_classification.keys()) + cls.non_spam_urls
@@ -510,33 +513,64 @@ class GoogleSafeBrowsingTest(unittest.TestCase):
             self.assertEqual(actual_result, expected_result)
             self.assertRaises(UnathorizedAPIKeyError, self.invalid_key_gbs.contains_any, urls)
             
-    def testLookup(self):
+    def doContainsTestExpectingTrue(self, url_sequence):
+        ''' Perform a test of __contains__ method of GoogleSafeBrowsing
+        instance when expecting True as a result '''
+        result = self.google_safe_browsing.contains_any(url_sequence)
+        self.assertTrue(result)
+    
+    def testContainsAnyForAllSpamUrls(self):
+        ''' contains_any should return True for a sequence of spam urls '''
+        self.doContainsTestExpectingTrue(self.spam_urls)
         
-        results_1 = self.google_safe_browsing.lookup(self.spam_urls_classification.keys())
+    def testContainsAnyForMixedData(self):
+        ''' contains_any should return True for a sequence containing both spam and non-spam urls '''
+        self.doContainsTestExpectingTrue(self.all_urls)
         
-        for i, item in enumerate(results_1):
+    def testContainsAnyForNonSpamUrls(self):
+        ''' contains_any should return False for a sequence containing non-spam urls'''
+        result = self.google_safe_browsing.contains_any(self.non_spam_urls)
+        self.assertFalse(result)
+        
+    def doLookupTestExpectingSpamUrls(self, url_sequence):
+        ''' Perform tests of lookup method when expecting
+        a sequence of objects representing spam urls as result '''
+        
+        result = self.google_safe_browsing.lookup(url_sequence)
+        
+        for i, item in enumerate(result):
             self.assertEqual(item.host, self.spam_urls_classification.keys()[i])
             self.assertEqual(item.source, self.google_safe_browsing)
             self.assertEqual(item.classification, self.spam_urls_classification[item.host].split(','))
+        
             
-        results_2 = self.google_safe_browsing.lookup(self.all_urls)
+    def testLookupForSpamUrls(self):
+        ''' lookup should return a sequence  of objects representing 
+        all urls when called with sequence of spam urls as argument '''
         
-        for i, item in enumerate(results_2):
-            self.assertEqual(item.host, self.spam_urls_classification.keys()[i])
-            self.assertEqual(item.source, self.google_safe_browsing)
-            self.assertEqual(item.classification, self.spam_urls_classification[item.host].split(','))
+        self.doLookupTestExpectingSpamUrls(self.spam_urls)
+            
+    def testLookupForAllUrls(self):
+        ''' lookup should return a sequence of objects representing 
+        only spam urls when called with sequence of spam and 
+        non-spam urls as argument '''
+            
+        self.doLookupTestExpectingSpamUrls(self.all_urls)
+            
+    def testLookupForNonSpamUrls(self):
+        ''' lookup should return an empty tuple when called for a sequence
+        of non spam urls as argument '''
         
-        results_3 = self.google_safe_browsing.lookup(self.non_spam_urls)
+        result = self.google_safe_browsing.lookup(self.non_spam_urls)
         
-        self.assertEqual(results_3, tuple())
+        self.assertEqual(result, tuple())
 
     @classmethod
     def tearDownClass(cls):
         cls.patcher.stop()
         
         
-class HostCollectionTest(unittest.TestCase):
-    
+class HostCollectionTest(unittest.TestCase):    
     def setUp(self):
         self.host_collection = HostCollection()
         self.hostname_strings = 'google.com', 'test1.pl'
