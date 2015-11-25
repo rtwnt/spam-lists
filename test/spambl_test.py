@@ -4,7 +4,7 @@
 import unittest
 from spambl import (UnknownCodeError, NXDOMAIN, HpHosts, DNSBLService, BaseDNSBLClient, 
                      DNSBLContentError, DNSBLTypeError, GoogleSafeBrowsing, UnathorizedAPIKeyError, HostCollection)
-from mock import Mock, patch
+from mock import Mock, patch, MagicMock
 from ipaddress import ip_address as IP
 from itertools import cycle, izip
 from __builtin__ import classmethod
@@ -12,7 +12,6 @@ from __builtin__ import classmethod
 from urlparse import urlparse, parse_qs
 from requests import HTTPError
 from dns import name
-import re
 
 def relative_name(hostname):
     ''' Create an object representing partially qualified domain name 
@@ -28,9 +27,56 @@ class DNSBLServiceTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         
-        cls.dnsbl_service = DNSBLService('test_service', 'test.suffix', cls.code_item_class, True, True)
+        cls.host_return_code = {'t1.pl': 1, 't2.com': 2, 't3.com.pl': 3, 't4.com': 7, 't5.pl': 11}
+        cls.correct_return_codes = 1, 2, 3
+
+        query_domain = 'test.query.domain'
         
+        cls.query_domain = name.from_text(query_domain)
+        
+        cls.setUpNames() 
+        cls.setUpDNSBLService(query_domain)
         cls.setUpMockedQuery()
+        
+    @classmethod
+    def setUpNames(cls):
+        ''' Prepare all instances of dns.name.Name objects that
+        will be passed as arguments to tested methods, along with
+        associated return codes
+        '''
+        
+        cls.name_known_code = dict()
+        cls.unknown_code_names = []
+        
+        for h, c in cls.host_return_code.iteritems():
+            hostname = relative_name(h)
+            
+            if c in cls.correct_return_codes:
+                cls.name_known_code[hostname] = c
+                
+            else:
+                cls.unknown_code_names.append(hostname)
+                
+        cls.not_listed_names = [relative_name(n) for n in ('lorem.pl', 'ipsum.pl')]
+        
+    @classmethod
+    def setUpDNSBLService(cls, query_domain):
+        ''' Perapre DNSBLService instance to be tested
+        
+        :param query_domain: a parent domain of dns query
+        '''
+        
+        code_item_class = MagicMock()
+        code_item_class.__getitem__.side_effect = cls.get_classification
+        
+        cls.dnsbl_service = DNSBLService('test_service', query_domain, code_item_class, True, True)
+        
+    @classmethod
+    def setUpMockedQuery(cls):
+        cls.patcher = patch('spambl.query')
+        cls.mocked_query = cls.patcher.start()
+        
+        cls.mocked_query.side_effect = cls.query
         
     @classmethod
     def query(cls, query_name):
@@ -41,51 +87,74 @@ class DNSBLServiceTest(unittest.TestCase):
         query, as required by DNSBLService
         '''
         
-        host = re.sub(r'.'+cls.test_suffix+'$', '', query_name)
+        host = str(query_name.relativize(cls.query_domain))
         
-        if host in cls.host_return_codes:
-            return_code = cls.host_return_codes[host]
-            
+        return_code = cls.host_return_code .get(host)
+        if return_code:
             answer = Mock()
             answer.to_text.return_value = '127.0.0.%d' % return_code
             return [answer]
         
         raise NXDOMAIN('test NXDOMAIN exception')
-    
+        
     @classmethod
-    def setUpMockedQuery(cls):
-        cls.patcher = patch('spambl.query')
-        cls.mocked_query = cls.patcher.start()
+    def get_classification(cls, index):
+        ''' Get classification for given code
         
-        return_codes = cycle(cls.code_item_class.keys())
+        This is a method providing side effects for mocked
+        classification map instance
         
-        cls.host_return_codes = {n: next(return_codes) for n in cls.hosts_listed}
+        :param index: an integer value intended as representing a classification value
+        :returns: a taxonomical unit
+        ''' 
         
-        cls.mocked_query.side_effect = cls.query
+        if index in cls.correct_return_codes:
+            return 'CLASS {}'.format(index)
         
-    def testGetClassification(self):
-        ''' Test get_classification method of DNSBL instance '''
-        
-        for key, value in self.code_item_class.iteritems():
-            actual = self.dnsbl_service.get_classification(key)
-            self.assertEqual(actual, value)
-        
-        self.assertRaises(UnknownCodeError, self.dnsbl_service.get_classification, 4)
-        
-    def testQuery(self):
-        ''' Test query method'''
-        
-        for host in self.hosts_listed:
+        raise UnknownCodeError('Unknown code raised by test')
             
-            self.assertEqual(self.dnsbl_service.query(host), self.host_return_codes[host])
+    def testGetClassificationForListedHosts(self):
+        ''' Listed hosts should be classified according to the return code
+        the service assigns to them and a map of classification in the DNSBLService object '''
         
-        for host in self.hosts_not_listed:
-            self.assertEqual(self.dnsbl_service.query(host), None)
+        for host, return_code in self.name_known_code.iteritems():
+            
+            actual = self.dnsbl_service.get_classification(host)
+            expected = self.get_classification(return_code)
+            self.assertEqual(actual, expected)
+            
+    def testGetClassificationForNotListedHosts(self):
+        ''' For not listed hosts, the expected classification is always None '''
+        
+        for host in self.not_listed_names:
+            actual = self.dnsbl_service.get_classification(host)
+            self.assertIsNone(actual)
+            
+    def testGetClassificationForUnknownClassHosts(self):
+        ''' Some changes to the service may introduce new return codes assigned
+        to hosts listed in them. These return codes refer to classifications that
+        must be included in the spambl module, so detecting them should
+        cause an error '''
+            
+        for host in self.unknown_code_names:
+            self.assertRaises(UnknownCodeError, self.dnsbl_service.get_classification, host)
+            
+        
+    def testContainsForListedHosts(self):
+        ''' __contains__ must return True for listed hosts '''
+        
+        for host in self.name_known_code.keys() + self.unknown_code_names:
+            self.assertTrue(host in self.dnsbl_service)
+            
+    def testContainsForNotListedHosts(self):
+        ''' __contains__ must return False for not listed hosts '''
+        
+        for host in self.not_listed_names:
+            self.assertFalse(host in self.dnsbl_service)
             
     @classmethod
     def tearDownClass(cls):
         cls.patcher.stop()
-
 class BaseDNSBLClientTest(unittest.TestCase):
     
     test_lists_attr_name = 'test_lists_attr'
