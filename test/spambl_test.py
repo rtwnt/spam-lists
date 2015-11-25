@@ -345,14 +345,25 @@ class BaseDNSBLClientTest(unittest.TestCase):
 class HpHostsTest(unittest.TestCase):
     ''' Tests HpHosts methods '''
     
-    classification = '[TEST]'
-    hosts_listed = 't1.pl', 't2.com', 't3.com.pl', '255.255.0.1', '2001:DB8:abc:123::42'
-    hosts_not_listed = 'at.pl', 'lorem.com', 'impsum.com', '200.170.0.1'
-    
     @classmethod
     def setUpClass(cls):
         cls.hp_hosts = HpHosts('spambl_test_suite')
+        cls.setUpData()
         cls.setUpMockedGet()
+        
+    @classmethod
+    def setUpData(cls):
+        cls.classification = '[TEST]'
+        
+        listed_hostnames = map(relative_name, ('t1.pl', 't2.com', 't3.com.pl'))
+        listed_ips = map(IP, (u'255.255.0.1', u'2001:DB8:abc:123::42'))
+        
+        cls.hosts_listed = listed_hostnames + listed_ips
+        
+        not_listed_hostnames = map(relative_name, ('at.pl', 'lorem.com', 'impsum.com'))
+        not_listed_ips = map(IP, [u'211.170.0.1'])
+        
+        cls.hosts_not_listed = not_listed_hostnames + not_listed_ips
         
     @classmethod
     def get(cls, url):
@@ -368,7 +379,7 @@ class HpHostsTest(unittest.TestCase):
         
         content = 'Not listed'
         
-        if params['s'][0] in cls.hosts_listed:
+        if params['s'][0] in [str(n) for n in cls.hosts_listed]:
             c = cls.classification if 'class' in params else ''
             content = ','.join(('Listed', c))
             
@@ -383,20 +394,26 @@ class HpHostsTest(unittest.TestCase):
         cls.mocked_get = cls.patcher.start()
         cls.mocked_get.side_effect = cls.get
     
-    def testContains(self):
-        ''' Test __contains__ method '''
+    def testContainsForListedHosts(self):
+        ''' For listed hosts, __contains__ should return True'''
         
         for host in self.hosts_listed:
             self.assertTrue(host in self.hp_hosts)
+            
+    def testContainsForNotListedHosts(self):
+        ''' For not listed hosts, __contains__ should return False '''
         
         for host in self.hosts_not_listed:
             self.assertFalse(host in self.hp_hosts)
                 
-    def testLookup(self):
-        ''' Test lookup method'''
+    def testLookupForListedHosts(self):
+        ''' For listed hosts, lookup should return an object representing it'''
         
         for host in self.hosts_listed:
             self.assertEqual(self.hp_hosts.lookup(host).host, host)
+            
+    def testLookupForNotListedHosts(self):
+        ''' For not listed hosts, lookup should return None '''
             
         for host in self.hosts_not_listed:
             self.assertEqual(self.hp_hosts.lookup(host), None)
@@ -405,8 +422,7 @@ class HpHostsTest(unittest.TestCase):
     def tearDownClass(cls):
         cls.patcher.stop()
         
-class GoogleSafeBrowsingTest(unittest.TestCase):
-    
+class GoogleSafeBrowsingTest(unittest.TestCase):    
     @classmethod
     def setUpClass(cls):
         cls.valid_key = 'test.key'
