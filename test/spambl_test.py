@@ -335,7 +335,7 @@ class BaseDNSBLClientTest(unittest.TestCase):
             lookup_results = self.base_dnsbl_client.lookup(host)
             for obj in lookup_results:
                 self.assertEqual(obj.classification, self.classification)
-                self.assertEqual(obj.host, host)
+                self.assertEqual(obj.value, host)
                 
     def testLookupForNotListedHosts(self):
         ''' For not listed hosts, lookup should return an empty tuple '''
@@ -410,7 +410,7 @@ class HpHostsTest(unittest.TestCase):
         ''' For listed hosts, lookup should return an object representing it'''
         
         for host in self.hosts_listed:
-            self.assertEqual(self.hp_hosts.lookup(host).host, host)
+            self.assertEqual(self.hp_hosts.lookup(host).value, host)
             
     def testLookupForNotListedHosts(self):
         ''' For not listed hosts, lookup should return None '''
@@ -539,9 +539,9 @@ class GoogleSafeBrowsingTest(unittest.TestCase):
         result = self.google_safe_browsing.lookup(url_sequence)
         
         for i, item in enumerate(result):
-            self.assertEqual(item.host, self.spam_urls_classification.keys()[i])
+            self.assertEqual(item.value, self.spam_urls_classification.keys()[i])
             self.assertEqual(item.source, self.google_safe_browsing)
-            self.assertEqual(item.classification, self.spam_urls_classification[item.host].split(','))
+            self.assertEqual(item.classification, self.spam_urls_classification[item.value].split(','))
         
             
     def testLookupForSpamUrls(self):

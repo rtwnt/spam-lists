@@ -8,6 +8,7 @@ from itertools import izip, product
 from ipaddress import ip_address
 import re
 from dns import name
+from collections import namedtuple
 
 class SpamBLError(Exception):
     ''' Base exception class for spambl module '''
@@ -40,22 +41,6 @@ class DNSBLTypeError(DNSBLClientError, TypeError):
     
 class UnathorizedAPIKeyError(SpamBLError):
     ''' Raise when trying to use an unathorized api key '''
-    
-class DNSBLItem(object):
-    ''' Represents a host listed on a DNS blacklist '''
-    
-    _classification = None
-    
-    def __init__(self, host, source, classification):
-        ''' Create a new instance of DNSBLItem 
-        
-        :param host: the host value listed on a DNS blacklist, either host name or ip address
-        :param source: dnsbl service object
-        :param return_code: last octet of ip address returned after querying the source for the host
-        '''
-        self.host = host
-        self.source = source
-        self.classification = classification
     
 
 class DNSBLService(object):
@@ -244,22 +229,13 @@ class BaseDNSBLClient(object):
         it is listed
         '''
         
-        return tuple(DNSBLItem(host, source, classification) for source, classification in self._get_item_data(host))
+        return tuple(AddressListItem(host, source, classification) for source, classification in self._get_item_data(host))
         
 class DNSBLClient(object):
     ''' Responsible for querying DNSBL services that list ip addresses'''
                 
 class URIDNSBLClient(object):
     ''' Responsible for querying DNSBL services that list hostnames '''
-    
-class ListItem(object):
-    ''' Represents a host listed on a blocklist'''
-    
-    def __init__(self, host, source, classification):
-        
-        self.host = host
-        self.source = source
-        self.classification = classification
     
 class HpHosts(object):
     ''' hpHosts client '''
@@ -308,7 +284,7 @@ class HpHosts(object):
             elements = data.split(',')
             classification = elements[1] if len(elements) > 1 else None
             
-            return ListItem(host, self.identifier, classification)
+            return AddressListItem(host, self.identifier, classification)
         return None
         
 class GoogleSafeBrowsing(object):
@@ -406,7 +382,7 @@ class GoogleSafeBrowsing(object):
             
             for url, _class in izip(url_list, classification_set):
                 if _class != 'ok':
-                    items.append(ListItem(url, self, _class.split(',')))
+                    items.append(AddressListItem(url, self, _class.split(',')))
                     
         return tuple(items)
     
@@ -501,6 +477,8 @@ class HostCollection(object):
         new.hostnames = self.hostnames - {x for x in self.get_domain_matches(other)}
         
         return new
+
+AddressListItem = namedtuple('AddressListItem', 'value source classification')
 
 if __name__ == '__main__':
     pass
