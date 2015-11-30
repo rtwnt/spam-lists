@@ -6,9 +6,9 @@ from dns.resolver import query, NXDOMAIN
 from requests import get, post, HTTPError
 from itertools import izip, product
 from ipaddress import ip_address
-import re
 from dns import name
 from collections import namedtuple
+import validators
 
 class SpamBLError(Exception):
     ''' Base exception class for spambl module '''
@@ -411,19 +411,6 @@ class HostCollection(object):
         for host in hosts:
             self.add(host)
         
-    def is_valid_hostname(self, host):
-        ''' Test if given value is a valid hostname string 
-        
-        :param host: a value to be tested
-        '''
-        
-        if host[-1] == '.':
-            host = host[:-1]
-            
-        label = '(?!-)[a-z0-9-]{1,63}(?<!-)'
-        
-        return 1 < len(host) < 253 and re.match('^(?:'+label+'\.)*'+label+'$', host)
-        
     def add(self, host):
         ''' Add the given value to collection
         
@@ -434,7 +421,7 @@ class HostCollection(object):
             host = ip_address(host)
             
         except ValueError:
-            if self.is_valid_hostname(host):
+            if validators.domain(host):
                 hostname = name.from_text(host).relativize(name.root)
                 self.hostnames.add(hostname)
                 
