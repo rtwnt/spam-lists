@@ -435,7 +435,8 @@ class HostCollection(object):
             
         except ValueError:
             if self.is_valid_hostname(host):
-                self.hostnames.add(name.from_text(host))
+                hostname = name.from_text(host).relativize(name.root)
+                self.hostnames.add(hostname)
                 
             else:
                 raise ValueError, "The value '{}' is not a valid host".format(host), exc_info()[2]

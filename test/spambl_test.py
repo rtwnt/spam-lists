@@ -592,7 +592,7 @@ class HostCollectionTest(unittest.TestCase):
         
         for h in self.listed_hostnames:
             self.host_collection_A.add(h)
-            self.assertIn(name.from_text(h), self.host_collection_A.hostnames)
+            self.assertIn(relative_name(h), self.host_collection_A.hostnames)
             
     def testAddIps(self):
         ''' Adding a valid ip address should result in inclusion of a
