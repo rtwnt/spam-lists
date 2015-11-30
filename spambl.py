@@ -351,6 +351,8 @@ class GoogleSafeBrowsing(object):
         is matched in either the phishing, malware, or unwanted software lists.
         '''
         
+        urls = list(set(urls))
+        
         for i in range(0, len(urls), self.max_urls_per_request):
             
             chunk = urls[i:i+self.max_urls_per_request]

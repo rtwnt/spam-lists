@@ -538,8 +538,8 @@ class GoogleSafeBrowsingTest(unittest.TestCase):
         
         result = self.google_safe_browsing.lookup(url_sequence)
         
-        for i, item in enumerate(result):
-            self.assertEqual(item.value, self.spam_urls_classification.keys()[i])
+        for item in result:
+            self.assertIn(item.value, self.spam_urls_classification)
             self.assertEqual(item.source, self.google_safe_browsing)
             self.assertEqual(item.classification, self.spam_urls_classification[item.value].split(','))
         
