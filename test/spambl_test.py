@@ -573,10 +573,10 @@ class GoogleSafeBrowsingTest(unittest.TestCase):
 class HostCollectionTest(unittest.TestCase):
     
     def setUp(self):
-        self.listed_hostnames = 'google.com', 'test1.pl'
-        self.listed_ips = u'127.0.0.1', u'2001:DB8:abc:123::42'
+        self.listed_hostnames = u'google.com', u'test1.pl'
+        self.listed_ips = u'127.0.0.1', u'2001:db8:abc:123::42'
         
-        self.not_listed_hosts = 'a.com', u'255.0.0.1'
+        self.not_listed_hosts = u'a.com', u'255.0.0.1'
         
         self.listed_hosts = self.listed_hostnames + self.listed_ips
         
@@ -655,6 +655,13 @@ class HostCollectionTest(unittest.TestCase):
         
         self.assertItemsEqual(actual.hostnames, expected.hostnames)
         self.assertItemsEqual(actual.ip_addresses, expected.ip_addresses)
+        
+    def testIter(self):
+        ''' The __iter__ method should yield all hosts contained
+        in HostCollection instance '''
+        
+        for k in self.host_collection_A:
+            self.assertIn(unicode(k), self.listed_hosts)
         
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']

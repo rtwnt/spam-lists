@@ -456,6 +456,13 @@ class HostCollection(object):
         for sub, _super in product(self.hostnames, other.hostnames):
             if sub.is_subdomain(_super):
                 yield sub
+                
+    def __iter__(self):
+        for ip in self.ip_addresses:
+            yield ip
+            
+        for hostname in self.hostnames:
+            yield hostname
     
     def contains_match(self, other):
         ''' Test if the other contains a matching value 
@@ -482,6 +489,7 @@ class HostCollection(object):
         return new
 
 AddressListItem = namedtuple('AddressListItem', 'value source classification')
-
+        
+        
 if __name__ == '__main__':
     pass
