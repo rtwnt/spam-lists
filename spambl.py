@@ -15,29 +15,6 @@ class SpamBLError(Exception):
     
 class UnknownCodeError(SpamBLError):
     ''' Raise when trying to use an unexpected value of dnsbl return code '''
-
-class DNSBLClientError(SpamBLError):
-    ''' A base for some exceptions raised by BaseDNSBLClient '''
-    
-    msg_tpl = None
-    def __init__(self, client, dnsbl_service, *args):
-        msg = self.msg_tpl.format(client.__class__.__name__, dnsbl_service.__class__.__name__)
-        
-        super(DNSBLClientError, self).__init__(msg, *args)
-
-class DNSBLContentError(DNSBLClientError, ValueError):
-    ''' Raise when trying to use an instance of DNSBL service that doesn't
-    support expected type of items
-    ''' 
-    
-    msg_tpl = 'This instance of {} does not list items required by {}'
-    
-class DNSBLTypeError(DNSBLClientError, TypeError):
-    ''' Raise when trying to use an object that is expected to represent dnsbl service
-    but doesn't have required attributes
-    '''
-    
-    msg_tpl = 'This instance of {} does not have an attribute required by {}'
     
 class UnathorizedAPIKeyError(SpamBLError):
     ''' Raise when trying to use an unathorized api key '''
@@ -170,72 +147,6 @@ class SumClassificationMap(CodeClassificationMap):
             classifications.append(_class)
             
         return tuple(classifications)
-        
-        
-class BaseDNSBLClient(object):
-    ''' Implements basic feaures of DNSBL client classes '''
-    
-    def __init__(self):
-        self.dnsbl_services = []
-    
-    def _required_content_in(self, dnsbl):
-        ''' Check if dnsbl has content required by this client
-        
-        :param dnsbl: an object representing dnsbl service
-        '''
-        
-        raise NotImplementedError('The method is not implemented')
-    
-    def add_dnsbl(self, dnsbl):
-        ''' Create new instance
-        
-        :param dnsbl: an object representing dnsbl service
-        '''
-        
-        try:
-            required_content_in = self._required_content_in(dnsbl)
-        except AttributeError:
-            raise DNSBLTypeError(self, dnsbl), None, exc_info()[2]
-            
-        if not required_content_in:
-            raise DNSBLContentError(self, dnsbl)
-            
-        self.dnsbl_services.append(dnsbl)
-    
-    def _get_item_data(self, host):
-        ''' Query registered dnsbl services for data on given host
-        
-        :param host: a valid host
-        :returns: a tuple containing source and classification for listed host
-        '''
-        
-        for source in self.dnsbl_services:
-            classification = source.get_classification(host)
-            
-            if classification:
-                yield str(source), classification
-            
-    def __contains__(self, host):
-        ''' Test if any dnsbl services contain given host
-        :param host: a valid host
-        '''
-        return any(host in source for source in self.dnsbl_services)
-    
-    def lookup(self, host):
-        ''' Get all items listed in registered dnsbl services for given host 
-        
-        :params host: a valid host
-        :returns: a list of objects representing host on different dns blocklists on which
-        it is listed
-        '''
-        
-        return tuple(AddressListItem(host, source, classification) for source, classification in self._get_item_data(host))
-        
-class DNSBLClient(object):
-    ''' Responsible for querying DNSBL services that list ip addresses'''
-                
-class URIDNSBLClient(object):
-    ''' Responsible for querying DNSBL services that list hostnames '''
     
 class HpHosts(object):
     ''' hpHosts client '''
