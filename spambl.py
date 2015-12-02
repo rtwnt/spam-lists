@@ -62,29 +62,6 @@ class BaseDNSBL(object):
         self._query_suffix = name.from_text(query_suffix)
         self._code_item_class = code_item_class
         
-    def _query(self, host):
-        ''' Query DNSBL service for given value
-        
-        :param value: a valid hostname or a valid inverted ip address
-        :returns: an integer representing classification code for given value, if it is listed. Otherwise,
-        it returns None
-        '''
-        if host.is_absolute():
-            raise ValueError('The value {} is not a relative host!'.format(host))
-        
-        query_name = host.derelativize(self._query_suffix)
-        
-        try:
-            response = query(query_name)
-                
-        except NXDOMAIN:
-            return None
-            
-        else:
-            last_octet = response[0].to_text().split('.')[-1]
-            
-            return int(last_octet)
-        
     def __str__(self):
         return str(self._identifier)
         
