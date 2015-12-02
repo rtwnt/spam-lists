@@ -149,6 +149,31 @@ class BaseDNSBL(object):
         
         return bool(self._query_for_hostname(hostname))
     
+    
+    def _do_lookup(self, host, query_method):
+        ''' Perform item lookup for given host
+        
+        :param host: a host value expected by query_method
+        :param query_method: a function performing query
+        :returns: an instance of AddressListItem representing given
+        host
+        :raises UnknownCodeError: if return code does not
+        map to any taxonomic unit present in _code_item_class
+        '''
+        
+        return_code = query_method(host)
+        
+        if not return_code:
+            return None
+        
+        try:
+            classification = self._code_item_class[return_code]
+            
+            return AddressListItem(str(host), self._identifier, classification)
+        
+        except UnknownCodeError as e:
+            raise type(e), 'Source:'+str(self), exc_info()[2]
+    
 class CodeClassificationMap(object):
     ''' A map containing taxonomical units assigned to integer codes'''
     def __init__(self, classification):
