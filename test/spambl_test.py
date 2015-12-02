@@ -3,7 +3,7 @@
 
 import unittest
 from spambl import (UnknownCodeError, NXDOMAIN, HpHosts, BaseDNSBL, 
-                    IpDNSBL,
+                    IpDNSBL, DomainDNSBL,
                     GoogleSafeBrowsing, UnathorizedAPIKeyError, HostCollection,
                      CodeClassificationMap, SumClassificationMap)
 from mock import Mock, patch, MagicMock
@@ -381,7 +381,82 @@ class IpDNSBLTest(BaseDNSBLTest):
         for h in self.listed_ip_unknown_class:
             self.assertRaises(UnknownCodeError, self.dnsbl_service.lookup_ip, h)
             
+class DomainDNSBLTest(BaseDNSBLTest):
+    
+    @classmethod
+    def setUpDNSBLService(cls, query_domain):
+        ''' Perapre DomainDNSBL instance to be tested
         
+        :param query_domain: a parent domain of dns query
+        '''
+        
+        cls.dnsbl_service = DomainDNSBL('test_service', query_domain, cls.getCodeItemClassMock())
+        
+    def testContainsForListedHostnameStrings(self):
+        ''' __contains__ must return True for listed hostname strings '''
+         
+        self.doTestContains(self.listed_hostname_strs, True)
+             
+    def testContainsForNotListedHostnameStrings(self):
+        ''' __contains__ must return False for not listed hostname strings '''
+         
+        self.doTestContains(self.not_listed_hostname_strs, False)
+        
+    def testContainsForListedHostnames(self):
+        ''' __contains__ must return True for listed hostname objects'''
+         
+        self.doTestContainsHostname(self.listed_hostnames, True)
+             
+    def testContainsForNotListedHostnames(self):
+        ''' __contains__ must return False for not listed hostname objects '''
+         
+        self.doTestContainsHostname(self.not_listed_hostnames, False)
+        
+    def testLookupForListedHostnameStrings(self):
+        ''' lookup method must return object with value equal to string hostname it
+        was passed '''
+        
+        for h in self.listed_hostname_strs:
+            actual = self.dnsbl_service.lookup(h)
+            self.assertEqual(actual.value, h)
+            
+    def testLookupForNotListedHostnameStrings(self):
+        ''' lookup method must return None for not listed hostname strings '''
+        
+        for h in self.not_listed_hostname_strs:
+            actual = self.dnsbl_service.lookup(h)
+            self.assertEqual(actual, None)
+            
+    def testLookupForHostnameStringsWithIncorrectCodes(self):
+        ''' lookup method must raise an exception for hostname strings
+        associated with unknown return codes '''
+        
+        for h in self.listed_hostname_strs_unknown_class:
+            self.assertRaises(UnknownCodeError, self.dnsbl_service.lookup, h)
+            
+    def testLookupHostnameForListedHostnames(self):
+        ''' lookup method must return object with value equal to string value of 
+        hostname object it was passed '''
+        
+        for h in self.listed_hostnames:
+            actual = self.dnsbl_service.lookup_hostname(h)
+            self.assertEqual(actual.value, str(h))
+            
+    def testLookupHostnameForNotListedHostnames(self):
+        ''' lookup method must return None with hostname objects representing 
+        not listed hostnames '''
+        
+        for h in self.not_listed_hostnames:
+            actual = self.dnsbl_service.lookup_hostname(h)
+            self.assertEqual(actual, None)
+            
+    def testLookupHostnameForListedHostnamesWithIncorrectCodes(self):
+        ''' lookup method must raise an exception for hostname objects associated
+        with unknown return codes '''
+        
+        for h in self.listed_hostname_unknown_class:
+            self.assertRaises(UnknownCodeError, self.dnsbl_service.lookup_hostname, h)
+            
 class CodeClassificationMapTest(unittest.TestCase):
     
     @classmethod
