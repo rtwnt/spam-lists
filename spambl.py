@@ -125,6 +125,11 @@ class BaseDNSBL(object):
         return str(self._identifier)
         
     def __contains__(self, host):
+        ''' Check if given host is listed by this service
+        
+        :param host: a host string
+        :return: True if the host is listed, otherwise False
+        '''
         return bool(self._query(host))
         
 class CodeClassificationMap(object):
