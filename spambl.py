@@ -82,6 +82,15 @@ class BaseDNSBL(object):
         except ValueError:
             raise ValueError, 'The given value is not a valid host!', exc_info()[2]
     
+    def _query_for_ip(self, ip):
+        ''' Query the service for given ip
+        
+        :param ip: a valid ip address
+        :raises NotImplementedError: the method is to be implemented in a separate class
+        '''
+        
+        raise NotImplementedError('The service {} does not list ip addresses'.format(self._identifier))
+    
     def __str__(self):
         return str(self._identifier)
         
