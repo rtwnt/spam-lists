@@ -225,6 +225,7 @@ class IpDNSBL(IpBLMixin, BaseDNSBL): pass
 
 class DomainDNSBL(DomainBLMixin, BaseDNSBL): pass
 
+class GeneralDNSBL(IpBLMixin, DomainBLMixin, BaseDNSBL): pass
 
 class CodeClassificationMap(object):
     ''' A map containing taxonomical units assigned to integer codes'''

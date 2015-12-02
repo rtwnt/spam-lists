@@ -3,7 +3,7 @@
 
 import unittest
 from spambl import (UnknownCodeError, NXDOMAIN, HpHosts, BaseDNSBL, 
-                    IpDNSBL, DomainDNSBL,
+                    IpDNSBL, DomainDNSBL, GeneralDNSBL,
                     GoogleSafeBrowsing, UnathorizedAPIKeyError, HostCollection,
                      CodeClassificationMap, SumClassificationMap)
 from mock import Mock, patch, MagicMock
@@ -457,6 +457,17 @@ class DomainDNSBLTest(BaseDNSBLTest):
         for h in self.listed_hostname_unknown_class:
             self.assertRaises(UnknownCodeError, self.dnsbl_service.lookup_hostname, h)
             
+class GeneralDNSBLTest(IpDNSBLTest, DomainDNSBLTest):
+    
+    @classmethod
+    def setUpDNSBLService(cls, query_domain):
+        ''' Prepare GeneralDNSBL instance to be tested
+        
+        :param query_domain: a parent domain of dns query
+        '''
+        
+        cls.dnsbl_service = GeneralDNSBL('test_service', query_domain, cls.getCodeItemClassMock())
+    
 class CodeClassificationMapTest(unittest.TestCase):
     
     @classmethod
