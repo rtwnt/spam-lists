@@ -470,18 +470,18 @@ class HostCollection(object):
         '''
         try:
             host = ip_address(host)
-            
-        except ValueError:
-            if validators.domain(host):
-                hostname = name.from_text(host).relativize(name.root)
-                self.hostnames.add(hostname)
-                
-            else:
-                raise ValueError, "The value '{}' is not a valid host".format(host), exc_info()[2]
-            
-        else:
             self.ip_addresses.add(host)
             return
+            
+        except ValueError:
+            pass
+        
+        try:
+            host = relative_name(host)
+            self.hostnames.add(host)
+            
+        except ValueError:
+            raise ValueError, 'The value "{}" is not a valid host'.format(host), exc_info()[2]
             
     def get_domain_matches(self, other):
         ''' Get domains from the other that are subdomains
