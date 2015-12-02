@@ -3,6 +3,7 @@
 
 import unittest
 from spambl import (UnknownCodeError, NXDOMAIN, HpHosts, BaseDNSBL, 
+                    IpDNSBL,
                     GoogleSafeBrowsing, UnathorizedAPIKeyError, HostCollection,
                      CodeClassificationMap, SumClassificationMap)
 from mock import Mock, patch, MagicMock
@@ -305,6 +306,81 @@ class BaseDNSBLTest(unittest.TestCase):
     def tearDownClass(cls):
         cls.patcher.stop()
         
+class IpDNSBLTest(BaseDNSBLTest):
+    
+    @classmethod
+    def setUpDNSBLService(cls, query_domain):
+        ''' Perapre IpDNSBL instance to be tested
+        
+        :param query_domain: a parent domain of dns query
+        '''
+        
+        cls.dnsbl_service = IpDNSBL('test_service', query_domain, cls.getCodeItemClassMock())
+        
+    def testContainsForListedIpStrings(self):
+        ''' __contains__ must return True for listed ip strings '''
+         
+        self.doTestContains(self.listed_ip_strs, True)
+             
+    def testContainsForNotListedIpStrings(self):
+        ''' __contains__ must return False for not listed ip strings '''
+         
+        self.doTestContains(self.not_listed_ip_strs, False)
+        
+    def testContainsForListedIps(self):
+        ''' __contains__ must return True for listed ip objects '''
+         
+        self.doTestContainsIp(map(IP, self.listed_ip_strs), True)
+             
+    def testContainsForNotListedIps(self):
+        ''' __contains__ must return False for not listed ip objects '''
+         
+        self.doTestContainsIp(map(IP, self.not_listed_ip_strs), False)
+            
+    def testLookupForListedIpStrings(self):
+        ''' lookup method must return object with value equal to
+        ip strings it was passed '''
+        
+        for h in self.listed_ip_strs:
+            actual = self.dnsbl_service.lookup(h)
+            self.assertEqual(actual.value, h)
+            
+    def testLookupForNotListedIpStrings(self):
+        ''' lookup method must return None for not listed ip strings'''
+        
+        for h in self.not_listed_ip_strs:
+            actual = self.dnsbl_service.lookup(h)
+            self.assertEqual(actual, None)
+            
+    def testLookupForListedIpStringsWithIncorrectCodes(self):
+        ''' lookup method must raise an exception when passed an
+        ip address string associated with an unknown return code '''
+        
+        for h in self.listed_ip_strs_unknown_class:
+            self.assertRaises(UnknownCodeError, self.dnsbl_service.lookup, h)
+    
+    def testLookupIpForListedIps(self):
+        ''' lookup method must return object with value equal to string value
+        of listed ip object it was passed '''
+        
+        for h in self.listed_ips:
+            actual = self.dnsbl_service.lookup_ip(h)
+            self.assertEqual(actual.value, str(h))
+             
+    def testLookupIpForNotListedIps(self):
+        ''' lookup method must return None for not listed ip object it was passed '''
+        
+        for h in self.not_listed_ips:
+            actual = self.dnsbl_service.lookup_ip(h)
+            self.assertEqual(actual, None)
+            
+    def testLookupIpForListedIpsWithIncorrectCodes(self):
+        ''' lookup method must raise an exception for an ip object representing value
+        associated with unknown return code '''
+        
+        for h in self.listed_ip_unknown_class:
+            self.assertRaises(UnknownCodeError, self.dnsbl_service.lookup_ip, h)
+            
         
 class CodeClassificationMapTest(unittest.TestCase):
     

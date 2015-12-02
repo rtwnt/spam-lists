@@ -221,6 +221,8 @@ class DomainBLMixin(object):
         '''
         return self._do_query(hostname)
         
+class IpDNSBL(IpBLMixin, BaseDNSBL): pass
+
 
 class CodeClassificationMap(object):
     ''' A map containing taxonomical units assigned to integer codes'''
