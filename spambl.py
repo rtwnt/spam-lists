@@ -49,23 +49,19 @@ def relative_reverse_pointer(ip):
     
 class BaseDNSBL(object):
     ''' Represents a DNSBL service '''
-    def __init__(self, identifier, query_suffix, code_item_class, lists_ips, lists_uris):
-        ''' Create new DNSBLService object
+    def __init__(self, identifier, query_suffix, code_item_class):
+        ''' Create new BaseDNSBL object
         
         :param identifier: a value designating DNSBL service provider: its name or url address.
         :param query_suffix: a suffix added to DNSBL query address
         :param code_item_class: item classes associated with DNSBL query return codes
-        :param lists_ips: information if this object represents an ip blocklist
-        :param lists_uris: information if this object represents a domain name blocklist
         '''
         
         self._identifier = identifier
 
         self._query_suffix = name.from_text(query_suffix)
         self._code_item_class = code_item_class
-        self.lists_ips = lists_ips
-        self.lists_uris = lists_uris
-    
+        
     def _query(self, host):
         ''' Query DNSBL service for given value
         
