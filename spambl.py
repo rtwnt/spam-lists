@@ -131,6 +131,15 @@ class BaseDNSBL(object):
         :return: True if the host is listed, otherwise False
         '''
         return bool(self._query(host))
+    
+    def contains_ip(self, ip):
+        ''' Check if given ip address is listed by this service
+        
+        :param ip: a valid ip address
+        :return: True if the ip address is listed, otherwise False
+        '''
+        return bool(self._query_for_ip(ip))
+    
         
 class CodeClassificationMap(object):
     ''' A map containing taxonomical units assigned to integer codes'''
