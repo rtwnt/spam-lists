@@ -20,7 +20,7 @@ class UnathorizedAPIKeyError(SpamBLError):
     ''' Raise when trying to use an unathorized api key '''
     
 
-class DNSBLService(object):
+class BaseDNSBL(object):
     ''' Represents a DNSBL service '''
     def __init__(self, identifier, query_suffix, code_item_class, lists_ips, lists_uris):
         ''' Create new DNSBLService object
