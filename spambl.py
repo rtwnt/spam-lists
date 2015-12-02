@@ -90,25 +90,6 @@ class BaseDNSBL(object):
         
     def __contains__(self, host):
         return bool(self._query(host))
-    
-    def get_classification(self, host):
-        ''' Return classification for given host
-        
-        :param host: a valid host relative host, an instance of dns.name.Name class
-        :raises UnknownCodeError: raised when the code associated with listed host is not associated with
-        a known classification value
-        :returns: a value containing classification of given host according to the classification
-        system of the service, or None if the host is not listed
-        '''
-        
-        return_code = self._query(host)
-        if not return_code:
-            return None
-        
-        try:
-            return self._code_item_class[return_code]
-        except UnknownCodeError as e:
-            raise type(e), 'Source:'+str(self), exc_info()[2]
         
 class CodeClassificationMap(object):
     ''' A map containing taxonomical units assigned to integer codes'''
