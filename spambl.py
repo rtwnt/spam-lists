@@ -182,6 +182,16 @@ class BaseDNSBL(object):
         otherwise None
         '''
         return self._do_lookup(host, self._query)
+    
+    def lookup_ip(self, ip):
+        ''' Perform item lookup for given ip address
+        
+        :param ip: a valid ip address
+        :returns: AddressListItem for given ip if it's listed, 
+        otherwise None
+        '''
+        return self._do_lookup(ip, self._query_for_ip)
+    
 
 class CodeClassificationMap(object):
     ''' A map containing taxonomical units assigned to integer codes'''
