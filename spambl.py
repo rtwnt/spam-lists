@@ -140,7 +140,15 @@ class BaseDNSBL(object):
         '''
         return bool(self._query_for_ip(ip))
     
+    def contains_hostname(self, hostname):
+        ''' Check if given hostname is listed by this service
         
+        :param hostname: a valid hostname
+        :return: True if the hostname is listed, otherwise False
+        '''
+        
+        return bool(self._query_for_hostname(hostname))
+    
 class CodeClassificationMap(object):
     ''' A map containing taxonomical units assigned to integer codes'''
     def __init__(self, classification):
