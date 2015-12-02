@@ -9,6 +9,7 @@ from ipaddress import ip_address
 from dns import name
 from collections import namedtuple
 import validators
+from dns.reversename import ipv4_reverse_domain, ipv6_reverse_domain, from_address as name_from_ip
 
 class SpamBLError(Exception):
     ''' Base exception class for spambl module '''
@@ -34,6 +35,18 @@ def relative_name(hostname):
     
     raise ValueError('Value "{}" is not a valid hostname'.format(hostname))
 
+def relative_reverse_pointer(ip):
+    ''' Create relative reverse pointer
+    
+    :param ip: instance of ip address class from ipaddress module
+    :returns: a dns.name.Name instance for given IP, representing
+    reverse pointer relative to the reverse pointer base domain
+    for the version of given ip
+    '''
+    root = ipv4_reverse_domain if ip.version == 4 else ipv6_reverse_domain
+    
+    return name_from_ip(str(ip)).relativize(root)
+    
 class BaseDNSBL(object):
     ''' Represents a DNSBL service '''
     def __init__(self, identifier, query_suffix, code_item_class, lists_ips, lists_uris):
