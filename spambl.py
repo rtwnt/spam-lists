@@ -20,6 +20,20 @@ class UnathorizedAPIKeyError(SpamBLError):
     ''' Raise when trying to use an unathorized api key '''
     
 
+def relative_name(hostname):
+    ''' Create relative domain name
+    
+    :param hostname: a hostname string
+    :returns: instance of dns.name.Name for given hostname, relative to
+    the root domain dns.name.root.
+    :raises ValueError: if the hostname is not valid
+    '''
+    
+    if validators.domain(hostname):
+        return name.from_text(hostname).relativize(name.root)
+    
+    raise ValueError('Value "{}" is not a valid hostname'.format(hostname))
+
 class BaseDNSBL(object):
     ''' Represents a DNSBL service '''
     def __init__(self, identifier, query_suffix, code_item_class, lists_ips, lists_uris):
