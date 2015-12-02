@@ -99,6 +99,28 @@ class BaseDNSBL(object):
         '''
         raise NotImplementedError('The service {} does not list hostnames'.format(self._identifier))
     
+    def _do_query(self, hostname):
+        ''' Query DNSBL service for given value
+        
+        :param hostname: a relative domain name
+        :returns: an integer representing classification code for given value, if it is listed. Otherwise,
+        it returns None
+        '''
+        
+        if hostname.is_absolute():
+            raise ValueError('The value {} is not a relative host!'.format(hostname))
+        
+        query_name = hostname.derelativize(self._query_suffix)
+        
+        try:
+            response = query(query_name)
+            last_octet = response[0].to_text().split('.')[-1]
+            
+            return int(last_octet)
+                
+        except NXDOMAIN:
+            return None
+        
     def __str__(self):
         return str(self._identifier)
         
