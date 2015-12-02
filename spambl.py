@@ -174,6 +174,15 @@ class BaseDNSBL(object):
         except UnknownCodeError as e:
             raise type(e), 'Source:'+str(self), exc_info()[2]
     
+    def lookup(self, host):
+        ''' Perform item lookup for given host
+        
+        :param host: a host string
+        :returns: AddressListItem for given host if it's listed, 
+        otherwise None
+        '''
+        return self._do_lookup(host, self._query)
+
 class CodeClassificationMap(object):
     ''' A map containing taxonomical units assigned to integer codes'''
     def __init__(self, classification):
