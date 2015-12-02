@@ -211,6 +211,16 @@ class IpBLMixin(object):
         '''
         return self._do_query(relative_reverse_pointer(ip))
     
+class DomainBLMixin(object):
+    
+    def _query_for_hostname(self, hostname):
+        ''' Query the service for given hostname
+        
+        :param hostname: a valid hostname
+        :raises NotImplementedError: the method is to be implemented in a separate class
+        '''
+        return self._do_query(hostname)
+        
 
 class CodeClassificationMap(object):
     ''' A map containing taxonomical units assigned to integer codes'''
