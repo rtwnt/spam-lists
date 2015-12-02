@@ -91,6 +91,14 @@ class BaseDNSBL(object):
         
         raise NotImplementedError('The service {} does not list ip addresses'.format(self._identifier))
     
+    def _query_for_hostname(self, hostname):
+        ''' Query the service for given hostname
+        
+        :param hostname: a valid hostname
+        :raises NotImplementedError: the method is to be implemented in a separate class
+        '''
+        raise NotImplementedError('The service {} does not list hostnames'.format(self._identifier))
+    
     def __str__(self):
         return str(self._identifier)
         
