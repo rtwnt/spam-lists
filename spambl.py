@@ -201,6 +201,16 @@ class BaseDNSBL(object):
         '''
         return self._do_lookup(hostname, self._query_for_hostname)
     
+class IpBLMixin(object):
+    
+    def _query_for_ip(self, ip):
+        ''' Query the service for given ip
+        
+        :param ip: a valid ip address
+        :raises NotImplementedError: the method is to be implemented in a separate class
+        '''
+        return self._do_query(relative_reverse_pointer(ip))
+    
 
 class CodeClassificationMap(object):
     ''' A map containing taxonomical units assigned to integer codes'''
