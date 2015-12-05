@@ -152,17 +152,15 @@ class GeneralDNSBL(BaseDNSBL):
         :param host: a value representing a host: an ip address or a hostname
         :returns: a return code from the service if the host is listed on it, otherwise None
         '''
-        try:
-            query_prefix = relative_reverse_pointer(host)
-            
-        except ValueError:
-            try:
-                query_prefix = relative_name(host)
-                
-            except ValueError:
-                raise ValueError, 'The value "{}" is not a valid host'.format(host), exc_info()[2]
         
-        return self._do_query(query_prefix)
+        for f in relative_reverse_pointer, relative_name:
+            try:
+                query_prefix = f(host)
+                return self._do_query(query_prefix)
+            
+            except ValueError: pass
+        
+        raise ValueError, 'The value "{}" is not a valid host'.format(host), exc_info()[2]
 
 class CodeClassificationMap(object):
     ''' A map containing taxonomical units assigned to integer codes'''
