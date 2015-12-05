@@ -163,7 +163,26 @@ class DomainDNSBL(DomainBLMixin, BaseDNSBL):
         query_prefix = relative_name(hostname)
         return self._do_query(query_prefix)
 
-class GeneralDNSBL(IpBLMixin, DomainBLMixin, BaseDNSBL): pass
+class GeneralDNSBL(IpBLMixin, DomainBLMixin, BaseDNSBL):
+    
+    def _query(self, host):
+        ''' Query the service for given host
+        
+        :param host: a value representing a host: an ip address or a hostname
+        :returns: a return code from the service if the host is listed on it, otherwise None
+        '''
+        try:
+            valid_ip = ip_address(host)
+            query_prefix = relative_reverse_pointer(valid_ip)
+            
+        except ValueError:
+            try:
+                query_prefix = relative_name(host)
+                
+            except ValueError:
+                raise ValueError, 'The value "{}" is not a valid host'.format(host), exc_info()[2]
+        
+        return self._do_query(query_prefix)
 
 class CodeClassificationMap(object):
     ''' A map containing taxonomical units assigned to integer codes'''
