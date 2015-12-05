@@ -43,6 +43,8 @@ def relative_reverse_pointer(ip):
     reverse pointer relative to the reverse pointer base domain
     for the version of given ip
     '''
+    
+    ip = ip_address(ip)
     root = ipv4_reverse_domain if ip.version == 4 else ipv6_reverse_domain
     
     return name_from_ip(str(ip)).relativize(root)
@@ -126,8 +128,7 @@ class IpDNSBL(BaseDNSBL):
         :param ip: a value representing ip address
         :returns: a return code from the service if it lists the ip, otherwise None
         '''
-        valid_ip = ip_address(ip)
-        query_prefix = relative_reverse_pointer(valid_ip)
+        query_prefix = relative_reverse_pointer(ip)
         
         return self._do_query(query_prefix)
 
@@ -152,8 +153,7 @@ class GeneralDNSBL(BaseDNSBL):
         :returns: a return code from the service if the host is listed on it, otherwise None
         '''
         try:
-            valid_ip = ip_address(host)
-            query_prefix = relative_reverse_pointer(valid_ip)
+            query_prefix = relative_reverse_pointer(host)
             
         except ValueError:
             try:
