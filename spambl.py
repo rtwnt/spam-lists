@@ -138,7 +138,18 @@ class DomainBLMixin(object):
         '''
         return self._do_query(hostname)
         
-class IpDNSBL(IpBLMixin, BaseDNSBL): pass
+class IpDNSBL(IpBLMixin, BaseDNSBL):
+    
+    def _query(self, ip):
+        ''' Query for given ip
+        
+        :param ip: a value representing ip address
+        :returns: a return code from the service if it lists the ip, otherwise None
+        '''
+        valid_ip = ip_address(ip)
+        query_prefix = relative_reverse_pointer(valid_ip)
+        
+        return self._do_query(query_prefix)
 
 class DomainDNSBL(DomainBLMixin, BaseDNSBL): pass
 
