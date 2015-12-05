@@ -95,24 +95,6 @@ class BaseDNSBL(object):
         '''
         return bool(self._query(host))
     
-    def contains_ip(self, ip):
-        ''' Check if given ip address is listed by this service
-        
-        :param ip: a valid ip address
-        :return: True if the ip address is listed, otherwise False
-        '''
-        return bool(self._query_for_ip(ip))
-    
-    def contains_hostname(self, hostname):
-        ''' Check if given hostname is listed by this service
-        
-        :param hostname: a valid hostname
-        :return: True if the hostname is listed, otherwise False
-        '''
-        
-        return bool(self._query_for_hostname(hostname))
-    
-    
     def _do_lookup(self, host, query_method):
         ''' Perform item lookup for given host
         
