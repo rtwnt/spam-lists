@@ -117,28 +117,8 @@ class BaseDNSBL(object):
         
         except UnknownCodeError as e:
             raise type(e), 'Source:'+str(self), exc_info()[2]
-    
-class IpBLMixin(object):
-    
-    def _query_for_ip(self, ip):
-        ''' Query the service for given ip
         
-        :param ip: a valid ip address
-        :raises NotImplementedError: the method is to be implemented in a separate class
-        '''
-        return self._do_query(relative_reverse_pointer(ip))
-    
-class DomainBLMixin(object):
-    
-    def _query_for_hostname(self, hostname):
-        ''' Query the service for given hostname
-        
-        :param hostname: a valid hostname
-        :raises NotImplementedError: the method is to be implemented in a separate class
-        '''
-        return self._do_query(hostname)
-        
-class IpDNSBL(IpBLMixin, BaseDNSBL):
+class IpDNSBL(BaseDNSBL):
     
     def _query(self, ip):
         ''' Query for given ip
@@ -151,7 +131,7 @@ class IpDNSBL(IpBLMixin, BaseDNSBL):
         
         return self._do_query(query_prefix)
 
-class DomainDNSBL(DomainBLMixin, BaseDNSBL):
+class DomainDNSBL(BaseDNSBL):
     
     def _query(self, hostname):
         ''' Query the service for given hostname
@@ -163,7 +143,7 @@ class DomainDNSBL(DomainBLMixin, BaseDNSBL):
         query_prefix = relative_name(hostname)
         return self._do_query(query_prefix)
 
-class GeneralDNSBL(IpBLMixin, DomainBLMixin, BaseDNSBL):
+class GeneralDNSBL(BaseDNSBL):
     
     def _query(self, host):
         ''' Query the service for given host
