@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import unittest
-from spambl import (UnknownCodeError, NXDOMAIN, HpHosts, BaseDNSBL, 
+from spambl import (UnknownCodeError, NXDOMAIN, HpHosts, 
                     IpDNSBL, DomainDNSBL, GeneralDNSBL,
                     GoogleSafeBrowsing, UnathorizedAPIKeyError, HostCollection,
                      CodeClassificationMap, SumClassificationMap)
@@ -25,132 +25,195 @@ def relative_name(hostname):
     :returns: dns.name.Name instance relative to the root
     '''
     return name.from_text(hostname).relativize(name.root) 
-        
-class BaseDNSBLTest(unittest.TestCase):
-    
-    @classmethod
-    def setUpDNSBLService(cls, query_domain):
-        ''' Perapre BaseDNSBL instance to be tested
-        
-        :param query_domain: a parent domain of dns query
-        '''
-        
-        cls.dnsbl_service = BaseDNSBL('test_service', query_domain, cls.getCodeItemClassMock())
-    
-    @classmethod
-    def setUpClass(cls):
-        
-        cls.setUpData()
-        query_domain = 'test.query.domain'
-        
-        cls.query_domain = name.from_text(query_domain)
-        
-        cls.setUpDNSBLService(query_domain)
-        cls.setUpMockedQuery()
-        
-    @classmethod
-    def getCodeItemClassMock(cls):
-        code_item_class = MagicMock()
-        code_item_class.__getitem__.side_effect = cls.get_classification
-        
-        return code_item_class
-        
-    @classmethod
-    def setUpData(cls):
-        cls.listed_hostname_strs = u't1.pl', u't2.com', u't3.com.pl', u't4.com', u't5.pl'
-        cls.listed_ip_strs = u'255.0.120.1', u'2001:db8:abc:123::42'
-        
-        cls.listed_hostnames = map(relative_name, cls.listed_hostname_strs)
-        cls.listed_ips = map(IP, cls.listed_ip_strs)
-        
-        cls.listed_hostname_strs_unknown_class = u'test1.pl', u'test2.pl'
-        cls.listed_hostname_unknown_class = map(relative_name, cls.listed_hostname_strs_unknown_class)
-        
-        cls.listed_ip_strs_unknown_class = u'120.150.120.1', u'2001:db7:abc:144::22'
-        cls.listed_ip_unknown_class = map(IP, cls.listed_ip_strs_unknown_class)
-        
-        
-        cls.not_listed_hostname_strs = u'lorem.pl', u'ipsum.com'
-        cls.not_listed_hostnames = map(relative_name, cls.not_listed_hostname_strs)
-        
-        cls.not_listed_ip_strs = u'200.0.121.1', u'2001:db8:abc:124::41'
-        cls.not_listed_ips = map(IP, cls.not_listed_ip_strs)
-        
-        cls.correct_return_codes = 1, 2, 3
-        cls.incorrect_return_codes = 7, 11
-        
-    @classmethod
-    def get_return_code(cls, host):
-        
-        listed_hostnames = cls.listed_hostname_strs + cls.listed_ip_strs
-        with_incorrect_codes = cls.listed_hostname_strs_unknown_class + cls.listed_ip_strs_unknown_class
-        
-        try:
-            i = listed_hostnames.index(unicode(host))
-            
-            return cls.correct_return_codes[i % len(cls.correct_return_codes)]
-            
-        except ValueError:
-            try:
-                n = with_incorrect_codes.index(unicode(host))
-                
-                return cls.incorrect_return_codes[n % len(cls.incorrect_return_codes)]
-            
-            except ValueError:
-                return None
-        
-    @classmethod
-    def setUpMockedQuery(cls):
-        cls.patcher = patch('spambl.query')
-        cls.mocked_query = cls.patcher.start()
-        
-        cls.mocked_query.side_effect = cls.query
-        
-    @classmethod
-    def query(cls, query_name):
-        ''' Perform dns query using this mocked implementation
-        
-        :param query_name: name of queried domain
-        :returns: an instance of Mock representing response to the
-        query, as required by BaseDNSBL
-        '''
-        
-        host = query_name.relativize(cls.query_domain)
-        ip_reverse_domains = reversename.ipv4_reverse_domain, reversename.ipv6_reverse_domain
-        
-        for root in ip_reverse_domains:
 
-            reverse_pointer = host.derelativize(root)
-            try:
-                host = reversename.to_address(reverse_pointer)
-            except SyntaxError:
-                continue
-            else:
-                break
+class AbstractTests:
+    class BaseDNSBLTest(unittest.TestCase):
+        @classmethod
+        def setUpClass(cls):
             
-        return_code = cls.get_return_code(host)
-        if return_code:
-            answer = Mock()
-            answer.to_text.return_value = '127.0.0.%d' % return_code
-            return [answer]
+            cls.setUpData()
+            query_domain = 'test.query.domain'
+            
+            cls.query_domain = name.from_text(query_domain)
+            
+            cls.setUpDNSBLService(query_domain)
+            cls.setUpMockedQuery()
+            
+        @classmethod
+        def getCodeItemClassMock(cls):
+            code_item_class = MagicMock()
+            code_item_class.__getitem__.side_effect = cls.get_classification
+            
+            return code_item_class
+            
+        @classmethod
+        def setUpData(cls):
+            cls.listed_hostname_strs = u't1.pl', u't2.com', u't3.com.pl', u't4.com', u't5.pl'
+            cls.listed_ip_strs = u'255.0.120.1', u'2001:db8:abc:123::42'
+            
+            cls.listed_hostname_strs_unknown_class = u'test1.pl', u'test2.pl'
+            
+            cls.listed_ip_strs_unknown_class = u'120.150.120.1', u'2001:db7:abc:144::22'
+            
+            cls.not_listed_hostname_strs = u'lorem.pl', u'ipsum.com'
+            
+            cls.not_listed_ip_strs = u'200.0.121.1', u'2001:db8:abc:124::41'
+            
+            cls.correct_return_codes = 1, 2, 3
+            cls.incorrect_return_codes = 7, 11
+            
+        @classmethod
+        def get_return_code(cls, host):
+            
+            listed_hostnames = cls.listed_hostname_strs + cls.listed_ip_strs
+            with_incorrect_codes = cls.listed_hostname_strs_unknown_class + cls.listed_ip_strs_unknown_class
+            
+            try:
+                i = listed_hostnames.index(unicode(host))
+                
+                return cls.correct_return_codes[i % len(cls.correct_return_codes)]
+                
+            except ValueError:
+                try:
+                    n = with_incorrect_codes.index(unicode(host))
+                    
+                    return cls.incorrect_return_codes[n % len(cls.incorrect_return_codes)]
+                
+                except ValueError:
+                    return None
+            
+        @classmethod
+        def setUpMockedQuery(cls):
+            cls.patcher = patch('spambl.query')
+            cls.mocked_query = cls.patcher.start()
+            
+            cls.mocked_query.side_effect = cls.query
+            
+        @classmethod
+        def query(cls, query_name):
+            ''' Perform dns query using this mocked implementation
+            
+            :param query_name: name of queried domain
+            :returns: an instance of Mock representing response to the
+            query, as required by BaseDNSBL
+            '''
+            
+            host = query_name.relativize(cls.query_domain)
+            ip_reverse_domains = reversename.ipv4_reverse_domain, reversename.ipv6_reverse_domain
+            
+            for root in ip_reverse_domains:
+    
+                reverse_pointer = host.derelativize(root)
+                try:
+                    host = reversename.to_address(reverse_pointer)
+                except SyntaxError:
+                    continue
+                else:
+                    break
+                
+            return_code = cls.get_return_code(host)
+            if return_code:
+                answer = Mock()
+                answer.to_text.return_value = '127.0.0.%d' % return_code
+                return [answer]
+            
+            raise NXDOMAIN('test NXDOMAIN exception')
+            
+        @classmethod
+        def get_classification(cls, index):
+            ''' Get classification for given code
+            
+            This is a method providing side effects for mocked
+            classification map instance
+            
+            :param index: an integer value intended as representing a classification value
+            :returns: a taxonomical unit
+            ''' 
+            
+            if index in cls.correct_return_codes:
+                return 'CLASS {}'.format(index)
+            
+            raise UnknownCodeError('Unknown code raised by test')
+                
+        @classmethod
+        def tearDownClass(cls):
+            cls.patcher.stop()
+                
+class DNSBLInvalidValueTestMixin(object):
+    
+    ''' Provides tests for methods of BaseDNSBL subclasses.
+    
+    All tests in this mixin use ip addresses and hostnames as arguments 
+    and assume they are invalid arguments for the tested methods 
+    '''
+    
+    def doTestCallForInvalidValue(self, function, data):
+        ''' Perform test of a function that should raise ValueError for given data '''
         
-        raise NXDOMAIN('test NXDOMAIN exception')
+        for h in data:
+            self.assertRaises(ValueError, function, h)
+    
+    def testContainsForListedHostnameStrings(self):
+        ''' Calling this method should result in ValueError '''
         
-    @classmethod
-    def get_classification(cls, index):
-        ''' Get classification for given code
+        method = self.dnsbl_service.__contains__
+        self.doTestCallForInvalidValue(method, self.listed_hostname_strs)
         
-        This is a method providing side effects for mocked
-        classification map instance
+    def testContainsForNotListedHostnameStrings(self):
+        ''' Calling this method should result in ValueError  '''
         
-        :param index: an integer value intended as representing a classification value
-        :returns: a taxonomical unit
-        ''' 
+        method = self.dnsbl_service.__contains__
+        self.doTestCallForInvalidValue(method, self.not_listed_hostname_strs)
         
-        if index in cls.correct_return_codes:
-            return 'CLASS {}'.format(index)
+    def testContainsForListedIpStrings(self):
+        ''' Calling this method should result in ValueError  '''
         
-        raise UnknownCodeError('Unknown code raised by test')
+        method = self.dnsbl_service.__contains__
+        self.doTestCallForInvalidValue(method, self.listed_ip_strs)
+             
+    def testContainsForNotListedIpStrings(self):
+        ''' Calling this method should result in ValueError  '''
+        
+        method = self.dnsbl_service.__contains__
+        self.doTestCallForInvalidValue(method, self.not_listed_ip_strs)
+        
+    def testLookupForListedHostnameStrings(self):
+        ''' Calling this method should result in ValueError  '''
+        
+        method = self.dnsbl_service.lookup
+        self.doTestCallForInvalidValue(method, self.listed_hostname_strs)
+            
+    def testLookupForNotListedHostnameStrings(self):
+        ''' Calling this method should result in ValueError  '''
+        
+        method = self.dnsbl_service.lookup
+        self.doTestCallForInvalidValue(method, self.not_listed_hostname_strs)
+            
+    def testLookupForHostnameStringsWithIncorrectCodes(self):
+        ''' Calling this method should result in ValueError  '''
+        
+        method = self.dnsbl_service.lookup
+        self.doTestCallForInvalidValue(method, self.listed_hostname_strs_unknown_class)
+            
+    def testLookupForListedIpStrings(self):
+        ''' Calling this method should result in ValueError  '''
+        
+        method = self.dnsbl_service.lookup
+        self.doTestCallForInvalidValue(method, self.listed_ip_strs)
+            
+    def testLookupForNotListedIpStrings(self):
+        ''' Calling this method should result in ValueError  '''
+        
+        method = self.dnsbl_service.lookup
+        self.doTestCallForInvalidValue(method, self.not_listed_ip_strs)
+            
+    def testLookupForListedIpStringsWithIncorrectCodes(self):
+        ''' Calling this method should result in ValueError  '''
+        
+        method = self.dnsbl_service.lookup
+        self.doTestCallForInvalidValue(method, self.listed_ip_strs_unknown_class)
+        
+class BaseDNSBLValidArgumentTestMixin(object):
     
     def doTestContains(self, hosts, expected):
         ''' Perform test of __contains__ method of dnsbl class '''
@@ -159,164 +222,16 @@ class BaseDNSBLTest(unittest.TestCase):
         
         for h in hosts:
             _assert(h in self.dnsbl_service)
-            
-    def doTestContainsHostname(self, hosts, expected):
-        ''' Perform test of contains_hostname method of dnsbl class '''
         
-        _assert = self.assertTrue if expected else self.assertFalse
-        
-        for h in hosts:
-            _assert(self.dnsbl_service.contains_hostname(h))
-            
-    def doTestContainsIp(self, hosts, expected):
-        ''' Perform test of contains_ip method of dnsbl class '''
-        
-        _assert = self.assertTrue if expected else self.assertFalse
-        
-        for h in hosts:
-            _assert(self.dnsbl_service.contains_ip(h))
+class DNSBLIpTestMixin(BaseDNSBLValidArgumentTestMixin):
     
-    def doTestNotImplementedOperation(self, function, data):
-        ''' Perform test of method that is not implemented in tested class '''
-        
-        for h in data:
-            self.assertRaises(NotImplementedError, function, h)
-      
-    def testContainsForListedHostnameStrings(self):
-        ''' Calling this method should result in NotImplementedError '''
-        
-        method = self.dnsbl_service.__contains__
-        self.doTestNotImplementedOperation(method, self.listed_hostname_strs)
-          
-    def testContainsForNotListedHostnameStrings(self):
-        ''' Calling this method should result in NotImplementedError '''
-        
-        method = self.dnsbl_service.__contains__
-        self.doTestNotImplementedOperation(method, self.not_listed_hostname_strs)
-        
-    def testContainsForListedHostnames(self):
-        ''' Calling this method should result in NotImplementedError '''
-        
-        method = self.dnsbl_service.contains_hostname
-        self.doTestNotImplementedOperation(method, self.listed_hostnames)
-             
-    def testContainsForNotListedHostnames(self):
-        ''' Calling this method should result in NotImplementedError '''
-        
-        method = self.dnsbl_service.contains_hostname
-        self.doTestNotImplementedOperation(method, self.not_listed_hostnames)
-        
-    def testContainsForListedIpStrings(self):
-        ''' Calling this method should result in NotImplementedError '''
-        
-        method = self.dnsbl_service.__contains__
-        self.doTestNotImplementedOperation(method, self.listed_ip_strs)
-             
-    def testContainsForNotListedIpStrings(self):
-        ''' Calling this method should result in NotImplementedError '''
-        
-        method = self.dnsbl_service.__contains__
-        self.doTestNotImplementedOperation(method, self.not_listed_ip_strs)
-        
-    def testContainsForListedIps(self):
-        ''' Calling this method should result in NotImplementedError '''
-        
-        method = self.dnsbl_service.contains_ip
-        self.doTestNotImplementedOperation(method, self.listed_ips)
-             
-    def testContainsForNotListedIps(self):
-        ''' Calling this method should result in NotImplementedError '''
-        
-        method = self.dnsbl_service.contains_ip
-        self.doTestNotImplementedOperation(method, self.not_listed_ips)
-        
-    def testLookupForListedHostnameStrings(self):
-        ''' Calling this method should result in NotImplementedError '''
-        
-        method = self.dnsbl_service.lookup
-        self.doTestNotImplementedOperation(method, self.listed_hostname_strs)
-            
-    def testLookupForNotListedHostnameStrings(self):
-        ''' Calling this method should result in NotImplementedError '''
-        
-        method = self.dnsbl_service.lookup
-        self.doTestNotImplementedOperation(method, self.not_listed_hostname_strs)
-            
-    def testLookupForHostnameStringsWithIncorrectCodes(self):
-        ''' Calling this method should result in NotImplementedError '''
-        
-        method = self.dnsbl_service.lookup
-        self.doTestNotImplementedOperation(method, self.listed_hostname_strs_unknown_class)
-            
-    def testLookupForListedIpStrings(self):
-        ''' Calling this method should result in NotImplementedError '''
-        
-        method = self.dnsbl_service.lookup
-        self.doTestNotImplementedOperation(method, self.listed_ip_strs)
-            
-    def testLookupForNotListedIpStrings(self):
-        ''' Calling this method should result in NotImplementedError '''
-        
-        method = self.dnsbl_service.lookup
-        self.doTestNotImplementedOperation(method, self.not_listed_ip_strs)
-            
-    def testLookupForListedIpStringsWithIncorrectCodes(self):
-        ''' Calling this method should result in NotImplementedError '''
-        
-        method = self.dnsbl_service.lookup
-        self.doTestNotImplementedOperation(method, self.listed_ip_unknown_class)
-            
-    def testLookupHostnameForListedHostnames(self):
-        ''' Calling this method should result in NotImplementedError '''
-        
-        method = self.dnsbl_service.lookup_hostname
-        self.doTestNotImplementedOperation(method, self.listed_hostnames)
-            
-    def testLookupHostnameForNotListedHostnames(self):
-        ''' Calling this method should result in NotImplementedError '''
-        
-        method = self.dnsbl_service.lookup_hostname
-        self.doTestNotImplementedOperation(method, self.not_listed_hostnames)
-            
-    def testLookupHostnameForListedHostnamesWithIncorrectCodes(self):
-        ''' Calling this method should result in NotImplementedError '''
-        
-        method = self.dnsbl_service.lookup_hostname
-        self.doTestNotImplementedOperation(method, self.listed_hostname_unknown_class)
-            
-    def testLookupIpForListedIps(self):
-        ''' Calling this method should result in NotImplementedError '''
-        
-        method = self.dnsbl_service.lookup_ip
-        self.doTestNotImplementedOperation(method, self.listed_ips)
-             
-    def testLookupIpForNotListedIps(self):
-        ''' Calling this method should result in NotImplementedError '''
-        
-        method = self.dnsbl_service.lookup_ip
-        self.doTestNotImplementedOperation(method, self.not_listed_ips)
-            
-    def testLookupIpForListedIpsWithIncorrectCodes(self):
-        ''' Calling this method should result in NotImplementedError '''
-        
-        method = self.dnsbl_service.lookup_ip
-        self.doTestNotImplementedOperation(method, self.listed_ip_unknown_class)
-            
-    @classmethod
-    def tearDownClass(cls):
-        cls.patcher.stop()
-        
-class IpDNSBLTest(BaseDNSBLTest):
+    ''' Provides tests for methods of BaseDNSBL subclasses.
     
-    @classmethod
-    def setUpDNSBLService(cls, query_domain):
-        ''' Perapre IpDNSBL instance to be tested
-        
-        :param query_domain: a parent domain of dns query
-        '''
-        
-        cls.dnsbl_service = IpDNSBL('test_service', query_domain, cls.getCodeItemClassMock())
-        
+    All tests in this mixin use ip addresses as arguments and
+    assume ip address values are valid arguments for the
+    tested methods 
+    '''
+    
     def testContainsForListedIpStrings(self):
         ''' __contains__ must return True for listed ip strings '''
          
@@ -326,16 +241,6 @@ class IpDNSBLTest(BaseDNSBLTest):
         ''' __contains__ must return False for not listed ip strings '''
          
         self.doTestContains(self.not_listed_ip_strs, False)
-        
-    def testContainsForListedIps(self):
-        ''' __contains__ must return True for listed ip objects '''
-         
-        self.doTestContainsIp(map(IP, self.listed_ip_strs), True)
-             
-    def testContainsForNotListedIps(self):
-        ''' __contains__ must return False for not listed ip objects '''
-         
-        self.doTestContainsIp(map(IP, self.not_listed_ip_strs), False)
             
     def testLookupForListedIpStrings(self):
         ''' lookup method must return object with value equal to
@@ -358,40 +263,15 @@ class IpDNSBLTest(BaseDNSBLTest):
         
         for h in self.listed_ip_strs_unknown_class:
             self.assertRaises(UnknownCodeError, self.dnsbl_service.lookup, h)
-    
-    def testLookupIpForListedIps(self):
-        ''' lookup method must return object with value equal to string value
-        of listed ip object it was passed '''
-        
-        for h in self.listed_ips:
-            actual = self.dnsbl_service.lookup_ip(h)
-            self.assertEqual(actual.value, str(h))
-             
-    def testLookupIpForNotListedIps(self):
-        ''' lookup method must return None for not listed ip object it was passed '''
-        
-        for h in self.not_listed_ips:
-            actual = self.dnsbl_service.lookup_ip(h)
-            self.assertEqual(actual, None)
             
-    def testLookupIpForListedIpsWithIncorrectCodes(self):
-        ''' lookup method must raise an exception for an ip object representing value
-        associated with unknown return code '''
-        
-        for h in self.listed_ip_unknown_class:
-            self.assertRaises(UnknownCodeError, self.dnsbl_service.lookup_ip, h)
-            
-class DomainDNSBLTest(BaseDNSBLTest):
+class DNSBLDomainTestMixin(BaseDNSBLValidArgumentTestMixin):
+    ''' Provides tests for methods of BaseDNSBL subclasses.
     
-    @classmethod
-    def setUpDNSBLService(cls, query_domain):
-        ''' Perapre DomainDNSBL instance to be tested
-        
-        :param query_domain: a parent domain of dns query
-        '''
-        
-        cls.dnsbl_service = DomainDNSBL('test_service', query_domain, cls.getCodeItemClassMock())
-        
+    All tests in this mixin use hostnames as arguments and
+    assume hostname values are valid arguments for the
+    tested methods 
+    '''
+    
     def testContainsForListedHostnameStrings(self):
         ''' __contains__ must return True for listed hostname strings '''
          
@@ -401,16 +281,6 @@ class DomainDNSBLTest(BaseDNSBLTest):
         ''' __contains__ must return False for not listed hostname strings '''
          
         self.doTestContains(self.not_listed_hostname_strs, False)
-        
-    def testContainsForListedHostnames(self):
-        ''' __contains__ must return True for listed hostname objects'''
-         
-        self.doTestContainsHostname(self.listed_hostnames, True)
-             
-    def testContainsForNotListedHostnames(self):
-        ''' __contains__ must return False for not listed hostname objects '''
-         
-        self.doTestContainsHostname(self.not_listed_hostnames, False)
         
     def testLookupForListedHostnameStrings(self):
         ''' lookup method must return object with value equal to string hostname it
@@ -434,30 +304,28 @@ class DomainDNSBLTest(BaseDNSBLTest):
         for h in self.listed_hostname_strs_unknown_class:
             self.assertRaises(UnknownCodeError, self.dnsbl_service.lookup, h)
             
-    def testLookupHostnameForListedHostnames(self):
-        ''' lookup method must return object with value equal to string value of 
-        hostname object it was passed '''
+class IpDNSBLTest(DNSBLIpTestMixin, DNSBLInvalidValueTestMixin, AbstractTests.BaseDNSBLTest):
+    @classmethod
+    def setUpDNSBLService(cls, query_domain):
+        ''' Perapre IpDNSBL instance to be tested
+         
+        :param query_domain: a parent domain of dns query
+        '''
+         
+        cls.dnsbl_service = IpDNSBL('test_service', query_domain, cls.getCodeItemClassMock())
         
-        for h in self.listed_hostnames:
-            actual = self.dnsbl_service.lookup_hostname(h)
-            self.assertEqual(actual.value, str(h))
-            
-    def testLookupHostnameForNotListedHostnames(self):
-        ''' lookup method must return None with hostname objects representing 
-        not listed hostnames '''
+class DomainDNSBLTest(DNSBLDomainTestMixin, DNSBLInvalidValueTestMixin, AbstractTests.BaseDNSBLTest):
+    
+    @classmethod
+    def setUpDNSBLService(cls, query_domain):
+        ''' Perapre DomainDNSBL instance to be tested
         
-        for h in self.not_listed_hostnames:
-            actual = self.dnsbl_service.lookup_hostname(h)
-            self.assertEqual(actual, None)
-            
-    def testLookupHostnameForListedHostnamesWithIncorrectCodes(self):
-        ''' lookup method must raise an exception for hostname objects associated
-        with unknown return codes '''
+        :param query_domain: a parent domain of dns query
+        '''
         
-        for h in self.listed_hostname_unknown_class:
-            self.assertRaises(UnknownCodeError, self.dnsbl_service.lookup_hostname, h)
+        cls.dnsbl_service = DomainDNSBL('test_service', query_domain, cls.getCodeItemClassMock())
             
-class GeneralDNSBLTest(IpDNSBLTest, DomainDNSBLTest):
+class GeneralDNSBLTest(DNSBLDomainTestMixin, DNSBLIpTestMixin, AbstractTests.BaseDNSBLTest):
     
     @classmethod
     def setUpDNSBLService(cls, query_domain):
