@@ -151,7 +151,17 @@ class IpDNSBL(IpBLMixin, BaseDNSBL):
         
         return self._do_query(query_prefix)
 
-class DomainDNSBL(DomainBLMixin, BaseDNSBL): pass
+class DomainDNSBL(DomainBLMixin, BaseDNSBL):
+    
+    def _query(self, hostname):
+        ''' Query the service for given hostname
+        
+        :param hostname: a string value representing a hostname
+        :returns: a return code from the service if the hostname is listed on it, otherwise None
+        '''
+        
+        query_prefix = relative_name(hostname)
+        return self._do_query(query_prefix)
 
 class GeneralDNSBL(IpBLMixin, DomainBLMixin, BaseDNSBL): pass
 
