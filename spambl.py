@@ -183,24 +183,6 @@ class BaseDNSBL(object):
         '''
         return self._do_lookup(host, self._query)
     
-    def lookup_ip(self, ip):
-        ''' Perform item lookup for given ip address
-        
-        :param ip: a valid ip address
-        :returns: AddressListItem for given ip if it's listed, 
-        otherwise None
-        '''
-        return self._do_lookup(ip, self._query_for_ip)
-    
-    def lookup_hostname(self, hostname):
-        ''' Perform item lookup for given hostname
-        
-        :param hostname: a valid hostname
-        :returns: AddressListItem for given hostname if it's listed, 
-        otherwise None
-        '''
-        return self._do_lookup(hostname, self._query_for_hostname)
-    
 class IpBLMixin(object):
     
     def _query_for_ip(self, ip):
