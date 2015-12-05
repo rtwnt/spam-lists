@@ -61,43 +61,6 @@ class BaseDNSBL(object):
 
         self._query_suffix = name.from_text(query_suffix)
         self._code_item_class = code_item_class
-        
-    def _query(self, host):
-        ''' Query the service for given host
-        
-        :param host: a host string
-        :returns: an integer representing classification code for given value, if it is listed. Otherwise,
-        it returns None
-        :raises ValueError: if given host is not valid
-        '''
-        try:
-            ip = ip_address(host)
-            return self._query_for_ip(ip)
-        except ValueError:
-            pass
-        
-        try:
-            hostname = relative_name(host)
-            return self._query_for_hostname(hostname)
-        except ValueError:
-            raise ValueError, 'The given value is not a valid host!', exc_info()[2]
-    
-    def _query_for_ip(self, ip):
-        ''' Query the service for given ip
-        
-        :param ip: a valid ip address
-        :raises NotImplementedError: the method is to be implemented in a separate class
-        '''
-        
-        raise NotImplementedError('The service {} does not list ip addresses'.format(self._identifier))
-    
-    def _query_for_hostname(self, hostname):
-        ''' Query the service for given hostname
-        
-        :param hostname: a valid hostname
-        :raises NotImplementedError: the method is to be implemented in a separate class
-        '''
-        raise NotImplementedError('The service {} does not list hostnames'.format(self._identifier))
     
     def _do_query(self, hostname):
         ''' Query DNSBL service for given value
