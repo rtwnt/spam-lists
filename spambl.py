@@ -95,18 +95,17 @@ class BaseDNSBL(object):
         '''
         return bool(self._query(host))
     
-    def _do_lookup(self, host, query_method):
+    def lookup(self, host):
         ''' Perform item lookup for given host
         
         :param host: a host value expected by query_method
-        :param query_method: a function performing query
         :returns: an instance of AddressListItem representing given
         host
         :raises UnknownCodeError: if return code does not
         map to any taxonomic unit present in _code_item_class
         '''
         
-        return_code = query_method(host)
+        return_code = self._query(host)
         
         if not return_code:
             return None
