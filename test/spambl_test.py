@@ -564,10 +564,11 @@ class HostCollectionTest(unittest.TestCase):
     def setUp(self):
         self.listed_hostnames = u'google.com', u'test1.pl'
         self.listed_ips = u'127.0.0.1', u'2001:db8:abc:123::42'
-        
-        self.not_listed_hosts = u'a.com', u'255.0.0.1'
-        
         self.listed_hosts = self.listed_hostnames + self.listed_ips
+        
+        self.not_listed_hostnames = u'a.com', u'lorem.pl'
+        self.not_listed_ips = u'255.0.0.1', u'2001:db8:abc:124::41'
+        self.not_listed_hosts = self.not_listed_hostnames + self.not_listed_ips
         
         self.host_collection_A = HostCollection(self.listed_hosts)
         
@@ -596,6 +597,31 @@ class HostCollectionTest(unittest.TestCase):
         
         test_host = '-k.'
         self.assertRaises(ValueError, self.host_collection_A.add, test_host)
+        
+    def testContainsForListedIps(self):
+        ''' __contains__ must return True for listed ips '''
+        for k in self.listed_ips:
+            self.assertTrue(k in self.host_collection_A)
+            
+    def testContainsForNotListedIps(self):
+        ''' __contains__ must return False for not listed ips '''
+        for k in self.not_listed_ips:
+            self.assertFalse(k in self.host_collection_A)
+            
+    def testContainsForListedHostnames(self):
+        ''' __contains__ must return True for listed hostnames '''
+        for k in self.listed_hostnames:
+            self.assertTrue(k in self.host_collection_A)
+            
+    def testContainsForNotListedHostnames(self):
+        ''' __contains__ must return False for not listed hostnames '''
+        for k in self.not_listed_hostnames:
+            self.assertFalse(k in self.host_collection_A)
+            
+    def testContainsForInvalidArguments(self):
+        ''' __contains__ must raise ValueError for invalid arguments '''
+        for k in ('-k', '999.999.000.111.222'):
+            self.assertRaises(ValueError, self.host_collection_A.__contains__, k)
         
     def testContainsMatchForMatchingHostCollection(self):
         ''' contains_match should return True for a HostCollection

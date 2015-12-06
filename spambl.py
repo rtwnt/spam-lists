@@ -396,6 +396,27 @@ class HostCollection(object):
         
         for host in hosts:
             self.add(host)
+            
+    def __contains__(self, host):
+        ''' Test membership of the host in the collection
+        
+        :param host: a value representing ip address or a hostname
+        :returns: True if given ip address is included in the collection, or
+        if given hostname is a subdomain of at least one domain in the collection
+        :raises ValueError: if the host is not a valid ip address or hostname
+        '''
+        try:
+            value = ip_address(host)
+            return value in self.ip_addresses
+        
+        except ValueError: pass
+        
+        try:
+            value = relative_name(host)
+            return any(value.is_subdomain(h) for h in self.hostnames)
+            
+        except ValueError:
+            raise ValueError, 'The value "{}" is not a valid host'.format(host), exc_info()[2]
         
     def add(self, host):
         ''' Add the given value to collection
@@ -403,13 +424,13 @@ class HostCollection(object):
         :param host: an ip address or a hostname
         :raises ValueError: raised when the given value is not a valid ip address nor a hostname
         '''
+        
         try:
             host = ip_address(host)
             self.ip_addresses.add(host)
             return
             
-        except ValueError:
-            pass
+        except ValueError: pass
         
         try:
             host = relative_name(host)
