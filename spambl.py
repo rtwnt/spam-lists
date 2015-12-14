@@ -483,7 +483,27 @@ class HostCollection(object):
         return new
 
 AddressListItem = namedtuple('AddressListItem', 'value source classification')
+
+class Host(object):
+    ''' Base host class '''
+    def is_match(self, other):
+        ''' Check if the other object matches this instance
         
+        The rules of matching are implemented in
+        _is_match method of subclasses of Host
         
+        :param other: other object to which we compare this instance
+        :returns: True if the objects match
+        '''
+        
+        if isinstance(other, self.__class__):
+            
+            return self._is_match(other)
+        
+        return False
+    
+    def __str__(self):
+        return str(self._value)
+    
 if __name__ == '__main__':
     pass
