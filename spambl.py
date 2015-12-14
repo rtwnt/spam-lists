@@ -64,17 +64,15 @@ class BaseDNSBL(object):
         self._query_suffix = name.from_text(query_suffix)
         self._code_item_class = code_item_class
     
-    def _do_query(self, hostname):
+    def _do_query(self, host):
         ''' Query DNSBL service for given value
         
-        :param hostname: a relative domain name
+        :param host: a host object that can provide a relative domain value representing it
         :returns: an integer representing classification code for given value, if it is listed. Otherwise,
         it returns None
         '''
         
-        if hostname.is_absolute():
-            raise ValueError('The value {} is not a relative host!'.format(hostname))
-        
+        hostname = host.relative_domain
         query_name = hostname.derelativize(self._query_suffix)
         
         try:
@@ -128,9 +126,8 @@ class IpDNSBL(BaseDNSBL):
         :param ip: a value representing ip address
         :returns: a return code from the service if it lists the ip, otherwise None
         '''
-        query_prefix = relative_reverse_pointer(ip)
         
-        return self._do_query(query_prefix)
+        return self._do_query(IpAddress(ip))
 
 class DomainDNSBL(BaseDNSBL):
     
@@ -141,26 +138,18 @@ class DomainDNSBL(BaseDNSBL):
         :returns: a return code from the service if the hostname is listed on it, otherwise None
         '''
         
-        query_prefix = relative_name(hostname)
-        return self._do_query(query_prefix)
+        return self._do_query(Hostname(hostname))
 
 class GeneralDNSBL(BaseDNSBL):
     
-    def _query(self, host):
+    def _query(self, host_value):
         ''' Query the service for given host
         
         :param host: a value representing a host: an ip address or a hostname
         :returns: a return code from the service if the host is listed on it, otherwise None
         '''
         
-        for f in relative_reverse_pointer, relative_name:
-            try:
-                query_prefix = f(host)
-                return self._do_query(query_prefix)
-            
-            except ValueError: pass
-        
-        raise ValueError, 'The value "{}" is not a valid host'.format(host), exc_info()[2]
+        return self._do_query(host(host_value))
 
 class CodeClassificationMap(object):
     ''' A map containing taxonomical units assigned to integer codes'''
@@ -511,10 +500,10 @@ class Host(object):
     
 class Hostname(Host):
     def __init__(self, value):
-        ''' Create a new instance of Hostname 
+        ''' Create a new instance of Hostname
         
         :param value: a string representing a hostname
-        :raises ValueError: if value parameter is not a string 
+        :raises ValueError: if value parameter is not a string
         '''
         value  = str(value)
         if not validators.domain(value):
