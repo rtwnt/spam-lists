@@ -537,5 +537,17 @@ class Hostname(Host):
         
         return self._value.is_subdomain(other._value)
     
+class IpAddress(Host):
+    def __init__(self, value):
+        ''' Create a new instance of IpAddress
+        
+        :param value: a value representing ip address
+        :raises AddressValueError: if the value is an instance of bytes (python3)
+        or str (python 2)
+        :raises ValueError: if the value is not a valid ip v4 or ip v6 address
+        '''
+        
+        self._value = ip_address(value)
+    
 if __name__ == '__main__':
     pass
