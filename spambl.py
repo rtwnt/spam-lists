@@ -526,5 +526,16 @@ class Hostname(Host):
         '''
         return self._value
     
+    def _is_match(self, other):
+        ''' Test if the object matches the other
+        
+        :param other: the object to which we compare this instance
+        :returns: True if the _value is subdomain of other._value
+        :raises AttributeError, TypeError: if the other object does not
+        contain _value, or _value is not of required type
+        '''
+        
+        return self._value.is_subdomain(other._value)
+    
 if __name__ == '__main__':
     pass

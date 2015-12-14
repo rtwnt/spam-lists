@@ -5,7 +5,7 @@ import unittest
 from spambl import (UnknownCodeError, NXDOMAIN, HpHosts, 
                     IpDNSBL, DomainDNSBL, GeneralDNSBL,
                     GoogleSafeBrowsing, UnathorizedAPIKeyError, HostCollection,
-                     CodeClassificationMap, SumClassificationMap)
+                     CodeClassificationMap, SumClassificationMap, Hostname)
 from mock import Mock, patch, MagicMock
 from ipaddress import ip_address as IP
 from itertools import cycle, izip, combinations, product
@@ -677,6 +677,49 @@ class HostCollectionTest(unittest.TestCase):
         
         for k in self.host_collection_A:
             self.assertIn(unicode(k), self.listed_hosts)
+            
+class HostnameTest(unittest.TestCase):
+    
+    @classmethod
+    def setUpClass(cls):
+        cls.test_unrelated_domain_str = 'test.unrelated.domain'
+        cls.unrelated_domain = Hostname(cls.test_unrelated_domain_str)
+        
+        cls.test_superdomain_str = 'hostname'
+        cls.superdomain = Hostname(cls.test_superdomain_str)
+        
+        cls.test_hostname_str = 'test.'+cls.test_superdomain_str
+        cls.hostname = Hostname(cls.test_hostname_str)
+        
+        cls.test_subdomain_str = 'subomain.of.'+cls.test_hostname_str
+        cls.subdomain = Hostname(cls.test_subdomain_str)
+        
+    def testIsMatchForTheSameHostname(self):
+        ''' is_match method should return True for
+        identical hostname '''
+        
+        self.assertTrue(self.hostname.is_match(Hostname(self.test_hostname_str)))
+        
+    def testIsMatchForASubdomain(self):
+        ''' is_match should return False for a subdomain '''
+        
+        self.assertFalse(self.hostname.is_match(self.subdomain))
+        
+    def testIsMatchForASuperDomain(self):
+        ''' is_match should return True for a superdomain '''
+        
+        self.assertTrue(self.hostname.is_match(self.superdomain))
+        
+    def testIsMatchForAnUnrelatedDomain(self):
+        ''' is_match should return False for an unrelated domain '''
+        
+        self.assertFalse(self.hostname.is_match(self.unrelated_domain))
+        
+    def testIsMatchForADifferentObject(self):
+        ''' is_match should return False for an object of different type '''
+        
+        self.assertFalse(self.hostname.is_match(tuple()))
+        
         
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
