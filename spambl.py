@@ -505,5 +505,9 @@ class Host(object):
     def __str__(self):
         return str(self._value)
     
+    def _is_match(self, other):
+        
+        raise NotImplementedError
+    
 if __name__ == '__main__':
     pass
