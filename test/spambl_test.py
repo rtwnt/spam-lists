@@ -5,9 +5,9 @@ import unittest
 from spambl import (UnknownCodeError, NXDOMAIN, HpHosts, 
                     IpDNSBL, DomainDNSBL, GeneralDNSBL,
                     GoogleSafeBrowsing, UnathorizedAPIKeyError, HostCollection,
-                     CodeClassificationMap, SumClassificationMap, Hostname, IpAddress)
+                     CodeClassificationMap, SumClassificationMap, Hostname, IpAddress, host)
 from mock import Mock, patch, MagicMock
-from ipaddress import ip_address as IP
+from ipaddress import ip_address as IP, ip_address
 from itertools import cycle, izip, combinations, product
 from __builtin__ import classmethod
 
@@ -789,6 +789,40 @@ class IpAddressTest(unittest.TestCase):
         ''' is_match should return False for a value of a different type '''
         
         self.assertFalse(self.ipv6.is_match([]))
+        
+        
+class HostTest(unittest.TestCase):
+    ''' Tests host function from spambl module '''
+    
+    @classmethod
+    def setUpClass(cls):
+        cls.ipv4_str = u'127.0.0.1'
+        cls.ipv6_str = u'2001:db8:abc:125::45'
+        cls.hostname = 'test.hostname'
+        cls.invalid_host = []
+        
+    def testHostForIpV4Address(self):
+        ''' host() for ipv4 address should return an IpAddress instance
+        with an expected value of the _value property'''
+        
+        self.assertEqual(host(self.ipv4_str)._value, ip_address(self.ipv4_str))
+        
+    def testHostForIpV6Address(self):
+        ''' host() for ipv6address should return an IpAddress instance
+        with an expected value of the _value property'''
+        
+        self.assertEqual(host(self.ipv6_str)._value, ip_address(self.ipv6_str))
+        
+    def testHostForHostname(self):
+        ''' host() for hostname should return a Hostname instance
+        with an expected value of the _value property'''
+        
+        self.assertEqual(host(self.hostname)._value, relative_name(self.hostname))
+        
+    def testHostForInvalidValue(self):
+        ''' For an invalid argument, host() should raise a ValueError'''
+        
+        self.assertRaises(ValueError, host, self.invalid_host)
         
         
 if __name__ == "__main__":

@@ -569,5 +569,27 @@ class IpAddress(Host):
         '''
         return self._value == other._value
     
+    
+def host(value):
+    ''' Create an instance of a Host subclass from given value
+    
+    :param value: an ip address or a hostname
+    :returns: an instance of a subclass of Host, either an ip address or a hostname
+    :raises ValueError: if the value is not a valid ip address or hostname
+    '''
+    
+    try:
+        return IpAddress(value)
+        
+    except ValueError: pass
+    
+    try:
+        return Hostname(value)
+        
+    except ValueError:
+        raise ValueError, 'The value "{}" is not a valid host'.format(value), exc_info()[2]
+        
+        
+    
 if __name__ == '__main__':
     pass
