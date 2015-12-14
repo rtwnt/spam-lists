@@ -548,6 +548,18 @@ class IpAddress(Host):
         '''
         
         self._value = ip_address(value)
+        
+    @property
+    def relative_domain(self):
+        ''' Get a relative domain name representing the ip address
+        
+        :returns: the reverse pointer relative to the common root
+        depending on the version of ip address stored in _value
+        '''
+        
+        root = ipv4_reverse_domain if self._value.version == 4 else ipv6_reverse_domain
+        
+        return name_from_ip(str(self._value)).relativize(root)
     
 if __name__ == '__main__':
     pass

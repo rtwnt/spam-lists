@@ -5,7 +5,7 @@ import unittest
 from spambl import (UnknownCodeError, NXDOMAIN, HpHosts, 
                     IpDNSBL, DomainDNSBL, GeneralDNSBL,
                     GoogleSafeBrowsing, UnathorizedAPIKeyError, HostCollection,
-                     CodeClassificationMap, SumClassificationMap, Hostname)
+                     CodeClassificationMap, SumClassificationMap, Hostname, IpAddress)
 from mock import Mock, patch, MagicMock
 from ipaddress import ip_address as IP
 from itertools import cycle, izip, combinations, product
@@ -719,6 +719,32 @@ class HostnameTest(unittest.TestCase):
         ''' is_match should return False for an object of different type '''
         
         self.assertFalse(self.hostname.is_match(tuple()))
+        
+
+class IpAddressTest(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        
+        cls.ipv4_address_str = u'255.0.2.1'
+        cls.ipv4_relative_reverse_pointer = relative_name('1.2.0.255')
+        cls.ipv4_address = IpAddress(cls.ipv4_address_str)
+        
+        cls.ipv6_address_str = u'2001:db8:abc:123::42'
+        ipv6_rrp_str = '2.4.0.0.0.0.0.0.0.0.0.0.0.0.0.0.3.2.1.0.c.b.a.0.8.b.d.0.1.0.0.2'
+        cls.ipv6_relative_reverse_pointer = relative_name(ipv6_rrp_str)
+        cls.ipv6_address = IpAddress(cls.ipv6_address_str)
+        
+    def testRelativeDomainForIpV4(self):
+        ''' relative_domain property of IpAddress containing
+        ipv4 value should be equal to given domain '''
+        
+        self.assertEqual(self.ipv4_address.relative_domain, self.ipv4_relative_reverse_pointer)
+        
+    def testRelativeDomainForIpV6(self):
+        ''' relative_domain property of IpAddress containing
+        ipv6 value should be equal to given domain '''
+        
+        self.assertEqual(self.ipv6_address.relative_domain, self.ipv6_relative_reverse_pointer)
         
         
 if __name__ == "__main__":
