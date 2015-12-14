@@ -509,5 +509,14 @@ class Host(object):
         
         raise NotImplementedError
     
+class Hostname(Host):
+    def __init__(self, value):
+        ''' Create a new instance of Hostname 
+        
+        :param value: a string representing a hostname
+        :raises ValueError: if value parameter is not a string 
+        '''
+        self._value = name.from_text(value).relativize(name.root)
+    
 if __name__ == '__main__':
     pass
