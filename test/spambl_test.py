@@ -725,70 +725,70 @@ class IpAddressTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         
-        cls.ipv4_address_str = u'255.0.2.1'
+        cls.ipv4_str = u'255.0.2.1'
         cls.another_ipv4_str = u'127.0.0.1'
-        cls.ipv4_relative_reverse_pointer = relative_name('1.2.0.255')
-        cls.ipv4_address = IpAddress(cls.ipv4_address_str)
+        cls.ipv4_relative_domain = relative_name('1.2.0.255')
+        cls.ipv4 = IpAddress(cls.ipv4_str)
         
-        cls.ipv6_address_str = u'2001:db8:abc:123::42'
+        cls.ipv6_str = u'2001:db8:abc:123::42'
         cls.another_ipv6_str = u'2001:db8:abc:125::45'
         ipv6_rrp_str = '2.4.0.0.0.0.0.0.0.0.0.0.0.0.0.0.3.2.1.0.c.b.a.0.8.b.d.0.1.0.0.2'
-        cls.ipv6_relative_reverse_pointer = relative_name(ipv6_rrp_str)
-        cls.ipv6_address = IpAddress(cls.ipv6_address_str)
+        cls.ipv6_relative_domain = relative_name(ipv6_rrp_str)
+        cls.ipv6 = IpAddress(cls.ipv6_str)
         
     def testRelativeDomainForIpV4(self):
         ''' relative_domain property of IpAddress containing
         ipv4 value should be equal to given domain '''
         
-        self.assertEqual(self.ipv4_address.relative_domain, self.ipv4_relative_reverse_pointer)
+        self.assertEqual(self.ipv4.relative_domain, self.ipv4_relative_domain)
         
     def testRelativeDomainForIpV6(self):
         ''' relative_domain property of IpAddress containing
         ipv6 value should be equal to given domain '''
         
-        self.assertEqual(self.ipv6_address.relative_domain, self.ipv6_relative_reverse_pointer)
+        self.assertEqual(self.ipv6.relative_domain, self.ipv6_relative_domain)
         
     def testIsMatchForTheSameIpV4Address(self):
         ''' is_match for IpAddress objects containing the same IpV4 values
         should return True '''
         
-        self.assertTrue(self.ipv4_address.is_match(IpAddress(self.ipv4_address_str)))
+        self.assertTrue(self.ipv4.is_match(IpAddress(self.ipv4_str)))
         
     def testIsMatchForDifferentIpV4Address(self):
         ''' is_match should return False for a value containing a different ipv4 address '''
         
-        self.assertFalse(self.ipv4_address.is_match(IpAddress(self.another_ipv4_str)))
+        self.assertFalse(self.ipv4.is_match(IpAddress(self.another_ipv4_str)))
         
     def testIsMatchForIpV6Address(self):
         ''' is_match should return False for an ipv6 value '''
         
-        self.assertFalse(self.ipv4_address.is_match(IpAddress(self.ipv6_address_str)))
+        self.assertFalse(self.ipv4.is_match(IpAddress(self.ipv6_str)))
         
     def testIsMatchForAValueOtherThanIpV4Address(self):
         ''' is_match should return False for a value of a different type '''
         
-        self.assertFalse(self.ipv4_address.is_match([]))
+        self.assertFalse(self.ipv4.is_match([]))
         
     def testIsMatchForTheSameIpV6Address(self):
         ''' is_match for IpAddress objects containing the same IpV6 values
         should return True '''
         
-        self.assertTrue(self.ipv6_address.is_match(IpAddress(self.ipv6_address_str)))
+        self.assertTrue(self.ipv6.is_match(IpAddress(self.ipv6_str)))
         
     def testIsMatchForDifferentIpV6Address(self):
         ''' is_match should return False for a value containing a different ipv4 address '''
         
-        self.assertFalse(self.ipv6_address.is_match(IpAddress(self.another_ipv6_str)))
+        self.assertFalse(self.ipv6.is_match(IpAddress(self.another_ipv6_str)))
         
     def testIsMatchForIpV4Address(self):
         ''' is_match should return False for an ipv4 value '''
         
-        self.assertFalse(self.ipv6_address.is_match(IpAddress(self.ipv4_address_str)))
+        self.assertFalse(self.ipv6.is_match(IpAddress(self.ipv4_str)))
         
     def testIsMatchForAValueOtherThanIpV6Address(self):
         ''' is_match should return False for a value of a different type '''
         
-        self.assertFalse(self.ipv6_address.is_match([]))
+        self.assertFalse(self.ipv6.is_match([]))
         
         
 if __name__ == "__main__":
