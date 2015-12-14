@@ -561,5 +561,13 @@ class IpAddress(Host):
         
         return name_from_ip(str(self._value)).relativize(root)
     
+    def _is_match(self, other):
+        ''' Test if this object matches the other
+        
+        :returns: True if both objects have equal _value properties
+        :raises AttributeError: if the other object does not have _value attribute
+        '''
+        return self._value == other._value
+    
 if __name__ == '__main__':
     pass
