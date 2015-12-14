@@ -517,6 +517,14 @@ class Hostname(Host):
         :raises ValueError: if value parameter is not a string 
         '''
         self._value = name.from_text(value).relativize(name.root)
+        
+    @property
+    def relative_domain(self):
+        ''' Return a relative domain representing the value
+        
+        :returns: the _value property of the object
+        '''
+        return self._value
     
 if __name__ == '__main__':
     pass
