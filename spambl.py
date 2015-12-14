@@ -516,6 +516,10 @@ class Hostname(Host):
         :param value: a string representing a hostname
         :raises ValueError: if value parameter is not a string 
         '''
+        value  = str(value)
+        if not validators.domain(value):
+            raise ValueError, 'The value "{}" is not a valid host'.format(value), exc_info()[2]
+        
         self._value = name.from_text(value).relativize(name.root)
         
     @property

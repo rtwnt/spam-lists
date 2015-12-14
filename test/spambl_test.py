@@ -682,10 +682,10 @@ class HostnameTest(unittest.TestCase):
     
     @classmethod
     def setUpClass(cls):
-        cls.test_unrelated_domain_str = 'test.unrelated.domain'
+        cls.test_unrelated_domain_str = 'test.unrelated.domain.com'
         cls.unrelated_domain = Hostname(cls.test_unrelated_domain_str)
         
-        cls.test_superdomain_str = 'hostname'
+        cls.test_superdomain_str = 'hostname.pl'
         cls.superdomain = Hostname(cls.test_superdomain_str)
         
         cls.test_hostname_str = 'test.'+cls.test_superdomain_str
