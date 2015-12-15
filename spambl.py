@@ -564,7 +564,7 @@ class IpAddress(Host):
     
     
 def host(value):
-    ''' Create an instance of a Host subclass from given value
+    ''' Create an instance of IpAddress or Hostname from a given value
     
     :param value: an ip address or a hostname
     :returns: an instance of a subclass of Host, either an ip address or a hostname
