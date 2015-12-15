@@ -582,7 +582,7 @@ class HostCollectionTest(unittest.TestCase):
         
         for h in self.listed_hostnames:
             self.host_collection_A.add(h)
-            self.assertIn(relative_name(h), self.host_collection_A.hostnames)
+            self.assertTrue(any(str(h) == str(i) for i in self.host_collection_A.hosts))
             
     def testAddIps(self):
         ''' Adding a valid ip address should result in inclusion of a
@@ -590,7 +590,7 @@ class HostCollectionTest(unittest.TestCase):
         
         for ip in self.listed_ips:
             self.host_collection_A.add(ip)
-            self.assertIn(IP(ip), self.host_collection_A.ip_addresses)
+            self.assertTrue(any(str(ip) == str(i) for i in self.host_collection_A.hosts))
             
     def testAddInvalidHost(self):
         ''' Adding an invalid host should result in an error '''

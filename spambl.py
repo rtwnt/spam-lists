@@ -376,53 +376,31 @@ class HostCollection(object):
         :param hosts: a sequence of ip adresses and hostnames
         '''
         
-        self.ip_addresses = set()
-        self.hostnames = set()
+        self.hosts = set()
         
         for host in hosts:
             self.add(host)
             
-    def __contains__(self, host):
+    def __contains__(self, host_value):
         ''' Test membership of the host in the collection
         
         :param host: a value representing ip address or a hostname
-        :returns: True if given ip address is included in the collection, or
-        if given hostname is a subdomain of at least one domain in the collection
+        :returns: True if given ip address or hostame match at least one value in the
+        collection
         :raises ValueError: if the host is not a valid ip address or hostname
         '''
-        try:
-            value = ip_address(host)
-            return value in self.ip_addresses
         
-        except ValueError: pass
+        host_obj = host(host_value)
+        return any(map(host_obj.is_match, self.hosts))
         
-        try:
-            value = relative_name(host)
-            return any(value.is_subdomain(h) for h in self.hostnames)
-            
-        except ValueError:
-            raise ValueError, 'The value "{}" is not a valid host'.format(host), exc_info()[2]
-        
-    def add(self, host):
+    def add(self, host_value):
         ''' Add the given value to collection
         
         :param host: an ip address or a hostname
         :raises ValueError: raised when the given value is not a valid ip address nor a hostname
         '''
         
-        try:
-            host = ip_address(host)
-            self.ip_addresses.add(host)
-            return
-            
-        except ValueError: pass
-        
-        try:
-            host = relative_name(host)
-            self.hostnames.add(host)
-            
-        except ValueError:
-            raise ValueError, 'The value "{}" is not a valid host'.format(host), exc_info()[2]
+        self.hosts.add(host(host_value))
 
 AddressListItem = namedtuple('AddressListItem', 'value source classification')
 
