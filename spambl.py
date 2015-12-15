@@ -20,35 +20,6 @@ class UnknownCodeError(SpamBLError):
 class UnathorizedAPIKeyError(SpamBLError):
     ''' Raise when trying to use an unathorized api key '''
     
-
-def relative_name(hostname):
-    ''' Create relative domain name
-    
-    :param hostname: a hostname string
-    :returns: instance of dns.name.Name for given hostname, relative to
-    the root domain dns.name.root.
-    :raises ValueError: if the hostname is not valid
-    '''
-    
-    if validators.domain(hostname):
-        return name.from_text(hostname).relativize(name.root)
-    
-    raise ValueError('Value "{}" is not a valid hostname'.format(hostname))
-
-def relative_reverse_pointer(ip):
-    ''' Create relative reverse pointer
-    
-    :param ip: instance of ip address class from ipaddress module
-    :returns: a dns.name.Name instance for given IP, representing
-    reverse pointer relative to the reverse pointer base domain
-    for the version of given ip
-    '''
-    
-    ip = ip_address(ip)
-    root = ipv4_reverse_domain if ip.version == 4 else ipv6_reverse_domain
-    
-    return name_from_ip(str(ip)).relativize(root)
-    
 class BaseDNSBL(object):
     ''' Represents a DNSBL service '''
     def __init__(self, identifier, query_suffix, code_item_class):
