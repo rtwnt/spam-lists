@@ -622,61 +622,6 @@ class HostCollectionTest(unittest.TestCase):
         ''' __contains__ must raise ValueError for invalid arguments '''
         for k in ('-k', '999.999.000.111.222'):
             self.assertRaises(ValueError, self.host_collection_A.__contains__, k)
-        
-    def testContainsMatchForMatchingHostCollection(self):
-        ''' contains_match should return True for a HostCollection
-        that includes matching values '''
-        
-        self.assertTrue(self.host_collection_A.contains_match(self.matching_A))
-        
-    def testContainsMatchForNotMatchingHostCollection(self):
-        ''' contains_match should return False for a HostCollection
-        that does not have any values in common with the other '''
-        
-        self.assertFalse(self.host_collection_A.contains_match(self.not_matching_a))
-        
-    def testContainsMatchForEmptyHostCollection(self):
-        ''' contains_match should return False for an empty
-        HostCollection '''
-        
-        self.assertFalse(self.host_collection_A.contains_match(self.empty))
-        
-    def testDifferenceForHostCollectionAandMatchingA(self):
-        ''' The difference between a host collection and another host
-        collection matching some of its elements should be a host
-        collection with only elements not matching the second one '''
-        
-        actual = self.matching_A.difference(self.host_collection_A)
-        expected = self.not_matching_a
-        
-        self.assertItemsEqual(actual.hostnames, expected.hostnames)
-        self.assertItemsEqual(actual.ip_addresses, expected.ip_addresses)
-        
-    def testDifferenceForMatchingAandHostCollectionA(self):
-        ''' The difference between a host collection and a host
-        collection matching it should be empty host collection'''
-        actual = self.host_collection_A.difference(self.matching_A)
-        expected = self.empty
-        
-        self.assertItemsEqual(actual.hostnames, expected.hostnames)
-        self.assertItemsEqual(actual.ip_addresses, expected.ip_addresses)
-        
-    def testDifferenceForHostCollectionAandEmpty(self):
-        ''' The difference between a host collection and an empty host
-        collection should be equal to the non-empty host
-        collection '''
-        actual = self.host_collection_A.difference(self.empty)
-        expected = self.host_collection_A
-        
-        self.assertItemsEqual(actual.hostnames, expected.hostnames)
-        self.assertItemsEqual(actual.ip_addresses, expected.ip_addresses)
-        
-    def testIter(self):
-        ''' The __iter__ method should yield all hosts contained
-        in HostCollection instance '''
-        
-        for k in self.host_collection_A:
-            self.assertIn(unicode(k), self.listed_hosts)
             
 class HostnameTest(unittest.TestCase):
     
@@ -823,7 +768,6 @@ class HostTest(unittest.TestCase):
         ''' For an invalid argument, host() should raise a ValueError'''
         
         self.assertRaises(ValueError, host, self.invalid_host)
-        
         
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']

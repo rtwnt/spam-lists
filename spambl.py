@@ -365,13 +365,9 @@ class GoogleSafeBrowsing(object):
     
 
 class HostCollection(object):
-    ''' Provides a container for ip addresses and domain names
+    ''' Provides a container for ip addresses and domain names.
     
-    Contains methods for testing if the collection matches partly with 
-    another instance. The match is detected when:
-    
-    * both collections have at least one the same ip address in them
-    * this collection contains a subdomain of a domain in the other collection
+    May be used as a local whitelist or blacklist.
     '''
     
     def __init__(self, hosts=()):
@@ -427,49 +423,6 @@ class HostCollection(object):
             
         except ValueError:
             raise ValueError, 'The value "{}" is not a valid host'.format(host), exc_info()[2]
-            
-    def get_domain_matches(self, other):
-        ''' Get domains from the other that are subdomains
-        of domains in this host collection 
-        
-        :param other: an instance of HostCollection
-        :returns: a subdomain of a domain in the other
-        '''
-        
-        for sub, _super in product(self.hostnames, other.hostnames):
-            if sub.is_subdomain(_super):
-                yield sub
-                
-    def __iter__(self):
-        for ip in self.ip_addresses:
-            yield ip
-            
-        for hostname in self.hostnames:
-            yield hostname
-    
-    def contains_match(self, other):
-        ''' Test if the other contains a matching value 
-        
-        :param other: an instance of HostCollection
-        :returns: True if any match between the collections is detected
-        '''
-        if any(ip in self.ip_addresses for ip in other.ip_addresses):
-            return True
-        
-        return any(self.get_domain_matches(other))
-        
-    def difference(self, other):
-        ''' Return a new host collection without matches from the other
-        
-        :param other: an instance of HostCollection
-        :returns: new instance of HostCollection
-        '''
-        
-        new  = HostCollection()
-        new.ip_addresses = self.ip_addresses - other.ip_addresses
-        new.hostnames = self.hostnames - {x for x in self.get_domain_matches(other)}
-        
-        return new
 
 AddressListItem = namedtuple('AddressListItem', 'value source classification')
 
