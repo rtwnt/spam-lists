@@ -4,7 +4,7 @@
 from sys import exc_info
 from dns.resolver import query, NXDOMAIN
 from requests import get, post, HTTPError
-from itertools import izip, product
+from itertools import izip
 from ipaddress import ip_address
 from dns import name
 from collections import namedtuple
