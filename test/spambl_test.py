@@ -349,6 +349,8 @@ class HpHostsTest(unittest.TestCase):
         
         cls.hosts_listed = listed_hostnames + listed_ips
         
+        cls.invalid_hosts = u'266.266.266.266', u'-test.host.pl'
+        
         not_listed_hostnames = map(relative_name, ('at.pl', 'lorem.com', 'impsum.com'))
         not_listed_ips = map(IP, [u'211.170.0.1'])
         
@@ -394,6 +396,11 @@ class HpHostsTest(unittest.TestCase):
         
         for host in self.hosts_not_listed:
             self.assertFalse(host in self.hp_hosts)
+            
+    def testContainsForInvalidHosts(self):
+        ''' For invalid hosts, __contains__ should raise a ValueError '''
+        for val in self.invalid_hosts:
+            self.assertRaises(ValueError, self.hp_hosts.__contains__, val)
                 
     def testLookupForListedHosts(self):
         ''' For listed hosts, lookup should return an object representing it'''
@@ -406,6 +413,11 @@ class HpHostsTest(unittest.TestCase):
             
         for host in self.hosts_not_listed:
             self.assertEqual(self.hp_hosts.lookup(host), None)
+            
+    def testLookupForInvalidHosts(self):
+        ''' For invalid hosts, lookup should raise a ValueError '''
+        for val in self.invalid_hosts:
+            self.assertRaises(ValueError, self.hp_hosts.lookup, val)
             
     @classmethod
     def tearDownClass(cls):

@@ -198,14 +198,16 @@ class HpHosts(object):
         
         self.app_id = client_name
         
-    def _query(self, host, classification = False):
+    def _query(self, host_value, classification = False):
         ''' Query the client for data of given host
         
         :param host: a valid host string
         :param classification: if True: hpHosts is queried also for classification for given host, if listed
         :returns: content of response to GET request to hpHosts for data on the given host
         '''
-        url = 'http://verify.hosts-file.net/?v={0}&s={1}'.format(self.app_id, host)
+        
+        host_value = host(host_value)
+        url = 'http://verify.hosts-file.net/?v={0}&s={1}'.format(self.app_id, host_value)
         url = url + '&class=true' if classification else url
         
         return get(url).content
