@@ -474,19 +474,18 @@ def host(value):
     :returns: an instance of a subclass of Host, either an ip address or a hostname
     :raises ValueError: if the value is not a valid ip address or hostname
     '''
+
+    data = [value]
     
-    try:
-        return IpAddress(value)
+    for f in IpAddress, Hostname:
+        try:
+            return  f(value)
         
-    except ValueError: pass
+        except ValueError as e:
+            data.append(str(e))
     
-    try:
-        return Hostname(value)
-        
-    except ValueError:
-        raise ValueError, 'The value "{}" is not a valid host'.format(value), exc_info()[2]
-        
-        
+    msg_tpl = "The value '{}' is not a valid host:\n* {}\n* {}"
+    raise ValueError, msg_tpl.format(*data)
     
 if __name__ == '__main__':
     pass
