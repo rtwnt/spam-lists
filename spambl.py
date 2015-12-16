@@ -411,7 +411,7 @@ class Hostname(Host):
         '''
         value  = str(value)
         if not validators.domain(value):
-            raise ValueError, 'The value "{}" is not a valid host'.format(value), exc_info()[2]
+            raise ValueError, "'{}' is not a valid hostname".format(value), exc_info()[2]
         
         self._value = name.from_text(value).relativize(name.root)
         
