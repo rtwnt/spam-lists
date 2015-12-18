@@ -3,7 +3,7 @@
 
 from sys import exc_info
 from dns.resolver import query, NXDOMAIN
-from requests import get, post, HTTPError
+from requests import get, post, HTTPError, adapters, Session
 from itertools import izip
 from ipaddress import ip_address
 from dns import name
@@ -510,6 +510,22 @@ def assert_valid_url(value):
     
     if not (match and any(f(host) for f in host_validators)):
         raise ValueError, "'{}' is not a valid url".format(value)
+    
+def request_session(max_retries):
+    ''' Get a request session
+    
+    :param max_retries: maximum number of retries configured for 
+    the session
+    :returns: a requests.Session instance
+    '''
+    
+    adapter = adapters.HTTPAdapter(max_retries=max_retries)
+    session = Session()
+    
+    for s in 'http://', 'https://':
+        session.mount(s, adapter)
+        
+    return session
     
 if __name__ == '__main__':
     pass
