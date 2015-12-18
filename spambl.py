@@ -10,6 +10,8 @@ from dns import name
 from collections import namedtuple
 import validators
 from dns.reversename import ipv4_reverse_domain, ipv6_reverse_domain, from_address as name_from_ip
+from urlparse import urlparse
+import re
 
 class SpamBLError(Exception):
     ''' Base exception class for spambl module '''
@@ -486,6 +488,28 @@ def host(value):
     
     msg_tpl = "The value '{}' is not a valid host:\n* {}\n* {}"
     raise ValueError, msg_tpl.format(*data)
+
+url_regex = re.compile(r'^[a-z0-9\.\-\+]*://' #scheme
+                       r'(?:\S+(?::\S*)?@)?' #authentication
+                       r'(?:[^/:]+|\[[0-9a-f:\.]+\])' # host
+                       r'(?::\d{2,5})?' # port
+                       r'(?:[/?#][^\s]*)?' # path, query or fragment
+                       r'$', re.IGNORECASE)
+
+def assert_valid_url(value):
+    ''' Make sure the value is a valid url
+    
+    :param value: a value to be tested
+    :raises ValueError: if value is not a valid url
+    '''
+    host_validators = validators.ipv4, validators.ipv6, validators.domain
+    
+    match = url_regex.match(value)
+    
+    host = urlparse(value).hostname
+    
+    if not (match and any(f(host) for f in host_validators)):
+        raise ValueError, "'{}' is not a valid url".format(value)
     
 if __name__ == '__main__':
     pass
