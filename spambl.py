@@ -4,7 +4,7 @@
 from sys import exc_info
 from dns.resolver import query, NXDOMAIN
 from requests import get, post, adapters, Session
-from requests.exceptions import HTTPError
+from requests.exceptions import HTTPError, Timeout, ConnectionError, InvalidSchema, InvalidURL
 from itertools import izip
 from ipaddress import ip_address
 from dns import name
@@ -526,6 +526,41 @@ def request_session(max_retries):
         session.mount(s, adapter)
         
     return session
+
+def get_valid_redirect_urls(max_retries):
+    ''' Get a generator yielding url addresses from response history
+    for given url 
+    
+    :param max_retries: a maximum number of retries per request
+    :returns: a generator function
+    '''
+    session = request_session(max_retries)
+    
+    def valid_redirect_urls(url):
+        ''' Get urls of all redirects following request with the given url
+        
+        :param url: a url value
+        :returns: a set of all urls from redirect history of request with the given url address
+        :raises requests.exceptions.InvalidUrl: if the given url is somehow invalid
+        '''
+        try:
+            response = session.head(url)
+            
+            try:
+                for response in session.resolve_redirects(response, response.request):
+                    yield response.url
+            except InvalidURL: pass
+                
+        except (Timeout, ConnectionError, InvalidSchema):
+            try:
+                last_url = response.headers['location']
+                
+                if is_valid_url(last_url):
+                    yield last_url
+                
+            except (KeyError, NameError): pass
+        
+    return valid_redirect_urls
     
 if __name__ == '__main__':
     pass

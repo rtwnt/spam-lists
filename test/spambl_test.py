@@ -5,14 +5,15 @@ import unittest
 from spambl import (UnknownCodeError, NXDOMAIN, HpHosts, 
                     IpDNSBL, DomainDNSBL, GeneralDNSBL,
                     GoogleSafeBrowsing, UnathorizedAPIKeyError, HostCollection,
-                     CodeClassificationMap, SumClassificationMap, Hostname, IpAddress, host, is_valid_url)
+                     CodeClassificationMap, SumClassificationMap, Hostname, IpAddress, 
+                     host, is_valid_url, get_valid_redirect_urls)
 from mock import Mock, patch, MagicMock
 from ipaddress import ip_address as IP, ip_address
 from itertools import cycle, izip, combinations, product
 from __builtin__ import classmethod
 
 from urlparse import urlparse, parse_qs
-from requests.exceptions import HTTPError
+from requests.exceptions import HTTPError, MissingSchema, InvalidSchema, InvalidURL
 from dns import name
 from dns import reversename
 from dns.exception import SyntaxError
@@ -808,6 +809,165 @@ class IsValidUrlTest(unittest.TestCase):
           
         for u in self.invalid_urls:
             self.assertFalse(is_valid_url(u))
+            
+class ValidRedirectUrlsTest(unittest.TestCase):
+    @classmethod
+    def setUpData(cls):
+        
+        ''' Types of urls causing different behaviour of valid_redirect_urls '''
+        cls.missing_schema_urls = 'test.url1.com', 'test.url2.pl'
+        cls.ftp_urls = 'ftp://test.url3.pl', 'ftp://test.url4.com'
+        cls.invalid_urls = 'http://266.0.0.1', 'https://127.0.1.1.1', 'http://-test.url5.com'
+        cls.http_urls = 'https://final.pl', 'http://125.123.223.1', 'http://[2001:db8:abc:125::45]'
+        
+        ''' maps of tested urls to their redirect locations '''
+        
+        cls.http_last = {
+                         'http://http.first.com': ('http://abc.first.com', cls.http_urls[0]),
+                         'http://http.second.com': ('http://abc.second.com', cls.http_urls[1]),
+                         'http://http.third.com': ('http://abc.third.com', cls.http_urls[2]),
+                         'http://http.fourth.com': (cls.http_urls[0],),
+                         'http://http.fifth.com': (cls.http_urls[1],),
+                         'http://http.sixth.com': (cls.http_urls[2],)
+                         }
+        
+        cls.ftp_last = {
+                        'http://ftp.first.com': ('http://def.first.com', cls.ftp_urls[0]),
+                         'http://ftp.second.com': ('http://def.second.com', cls.ftp_urls[1]),
+                         'http://ftp.third.com': (cls.ftp_urls[0],),
+                         'http://ftp.fourth.com': (cls.ftp_urls[1],)
+                        }
+        
+        cls.invalid_last = {
+                                'http://invalid.first.com': ('http://ghi.first.com', cls.invalid_urls[0]),
+                                'http://invalid.second.com': ('http://ghi.second.com', cls.invalid_urls[1]),
+                                'http://invalid.third.com': ('http://ghi.third.com', cls.invalid_urls[2]),
+                                'http://invalid.fourth.com': (cls.invalid_urls[0],),
+                                'http://invalid.fifth.com': (cls.invalid_urls[1],),
+                                'http://invalid.sixth.com': (cls.invalid_urls[2],)
+                                }
+        
+        cls.url_redirect_maps = cls.http_last, cls.ftp_last, cls.invalid_last
+        
+    @classmethod
+    def setUpClass(cls):
+        cls.setUpData()
+        
+        cls.patcher = patch('spambl.request_session')
+        cls.mocked_request_session = cls.patcher.start()
+        
+        
+        session_mock = Mock(spec=['head', 'resolve_redirects'])
+        
+        session_mock.head.side_effect = cls.head
+        session_mock.resolve_redirects.side_effect = cls.resolve_redirects
+        
+        cls.mocked_request_session.return_value = session_mock
+        
+        cls.valid_redirect_urls = staticmethod(get_valid_redirect_urls(1))
+        
+    @classmethod
+    def get_location(cls, url):
+        ''' Get content of Location header for response to given url 
+        
+        :param url: url value
+        :returns: a location header value according to 
+        the input data provided for the test
+        '''
+        for _map in cls.url_redirect_maps:
+            for u, ru in _map.iteritems():
+                if u == url:
+                    return ru[0]
+                
+                try: 
+                    return ru[ru.index(url)+1]
+                
+                except ValueError: pass
+                
+                except IndexError:
+                    return None
+        return None
+                
+    @classmethod
+    def head(cls, url):
+        ''' Provides side effect for mocked requests.Session.head '''
+        
+        if url in cls.missing_schema_urls:
+            raise MissingSchema
+        
+        elif url in cls.ftp_urls:
+            raise InvalidSchema
+        
+        elif url in cls.invalid_urls:
+                raise InvalidURL
+            
+        response = Mock(spec = ['request', 'url', 'headers'])
+        response.headers = {}
+        location = cls.get_location(url)
+        if location:
+            response.headers['location'] = location
+        
+        response.url = url
+        return response
+            
+            
+    @classmethod
+    def resolve_redirects(cls, response, _):
+        ''' Provides side effects for mocked requests.Session.resolve_redirects '''
+        while 'location' in response.headers:
+            response = cls.head(response.headers['location'])
+            yield response
+            
+            
+    def testForTargetFtpUrl(self):
+        ''' The responce history is expected to contain all the urls except
+        the first one '''
+        
+        for url, expected_redirects in self.ftp_last.iteritems():
+            actual_redirects = tuple(self.valid_redirect_urls(url))
+            self.assertItemsEqual(actual_redirects, expected_redirects)
+            
+    def testForTargetInvalidUrl(self):
+        ''' The response history is expected to contain all the addresses
+        except the first one and the invalid last one '''
+        for url, redirects in self.invalid_last.iteritems():
+            expected = redirects[:-1]
+            actual = tuple(self.valid_redirect_urls(url))
+            self.assertItemsEqual(actual, expected)
+            
+    def testForTargetValidHttpUrl(self):
+        ''' The response history is expected to contain all the addresses except
+        the first one '''
+        
+        for url, expected_redirects in self.http_last.iteritems():
+            actual = tuple(self.valid_redirect_urls(url))
+            self.assertItemsEqual(actual, expected_redirects)
+            
+    def testForHttpUrlsWithNoRedirects(self):
+        ''' The response history is expected to contain no addresses '''
+        for u in self.http_urls:
+            actual = tuple(self.valid_redirect_urls(u))
+            self.assertItemsEqual(actual, tuple())
+        
+    def testForFtpUrls(self):
+        ''' The response history us expected to contain no addresses '''
+        for u in self.ftp_urls:
+            actual = tuple(self.valid_redirect_urls(u))
+            self.assertEqual(actual, tuple())
+        
+    def testForInvalidUrls(self):
+        ''' ValueError is expected to be raised '''
+        for u in self.invalid_urls:
+            self.assertRaises(ValueError, lambda e: tuple(self.valid_redirect_urls(e)), u)
+            
+    def testForMissingSchemaUrls(self):
+        ''' MissingSchema is expected to be raised '''
+        for u in self.missing_schema_urls:
+            self.assertRaises(MissingSchema, lambda e: tuple(self.valid_redirect_urls(e)), u)
+            
+    @classmethod
+    def tearDownClass(cls):
+        cls.patcher.stop()
             
         
 if __name__ == "__main__":
