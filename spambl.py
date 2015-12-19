@@ -495,21 +495,6 @@ url_regex = re.compile(r'^[a-z0-9\.\-\+]*://' #scheme
                        r'(?::\d{2,5})?' # port
                        r'(?:[/?#][^\s]*)?' # path, query or fragment
                        r'$', re.IGNORECASE)
-
-def assert_valid_url(value):
-    ''' Make sure the value is a valid url
-    
-    :param value: a value to be tested
-    :raises ValueError: if value is not a valid url
-    '''
-    host_validators = validators.ipv4, validators.ipv6, validators.domain
-    
-    match = url_regex.match(value)
-    
-    host = urlparse(value).hostname
-    
-    if not (match and any(f(host) for f in host_validators)):
-        raise ValueError, "'{}' is not a valid url".format(value)
     
 def request_session(max_retries):
     ''' Get a request session
