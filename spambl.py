@@ -3,7 +3,8 @@
 
 from sys import exc_info
 from dns.resolver import query, NXDOMAIN
-from requests import get, post, HTTPError, adapters, Session
+from requests import get, post, adapters, Session
+from requests.exceptions import HTTPError
 from itertools import izip
 from ipaddress import ip_address
 from dns import name
