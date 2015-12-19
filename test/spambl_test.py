@@ -13,7 +13,7 @@ from itertools import cycle, izip, combinations, product
 from __builtin__ import classmethod
 
 from urlparse import urlparse, parse_qs
-from requests import HTTPError
+from requests.exceptions import HTTPError
 from dns import name
 from dns import reversename
 from dns.exception import SyntaxError
