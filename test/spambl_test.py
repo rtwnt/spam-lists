@@ -5,7 +5,8 @@ import unittest
 from spambl import (UnknownCodeError, NXDOMAIN, HpHosts, 
                     IpDNSBL, DomainDNSBL, GeneralDNSBL,
                     GoogleSafeBrowsing, UnathorizedAPIKeyError, HostCollection,
-                     CodeClassificationMap, SumClassificationMap, Hostname, IpAddress, host, assert_valid_url)
+                     CodeClassificationMap, SumClassificationMap, Hostname, IpAddress, host, 
+                     assert_valid_url, is_valid_url)
 from mock import Mock, patch, MagicMock
 from ipaddress import ip_address as IP, ip_address
 from itertools import cycle, izip, combinations, product
@@ -796,22 +797,53 @@ class AssertValidUrlTest(unittest.TestCase):
         'http://test.domain.com:aaa', 
         'https://testdomaincom', 
         'http://-invalid.domain.com'
-        
+         
     def testAssertValidUrlForValidUrls(self):
         ''' The function should not raise an exception for valid urls '''
-        
+         
         try:
             map(assert_valid_url, self.valid_urls)
-            
+             
         except ValueError:
             self.fail('Exception has been raised for a valid url')
-            
-            
+             
+             
     def testAssertValidUrlForInvalidUrls(self):
         ''' The function should raise ValueError for invalid urls '''
-        
+         
         for u in self.invalid_urls:
             self.assertRaises(ValueError, assert_valid_url, u)
+            
+            
+class IsValidUrlTest(unittest.TestCase):
+     
+    @classmethod
+    def setUpClass(cls):
+        cls.valid_urls = 'http://test.url.com', 'https://google.com', 
+        'https://google.com/',
+        'https://test.domain.com/path/element?var=1&var_2=3#fragment', 
+        'http://test.domain.com?var_1=1&var_2=2',
+        'https://test.domain.com:123', 'https://abc:def@test.domain.com'
+        'http://255.0.0.255', 'http://[2001:db8:abc:125::45]'
+         
+        cls.invalid_urls = 'test.url.com', 'http://266.0.0.266', 'http://127.0.0.1.1', 
+        'http://test.domain.com:aaa', 
+        'https://testdomaincom', 
+        'http://-invalid.domain.com'
+         
+    def testIsValidUrlForValidUrls(self):
+        ''' The function should return True for valid urls '''
+         
+        for u in self.valid_urls:
+            self.assertTrue(is_valid_url(u))
+             
+             
+    def testAssertValidUrlForInvalidUrls(self):
+        ''' The function should return False for invalid urls '''
+          
+        for u in self.invalid_urls:
+            self.assertFalse(is_valid_url(u))
+            
         
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']

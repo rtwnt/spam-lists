@@ -526,6 +526,20 @@ def request_session(max_retries):
         session.mount(s, adapter)
         
     return session
+
+def is_valid_url(value):
+    ''' Check if given value is valid url string
+    
+    :param value: a value to test
+    :returns: True if the value is valid url string
+    '''
+    host_validators = validators.ipv4, validators.ipv6, validators.domain
+    
+    match = url_regex.match(value)
+    
+    host = urlparse(value).hostname
+    
+    return (match and any(f(host) for f in host_validators))
     
 if __name__ == '__main__':
     pass
