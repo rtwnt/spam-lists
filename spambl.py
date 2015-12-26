@@ -527,16 +527,18 @@ def request_session(max_retries):
         
     return session
 
-def get_valid_redirect_urls(max_retries):
-    ''' Get a generator yielding url addresses from response history
-    for given url 
+class RedirectUrlResolver(object):
+    '''Responsible for listing valid response addresses for given urls'''
     
-    :param max_retries: a maximum number of retries per request
-    :returns: a generator function
-    '''
-    session = request_session(max_retries)
-    
-    def valid_redirect_urls(url):
+    def __init__(self, max_retries):
+        ''' Create a new instance
+        
+        :param max_retries: a maximum number of retries per request
+        '''
+        
+        self.session = request_session(max_retries)
+        
+    def __call__(self, url):
         ''' Get urls of all redirects following request with the given url
         
         :param url: a url value
@@ -544,10 +546,10 @@ def get_valid_redirect_urls(max_retries):
         :raises requests.exceptions.InvalidUrl: if the given url is somehow invalid
         '''
         try:
-            response = session.head(url)
+            response = self.session.head(url)
             
             try:
-                for response in session.resolve_redirects(response, response.request):
+                for response in self.session.resolve_redirects(response, response.request):
                     yield response.url
             except InvalidURL: pass
                 
@@ -559,8 +561,6 @@ def get_valid_redirect_urls(max_retries):
                     yield last_url
                 
             except (KeyError, NameError): pass
-        
-    return valid_redirect_urls
     
 if __name__ == '__main__':
     pass

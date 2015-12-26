@@ -6,7 +6,7 @@ from spambl import (UnknownCodeError, NXDOMAIN, HpHosts,
                     IpDNSBL, DomainDNSBL, GeneralDNSBL,
                     GoogleSafeBrowsing, UnathorizedAPIKeyError, HostCollection,
                      CodeClassificationMap, SumClassificationMap, Hostname, IpAddress, 
-                     host, is_valid_url, get_valid_redirect_urls)
+                     host, is_valid_url, RedirectUrlResolver)
 from mock import Mock, patch, MagicMock
 from ipaddress import ip_address as IP, ip_address
 from itertools import cycle, izip, combinations, product
@@ -810,7 +810,7 @@ class IsValidUrlTest(unittest.TestCase):
         for u in self.invalid_urls:
             self.assertFalse(is_valid_url(u))
             
-class ValidRedirectUrlsTest(unittest.TestCase):
+class RedirectUrlResolverTest(unittest.TestCase):
     @classmethod
     def setUpData(cls):
         
@@ -864,7 +864,7 @@ class ValidRedirectUrlsTest(unittest.TestCase):
         
         cls.mocked_request_session.return_value = session_mock
         
-        cls.valid_redirect_urls = staticmethod(get_valid_redirect_urls(1))
+        cls.valid_redirect_urls = RedirectUrlResolver(1)
         
     @classmethod
     def get_location(cls, url):
