@@ -575,10 +575,10 @@ class RedirectUrlResolver(object):
                     
             except InvalidURL: pass
                 
-            except (Timeout, ConnectionError, InvalidSchema):
+            except (Timeout, ConnectionError, InvalidSchema) as e:
                 last_url = response.headers['location']
                 
-                if is_valid_url(last_url):
+                if isinstance(e, Timeout) or is_valid_url(last_url):
                     yield last_url
     
 if __name__ == '__main__':
