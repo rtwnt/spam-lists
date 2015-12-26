@@ -530,13 +530,13 @@ def request_session(max_retries):
 class RedirectUrlResolver(object):
     '''Responsible for listing valid response addresses for given urls'''
     
-    def __init__(self, max_retries):
+    def __init__(self, session = Session()):
         ''' Create a new instance
         
-        :param max_retries: a maximum number of retries per request
+        :param session: a requests.Session instance used for resolving redirects
         '''
         
-        self.session = request_session(max_retries)
+        self.session = session
         
     def __call__(self, url):
         ''' Get urls of all redirects following request with the given url

@@ -853,18 +853,12 @@ class RedirectUrlResolverTest(unittest.TestCase):
     def setUpClass(cls):
         cls.setUpData()
         
-        cls.patcher = patch('spambl.request_session')
-        cls.mocked_request_session = cls.patcher.start()
-        
-        
         session_mock = Mock(spec=['head', 'resolve_redirects'])
         
         session_mock.head.side_effect = cls.head
         session_mock.resolve_redirects.side_effect = cls.resolve_redirects
         
-        cls.mocked_request_session.return_value = session_mock
-        
-        cls.valid_redirect_urls = RedirectUrlResolver(1)
+        cls.valid_redirect_urls = RedirectUrlResolver(session_mock)
         
     @classmethod
     def get_location(cls, url):
@@ -964,11 +958,6 @@ class RedirectUrlResolverTest(unittest.TestCase):
         ''' MissingSchema is expected to be raised '''
         for u in self.missing_schema_urls:
             self.assertRaises(MissingSchema, lambda e: tuple(self.valid_redirect_urls(e)), u)
-            
-    @classmethod
-    def tearDownClass(cls):
-        cls.patcher.stop()
-            
         
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
