@@ -90,7 +90,7 @@ class BaseDNSBL(object):
             return AddressListItem(str(host), self._identifier, classification)
         
         except UnknownCodeError as e:
-            raise type(e), 'Source:'+str(self), exc_info()[2]
+            raise exc_info()[0],  '{}\nSource:{}'.format(str(e), str(self)), exc_info()[2]
         
 class IpDNSBL(BaseDNSBL):
     
