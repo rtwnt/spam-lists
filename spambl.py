@@ -4,7 +4,8 @@
 from sys import exc_info
 from dns.resolver import query, NXDOMAIN
 from requests import get, post, adapters, Session
-from requests.exceptions import HTTPError, Timeout, ConnectionError, InvalidSchema, InvalidURL
+from requests.exceptions import (HTTPError, Timeout, ConnectionError, InvalidSchema, InvalidURL,
+                                 MissingSchema)
 from itertools import izip
 from ipaddress import ip_address
 from dns import name
@@ -538,29 +539,47 @@ class RedirectUrlResolver(object):
         
         self.session = session
         
+    def get_first_response(self, url):
+        ''' Get the first response from a chain
+        
+        :param url: a url value
+        :returns: an object representing the first response in
+        the response history for given url
+        :raises ValueError: if the parameter is not a valid url value
+        '''
+        try:
+            return self.session.head(url)
+            
+        except (ConnectionError, InvalidSchema):
+            if not is_valid_url(url):
+                raise ValueError, '{} is not a valid url'.format(url), exc_info()[2]
+        except (InvalidURL, MissingSchema) as e:
+            raise ValueError, str(e), exc_info()[2]
+        except Timeout:
+            pass
+        
     def __call__(self, url):
         ''' Get urls of all redirects following request with the given url
         
         :param url: a url value
-        :returns: a set of all urls from redirect history of request with the given url address
-        :raises requests.exceptions.InvalidUrl: if the given url is somehow invalid
+        :returns: valid redirection addresses. If a request
+        for an address fails, and the address is a valid url string, it's included as the
+        last returned value. If the value is invalid, no further values are returned.
+        :raises ValuError: if the argument is not a valid url value
         '''
-        try:
-            response = self.session.head(url)
-            
+        response = self.get_first_response(url)
+        if response:
             try:
                 for response in self.session.resolve_redirects(response, response.request):
                     yield response.url
+                    
             except InvalidURL: pass
                 
-        except (Timeout, ConnectionError, InvalidSchema):
-            try:
+            except (Timeout, ConnectionError, InvalidSchema):
                 last_url = response.headers['location']
                 
                 if is_valid_url(last_url):
                     yield last_url
-                
-            except (KeyError, NameError): pass
     
 if __name__ == '__main__':
     pass

@@ -955,9 +955,9 @@ class RedirectUrlResolverTest(unittest.TestCase):
             self.assertRaises(ValueError, lambda e: tuple(self.valid_redirect_urls(e)), u)
             
     def testForMissingSchemaUrls(self):
-        ''' MissingSchema is expected to be raised '''
+        ''' ValueError is expected to be raised '''
         for u in self.missing_schema_urls:
-            self.assertRaises(MissingSchema, lambda e: tuple(self.valid_redirect_urls(e)), u)
+            self.assertRaises(ValueError, lambda e: tuple(self.valid_redirect_urls(e)), u)
         
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
