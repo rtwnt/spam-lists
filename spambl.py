@@ -580,6 +580,31 @@ class RedirectUrlResolver(object):
                 
                 if isinstance(e, Timeout) or is_valid_url(last_url):
                     yield last_url
+                    
+class BaseUrlTester(object):
+    ''' A base for classes responsible for url testing '''
+    
+    def __init__(self, session = None):
+        ''' Create a new instance
+        
+        :param session: requests.Session instance used for redirect
+        url resolution
+        '''
+        if session:
+            self.redirect_resolver.session = session
+        
+    @property
+    def redirect_resolver(self):
+        ''' Get redirect resolver
+        
+        :returns: an instance of RedirecUrlResolver set for this object
+        '''
+        if not self._redirect_resolver:
+            self._redirect_resolver = RedirectUrlResolver()
+            
+        return self._redirect_resolver
+        
+        
     
 if __name__ == '__main__':
     pass
