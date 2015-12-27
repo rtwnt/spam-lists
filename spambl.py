@@ -527,59 +527,6 @@ def request_session(max_retries):
         session.mount(s, adapter)
         
     return session
-
-class RedirectUrlResolver(object):
-    '''Responsible for listing valid response addresses for given urls'''
-    
-    def __init__(self, session = Session()):
-        ''' Create a new instance
-        
-        :param session: a requests.Session instance used for resolving redirects
-        '''
-        
-        self.session = session
-        
-    def get_first_response(self, url):
-        ''' Get the first response from a chain
-        
-        :param url: a url value
-        :returns: an object representing the first response in
-        the response history for given url
-        :raises ValueError: if the parameter is not a valid url value
-        '''
-        try:
-            return self.session.head(url)
-            
-        except (ConnectionError, InvalidSchema):
-            if not is_valid_url(url):
-                raise ValueError, '{} is not a valid url'.format(url), exc_info()[2]
-        except (InvalidURL, MissingSchema) as e:
-            raise ValueError, str(e), exc_info()[2]
-        except Timeout:
-            pass
-        
-    def __call__(self, url):
-        ''' Get urls of all redirects following request with the given url
-        
-        :param url: a url value
-        :returns: valid redirection addresses. If a request
-        for an address fails, and the address is a valid url string, it's included as the
-        last returned value. If the value is invalid, no further values are returned.
-        :raises ValuError: if the argument is not a valid url value
-        '''
-        response = self.get_first_response(url)
-        if response:
-            try:
-                for response in self.session.resolve_redirects(response, response.request):
-                    yield response.url
-                    
-            except InvalidURL: pass
-                
-            except (Timeout, ConnectionError, InvalidSchema) as e:
-                last_url = response.headers['location']
-                
-                if isinstance(e, Timeout) or is_valid_url(last_url):
-                    yield last_url
                     
 class BaseUrlTester(object):
     ''' A base for classes responsible for url testing '''
@@ -602,6 +549,49 @@ class BaseUrlTester(object):
             self._redirect_session = Session()
             
         return self._redirect_session
+    
+    def get_first_response(self, url):
+        ''' Get the first response from the history of responses
+        for given url
+        
+        :param url: a url value
+        :returns: an object representing the first response in
+        the response history for given url
+        :raises ValueError: if the parameter is not a valid url value
+        '''
+        try:
+            return self.redirect_session.head(url)
+            
+        except (ConnectionError, InvalidSchema):
+            if not is_valid_url(url):
+                raise ValueError, '{} is not a valid url'.format(url), exc_info()[2]
+        except (InvalidURL, MissingSchema) as e:
+            raise ValueError, str(e), exc_info()[2]
+        except Timeout:
+            pass
+        
+    def resolve_redirects(self, url):
+        ''' Get urls of all redirects following request with the given url
+        
+        :param url: a url value
+        :returns: valid redirection addresses. If a request
+        for an address fails, and the address is a valid url string, it's included as the
+        last returned value. If the value is invalid, no further values are returned.
+        :raises ValuError: if the argument is not a valid url value
+        '''
+        response = self.get_first_response(url)
+        if response:
+            try:
+                for response in self.redirect_session.resolve_redirects(response, response.request):
+                    yield response.url
+                    
+            except InvalidURL: pass
+                
+            except (Timeout, ConnectionError, InvalidSchema) as e:
+                last_url = response.headers['location']
+                
+                if isinstance(e, Timeout) or is_valid_url(last_url):
+                    yield last_url
         
 if __name__ == '__main__':
     pass

@@ -6,7 +6,7 @@ from spambl import (UnknownCodeError, NXDOMAIN, HpHosts,
                     IpDNSBL, DomainDNSBL, GeneralDNSBL,
                     GoogleSafeBrowsing, UnathorizedAPIKeyError, HostCollection,
                      CodeClassificationMap, SumClassificationMap, Hostname, IpAddress, 
-                     host, is_valid_url, RedirectUrlResolver)
+                     host, is_valid_url, BaseUrlTester)
 from mock import Mock, patch, MagicMock
 from ipaddress import ip_address as IP, ip_address
 from itertools import cycle, izip, combinations, product
@@ -810,7 +810,7 @@ class IsValidUrlTest(unittest.TestCase):
         for u in self.invalid_urls:
             self.assertFalse(is_valid_url(u))
             
-class RedirectUrlResolverTest(unittest.TestCase):
+class BaseUrlTesterTest(unittest.TestCase):
     @classmethod
     def setUpData(cls):
         
@@ -858,7 +858,7 @@ class RedirectUrlResolverTest(unittest.TestCase):
         session_mock.head.side_effect = cls.head
         session_mock.resolve_redirects.side_effect = cls.resolve_redirects
         
-        cls.valid_redirect_urls = RedirectUrlResolver(session_mock)
+        cls.base_url_tester = BaseUrlTester(session_mock)
         
     @classmethod
     def get_location(cls, url):
@@ -918,7 +918,7 @@ class RedirectUrlResolverTest(unittest.TestCase):
         the first one '''
         
         for url, expected_redirects in self.ftp_last.iteritems():
-            actual_redirects = tuple(self.valid_redirect_urls(url))
+            actual_redirects = tuple(self.base_url_tester.resolve_redirects(url))
             self.assertItemsEqual(actual_redirects, expected_redirects)
             
     def testForTargetInvalidUrl(self):
@@ -926,7 +926,7 @@ class RedirectUrlResolverTest(unittest.TestCase):
         except the first one and the invalid last one '''
         for url, redirects in self.invalid_last.iteritems():
             expected = redirects[:-1]
-            actual = tuple(self.valid_redirect_urls(url))
+            actual = tuple(self.base_url_tester.resolve_redirects(url))
             self.assertItemsEqual(actual, expected)
             
     def testForTargetValidHttpUrl(self):
@@ -934,30 +934,30 @@ class RedirectUrlResolverTest(unittest.TestCase):
         the first one '''
         
         for url, expected_redirects in self.http_last.iteritems():
-            actual = tuple(self.valid_redirect_urls(url))
+            actual = tuple(self.base_url_tester.resolve_redirects(url))
             self.assertItemsEqual(actual, expected_redirects)
             
     def testForHttpUrlsWithNoRedirects(self):
         ''' The response history is expected to contain no addresses '''
         for u in self.http_urls:
-            actual = tuple(self.valid_redirect_urls(u))
+            actual = tuple(self.base_url_tester.resolve_redirects(u))
             self.assertItemsEqual(actual, tuple())
         
     def testForFtpUrls(self):
         ''' The response history us expected to contain no addresses '''
         for u in self.ftp_urls:
-            actual = tuple(self.valid_redirect_urls(u))
+            actual = tuple(self.base_url_tester.resolve_redirects(u))
             self.assertEqual(actual, tuple())
         
     def testForInvalidUrls(self):
         ''' ValueError is expected to be raised '''
         for u in self.invalid_urls:
-            self.assertRaises(ValueError, lambda e: tuple(self.valid_redirect_urls(e)), u)
+            self.assertRaises(ValueError, lambda e: tuple(self.base_url_tester.resolve_redirects(e)), u)
             
     def testForMissingSchemaUrls(self):
         ''' ValueError is expected to be raised '''
         for u in self.missing_schema_urls:
-            self.assertRaises(ValueError, lambda e: tuple(self.valid_redirect_urls(e)), u)
+            self.assertRaises(ValueError, lambda e: tuple(self.base_url_tester.resolve_redirects(e)), u)
         
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
