@@ -913,7 +913,7 @@ class BaseUrlTesterTest(unittest.TestCase):
             yield response
             
             
-    def testForTargetFtpUrl(self):
+    def testResolveRedirectsForTargetFtpUrl(self):
         ''' The responce history is expected to contain all the urls except
         the first one '''
         
@@ -921,7 +921,7 @@ class BaseUrlTesterTest(unittest.TestCase):
             actual_redirects = tuple(self.base_url_tester.resolve_redirects(url))
             self.assertItemsEqual(actual_redirects, expected_redirects)
             
-    def testForTargetInvalidUrl(self):
+    def testResolveRedirectsForTargetInvalidUrl(self):
         ''' The response history is expected to contain all the addresses
         except the first one and the invalid last one '''
         for url, redirects in self.invalid_last.iteritems():
@@ -929,7 +929,7 @@ class BaseUrlTesterTest(unittest.TestCase):
             actual = tuple(self.base_url_tester.resolve_redirects(url))
             self.assertItemsEqual(actual, expected)
             
-    def testForTargetValidHttpUrl(self):
+    def testResolveRedirectsForTargetValidHttpUrl(self):
         ''' The response history is expected to contain all the addresses except
         the first one '''
         
@@ -937,24 +937,24 @@ class BaseUrlTesterTest(unittest.TestCase):
             actual = tuple(self.base_url_tester.resolve_redirects(url))
             self.assertItemsEqual(actual, expected_redirects)
             
-    def testForHttpUrlsWithNoRedirects(self):
+    def testResolveRedirectsForHttpUrlsWithNoRedirects(self):
         ''' The response history is expected to contain no addresses '''
         for u in self.http_urls:
             actual = tuple(self.base_url_tester.resolve_redirects(u))
             self.assertItemsEqual(actual, tuple())
         
-    def testForFtpUrls(self):
+    def testResolveRedirectsForFtpUrls(self):
         ''' The response history us expected to contain no addresses '''
         for u in self.ftp_urls:
             actual = tuple(self.base_url_tester.resolve_redirects(u))
             self.assertEqual(actual, tuple())
         
-    def testForInvalidUrls(self):
+    def testResolveRedirectsForInvalidUrls(self):
         ''' ValueError is expected to be raised '''
         for u in self.invalid_urls:
             self.assertRaises(ValueError, lambda e: tuple(self.base_url_tester.resolve_redirects(e)), u)
             
-    def testForMissingSchemaUrls(self):
+    def testResolveRedirectsForMissingSchemaUrls(self):
         ''' ValueError is expected to be raised '''
         for u in self.missing_schema_urls:
             self.assertRaises(ValueError, lambda e: tuple(self.base_url_tester.resolve_redirects(e)), u)
