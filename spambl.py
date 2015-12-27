@@ -3,7 +3,7 @@
 
 from sys import exc_info
 from dns.resolver import query, NXDOMAIN
-from requests import get, post, adapters, Session
+from requests import get, post, Session
 from requests.exceptions import (HTTPError, Timeout, ConnectionError, InvalidSchema, InvalidURL,
                                  MissingSchema)
 from itertools import izip
@@ -511,22 +511,6 @@ def is_valid_url(value):
     host = urlparse(value).hostname
     
     return (match and any(f(host) for f in host_validators))
-    
-def request_session(max_retries):
-    ''' Get a request session
-    
-    :param max_retries: maximum number of retries configured for 
-    the session
-    :returns: a requests.Session instance
-    '''
-    
-    adapter = adapters.HTTPAdapter(max_retries=max_retries)
-    session = Session()
-    
-    for s in 'http://', 'https://':
-        session.mount(s, adapter)
-        
-    return session
                     
 class BaseUrlTester(object):
     ''' A base for classes responsible for url testing '''
