@@ -584,27 +584,24 @@ class RedirectUrlResolver(object):
 class BaseUrlTester(object):
     ''' A base for classes responsible for url testing '''
     
-    def __init__(self, session = None):
+    def __init__(self, redirect_session = None):
         ''' Create a new instance
         
-        :param session: requests.Session instance used for redirect
+        :param redirect_session: requests.Session instance used for redirect
         url resolution
         '''
-        if session:
-            self.redirect_resolver.session = session
+        self._redirect_session = redirect_session
         
     @property
-    def redirect_resolver(self):
-        ''' Get redirect resolver
+    def redirect_session(self):
+        ''' Get redirect session
         
         :returns: an instance of RedirecUrlResolver set for this object
         '''
-        if not self._redirect_resolver:
-            self._redirect_resolver = RedirectUrlResolver()
+        if not self._redirect_session:
+            self._redirect_session = Session()
             
-        return self._redirect_resolver
+        return self._redirect_session
         
-        
-    
 if __name__ == '__main__':
     pass
