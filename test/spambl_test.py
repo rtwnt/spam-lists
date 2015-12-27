@@ -9,7 +9,7 @@ from spambl import (UnknownCodeError, NXDOMAIN, HpHosts,
                      host, is_valid_url, BaseUrlTester)
 from mock import Mock, patch, MagicMock
 from ipaddress import ip_address as IP, ip_address
-from itertools import cycle, izip, combinations, product
+from itertools import cycle, izip, combinations, product, chain
 from __builtin__ import classmethod
 
 from urlparse import urlparse, parse_qs
@@ -958,6 +958,90 @@ class BaseUrlTesterTest(unittest.TestCase):
         ''' ValueError is expected to be raised '''
         for u in self.missing_schema_urls:
             self.assertRaises(ValueError, lambda e: tuple(self.base_url_tester.resolve_redirects(e)), u)
+            
+    def testUrlsToTestForTargetHttpUrls(self):
+        ''' The result is expected to be the same as the arguments '''
+        urls = self.http_last.keys()
+        expected = urls
+        actual = list(self.base_url_tester.urls_to_test(urls))
+        
+        self.assertEqual(expected, actual)
+    
+            
+    def testUrlsToTestForTargetHttpUrlsAndRedirectResolution(self):
+        ''' The result is expected to contain all the arguments and
+        all redirect locations specified for them '''
+        urls = self.http_last.keys()
+        expected = urls + list(chain(*self.http_last.values()))
+        actual = list(self.base_url_tester.urls_to_test(urls, True))
+        
+        self.assertEqual(expected, actual)
+        
+    def testUrlsToTestForTargetFtpUrls(self):
+        ''' The result is expected to be the same as the arguments '''
+        urls = self.ftp_last.keys()
+        expected = urls
+        actual = list(self.base_url_tester.urls_to_test(urls))
+        
+        self.assertEqual(expected, actual)
+        
+    def testUrlsToTestForTargetFtpUrlsAndRedirectResolution(self):
+        ''' The result is expected to contain all the arguments and
+        all redirect locations specified for them '''
+        urls = self.ftp_last.keys()
+        expected = urls + list(chain(*self.ftp_last.values()))
+        actual = list(self.base_url_tester.urls_to_test(urls, True))
+        
+        self.assertEqual(expected, actual)
+        
+    def testUrlsToTestForInvalidTargetUrl(self):
+        ''' The result is expected to be the same as the arguments '''
+        urls = self.invalid_last.keys()
+        expected = urls
+        actual = list(self.base_url_tester.urls_to_test(urls))
+        
+        self.assertEqual(expected, actual)
+        
+    def testUrlsToTestForInvalidTargetUrlAndRedirectResolution(self):
+        ''' The result if expected to consist of all the arguments and their
+        redirect location, except the last, invalid ones '''
+        urls = self.invalid_last.keys()
+        redirect_sequences= [k[:-1] for k in self.invalid_last.values()]
+        expected = urls+list(chain(*redirect_sequences))
+        actual = list(self.base_url_tester.urls_to_test(urls, True))
+        self.assertEqual(expected, actual)
+        
+    def testUrlsToTestForHttpUrlsWithNoRedirects(self):
+        ''' The result is expected to be the same as the arguments '''
+        actual_1 = tuple(self.base_url_tester.urls_to_test(self.http_urls))
+        actual_2 = tuple(self.base_url_tester.urls_to_test(self.http_urls, True))
+        
+        self.assertEqual(actual_1, self.http_urls)
+        self.assertEqual(actual_2, self.http_urls)
+        
+    def testUrlsToTestForFtpUrls(self):
+        ''' The result is expected to be the same as the arguments '''
+        actual_1 = tuple(self.base_url_tester.urls_to_test(self.ftp_urls))
+        actual_2 = tuple(self.base_url_tester.urls_to_test(self.ftp_urls, True))
+        self.assertEqual(actual_1, self.ftp_urls)
+        self.assertEqual(actual_2, self.ftp_urls)
+        
+    def testUrlsToTestForInvalidUrls(self):
+        ''' The urls_to_test method is expected to raise ValueError for invalid urls '''
+        def test(resolve_redirects):
+            self.assertRaises(ValueError, self.base_url_tester.urls_to_test, self.invalid_urls, resolve_redirects)
+            
+        test(False)
+        test(True)
+        
+    def testUrlsToTestForMissingSchemaUrls(self):
+        ''' The urls_to_test method is expected to raise ValueError for urls missing their schema part'''
+        def test(resolve_redirects):
+            self.assertRaises(ValueError, self.base_url_tester.urls_to_test, self.missing_schema_urls)
+        
+        test(False)
+        test(True)
+        
         
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']

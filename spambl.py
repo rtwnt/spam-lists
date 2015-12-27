@@ -6,7 +6,7 @@ from dns.resolver import query, NXDOMAIN
 from requests import get, post, Session
 from requests.exceptions import (HTTPError, Timeout, ConnectionError, InvalidSchema, InvalidURL,
                                  MissingSchema)
-from itertools import izip
+from itertools import izip, chain
 from ipaddress import ip_address
 from dns import name
 from collections import namedtuple
@@ -563,6 +563,7 @@ class BaseUrlTester(object):
         last returned value. If the value is invalid, no further values are returned.
         :raises ValuError: if the argument is not a valid url value
         '''
+        
         response = self.get_first_response(url)
         if response:
             try:
@@ -576,6 +577,25 @@ class BaseUrlTester(object):
                 
                 if isinstance(e, Timeout) or is_valid_url(last_url):
                     yield last_url
+                    
+    def urls_to_test(self, urls, resolve_redirects=False):
+        ''' From given urls, get all url addresses to test
         
+        :param urls: a sequence of url values
+        :param resolve_redirects: if True, url addresses of redirections will also
+        be returned
+        :returns: a chain object containing valid url addresses
+        '''
+        
+        for u in urls:
+            if not is_valid_url(u):
+                raise ValueError, '{} is not a valid url'.format(u), exc_info()[2]
+            
+        redirect_generators = []
+        if resolve_redirects:
+            redirect_generators = map(self.resolve_redirects, urls)
+            
+        return chain(urls, *redirect_generators)
+                
 if __name__ == '__main__':
     pass
