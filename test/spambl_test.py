@@ -945,8 +945,6 @@ class BaseUrlTesterTest(unittest.TestCase):
             
             self.assertItemsEqual(actual_redirects, expected)
             
-            
-            
     def testResolveRedirectsForTargetFtpUrl(self):
         ''' The responce history is expected to contain all the urls except
         the first one '''
@@ -991,7 +989,7 @@ class BaseUrlTesterTest(unittest.TestCase):
         of url addresses of responses in response history of a request with the address
         being the first item of each history in histories
         '''
-        urls = [h[0] for h in histories]
+        urls = list(set(h[0] for h in histories))
         actual = list(self.base_url_tester.urls_to_test(urls))
         self.assertEqual(urls, actual)
             
@@ -1015,26 +1013,39 @@ class BaseUrlTesterTest(unittest.TestCase):
         
         Test is performed for resolve_redirects = True
         
+        The actual is expected to contain the same elements as the expected.
+        
+        Also, urls that appear only as redirects, and not in the url values
+        passed to the method, must follow all the urls passed to the
+        method in the result
+        
         :param histories: a sequence of histories. Each history is a sequence
         of url addresses of responses in response history of a request with the address
         being the first item of each history in histories
         '''
         
-        
         urls = []
-        redirects = []
+        url_set = set()
+        redirect_set = set()
         
         redirect_slice = self.get_redirect_slice(histories)
         
         for h in histories:
-            urls += h[:1]
-            redirects.extend(h[redirect_slice])
+            url = h[0]
+            urls.append(url)
+            url_set.add(url)
+            redirect_set.update(h[redirect_slice])
             
-        expected = urls+redirects
+        expected = url_set | redirect_set
         actual = list(self.base_url_tester.urls_to_test(urls, True))
+        self.assertItemsEqual(expected, actual)
         
-        self.assertEqual(expected, actual)
+        redirect_indexes = map(actual.index, redirect_set - url_set)
+        url_indexes = map(actual.index, url_set)
         
+        for ui, ri in product(url_indexes, redirect_indexes):
+            self.assertLess(ui, ri)
+            
     def testUrlsToTestForTargetHttpUrlsAndRedirectResolution(self):
         ''' The result is expected to contain all the arguments and
         all redirect locations specified for them '''
@@ -1060,8 +1071,11 @@ class BaseUrlTesterTest(unittest.TestCase):
         :param not_valid_urls: a sequence of invalid url values to be passed to urls_to_test
         :param resolve_redirects: if True: the test is performed for resolve_redirects = True
         '''
+        
+        function = lambda u: tuple(self.base_url_tester.urls_to_test((u,), resolve_redirects))
+        
         for n in not_valid_urls:
-            self.assertRaises(ValueError, self.base_url_tester.urls_to_test, (n,), resolve_redirects)
+            self.assertRaises(ValueError, function, n)
         
     def testUrlsToTestForInvalidUrls(self):
         ''' The urls_to_test method is expected to raise ValueError for invalid urls '''
