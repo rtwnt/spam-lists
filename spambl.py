@@ -239,6 +239,7 @@ class HpHosts(object):
             return AddressListItem(host, self.identifier, classification)
         return None
         
+
 class GoogleSafeBrowsing(object):
     ''' Google Safe Browsing lookup API client '''
     
@@ -584,18 +585,22 @@ class BaseUrlTester(object):
         :param urls: a sequence of url values
         :param resolve_redirects: if True, url addresses of redirections will also
         be returned
-        :returns: a chain object containing valid url addresses
+        :returns: url addresses to test
         '''
-        
+        urls = set(urls)
         for u in urls:
             if not is_valid_url(u):
-                raise ValueError, '{} is not a valid url'.format(u), exc_info()[2]
+                raise ValueError, '{} is not a valid url'.format(u)
+            yield u
             
-        redirect_generators = []
         if resolve_redirects:
-            redirect_generators = map(self.resolve_redirects, urls)
+            seen = set(urls)
+            redirect_urls = chain(*map(self.resolve_redirects, urls))
             
-        return chain(urls, *redirect_generators)
+            for ru in redirect_urls:
+                if ru not in seen:
+                    seen.add(ru)
+                    yield ru
                 
 if __name__ == '__main__':
     pass
