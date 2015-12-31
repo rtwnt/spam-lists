@@ -446,6 +446,7 @@ def get_redirect_urls(urls):
         
     return result
 
+
 class GoogleSafeBrowsingTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -454,6 +455,7 @@ class GoogleSafeBrowsingTest(unittest.TestCase):
         cls.google_safe_browsing = GoogleSafeBrowsing('test_client', '0.1', cls.valid_key)
         cls.invalid_key_gbs = GoogleSafeBrowsing('test_client', '0.1', 'invalid_key')
         
+
         cls.setUpUrls()
         cls.setUpPost()
         
@@ -833,6 +835,25 @@ class IsValidUrlTest(unittest.TestCase):
             self.assertFalse(is_valid_url(u))
             
 class BaseUrlTesterTest(unittest.TestCase):
+    
+    @classmethod
+    def getRegisteredRedirects(cls, target_list, urls):
+        ''' Get a sequence of urls representing
+        a sequence of redirects
+        
+        Each url is registered, and the last one is
+        registered by adding it to specified list
+        :param target_list: a list to which final target url is to
+        be appended
+        :param urls: a sequence of url values
+        :returns: a tuple containing Url instances
+        '''
+        redirect_urls = get_redirect_urls(urls)
+        
+        target_list.append(redirect_urls[-1])
+        
+        cls.http_urls.extend(redirect_urls[:-1])
+    
     @classmethod
     def setUpData(cls):
         
