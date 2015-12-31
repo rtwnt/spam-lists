@@ -426,6 +426,7 @@ class HpHostsTest(unittest.TestCase):
         cls.patcher.stop()
 
 Url = namedtuple('Url', 'value location')
+Url.__new__.__defaults__ = (None,)
 
 def get_redirect_urls(urls):
     ''' Get a sequence of Url objects,
