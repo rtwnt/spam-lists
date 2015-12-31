@@ -455,7 +455,6 @@ class GoogleSafeBrowsingTest(unittest.TestCase):
         cls.google_safe_browsing = GoogleSafeBrowsing('test_client', '0.1', cls.valid_key)
         cls.invalid_key_gbs = GoogleSafeBrowsing('test_client', '0.1', 'invalid_key')
         
-
         cls.setUpUrls()
         cls.setUpPost()
         
@@ -477,6 +476,7 @@ class GoogleSafeBrowsingTest(unittest.TestCase):
         cls.all_urls = tuple(cls.spam_urls_classification.keys()) + cls.non_spam_urls
         
     @classmethod
+
     def setUpPost(cls):
         
         cls.patcher = patch('spambl.post')
@@ -853,6 +853,20 @@ class BaseUrlTesterTest(unittest.TestCase):
         target_list.append(redirect_urls[-1])
         
         cls.http_urls.extend(redirect_urls[:-1])
+        
+        return redirect_urls
+    
+    @classmethod
+    def getRegisteredRedirectsToHttp(cls, *urls):
+        return cls.getRegisteredRedirects(cls.http_urls, urls)
+        
+    @classmethod
+    def getRegisteredRedirectsToFtp(cls, *urls):
+        return cls.getRegisteredRedirects(cls.ftp_urls, urls)
+        
+    @classmethod
+    def getRegisteredRedirectsToInvalidUrl(cls, *urls):
+        return cls.getRegisteredRedirects(cls.invalid_urls, urls)
     
     @classmethod
     def setUpData(cls):
