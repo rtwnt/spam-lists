@@ -869,6 +869,27 @@ class BaseUrlTesterTest(unittest.TestCase):
         return cls.getRegisteredRedirects(cls.invalid_urls, urls)
     
     @classmethod
+    def getExpectedRedirectUrls(cls, urls):
+        ''' Return a list of redirect urls for all of
+        given urls
+        
+        :param urls: a sequence of Url instances
+        :returns: a list of redirect url values expected
+        as addresses of responses to all given values
+        '''
+        redirect_urls = []
+        
+        for u in urls:
+            while u.location:
+                if u.location in cls.invalid_urls:
+                    break
+                
+                redirect_urls.append(u.location.value)
+                u = u.location
+                
+        return redirect_urls
+    
+    @classmethod
     def setUpData(cls):
         
         ''' Types of urls causing different behaviour of valid_redirect_urls '''
