@@ -427,8 +427,26 @@ class HpHostsTest(unittest.TestCase):
 
 Url = namedtuple('Url', 'value location')
 
+def get_redirect_urls(*urls):
+    ''' Get a sequence of Url objects,
+    each with .location assigned to the next one
+    
+    :param urls: a sequence of url values
+    :returns: a tuple containing instances of urls for given
+    arguments
+    '''
+    
+    result = []
+    location = None
+    
+    for u in reversed(urls):
+        url = Url(u, location)
+        result.insert(0, url)
+        location = result[0]
         
-class GoogleSafeBrowsingTest(unittest.TestCase):    
+    return result
+
+class GoogleSafeBrowsingTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.valid_key = 'test_key'
