@@ -427,7 +427,7 @@ class HpHostsTest(unittest.TestCase):
 
 Url = namedtuple('Url', 'value location')
 
-def get_redirect_urls(*urls):
+def get_redirect_urls(urls):
     ''' Get a sequence of Url objects,
     each with .location assigned to the next one
     
