@@ -10,7 +10,8 @@ from spambl import (UnknownCodeError, NXDOMAIN, HpHosts,
 from mock import Mock, patch, MagicMock
 from ipaddress import ip_address as IP, ip_address
 from itertools import cycle, izip, combinations, product
-from __builtin__ import classmethod
+
+from collections import namedtuple
 
 from urlparse import urlparse, parse_qs
 from requests.exceptions import HTTPError, MissingSchema, InvalidSchema, InvalidURL
@@ -423,6 +424,9 @@ class HpHostsTest(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         cls.patcher.stop()
+
+Url = namedtuple('Url', 'value location')
+
         
 class GoogleSafeBrowsingTest(unittest.TestCase):    
     @classmethod
