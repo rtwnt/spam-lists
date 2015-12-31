@@ -447,8 +447,8 @@ def get_redirect_urls(urls):
         
     return result
 
-
 class GoogleSafeBrowsingTest(unittest.TestCase):
+    
     @classmethod
     def setUpClass(cls):
         cls.valid_key = 'test_key'
@@ -527,7 +527,6 @@ class GoogleSafeBrowsingTest(unittest.TestCase):
             
         return response
         
-        
     def testContainsAny(self):
         
         url_result_1 = self.spam_urls_classification.keys(), True
@@ -583,7 +582,7 @@ class GoogleSafeBrowsingTest(unittest.TestCase):
         non-spam urls as argument '''
             
         self.doLookupTestExpectingSpamUrls(self.all_urls)
-            
+        
     def testLookupForNonSpamUrls(self):
         ''' lookup should return an empty tuple when called for a sequence
         of non spam urls as argument '''
@@ -836,6 +835,9 @@ class IsValidUrlTest(unittest.TestCase):
             self.assertFalse(is_valid_url(u))
             
 class BaseUrlTesterTest(unittest.TestCase):
+    http_urls = []
+    ftp_urls = []
+    invalid_urls = []
     
     @classmethod
     def getRegisteredRedirects(cls, target_list, urls):
@@ -892,45 +894,60 @@ class BaseUrlTesterTest(unittest.TestCase):
     
     @classmethod
     def setUpData(cls):
+        ''' Prepare all data to be used in testing
         
-        ''' Types of urls causing different behaviour of valid_redirect_urls '''
-        cls.missing_schema_urls = 'test.url1.com', 'test.url2.pl'
-        cls.ftp_urls = 'ftp://test.url3.pl', 'ftp://test.url4.com'
-        cls.invalid_urls = 'http://266.0.0.1', 'https://127.0.1.1.1', 'http://-test.url5.com'
-        cls.http_urls = 'https://final.pl', 'http://125.123.223.1', 'http://[2001:db8:abc:125::45]'
+        All url address values are generated using http_urls function,
+        and they are stored in instances of Url object.
         
-        ''' maps of tested urls to their redirect locations '''
+        Url objects have two properties:
+        * value - which specifies url address represented by the object
+        * location - which contains Url object representing address
+        to which a request for url address from .value property redirects
         
+        Url instances representing invalid url values, urls not supported
+        by Requests library, or valid http urls that are to be final
+        request targets, receive no location value
+        '''
+        http_urls = lambda *hosts: tuple('http://'+h for h in hosts)
         
-        def response_url_sequences(tag, last_urls):
-            ''' Generate sequences of response url addresses to
-            be used in testing
+        host_sequences = (
+                          ('testhost1.com', 
+                           'redirect1.pl', 
+                           '220.125.111.8', 
+                           '266.0.0.1'),
+                          ('testhost2.com', 
+                           'sub.redirect2.com', 
+                           '[2001:db8:abc:125::45]', 
+                           '127.0.1.1.1'),
+                          ('sub.host3.pl', 
+                           'redirect3.pl', 
+                           'redirect.4.pl', 
+                           '-test.url5.com')
+                          )
+        
+        for hs in host_sequences:
+            cls.getRegisteredRedirectsToInvalidUrl(*http_urls(*hs))
             
-            :param tag: a tag value used for generating unique http urls
-            :param last_urls: a sequence of urls to be put as the last in
-            each sequence
-            :returns: three response url sequences for each of last_urls:
-            one sequence with three elements, one with two, and one
-            with just one
-            '''
-            first = lambda i: 'http://{}.{}.com'.format(i, tag)
-            redirect = lambda i: 'http://{}.{}.redirect.com'.format(i, tag)
-            
-            url_sequences = []
-            
-            i = 0
-            
-            for u in last_urls:
-                url_sequences += (first(i), redirect(i), u), (first(i+1), u), (u,)
-                
-                i += 2
-                
-            return url_sequences
+        cls.getRegisteredRedirectsToFtp(
+                                        *http_urls(
+                                                  'test.host3.com', 
+                                                  '122.144.111.1', 
+                                                  'redirect3.com'
+                                                  )+(
+                                                     'ftp://ftphost.com',
+                                                     ))
         
-        cls.http_last = response_url_sequences('http', cls.http_urls)
-        cls.ftp_last = response_url_sequences('ftp', cls.ftp_urls)
-        invalid_last = response_url_sequences('invalid', cls.invalid_urls)
-        cls.invalid_not_first = filter(lambda a: len(a) > 1, invalid_last)
+        cls.getRegisteredRedirectsToHttp(
+                                         *http_urls(
+                                                    'test.host4.com', 
+                                                    '105.1.1.1',
+                                                    '[2001:db8:abc:126::44]', 
+                                                    'final.http.host'
+                                                    ))
+            
+        
+        
+        cls.missing_schema_urls = map(Url, ('test.url1.com', 'test.url2.pl'))
         
     @classmethod
     def setUpClass(cls):
@@ -942,6 +959,33 @@ class BaseUrlTesterTest(unittest.TestCase):
         session_mock.resolve_redirects.side_effect = cls.resolve_redirects
         
         cls.base_url_tester = BaseUrlTester(session_mock)
+                  
+    @classmethod
+    def head(cls, url):
+        ''' Provides side effect for mocked requests.Session.head '''
+        
+        url_in = lambda l: url in (u.value for u in l)
+        
+        if url_in(cls.missing_schema_urls):
+            raise MissingSchema
+        
+        elif url_in(cls.ftp_urls):
+            raise InvalidSchema
+        
+        elif url_in(cls.invalid_urls):
+                raise InvalidURL
+            
+            
+        registered = next(u for u in cls.http_urls if u.value == url)
+        response = Mock(spec = ['request', 'url', 'headers'])
+        response.headers = {}
+        
+        if registered.location:
+            response.headers['location'] = registered.location.value
+        
+        response.url = url
+        
+        return response
         
     @classmethod
     def get_location(cls, url):
@@ -961,30 +1005,7 @@ class BaseUrlTesterTest(unittest.TestCase):
                 except IndexError:
                     return None
         return None
-                
-    @classmethod
-    def head(cls, url):
-        ''' Provides side effect for mocked requests.Session.head '''
-        
-        if url in cls.missing_schema_urls:
-            raise MissingSchema
-        
-        elif url in cls.ftp_urls:
-            raise InvalidSchema
-        
-        elif url in cls.invalid_urls:
-                raise InvalidURL
-            
-        response = Mock(spec = ['request', 'url', 'headers'])
-        response.headers = {}
-        location = cls.get_location(url)
-        if location:
-            response.headers['location'] = location
-        
-        response.url = url
-        return response
-            
-            
+     
     @classmethod
     def resolve_redirects(cls, response, _):
         ''' Provides side effects for mocked requests.Session.resolve_redirects '''
@@ -1006,6 +1027,81 @@ class BaseUrlTesterTest(unittest.TestCase):
             return slice(1, -1)
         return slice(1, None)
     
+    def testResolveRedirects(self):
+        ''' Each call to resolve_redirects is expected to
+        return a sequence containing all url addresses of
+        redirects resolved for given urls '''
+        
+        for url in self.http_urls+self.ftp_urls:
+            
+            expected = self.getExpectedRedirectUrls((url,))
+            actual = list(self.base_url_tester.resolve_redirects(url.value))
+            
+            self.assertItemsEqual(actual, expected)
+        
+    def doTestResolveRedirectsForInvalidArguments(self, not_valid_urls):
+        ''' Perform test for resolve_redirects for arguments that are not valid urls.
+        ValueError is expected to be raised
+        
+        :param not_valid_urls: a sequence of invalid url values
+        '''
+        
+        tested_method = self.base_url_tester.resolve_redirects
+        function = lambda e: tuple(tested_method(e))
+        
+        for u in not_valid_urls:
+            self.assertRaises(ValueError, function, u.value)
+        
+    def testResolveRedirectsForInvalidUrls(self):
+        ''' ValueError is expected to be raised '''
+        self.doTestResolveRedirectsForInvalidArguments(self.invalid_urls)
+            
+    def testResolveRedirectsForMissingSchemaUrls(self):
+        ''' ValueError is expected to be raised '''
+        self.doTestResolveRedirectsForInvalidArguments(self.missing_schema_urls)
+            
+    def testUrlsToTest(self):
+        ''' The urls_to_test is expected to return a sequence
+        of url values containing the same elements as the sequence
+        of url values it received as argument
+        
+        Test is performed for resolve_redirects = False
+        '''
+        url_values = [u.value for u in self.http_urls+self.ftp_urls]
+        actual = list(self.base_url_tester.urls_to_test(url_values))
+        self.assertItemsEqual(url_values, actual)
+        
+    def testUrlsToTestWithRedirectResolution(self):
+        ''' The urls_to_test is expected to return a sequence of
+        values containing the same elements as a sum of:
+        
+        * a sequence of url values passed to the method
+        * a sequence of url addresses of redirects resolved
+        for given url values
+        
+        Also, urls that appear only as redirects, and not in the url values
+        passed to the method, must follow all the urls passed to the
+        method in the result
+        '''
+        
+        for u in self.http_urls+self.ftp_urls:
+            urls = u.value,
+            url_set = set(urls)
+            
+            redirects = self.getExpectedRedirectUrls((u,))
+            expected_redirects = tuple(set(redirects) - url_set)
+            
+            expected = urls + expected_redirects
+            actual = list(self.base_url_tester.urls_to_test(urls, True))
+            
+            self.assertItemsEqual(expected, actual)
+            
+            redirect_indexes = map(actual.index, expected_redirects)
+            url_indexes = map(actual.index, url_set)
+            
+            for ui, ri in product(url_indexes, redirect_indexes):
+                self.assertLess(ui, ri)
+    
     def doTestResolveRedirects(self, histories):
         ''' Test resolve_redirects method for given data
         
@@ -1024,40 +1120,6 @@ class BaseUrlTesterTest(unittest.TestCase):
             
             self.assertItemsEqual(actual_redirects, expected)
             
-    def testResolveRedirectsForTargetFtpUrl(self):
-        ''' The responce history is expected to contain all the urls except
-        the first one '''
-        
-        self.doTestResolveRedirects(self.ftp_last)
-            
-    def testResolveRedirectsForTargetInvalidUrl(self):
-        ''' The response history is expected to contain all the addresses
-        except the first one and the invalid last one '''
-        self.doTestResolveRedirects(self.invalid_not_first)
-            
-    def testResolveRedirectsForTargetValidHttpUrl(self):
-        ''' The response history is expected to contain all the addresses except
-        the first one '''
-        
-        self.doTestResolveRedirects(self.http_last)
-        
-    def doTestResolveRedirectsForInvalidArguments(self, not_valid_urls):
-        ''' Perform test for resolve_redirects for arguments that are not valid urls. 
-        ValueError is expected to be raised
-        
-        :param not_valid_urls: a sequence of invalid url values
-        '''
-        for u in not_valid_urls:
-            self.assertRaises(ValueError, lambda e: tuple(self.base_url_tester.resolve_redirects(e)), u)
-        
-    def testResolveRedirectsForInvalidUrls(self):
-        ''' ValueError is expected to be raised '''
-        self.doTestResolveRedirectsForInvalidArguments(self.invalid_urls)
-            
-    def testResolveRedirectsForMissingSchemaUrls(self):
-        ''' ValueError is expected to be raised '''
-        self.doTestResolveRedirectsForInvalidArguments(self.missing_schema_urls)
-            
     def doTestUrlsToTest(self, histories):
         ''' Perform test of urls_to_test method for
         given list of url address response history 
@@ -1071,20 +1133,6 @@ class BaseUrlTesterTest(unittest.TestCase):
         urls = list(set(h[0] for h in histories))
         actual = list(self.base_url_tester.urls_to_test(urls))
         self.assertEqual(urls, actual)
-            
-    def testUrlsToTestForTargetHttpUrls(self):
-        ''' The result is expected to be the same as the arguments '''
-        
-        self.doTestUrlsToTest(self.http_last)
-        
-    def testUrlsToTestForTargetFtpUrls(self):
-        ''' The result is expected to be the same as the arguments '''
-        self.doTestUrlsToTest(self.ftp_last)
-        
-    def testUrlsToTestForInvalidTargetUrl(self):
-        ''' The result is expected to be the same as the arguments '''
-        self.doTestUrlsToTest(self.invalid_not_first)
-        
         
     def doTestUrlsToTestWithRedirectResolution(self, histories):
         ''' Perform test of urls_to_test method for
@@ -1124,37 +1172,21 @@ class BaseUrlTesterTest(unittest.TestCase):
         
         for ui, ri in product(url_indexes, redirect_indexes):
             self.assertLess(ui, ri)
-            
-    def testUrlsToTestForTargetHttpUrlsAndRedirectResolution(self):
-        ''' The result is expected to contain all the arguments and
-        all redirect locations specified for them '''
-        
-        self.doTestUrlsToTestWithRedirectResolution(self.http_last)
-        
-    def testUrlsToTestForTargetFtpUrlsAndRedirectResolution(self):
-        ''' The result is expected to contain all the arguments and
-        all redirect locations specified for them '''
-        
-        self.doTestUrlsToTestWithRedirectResolution(self.ftp_last)
-        
-    def testUrlsToTestForInvalidTargetUrlAndRedirectResolution(self):
-        ''' The result if expected to consist of all the arguments and their
-        redirect location, except the last, invalid ones '''
-        
-        self.doTestUrlsToTestWithRedirectResolution(self.invalid_not_first)
         
     def doTestUrlsToTestForInvalidArguments(self, not_valid_urls, resolve_redirects):
         ''' Perform test of urls_to_test method for invalid url values, expecting
         ValueError to be raised 
         
+
         :param not_valid_urls: a sequence of invalid url values to be passed to urls_to_test
         :param resolve_redirects: if True: the test is performed for resolve_redirects = True
         '''
+        tested_method = self.base_url_tester.urls_to_test
         
-        function = lambda u: tuple(self.base_url_tester.urls_to_test((u,), resolve_redirects))
+        function = lambda u: tuple(tested_method((u,), resolve_redirects))
         
         for n in not_valid_urls:
-            self.assertRaises(ValueError, function, n)
+            self.assertRaises(ValueError, function, n.value)
         
     def testUrlsToTestForInvalidUrls(self):
         ''' The urls_to_test method is expected to raise ValueError for invalid urls '''
