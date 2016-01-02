@@ -863,7 +863,7 @@ class BaseUrlTesterTest(unittest.TestCase):
         target_list.append(redirect_urls[-1])
         
         cls.valid_http_urls.extend(redirect_urls[:-1])
-    
+        
     @classmethod
     def getExpectedRedirectUrls(cls, urls):
         ''' Return a list of redirect urls for all of
@@ -910,13 +910,17 @@ class BaseUrlTesterTest(unittest.TestCase):
         for hs in host_sequences:
             cls.addRedirectUrls(hs, cls.invalid_urls)
         
-        cls.addRedirectUrls(('test.host3.com', '122.144.111.1',
-                              'ftp://ftphost.com'), cls.valid_non_http_urls)
+        cls.addRedirectUrls(('test.host3.com', '122.144.111.1', 
+                             'ftp://ftphost.com'), cls.valid_non_http_urls)
         
         cls.addRedirectUrls(('test.host4.com', '[2001:db8:abc:126::44]', 
                                                     'final.http.host'))
         
         cls.missing_schema_urls = map(Url, ('test.url1.com', 'test.url2.pl'))
+        
+    @property
+    def valid_urls(self):
+        return self.valid_http_urls + self.valid_non_http_urls
 
     @classmethod
     def setUpClass(cls):
@@ -969,7 +973,7 @@ class BaseUrlTesterTest(unittest.TestCase):
         return a sequence containing all url addresses of
         redirects resolved for given urls '''
         
-        for url in self.valid_http_urls+self.valid_non_http_urls:
+        for url in self.valid_urls:
             
             expected = self.getExpectedRedirectUrls((url,))
             actual = list(self.base_url_tester.resolve_redirects(url.value))
@@ -1004,7 +1008,7 @@ class BaseUrlTesterTest(unittest.TestCase):
         
         Test is performed for resolve_redirects = False
         '''
-        url_values = [u.value for u in self.valid_http_urls+self.valid_non_http_urls]
+        url_values = [u.value for u in self.valid_urls]
         actual = list(self.base_url_tester.urls_to_test(url_values))
         self.assertItemsEqual(url_values, actual)
         
@@ -1023,7 +1027,7 @@ class BaseUrlTesterTest(unittest.TestCase):
         method in the result
         '''
         
-        for u in self.valid_http_urls+self.valid_non_http_urls:
+        for u in self.valid_urls:
             urls = u.value,
             url_set = set(urls)
             
