@@ -573,8 +573,7 @@ class GoogleSafeBrowsingTest(unittest.TestCase):
             self.assertIn(item.value, self.spam_urls_classification)
             self.assertEqual(item.source, self.google_safe_browsing)
             self.assertEqual(item.classification, self.spam_urls_classification[item.value].split(','))
-        
-            
+         
     def testLookupForSpamUrls(self):
         ''' lookup should return a sequence  of objects representing 
         all urls when called with sequence of spam urls as argument '''
@@ -600,7 +599,6 @@ class GoogleSafeBrowsingTest(unittest.TestCase):
     def tearDownClass(cls):
         cls.patcher.stop()
         
-        
 class HostCollectionTest(unittest.TestCase):
     
     def setUp(self):
@@ -613,7 +611,7 @@ class HostCollectionTest(unittest.TestCase):
         self.not_listed_hosts = self.not_listed_hostnames + self.not_listed_ips
         
         self.host_collection_A = HostCollection(self.listed_hosts)
-        
+
         self.matching_A = HostCollection(self.listed_hosts+self.not_listed_hosts)
         self.not_matching_a = HostCollection(self.not_listed_hosts)
         self.empty = HostCollection()
@@ -841,7 +839,7 @@ class IsValidUrlTest(unittest.TestCase):
             
 class BaseUrlTesterTest(unittest.TestCase):
     http_urls = []
-    ftp_urls = []
+    non_http_urls = []
     invalid_urls = []
     
     @classmethod
@@ -870,7 +868,7 @@ class BaseUrlTesterTest(unittest.TestCase):
         
     @classmethod
     def getRegisteredRedirectsToFtp(cls, *urls):
-        return cls.getRegisteredRedirects(cls.ftp_urls, urls)
+        return cls.getRegisteredRedirects(cls.non_http_urls, urls)
         
     @classmethod
     def getRegisteredRedirectsToInvalidUrl(cls, *urls):
@@ -966,7 +964,7 @@ class BaseUrlTesterTest(unittest.TestCase):
         if url_in(cls.missing_schema_urls):
             raise MissingSchema
         
-        elif url_in(cls.ftp_urls):
+        elif url_in(cls.non_http_urls):
             raise InvalidSchema
         
         elif url_in(cls.invalid_urls):
@@ -1029,7 +1027,7 @@ class BaseUrlTesterTest(unittest.TestCase):
         return a sequence containing all url addresses of
         redirects resolved for given urls '''
         
-        for url in self.http_urls+self.ftp_urls:
+        for url in self.http_urls+self.non_http_urls:
             
             expected = self.getExpectedRedirectUrls((url,))
             actual = list(self.base_url_tester.resolve_redirects(url.value))
@@ -1064,7 +1062,7 @@ class BaseUrlTesterTest(unittest.TestCase):
         
         Test is performed for resolve_redirects = False
         '''
-        url_values = [u.value for u in self.http_urls+self.ftp_urls]
+        url_values = [u.value for u in self.http_urls+self.non_http_urls]
         actual = list(self.base_url_tester.urls_to_test(url_values))
         self.assertItemsEqual(url_values, actual)
         
@@ -1081,7 +1079,7 @@ class BaseUrlTesterTest(unittest.TestCase):
         method in the result
         '''
         
-        for u in self.http_urls+self.ftp_urls:
+        for u in self.http_urls+self.non_http_urls:
             urls = u.value,
             url_set = set(urls)
             
