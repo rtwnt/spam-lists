@@ -454,7 +454,6 @@ def get_redirect_urls(urls):
 class GoogleSafeBrowsingTest(unittest.TestCase):
     
     @classmethod
-
     def setUpClass(cls):
         cls.valid_key = 'test_key'
         
@@ -840,7 +839,7 @@ class IsValidUrlTest(unittest.TestCase):
             
 class BaseUrlTesterTest(unittest.TestCase):
     valid_http_urls = []
-    non_http_urls = []
+    valid_non_http_urls = []
     invalid_urls = []
     
     @classmethod
@@ -869,7 +868,7 @@ class BaseUrlTesterTest(unittest.TestCase):
         
     @classmethod
     def getRegisteredRedirectsToFtp(cls, *urls):
-        return cls.getRegisteredRedirects(cls.non_http_urls, urls)
+        return cls.getRegisteredRedirects(cls.valid_non_http_urls, urls)
         
     @classmethod
     def getRegisteredRedirectsToInvalidUrl(cls, *urls):
@@ -954,7 +953,7 @@ class BaseUrlTesterTest(unittest.TestCase):
         if url_in(cls.missing_schema_urls):
             raise MissingSchema
         
-        elif url_in(cls.non_http_urls):
+        elif url_in(cls.valid_non_http_urls):
             raise InvalidSchema
         
         elif url_in(cls.invalid_urls):
@@ -1017,7 +1016,7 @@ class BaseUrlTesterTest(unittest.TestCase):
         return a sequence containing all url addresses of
         redirects resolved for given urls '''
         
-        for url in self.valid_http_urls+self.non_http_urls:
+        for url in self.valid_http_urls+self.valid_non_http_urls:
             
             expected = self.getExpectedRedirectUrls((url,))
             actual = list(self.base_url_tester.resolve_redirects(url.value))
@@ -1052,7 +1051,7 @@ class BaseUrlTesterTest(unittest.TestCase):
         
         Test is performed for resolve_redirects = False
         '''
-        url_values = [u.value for u in self.valid_http_urls+self.non_http_urls]
+        url_values = [u.value for u in self.valid_http_urls+self.valid_non_http_urls]
         actual = list(self.base_url_tester.urls_to_test(url_values))
         self.assertItemsEqual(url_values, actual)
         
@@ -1069,7 +1068,7 @@ class BaseUrlTesterTest(unittest.TestCase):
         method in the result
         '''
         
-        for u in self.valid_http_urls+self.non_http_urls:
+        for u in self.valid_http_urls+self.valid_non_http_urls:
             urls = u.value,
             url_set = set(urls)
             
