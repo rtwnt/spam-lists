@@ -913,32 +913,21 @@ class BaseUrlTesterTest(unittest.TestCase):
         '''
         
         host_sequences = (
-                          ('testhost1.com', 
-                           'redirect1.pl', 
-                           '220.125.111.8', 
-                           '266.0.0.1'),
-                          ('testhost2.com', 
-                           'sub.redirect2.com', 
-                           '[2001:db8:abc:125::45]', 
-                           '127.0.1.1.1'),
-                          ('sub.host3.pl', 
-                           'redirect3.pl', 
-                           'redirect.4.pl', 
-                           '-test.url5.com')
+                          ('testhost1.com', '220.125.111.8', '266.0.0.1'),
+                          ('testhost2.com','[2001:db8:abc:125::45]', '127.0.1.1.1'),
+                          ('sub.host3.pl', 'redirect3.pl', '-test.url5.com')
                           )
         
         for hs in host_sequences:
             cls.getRegisteredRedirectsToInvalidUrl(*hs)
             
         cls.getRegisteredRedirectsToFtp(
-                                                  'test.host3.com', 
-                                                  '122.144.111.1', 
-                                                  'redirect3.com'
-                                                     'ftp://ftphost.com')
+                                        'test.host3.com', 
+                                        '122.144.111.1', 
+                                        'ftp://ftphost.com')
         
         cls.getRegisteredRedirectsToHttp(
-                                                    'test.host4.com', 
-                                                    '105.1.1.1',
+                                                    'test.host4.com',
                                                     '[2001:db8:abc:126::44]', 
                                                     'final.http.host')
         
