@@ -460,11 +460,11 @@ class GoogleSafeBrowsingTest(unittest.TestCase):
         cls.google_safe_browsing = GoogleSafeBrowsing('test_client', '0.1', cls.valid_key)
         cls.invalid_key_gbs = GoogleSafeBrowsing('test_client', '0.1', 'invalid_key')
         
-        cls.setUpUrls()
+        cls.setUpData()
         cls.setUpPost()
         
     @classmethod    
-    def setUpUrls(cls):
+    def setUpData(cls):
         hosts = 't1.pl', 't2.com', 't3.com.pl', IP(u'255.255.0.1'), IP(u'2001:DB8:abc:123::42')
         classifications = 'phishing', 'malware', 'unwanted'
         classification_ranges = cycle(range(1, len(classifications)))
