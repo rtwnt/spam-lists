@@ -841,38 +841,28 @@ class BaseUrlTesterTest(unittest.TestCase):
     valid_http_urls = []
     valid_non_http_urls = []
     invalid_urls = []
-    
     @classmethod
-    def getRegisteredRedirects(cls, target_list, urls):
+    def addRedirectUrls(cls, values, target_list = None):
         ''' Get a sequence of urls representing
         a sequence of redirects
         
         Each url is registered, and the last one is
         registered by adding it to specified list
+        
         :param target_list: a list to which final target url is to
-        be appended
-        :param urls: a sequence of url values
-        :returns: a tuple containing Url instances
+        be appended. If None, the final url is assumed to be a http url
+        and added to proper list
+        :param values: a sequence of values to add. If the values do not have
+        scheme, http is assumed
         '''
-        redirect_urls = get_redirect_urls(urls)
+        redirect_urls = get_redirect_urls(values)
+        
+        if target_list is None:
+            target_list = cls.valid_http_urls
         
         target_list.append(redirect_urls[-1])
         
         cls.valid_http_urls.extend(redirect_urls[:-1])
-        
-        return redirect_urls
-    
-    @classmethod
-    def getRegisteredRedirectsToHttp(cls, *urls):
-        return cls.getRegisteredRedirects(cls.valid_http_urls, urls)
-        
-    @classmethod
-    def getRegisteredRedirectsToFtp(cls, *urls):
-        return cls.getRegisteredRedirects(cls.valid_non_http_urls, urls)
-        
-    @classmethod
-    def getRegisteredRedirectsToInvalidUrl(cls, *urls):
-        return cls.getRegisteredRedirects(cls.invalid_urls, urls)
     
     @classmethod
     def getExpectedRedirectUrls(cls, urls):
@@ -899,8 +889,7 @@ class BaseUrlTesterTest(unittest.TestCase):
     def setUpData(cls):
         ''' Prepare all data to be used in testing
         
-        All url address values are generated using valid_http_urls function,
-        and they are stored in instances of Url object.
+        Urls to be used in testing are represented by instances of Url class.
         
         Url objects have two properties:
         * value - which specifies url address represented by the object
@@ -919,20 +908,16 @@ class BaseUrlTesterTest(unittest.TestCase):
                           )
         
         for hs in host_sequences:
-            cls.getRegisteredRedirectsToInvalidUrl(*hs)
-            
-        cls.getRegisteredRedirectsToFtp(
-                                        'test.host3.com', 
-                                        '122.144.111.1', 
-                                        'ftp://ftphost.com')
+            cls.addRedirectUrls(hs, cls.invalid_urls)
         
-        cls.getRegisteredRedirectsToHttp(
-                                                    'test.host4.com',
-                                                    '[2001:db8:abc:126::44]', 
-                                                    'final.http.host')
+        cls.addRedirectUrls(('test.host3.com', '122.144.111.1',
+                              'ftp://ftphost.com'), cls.valid_non_http_urls)
+        
+        cls.addRedirectUrls(('test.host4.com', '[2001:db8:abc:126::44]', 
+                                                    'final.http.host'))
         
         cls.missing_schema_urls = map(Url, ('test.url1.com', 'test.url2.pl'))
-        
+
     @classmethod
     def setUpClass(cls):
         cls.setUpData()
@@ -970,26 +955,8 @@ class BaseUrlTesterTest(unittest.TestCase):
         response.url = url
         
         return response
-        
-    @classmethod
-    def get_location(cls, url):
-        ''' Get content of Location header for response to given url 
-        
-        :param url: url value
-        :returns: a location header value according to 
-        the input data provided for the test
-        '''
-        for history_list in cls.http_last, cls.ftp_last, cls.invalid_not_first:
-            for history in history_list:
-                try: 
-                    return history[history.index(url)+1]
-                
-                except ValueError: pass
-                
-                except IndexError:
-                    return None
-        return None
-     
+            
+            
     @classmethod
     def resolve_redirects(cls, response, _):
         ''' Provides side effects for mocked requests.Session.resolve_redirects '''
@@ -997,20 +964,6 @@ class BaseUrlTesterTest(unittest.TestCase):
             response = cls.head(response.headers['location'])
             yield response
             
-    @classmethod
-    def get_redirect_slice(cls, histories):
-        ''' Get a slice object for accessing expected resolved redirect urls
-        appearing in histories listed in data
-        
-        :param histories: a sequence of histories. Each history is a sequence
-        of url addresses of responses in response history of a request with the address
-        being the first item of each history in histories
-        '''
-        
-        if histories == cls.invalid_not_first:
-            return slice(1, -1)
-        return slice(1, None)
-    
     def testResolveRedirects(self):
         ''' Each call to resolve_redirects is expected to
         return a sequence containing all url addresses of
@@ -1063,6 +1016,8 @@ class BaseUrlTesterTest(unittest.TestCase):
         * a sequence of url addresses of redirects resolved
         for given url values
         
+        Test is performed for resolve_redirects = True
+        
         Also, urls that appear only as redirects, and not in the url values
         passed to the method, must follow all the urls passed to the
         method in the result
@@ -1085,83 +1040,11 @@ class BaseUrlTesterTest(unittest.TestCase):
             
             for ui, ri in product(url_indexes, redirect_indexes):
                 self.assertLess(ui, ri)
-    
-    def doTestResolveRedirects(self, histories):
-        ''' Test resolve_redirects method for given data
-        
-        :param histories: a sequence of histories. Each history is a sequence
-        of url addresses of responses in response history of a request with the address
-        being the first item of each history in histories
-        '''
-        
-        redirect_slice = self.get_redirect_slice(histories)
-
-        for history in histories:
-            url = history[0]
-            expected = history[redirect_slice]
-            
-            actual_redirects = list(self.base_url_tester.resolve_redirects(url))
-            
-            self.assertItemsEqual(actual_redirects, expected)
-            
-    def doTestUrlsToTest(self, histories):
-        ''' Perform test of urls_to_test method for
-        given list of url address response history 
-        
-        Test is performed for resolve_redirects = False
-        
-        :param histories: a sequence of histories. Each history is a sequence
-        of url addresses of responses in response history of a request with the address
-        being the first item of each history in histories
-        '''
-        urls = list(set(h[0] for h in histories))
-        actual = list(self.base_url_tester.urls_to_test(urls))
-        self.assertEqual(urls, actual)
-        
-    def doTestUrlsToTestWithRedirectResolution(self, histories):
-        ''' Perform test of urls_to_test method for
-        given list of url address response history 
-        
-        Test is performed for resolve_redirects = True
-        
-        The actual is expected to contain the same elements as the expected.
-        
-        Also, urls that appear only as redirects, and not in the url values
-        passed to the method, must follow all the urls passed to the
-        method in the result
-        
-        :param histories: a sequence of histories. Each history is a sequence
-        of url addresses of responses in response history of a request with the address
-        being the first item of each history in histories
-        '''
-        
-        urls = []
-        url_set = set()
-        redirect_set = set()
-        
-        redirect_slice = self.get_redirect_slice(histories)
-        
-        for h in histories:
-            url = h[0]
-            urls.append(url)
-            url_set.add(url)
-            redirect_set.update(h[redirect_slice])
-            
-        expected = url_set | redirect_set
-        actual = list(self.base_url_tester.urls_to_test(urls, True))
-        self.assertItemsEqual(expected, actual)
-        
-        redirect_indexes = map(actual.index, redirect_set - url_set)
-        url_indexes = map(actual.index, url_set)
-        
-        for ui, ri in product(url_indexes, redirect_indexes):
-            self.assertLess(ui, ri)
         
     def doTestUrlsToTestForInvalidArguments(self, not_valid_urls, resolve_redirects):
         ''' Perform test of urls_to_test method for invalid url values, expecting
         ValueError to be raised 
         
-
         :param not_valid_urls: a sequence of invalid url values to be passed to urls_to_test
         :param resolve_redirects: if True: the test is performed for resolve_redirects = True
         '''
