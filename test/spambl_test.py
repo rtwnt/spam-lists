@@ -432,7 +432,8 @@ def get_redirect_urls(urls):
     ''' Get a sequence of Url objects,
     each with .location assigned to the next one
     
-    :param urls: a sequence of url values
+    :param urls: a sequence of url values. If a value has no scheme,
+    http is assumed
     :returns: a tuple containing instances of urls for given
     arguments
     '''
@@ -441,6 +442,9 @@ def get_redirect_urls(urls):
     location = None
     
     for u in reversed(urls):
+        if not urlparse(u).scheme:
+            u = 'http://'+u
+        
         url = Url(u, location)
         result.insert(0, url)
         location = result[0]
@@ -510,6 +514,7 @@ class GoogleSafeBrowsingTest(unittest.TestCase):
         :param results: results of the request, to be put in the response body
         :returns: an instance of Mock representing response object
         '''
+
         response = Mock(spec=['content', 'raise_for_status', 'status_code'])
         
         response.status_code = 204
@@ -908,7 +913,6 @@ class BaseUrlTesterTest(unittest.TestCase):
         by Requests library, or valid http urls that are to be final
         request targets, receive no location value
         '''
-        http_urls = lambda *hosts: tuple('http://'+h for h in hosts)
         
         host_sequences = (
                           ('testhost1.com', 
@@ -926,26 +930,19 @@ class BaseUrlTesterTest(unittest.TestCase):
                           )
         
         for hs in host_sequences:
-            cls.getRegisteredRedirectsToInvalidUrl(*http_urls(*hs))
+            cls.getRegisteredRedirectsToInvalidUrl(*hs)
             
         cls.getRegisteredRedirectsToFtp(
-                                        *http_urls(
                                                   'test.host3.com', 
                                                   '122.144.111.1', 
                                                   'redirect3.com'
-                                                  )+(
-                                                     'ftp://ftphost.com',
-                                                     ))
+                                                     'ftp://ftphost.com')
         
         cls.getRegisteredRedirectsToHttp(
-                                         *http_urls(
                                                     'test.host4.com', 
                                                     '105.1.1.1',
                                                     '[2001:db8:abc:126::44]', 
-                                                    'final.http.host'
-                                                    ))
-            
-        
+                                                    'final.http.host')
         
         cls.missing_schema_urls = map(Url, ('test.url1.com', 'test.url2.pl'))
         
