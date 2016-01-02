@@ -454,6 +454,7 @@ def get_redirect_urls(urls):
 class GoogleSafeBrowsingTest(unittest.TestCase):
     
     @classmethod
+
     def setUpClass(cls):
         cls.valid_key = 'test_key'
         
@@ -838,7 +839,7 @@ class IsValidUrlTest(unittest.TestCase):
             self.assertFalse(is_valid_url(u))
             
 class BaseUrlTesterTest(unittest.TestCase):
-    http_urls = []
+    valid_http_urls = []
     non_http_urls = []
     invalid_urls = []
     
@@ -858,13 +859,13 @@ class BaseUrlTesterTest(unittest.TestCase):
         
         target_list.append(redirect_urls[-1])
         
-        cls.http_urls.extend(redirect_urls[:-1])
+        cls.valid_http_urls.extend(redirect_urls[:-1])
         
         return redirect_urls
     
     @classmethod
     def getRegisteredRedirectsToHttp(cls, *urls):
-        return cls.getRegisteredRedirects(cls.http_urls, urls)
+        return cls.getRegisteredRedirects(cls.valid_http_urls, urls)
         
     @classmethod
     def getRegisteredRedirectsToFtp(cls, *urls):
@@ -899,7 +900,7 @@ class BaseUrlTesterTest(unittest.TestCase):
     def setUpData(cls):
         ''' Prepare all data to be used in testing
         
-        All url address values are generated using http_urls function,
+        All url address values are generated using valid_http_urls function,
         and they are stored in instances of Url object.
         
         Url objects have two properties:
@@ -960,7 +961,7 @@ class BaseUrlTesterTest(unittest.TestCase):
                 raise InvalidURL
             
             
-        registered = next(u for u in cls.http_urls if u.value == url)
+        registered = next(u for u in cls.valid_http_urls if u.value == url)
         response = Mock(spec = ['request', 'url', 'headers'])
         response.headers = {}
         
@@ -1016,7 +1017,7 @@ class BaseUrlTesterTest(unittest.TestCase):
         return a sequence containing all url addresses of
         redirects resolved for given urls '''
         
-        for url in self.http_urls+self.non_http_urls:
+        for url in self.valid_http_urls+self.non_http_urls:
             
             expected = self.getExpectedRedirectUrls((url,))
             actual = list(self.base_url_tester.resolve_redirects(url.value))
@@ -1051,7 +1052,7 @@ class BaseUrlTesterTest(unittest.TestCase):
         
         Test is performed for resolve_redirects = False
         '''
-        url_values = [u.value for u in self.http_urls+self.non_http_urls]
+        url_values = [u.value for u in self.valid_http_urls+self.non_http_urls]
         actual = list(self.base_url_tester.urls_to_test(url_values))
         self.assertItemsEqual(url_values, actual)
         
@@ -1068,7 +1069,7 @@ class BaseUrlTesterTest(unittest.TestCase):
         method in the result
         '''
         
-        for u in self.http_urls+self.non_http_urls:
+        for u in self.valid_http_urls+self.non_http_urls:
             urls = u.value,
             url_set = set(urls)
             
