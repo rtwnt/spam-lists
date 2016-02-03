@@ -16,8 +16,6 @@ from collections import namedtuple
 from urlparse import urlparse, parse_qs
 from requests.exceptions import HTTPError, MissingSchema, InvalidSchema, InvalidURL
 from dns import name
-from dns import reversename
-from dns.exception import SyntaxError
 
 def relative_name(hostname):
     ''' Create an object representing partially qualified domain name 
@@ -29,130 +27,34 @@ def relative_name(hostname):
     return name.from_text(hostname).relativize(name.root) 
 
 class BaseDNSBLTest(object):
-    @classmethod
-    def setUpClass(cls, listed_with_known_codes, listed_with_unknown_codes, 
-                  not_listed, invalid_arguments):
-        
-        cls.setUpData(listed_with_known_codes, listed_with_unknown_codes, 
-                  not_listed, invalid_arguments)
-        query_domain = 'test.query.domain'
-        
-        cls.query_domain = name.from_text(query_domain)
-        
-        cls.setUpDNSBLService(query_domain)
-        cls.setUpMockedQuery()
-        
-    @classmethod
-    def getCodeItemClassMock(cls):
-        code_item_class = MagicMock()
-        code_item_class.__getitem__.side_effect = cls.get_classification
-        
-        return code_item_class
-        
-    @classmethod
-    def setUpData(cls, listed_with_known_codes, listed_with_unknown_codes, 
-                  not_listed, invalid_arguments):
-        ''' Prepares data used for tests
-        
-        known return code - a return code value that has been accounted for in
-        the instance of code_item_class map used by the service instance
-        
-        :param listed_with_known_codes: a sequence of hosts that are listed
-        by the tested service and have known return codes assigned to them
-        :param listed_with_unknown_codes: a sequence of hosts that are listed
-        by the tested service, but which should trigger returning an unknown return
-        code value when the return code assigned to them is requested
-        :param not_listed: a sequence of hosts that could be listed by 
-        the tested service (valid hosts), but aren't
-        :param invalid_arguments: a sequence of arguments expected to cause a ValueError
-        when passed to tested methods
-        '''
-        
-        cls.listed_with_known_codes = listed_with_known_codes
-        cls.listed_with_unknown_codes = listed_with_unknown_codes
-        cls.not_listed = not_listed
-        cls.invalid_arguments = invalid_arguments
-        
-        cls.listed_hosts = listed_with_known_codes + listed_with_unknown_codes
-        
-        cls.known_return_codes = 1, 2, 3
-        cls.unknown_return_codes = 7, 11
-        
-    @classmethod
-    def get_return_code(cls, host):
-        
-        try:
-            i = cls.listed_with_known_codes.index(unicode(host))
-            
-            return cls.known_return_codes[i % len(cls.known_return_codes)]
-            
-        except ValueError:
-            try:
-                n = cls.listed_with_unknown_codes.index(unicode(host))
-                
-                return cls.unknown_return_codes[n % len(cls.unknown_return_codes)]
-            
-            except ValueError:
-                return None
-        
-    @classmethod
-    def setUpMockedQuery(cls):
-        cls.patcher = patch('spambl.query')
-        cls.mocked_query = cls.patcher.start()
-        
-        cls.mocked_query.side_effect = cls.query
-        
-    @classmethod
-    def query(cls, query_name):
-        ''' Perform dns query using this mocked implementation
-        
-        :param query_name: name of queried domain
-        :returns: an instance of Mock representing response to the
-        query, as required by BaseDNSBL
-        '''
-        
-        host = query_name.relativize(cls.query_domain)
-        ip_reverse_domains = reversename.ipv4_reverse_domain, reversename.ipv6_reverse_domain
-        
-        for root in ip_reverse_domains:
-
-            reverse_pointer = host.derelativize(root)
-            try:
-                host = reversename.to_address(reverse_pointer)
-            except SyntaxError:
-                continue
-            else:
-                break
-            
-        return_code = cls.get_return_code(host)
-        if return_code:
-            answer = Mock()
-            answer.to_text.return_value = '127.0.0.%d' % return_code
-            return [answer]
-        
-        raise NXDOMAIN('test NXDOMAIN exception')
-        
-    @classmethod
-    def get_classification(cls, index):
-        ''' Get classification for given code
-        
-        This is a method providing side effects for mocked
-        classification map instance
-        
-        :param index: an integer value intended as representing a classification value
-        :returns: a taxonomical unit
-        ''' 
-        
-        if index in cls.known_return_codes:
-            return 'CLASS {}'.format(index)
-        
-        raise UnknownCodeError('Unknown code raised by test')
     
+    valid_hosts = ()
+    invalid_hosts = ()
+    factory = None
+    
+    @classmethod
+    def setUpClass(cls):
+        
+        cls.query_domain_str = 'test.query.domain'
+        cls.query_domain = name.from_text(cls.query_domain_str)
+    
+    def setUp(self):
+        
+        self.classification_map = MagicMock()
+        
+        self.dnsbl_service = self.factory('test_service', self.query_domain_str, self.classification_map)
+        
+        dns_answer_mock = Mock()
+        self.dns_answer_string = dns_answer_mock.to_text.return_value = '121.0.0.1'
+        
+        self.patcher = patch('spambl.query')
+        self.dns_query_mock = self.patcher.start()
+        self.dns_query_mock.return_value = [dns_answer_mock]
     
     def doTestCallForInvalidArgs(self, function):
         ''' Perform test of a function that should raise ValueError for given data '''
         
-        for h in self.invalid_arguments:
+        for h in self.invalid_hosts:
             self.assertRaises(ValueError, function, h)
         
     def testContainsForInvalidArgs(self):
@@ -165,114 +67,66 @@ class BaseDNSBLTest(object):
         
         self.doTestCallForInvalidArgs(self.dnsbl_service.lookup)
             
-    def doTestContains(self, hosts, expected):
-        ''' Perform test of __contains__ method of dnsbl class '''
-        
-        _assert = self.assertTrue if expected else self.assertFalse
-        
-        for h in hosts:
-            _assert(h in self.dnsbl_service)
-            
     def testContainsForListedValues(self):
         ''' __contains__ should return  true '''
-        
-        self.doTestContains(self.listed_hosts, True)
+
+        for h in self.valid_hosts:
+            self.assertTrue(h in self.dnsbl_service)
         
     def testContainsForNotListedValues(self):
         ''' __contains__ should return  true '''
         
-        self.doTestContains(self.not_listed, False)
+        self.dns_query_mock.side_effect = NXDOMAIN('Test NXDOMAIN')
+        
+        for h in self.valid_hosts:
+            self.assertFalse(h in self.dnsbl_service)
             
     def testLookupForListedValues(self):
         ''' lookup method must return object with value equal to
         ip strings it was passed '''
         
-        for h in self.listed_with_known_codes:
+        for h in self.valid_hosts:
             actual = self.dnsbl_service.lookup(h)
             self.assertEqual(actual.value, h)
             
     def testLookupForNotListedValues(self):
         ''' lookup method must return None  '''
         
-        for h in self.not_listed:
+        self.dns_query_mock.side_effect = NXDOMAIN('Test NXDOMAIN')
+        
+        for h in self.valid_hosts:
             actual = self.dnsbl_service.lookup(h)
             self.assertIsNone(actual)
             
     def testLookupForListedWithUnknownCodes(self,):
         ''' lookup method must raise UnknownCodeError '''
         
-        for h in self.listed_with_unknown_codes:
+        self.classification_map.__getitem__.side_effect = UnknownCodeError('Unknown code error')
+        
+        for h in self.valid_hosts:
             self.assertRaises(UnknownCodeError, self.dnsbl_service.lookup, h)
-            
-    @classmethod
-    def tearDownClass(cls):
-        cls.patcher.stop()
+        
+    def tearDown(self):
+        
+        self.patcher.stop()
             
 class IpDNSBLTest(BaseDNSBLTest, unittest.TestCase):
     
-    @classmethod
-    def setUpClass(cls):
-        
-        listed_with_known_codes = u'255.0.120.1', u'2001:db8:abc:123::42'
-        listed_with_unknown_codes = u'120.150.120.1', u'2001:db7:abc:144::22'
-        not_listed = u'200.0.121.1', u'2001:db8:abc:124::41'
-        invalid_arguments = u't1.pl', u't2.com'
-        
-        super(IpDNSBLTest, cls).setUpClass(listed_with_known_codes, listed_with_unknown_codes, 
-                                           not_listed, invalid_arguments)
-    
-    
-    @classmethod
-    def setUpDNSBLService(cls, query_domain):
-        ''' Prepare IpDNSBL instance to be tested
-         
-        :param query_domain: a parent domain of dns query
-        '''
-         
-        cls.dnsbl_service = IpDNSBL('test_service', query_domain, cls.getCodeItemClassMock())
+    valid_hosts = u'255.0.120.1', u'2001:db8:abc:123::42'
+    invalid_hosts = u't1.pl', u't2.com'
+    factory = IpDNSBL
         
 class DomainDNSBLTest(BaseDNSBLTest, unittest.TestCase):
     
-    @classmethod
-    def setUpClass(cls):
-        listed_with_known_codes = u't1.pl', u't2.com', u't3.com.pl', u't4.com', u't5.pl'
-        listed_with_unknown_codes = u'test1.pl', u'test2.pl'
-        not_listed = u'lorem.pl', u'ipsum.com'
-        invalid_arguments = u'255.0.120.1', u'2001:db8:abc:123::42', '-aaa'
-        
-        super(DomainDNSBLTest, cls).setUpClass(listed_with_known_codes, listed_with_unknown_codes, 
-                                           not_listed, invalid_arguments)
-    
-    @classmethod
-    def setUpDNSBLService(cls, query_domain):
-        ''' Perapre DomainDNSBL instance to be tested
-        
-        :param query_domain: a parent domain of dns query
-        '''
-        
-        cls.dnsbl_service = DomainDNSBL('test_service', query_domain, cls.getCodeItemClassMock())
+    valid_hosts = u't1.pl', u't2.com'
+    invalid_hosts = u'255.0.120.1', u'2001:db8:abc:123::42', '-aaa'
+    factory = DomainDNSBL
             
 class GeneralDNSBLTest(BaseDNSBLTest, unittest.TestCase):
     
-    @classmethod
-    def setUpClass(cls):
-        listed_with_known_codes = u't1.pl', u't2.com', u'255.0.120.1', u'2001:db8:abc:123::42'
-        listed_with_unknown_codes = u'test1.pl', u'test2.pl', u'120.150.120.1', u'2001:db7:abc:144::22'
-        not_listed = u'lorem.pl', u'ipsum.com', u'200.0.121.1', u'2001:db8:abc:124::41'
-        invalid_arguments = '-aaaa'
-        
-        
-        super(GeneralDNSBLTest, cls).setUpClass(listed_with_known_codes, listed_with_unknown_codes, 
-                                           not_listed, invalid_arguments)
-    
-    @classmethod
-    def setUpDNSBLService(cls, query_domain):
-        ''' Prepare GeneralDNSBL instance to be tested
-        
-        :param query_domain: a parent domain of dns query
-        '''
-        
-        cls.dnsbl_service = GeneralDNSBL('test_service', query_domain, cls.getCodeItemClassMock())
+    valid_hosts = u't1.pl', u'255.0.120.1', u'2001:db8:abc:123::42'
+    invalid_hosts = u'266.0.120.1', '/e'
+    factory = GeneralDNSBL
     
 class CodeClassificationMapTest(unittest.TestCase):
     
