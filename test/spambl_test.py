@@ -192,92 +192,65 @@ class HpHostsTest(unittest.TestCase):
     
     @classmethod
     def setUpClass(cls):
-        cls.hp_hosts = HpHosts('spambl_test_suite')
-        cls.setUpData()
-        cls.setUpMockedGet()
-        
-    @classmethod
-    def setUpData(cls):
-        cls.classification = '[TEST]'
-        
-        listed_hostnames = map(relative_name, ('t1.pl', 't2.com', 't3.com.pl'))
-        listed_ips = map(IP, (u'255.255.0.1', u'2001:DB8:abc:123::42'))
-        
-        cls.hosts_listed = listed_hostnames + listed_ips
-        
+        cls.valid_hosts = 't1.pl', u'255.255.0.1'
         cls.invalid_hosts = u'266.266.266.266', u'-test.host.pl'
         
-        not_listed_hostnames = map(relative_name, ('at.pl', 'lorem.com', 'impsum.com'))
-        not_listed_ips = map(IP, [u'211.170.0.1'])
+        cls.hp_hosts = HpHosts('spambl_test_suite')
         
-        cls.hosts_not_listed = not_listed_hostnames + not_listed_ips
+    def setUp(self):
         
-    @classmethod
-    def get(cls, url):
-        ''' Perform GET request using this mocked implementation
+        self.response = Mock()
         
-        :param url: address of resource
-        :returns: an instance of Mock representing response object,
-        as required by HpHosts class
-        '''
-        
-        parsed_url = urlparse(url)
-        params = parse_qs(parsed_url.query)
-        
-        content = 'Not listed'
-        
-        if params['s'][0] in [str(n) for n in cls.hosts_listed]:
-            c = cls.classification if 'class' in params else ''
-            content = ','.join(('Listed', c))
-            
-        response = Mock(spec=['content'])
-        response.content = content
-        
-        return response
-        
-    @classmethod
-    def setUpMockedGet(cls):
-        cls.patcher = patch('spambl.get')
-        cls.mocked_get = cls.patcher.start()
-        cls.mocked_get.side_effect = cls.get
+        self.patcher = patch('spambl.get')
+        self.get_mock = self.patcher.start()
+        self.get_mock.return_value = self.response
     
     def testContainsForListedHosts(self):
         ''' For listed hosts, __contains__ should return True'''
         
-        for host in self.hosts_listed:
+        self.response.content = 'Listed, [TEST CLASS]'
+        
+        for host in self.valid_hosts:
             self.assertTrue(host in self.hp_hosts)
             
     def testContainsForNotListedHosts(self):
         ''' For not listed hosts, __contains__ should return False '''
         
-        for host in self.hosts_not_listed:
+        self.response.content = 'Not listed'
+        
+        for host in self.valid_hosts:
             self.assertFalse(host in self.hp_hosts)
             
     def testContainsForInvalidHosts(self):
         ''' For invalid hosts, __contains__ should raise a ValueError '''
+        
         for val in self.invalid_hosts:
             self.assertRaises(ValueError, self.hp_hosts.__contains__, val)
                 
     def testLookupForListedHosts(self):
         ''' For listed hosts, lookup should return an object representing it'''
         
-        for host in self.hosts_listed:
+        self.response.content = 'Listed, [TEST CLASS]'
+        
+        for host in self.valid_hosts:
             self.assertEqual(self.hp_hosts.lookup(host).value, host)
             
     def testLookupForNotListedHosts(self):
         ''' For not listed hosts, lookup should return None '''
-            
-        for host in self.hosts_not_listed:
+        
+        self.response.content = 'Not listed'
+        
+        for host in self.valid_hosts:
             self.assertEqual(self.hp_hosts.lookup(host), None)
             
     def testLookupForInvalidHosts(self):
         ''' For invalid hosts, lookup should raise a ValueError '''
+        
         for val in self.invalid_hosts:
             self.assertRaises(ValueError, self.hp_hosts.lookup, val)
             
-    @classmethod
-    def tearDownClass(cls):
-        cls.patcher.stop()
+    def tearDown(self):
+        self.patcher.stop()
 
 Url = namedtuple('Url', 'value location')
 Url.__new__.__defaults__ = (None,)
