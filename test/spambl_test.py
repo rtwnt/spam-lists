@@ -531,35 +531,42 @@ class IpAddressTest(unittest.TestCase):
 class HostTest(unittest.TestCase):
     ''' Tests host function from spambl module '''
     
-    @classmethod
-    def setUpClass(cls):
-        cls.ipv4_str = u'127.0.0.1'
-        cls.ipv6_str = u'2001:db8:abc:125::45'
-        cls.hostname = 'test.hostname'
-        cls.invalid_host = []
-        
     def testHostForIpV4Address(self):
         ''' host() for ipv4 address should return an IpAddress instance
         with an expected value of the _value property'''
         
-        self.assertEqual(host(self.ipv4_str)._value, ip_address(self.ipv4_str))
+        ip = u'127.0.0.1'
+        actual = host(ip)._value
+        expected = ip_address(ip)
+        
+        self.assertEqual(actual, expected)
         
     def testHostForIpV6Address(self):
         ''' host() for ipv6address should return an IpAddress instance
         with an expected value of the _value property'''
         
-        self.assertEqual(host(self.ipv6_str)._value, ip_address(self.ipv6_str))
+        ip = u'2001:db8:abc:125::45'
+        actual = host(ip)._value
+        expected = ip_address(ip)
+        
+        self.assertEqual(actual, expected)
         
     def testHostForHostname(self):
         ''' host() for hostname should return a Hostname instance
         with an expected value of the _value property'''
         
-        self.assertEqual(host(self.hostname)._value, relative_name(self.hostname))
+        hostname = 'test.hostname'
+        actual = host(hostname)._value
+        expected = relative_name(hostname)
+        
+        self.assertEqual(actual, expected)
         
     def testHostForInvalidValue(self):
         ''' For an invalid argument, host() should raise a ValueError'''
         
-        self.assertRaises(ValueError, host, self.invalid_host)
+        invalid = '/e'
+        
+        self.assertRaises(ValueError, host, invalid)
           
 class IsValidUrlTest(unittest.TestCase):
      
