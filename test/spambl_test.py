@@ -17,15 +17,6 @@ from urlparse import urlparse
 from requests.exceptions import HTTPError, MissingSchema, InvalidSchema, InvalidURL
 from dns import name
 
-def relative_name(hostname):
-    ''' Create an object representing partially qualified domain name 
-    for given hostname
-    
-    :param host: a hostname
-    :returns: dns.name.Name instance relative to the root
-    '''
-    return name.from_text(hostname).relativize(name.root) 
-
 class BaseDNSBLTest(object):
     
     valid_hosts = ()
@@ -557,7 +548,7 @@ class HostTest(unittest.TestCase):
         
         hostname = 'test.hostname'
         actual = host(hostname)._value
-        expected = relative_name(hostname)
+        expected = name.from_text(hostname).relativize(name.root) 
         
         self.assertEqual(actual, expected)
         
