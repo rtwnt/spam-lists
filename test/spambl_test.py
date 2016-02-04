@@ -412,38 +412,36 @@ class HostnameTest(unittest.TestCase):
     
     @classmethod
     def setUpClass(cls):
-        cls.test_unrelated_domain_str = 'test.unrelated.domain.com'
-        cls.unrelated_domain = Hostname(cls.test_unrelated_domain_str)
-        
-        cls.test_superdomain_str = 'hostname.pl'
-        cls.superdomain = Hostname(cls.test_superdomain_str)
-        
-        cls.test_hostname_str = 'test.'+cls.test_superdomain_str
-        cls.hostname = Hostname(cls.test_hostname_str)
-        
-        cls.test_subdomain_str = 'subomain.of.'+cls.test_hostname_str
-        cls.subdomain = Hostname(cls.test_subdomain_str)
+        cls.hostname = Hostname('hostname.pl')
         
     def testIsMatchForTheSameHostname(self):
         ''' is_match method should return True for
         identical hostname '''
         
-        self.assertTrue(self.hostname.is_match(Hostname(self.test_hostname_str)))
+        hostname_2 = Hostname(self.hostname)
+        
+        self.assertTrue(self.hostname.is_match(hostname_2))
         
     def testIsMatchForASubdomain(self):
         ''' is_match should return False for a subdomain '''
         
-        self.assertFalse(self.hostname.is_match(self.subdomain))
+        subdomain = Hostname('subdomain.hostname.pl')
+        
+        self.assertFalse(self.hostname.is_match(subdomain))
         
     def testIsMatchForASuperDomain(self):
         ''' is_match should return True for a superdomain '''
         
-        self.assertTrue(self.hostname.is_match(self.superdomain))
+        subdomain = Hostname('subdomain.hostname.pl')
+        
+        self.assertTrue(subdomain.is_match(self.hostname))
         
     def testIsMatchForAnUnrelatedDomain(self):
         ''' is_match should return False for an unrelated domain '''
         
-        self.assertFalse(self.hostname.is_match(self.unrelated_domain))
+        unrelated_hostname = Hostname('otherhostname.pl')
+        
+        self.assertFalse(self.hostname.is_match(unrelated_hostname))
         
     def testIsMatchForADifferentObject(self):
         ''' is_match should return False for an object of different type '''
