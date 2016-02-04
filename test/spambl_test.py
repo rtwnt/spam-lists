@@ -453,70 +453,79 @@ class IpAddressTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         
-        cls.ipv4_str = u'255.0.2.1'
-        cls.another_ipv4_str = u'127.0.0.1'
-        cls.ipv4_relative_domain = relative_name('1.2.0.255')
-        cls.ipv4 = IpAddress(cls.ipv4_str)
-        
-        cls.ipv6_str = u'2001:db8:abc:123::42'
-        cls.another_ipv6_str = u'2001:db8:abc:125::45'
-        ipv6_rrp_str = '2.4.0.0.0.0.0.0.0.0.0.0.0.0.0.0.3.2.1.0.c.b.a.0.8.b.d.0.1.0.0.2'
-        cls.ipv6_relative_domain = relative_name(ipv6_rrp_str)
-        cls.ipv6 = IpAddress(cls.ipv6_str)
+        cls.ipv4 = IpAddress(u'255.0.2.1')
+        cls.ipv6 = IpAddress(u'2001:db8:abc:123::42')
         
     def testRelativeDomainForIpV4(self):
         ''' relative_domain property of IpAddress containing
         ipv4 value should be equal to given domain '''
         
-        self.assertEqual(self.ipv4.relative_domain, self.ipv4_relative_domain)
+        actual = str(self.ipv4.relative_domain)
+        
+        self.assertEqual(actual, '1.2.0.255')
         
     def testRelativeDomainForIpV6(self):
         ''' relative_domain property of IpAddress containing
         ipv6 value should be equal to given domain '''
         
-        self.assertEqual(self.ipv6.relative_domain, self.ipv6_relative_domain)
+        actual = str(self.ipv6.relative_domain)
+        expected = '2.4.0.0.0.0.0.0.0.0.0.0.0.0.0.0.3.2.1.0.c.b.a.0.8.b.d.0.1.0.0.2'
+        
+        self.assertEqual(actual, expected)
         
     def testIsMatchForTheSameIpV4Address(self):
         ''' is_match for IpAddress objects containing the same IpV4 values
         should return True '''
         
-        self.assertTrue(self.ipv4.is_match(IpAddress(self.ipv4_str)))
+        second = IpAddress(unicode(self.ipv4))
+        
+        self.assertTrue(self.ipv4.is_match(second))
         
     def testIsMatchForDifferentIpV4Address(self):
         ''' is_match should return False for a value containing a different ipv4 address '''
         
-        self.assertFalse(self.ipv4.is_match(IpAddress(self.another_ipv4_str)))
+        second = IpAddress(u'198.99.111.22')
+        
+        self.assertFalse(self.ipv4.is_match(second))
         
     def testIsMatchForIpV6Address(self):
         ''' is_match should return False for an ipv6 value '''
         
-        self.assertFalse(self.ipv4.is_match(IpAddress(self.ipv6_str)))
+        self.assertFalse(self.ipv4.is_match(self.ipv6))
         
     def testIsMatchForAValueOtherThanIpV4Address(self):
         ''' is_match should return False for a value of a different type '''
         
-        self.assertFalse(self.ipv4.is_match([]))
+        other = []
+        
+        self.assertFalse(self.ipv4.is_match(other))
         
     def testIsMatchForTheSameIpV6Address(self):
         ''' is_match for IpAddress objects containing the same IpV6 values
         should return True '''
         
-        self.assertTrue(self.ipv6.is_match(IpAddress(self.ipv6_str)))
+        second = IpAddress(unicode(self.ipv6))
+        
+        self.assertTrue(self.ipv6.is_match(second))
         
     def testIsMatchForDifferentIpV6Address(self):
         ''' is_match should return False for a value containing a different ipv4 address '''
         
-        self.assertFalse(self.ipv6.is_match(IpAddress(self.another_ipv6_str)))
+        other = IpAddress(u'2001:db8:abc:124::44')
+        
+        self.assertFalse(self.ipv6.is_match(other))
         
     def testIsMatchForIpV4Address(self):
         ''' is_match should return False for an ipv4 value '''
         
-        self.assertFalse(self.ipv6.is_match(IpAddress(self.ipv4_str)))
+        self.assertFalse(self.ipv4.is_match(self.ipv6))
         
     def testIsMatchForAValueOtherThanIpV6Address(self):
         ''' is_match should return False for a value of a different type '''
         
-        self.assertFalse(self.ipv6.is_match([]))
+        other = []
+        
+        self.assertFalse(self.ipv6.is_match(other))
         
         
 class HostTest(unittest.TestCase):
