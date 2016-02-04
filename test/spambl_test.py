@@ -373,66 +373,40 @@ class GoogleSafeBrowsingTest(unittest.TestCase):
 class HostCollectionTest(unittest.TestCase):
     
     def setUp(self):
-        self.listed_hostnames = u'google.com', u'test1.pl'
-        self.listed_ips = u'127.0.0.1', u'2001:db8:abc:123::42'
-        self.listed_hosts = self.listed_hostnames + self.listed_ips
+        self.listed_hosts = 'google.com', 'test1.pl', u'127.0.0.1', u'2001:db8:abc:123::42'
+        self.not_listed_hosts = 'a.com', 'lorem.pl', u'255.0.0.1', u'2001:db8:abc:124::41'
+        self.invalid_hosts = '-k', u'999.999.000.111.222'
         
-        self.not_listed_hostnames = u'a.com', u'lorem.pl'
-        self.not_listed_ips = u'255.0.0.1', u'2001:db8:abc:124::41'
-        self.not_listed_hosts = self.not_listed_hostnames + self.not_listed_ips
+        self.host_collection = HostCollection(self.listed_hosts)
         
-        self.host_collection_A = HostCollection(self.listed_hosts)
-
-        self.matching_A = HostCollection(self.listed_hosts+self.not_listed_hosts)
-        self.not_matching_a = HostCollection(self.not_listed_hosts)
-        self.empty = HostCollection()
+    def testAddValidHost(self):
+        ''' Adding a valid host should result in inclusion of an object representing it in collection '''
         
-    def testAddHostnames(self):
-        ''' Adding a valid hostname should result in inclusion of a
-        Name object representing it in the collection '''
-        
-        for h in self.listed_hostnames:
-            self.host_collection_A.add(h)
-            self.assertTrue(any(str(h) == str(i) for i in self.host_collection_A.hosts))
-            
-    def testAddIps(self):
-        ''' Adding a valid ip address should result in inclusion of a
-        valid ip address object representing it in the collection '''
-        
-        for ip in self.listed_ips:
-            self.host_collection_A.add(ip)
-            self.assertTrue(any(str(ip) == str(i) for i in self.host_collection_A.hosts))
+        for h in self.listed_hosts:
+            self.host_collection.add(h)
+            actual = any(str(h) == str(i) for i in self.host_collection.hosts)
+            self.assertTrue(actual)
             
     def testAddInvalidHost(self):
         ''' Adding an invalid host should result in an error '''
         
-        test_host = '-k.'
-        self.assertRaises(ValueError, self.host_collection_A.add, test_host)
+        for k in self.invalid_hosts:
+            self.assertRaises(ValueError, self.host_collection.add, k)
         
-    def testContainsForListedIps(self):
-        ''' __contains__ must return True for listed ips '''
-        for k in self.listed_ips:
-            self.assertTrue(k in self.host_collection_A)
+    def testContainsForListedValues(self):
+        ''' __contains__ must return True for listed hosts '''
+        for k in self.listed_hosts:
+            self.assertTrue(k in self.host_collection)
             
-    def testContainsForNotListedIps(self):
-        ''' __contains__ must return False for not listed ips '''
-        for k in self.not_listed_ips:
-            self.assertFalse(k in self.host_collection_A)
-            
-    def testContainsForListedHostnames(self):
-        ''' __contains__ must return True for listed hostnames '''
-        for k in self.listed_hostnames:
-            self.assertTrue(k in self.host_collection_A)
-            
-    def testContainsForNotListedHostnames(self):
-        ''' __contains__ must return False for not listed hostnames '''
-        for k in self.not_listed_hostnames:
-            self.assertFalse(k in self.host_collection_A)
+    def testContainsForNotListedValues(self):
+        ''' __contains__ must return False for not listed hosts '''
+        for k in self.not_listed_hosts:
+            self.assertFalse(k in self.host_collection)
             
     def testContainsForInvalidArguments(self):
         ''' __contains__ must raise ValueError for invalid arguments '''
-        for k in ('-k', '999.999.000.111.222'):
-            self.assertRaises(ValueError, self.host_collection_A.__contains__, k)
+        for k in self.invalid_hosts:
+            self.assertRaises(ValueError, self.host_collection.__contains__, k)
             
 class HostnameTest(unittest.TestCase):
     
