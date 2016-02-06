@@ -512,6 +512,21 @@ def is_valid_url(value):
     host = urlparse(value).hostname
     
     return (match and any(f(host) for f in host_validators))
+
+class RedirectUrlResolver(object):
+    
+    def __init__(self, requests_session = Session()):
+        '''
+        Constructor
+        
+        :param requests_session: a session object implementing
+        methods:
+        * head(url) (for HEAD request)
+        * resolve_redirects(response, request)
+        '''
+        
+        self.session = requests_session
+        
                     
 class BaseUrlTester(object):
     ''' A base for classes responsible for url testing '''
