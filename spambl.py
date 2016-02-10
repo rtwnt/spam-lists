@@ -527,6 +527,55 @@ class RedirectUrlResolver(object):
         
         self.session = requests_session
         
+    def get_first_response(self, url):
+        ''' Get the first response to HEAD request for given url
+        
+        :param url: a url value
+        :returns: If no exception was raised, it returns 
+        an object representing the first response in the response history 
+        for given url.
+        
+        Otherwise, None is returned.
+        
+        :raises ValueError: if the parameter is not a valid url value
+        '''
+        
+        if not is_valid_url(url):
+            raise ValueError, '{} is not a valid url'.format(url)
+        
+        try:
+            return self.session.head(url)
+        
+        except (ConnectionError, InvalidSchema, Timeout):
+            return None
+        
+    def get_redirect_urls(self, url):
+        ''' Get valid location header values from
+        responses for given url
+        
+        :param url: a url value
+        :returns: valid redirection addresses. If a request
+        for an address fails, and the address is still a valid url string, 
+        it's included as the last yielded value. If it's not, the previous value
+        is the last one.
+        :raises ValuError: if the argument is not a valid url
+        '''
+        
+        response = self.get_first_response(url)
+        
+        if response:
+            try:
+                for response in self.session.resolve_redirects(response, response.request):
+                    yield response.url
+                    
+            except InvalidURL: pass
+                
+            except (Timeout, ConnectionError, InvalidSchema) as e:
+                last_url = response.headers['location']
+                
+                if isinstance(e, Timeout) or is_valid_url(last_url):
+                    yield last_url
+        
                     
 class BaseUrlTester(object):
     ''' A base for classes responsible for url testing '''

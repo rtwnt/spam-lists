@@ -14,8 +14,11 @@ from itertools import combinations, product
 from collections import namedtuple
 
 from urlparse import urlparse
-from requests.exceptions import HTTPError, MissingSchema, InvalidSchema, InvalidURL
+from requests.exceptions import HTTPError, MissingSchema, InvalidSchema, InvalidURL,\
+    ConnectionError, Timeout
 from dns import name
+
+from nose_parameterized import parameterized
 
 class BaseDNSBLTest(object):
     
@@ -586,12 +589,151 @@ class IsValidUrlTest(unittest.TestCase):
             self.assertFalse(is_valid_url(u))
             
 class RedirectUrlResolverTest(unittest.TestCase):
+    
+    valid_urls = ['http://first.com', 'http://122.55.33.21',
+    'http://[2001:db8:abc:123::42]']
+    
     def setUp(self):
         
         session_mock = Mock()
         
+        self.head_mock = session_mock.head
+        self.resolve_redirects_mock = session_mock.resolve_redirects
+        
         self.resolver = RedirectUrlResolver(session_mock)
         
+        self.patcher = patch('spambl.is_valid_url')
+        self.is_valid_url_mock = self.patcher.start()
+        
+        
+    def testGetFirstResponseForInvalidUrl(self):
+        
+        self.is_valid_url_mock.return_value = False
+        
+        self.assertRaises(ValueError, self.resolver.get_first_response, 'http://test.com')
+        
+    @parameterized.expand([
+                           ('ConnectionError', ConnectionError),
+                           ('InvalidSchema', InvalidSchema),
+                           ('Timeout', Timeout)
+                           ])
+    def testGetFirstResponseForFirstUrlTriggering(self, _, exception_type):
+        
+        self.head_mock.side_effect = exception_type
+        self.assertIsNone(self.resolver.get_first_response('http://test.com'))
+        
+    def testGetRedirectUrlsForInvalidUrl(self):
+        
+        self.is_valid_url_mock.return_value = False
+        
+        with self.assertRaises(ValueError):
+            self.resolver.get_redirect_urls('http://test.com').next()
+        
+    @parameterized.expand([
+                           ('ConnectionError', ConnectionError),
+                           ('InvalidSchema', InvalidSchema),
+                           ('Timeout', Timeout)
+                           ])
+    def testGetRedirectUrlsForFirstUrlTriggering(self, _, exception_type):
+        
+        self.head_mock.side_effect = exception_type
+        
+        url_generator = self.resolver.get_redirect_urls('http://test.com')
+        
+        self.assertFalse(list(url_generator))
+            
+    def _getResponseMocks(self, urls):
+        
+        response_mocks = []
+        
+        for u in urls:
+            response = Mock()
+            response.url = u
+            response_mocks.append(response)
+            
+        return response_mocks
+    
+    def _setSessionResolveRedirectsSideEffects(self, urls, exception_type=None):
+        
+        if not (exception_type is None or 
+                issubclass(exception_type, Exception)):
+            raise ValueError, '{} is not a subclass of Exception'.format(exception_type)
+        
+        self._response_mocks = self._getResponseMocks(urls)
+        
+        def resolveRedirects(response, request):
+            for r in self._response_mocks:
+                yield r
+                
+            if exception_type:
+                raise exception_type
+                
+        self.resolve_redirects_mock.side_effect = resolveRedirects
+        
+    def _setLastResponseLocationHeader(self, url):
+        
+        all_responses = [self.head_mock.return_value] + self._response_mocks
+        all_responses[-1].headers = {'location': url}
+    
+    def _testGetRedirectUrlsYields(self, expected):
+        
+        url_generator = self.resolver.get_redirect_urls('http://test.com')
+        
+        self.assertEqual(expected, list(url_generator))
+        
+    @parameterized.expand([
+                           ('YieldingNoUrl', []),
+                           ('YieldingUrls', valid_urls)
+                           ])
+    def testGetRedirectUrls(self, _, expected):
+        
+        self._setSessionResolveRedirectsSideEffects(expected)
+        
+        self._testGetRedirectUrlsYields(expected)
+        
+    @parameterized.expand([
+                           ('Timeout', [], Timeout),
+                           ('Timeout', valid_urls, Timeout),
+                           ('ConnectionError', [], ConnectionError),
+                           ('ConnectionError', valid_urls, ConnectionError),
+                           ('InvalidSchema', [], InvalidSchema),
+                           ('InvalidSchema', valid_urls, InvalidSchema),
+                           ])
+    def testGetRedirectUrlsUntilValidUrlTriggers(self, _, expected, exception_type):
+        
+        self._setSessionResolveRedirectsSideEffects(expected, exception_type)
+        
+        error_source = 'http://triggered.error.com'
+        expected.append(error_source)
+        
+        self._setLastResponseLocationHeader(error_source)
+            
+        self._testGetRedirectUrlsYields(expected)
+        
+    @parameterized.expand([
+                           ('InvalidURL', [], InvalidURL),
+                           ('InvalidURL', valid_urls, InvalidURL),
+                           ('ConnectionError', [], ConnectionError),
+                           ('ConnectionError', valid_urls, ConnectionError),
+                           ('InvalidSchema', [], InvalidSchema),
+                           ('InvalidSchema', valid_urls, InvalidSchema),
+                           ])
+    def testGetRedirectUrlsUntilInvalidUrlTriggers(self, _, expected, exception_type):
+        
+        is_valid_url = lambda u: u in expected+['http://test.com']
+        self.is_valid_url_mock.side_effect = is_valid_url
+        
+        self._setSessionResolveRedirectsSideEffects(expected, exception_type)
+        
+        self._setLastResponseLocationHeader('http://invalid.url.com')
+            
+        self._testGetRedirectUrlsYields(expected)
+    
+    def tearDown(self):
+        
+        self.patcher.stop()
+        
+            
 class BaseUrlTesterTest(unittest.TestCase):
     valid_http_urls = []
     valid_non_http_urls = []
@@ -829,7 +971,6 @@ class BaseUrlTesterTest(unittest.TestCase):
     def testUrlsToTestForMissingSchemaUrlsWithRedirectResolution(self):
         ''' The urls_to_test method is expected to raise ValueError for urls missing their schema part'''
         self.doTestUrlsToTestForInvalidArguments(self.missing_schema_urls, True)
-        
         
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
