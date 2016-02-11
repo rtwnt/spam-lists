@@ -4,9 +4,8 @@
 from sys import exc_info
 from dns.resolver import query, NXDOMAIN
 from requests import get, post, Session
-from requests.exceptions import (HTTPError, Timeout, ConnectionError, InvalidSchema, InvalidURL,
-                                 MissingSchema)
-from itertools import izip, chain
+from requests.exceptions import HTTPError, Timeout, ConnectionError, InvalidSchema, InvalidURL
+from itertools import izip
 from ipaddress import ip_address
 from dns import name
 from collections import namedtuple
@@ -580,70 +579,48 @@ class RedirectUrlResolver(object):
 class BaseUrlTester(object):
     ''' A base for classes responsible for url testing '''
     
+    _redirect_url_resolver = None
+    
     def __init__(self, redirect_session = None):
         ''' Create a new instance
         
         :param redirect_session: requests.Session instance used for redirect
         url resolution
         '''
-        self._redirect_session = redirect_session
+        
+        if redirect_session is not None:
+            self.redirect_url_resolver.session = redirect_session
         
     @property
-    def redirect_session(self):
-        ''' Get redirect session
+    def redirect_url_resolver(self):
+        ''' Get redirect url resolver
         
         :returns: an instance of RedirecUrlResolver set for this object
         '''
-        if not self._redirect_session:
-            self._redirect_session = Session()
+        if self._redirect_url_resolver is None:
+            self._redirect_url_resolver = RedirectUrlResolver()
             
-        return self._redirect_session
+        return self._redirect_url_resolver
     
-    def get_first_response(self, url):
-        ''' Get the first response from the history of responses
-        for given url
+    def get_redirect_urls(self, urls):
+        ''' Get unique redirect urls for given urls
         
-        :param url: a url value
-        :returns: an object representing the first response in
-        the response history for given url
-        :raises ValueError: if the parameter is not a valid url value
+        :param urls: original urls
+        :returns: valid url addresses of redirects
         '''
-        try:
-            return self.redirect_session.head(url)
+        seen = set(urls)
+        
+        for u in urls:
+            redirect_urls = self.redirect_url_resolver.get_redirect_urls(u)
             
-        except (ConnectionError, InvalidSchema):
-            if not is_valid_url(url):
-                raise ValueError, '{} is not a valid url'.format(url), exc_info()[2]
-        except (InvalidURL, MissingSchema) as e:
-            raise ValueError, str(e), exc_info()[2]
-        except Timeout:
-            pass
-        
-    def resolve_redirects(self, url):
-        ''' Get urls of all redirects following request with the given url
-        
-        :param url: a url value
-        :returns: valid redirection addresses. If a request
-        for an address fails, and the address is a valid url string, it's included as the
-        last returned value. If the value is invalid, no further values are returned.
-        :raises ValuError: if the argument is not a valid url value
-        '''
-        
-        response = self.get_first_response(url)
-        if response:
-            try:
-                for response in self.redirect_session.resolve_redirects(response, response.request):
-                    yield response.url
-                    
-            except InvalidURL: pass
+            for ru in redirect_urls:
+                if ru in seen:
+                    break
                 
-            except (Timeout, ConnectionError, InvalidSchema) as e:
-                last_url = response.headers['location']
-                
-                if isinstance(e, Timeout) or is_valid_url(last_url):
-                    yield last_url
-                    
-    def urls_to_test(self, urls, resolve_redirects=False):
+                seen.add(ru)
+                yield ru
+               
+    def get_urls_to_test(self, urls, resolve_redirects=False):
         ''' From given urls, get all url addresses to test
         
         :param urls: a sequence of url values
@@ -652,19 +629,16 @@ class BaseUrlTester(object):
         :returns: url addresses to test
         '''
         urls = set(urls)
+        
         for u in urls:
             if not is_valid_url(u):
                 raise ValueError, '{} is not a valid url'.format(u)
+            
             yield u
             
         if resolve_redirects:
-            seen = set(urls)
-            redirect_urls = chain(*map(self.resolve_redirects, urls))
-            
-            for ru in redirect_urls:
-                if ru not in seen:
-                    seen.add(ru)
-                    yield ru
+            for ru in self.get_redirect_urls(urls):
+                yield ru
                 
 if __name__ == '__main__':
     pass
