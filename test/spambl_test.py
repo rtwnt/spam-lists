@@ -11,8 +11,6 @@ from spambl import (UnknownCodeError, NXDOMAIN, HpHosts,
 from mock import Mock, patch, MagicMock
 from itertools import combinations, product, chain
 
-from collections import namedtuple
-
 from requests.exceptions import HTTPError, InvalidSchema, InvalidURL,\
     ConnectionError, Timeout
 from dns import name, reversename
@@ -244,9 +242,6 @@ class HpHostsTest(unittest.TestCase):
             
     def tearDown(self):
         self.patcher.stop()
-
-Url = namedtuple('Url', 'value location')
-Url.__new__.__defaults__ = (None,)
 
 class GoogleSafeBrowsingTest(unittest.TestCase):
     
