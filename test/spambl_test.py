@@ -121,25 +121,25 @@ class GeneralDNSBLTest(BaseDNSBLTest, unittest.TestCase):
     
 class CodeClassificationMapTest(unittest.TestCase):
     
-    @classmethod
-    def setUpClass(cls):
-        cls.code_item_class = {1: 'Class #1', 2: 'Class #2'}
-        cls.invalid_keys = 3, 4
+    def setUp(self):
         
-        cls.map = CodeClassificationMap(cls.code_item_class)
+        self.code_item_class = {}
+        self.map = CodeClassificationMap(self.code_item_class)
         
+    def testGetItemForValidKey(self):
         
-    def testGetItemForValidKeys(self):
-        ''' For a listed key, __getitem__ should return expected classification '''
+        key = 4
         
-        for key in self.code_item_class:
-            self.assertEqual(self.map[key], self.code_item_class[key])
+        self.code_item_class.update({key: 'TestClass'})
+        
+        expected = self.code_item_class[key]
+        actual = self.map[key]
+        
+        self.assertEqual(expected, actual)
             
     def testGetItemForInvalidKeys(self):
-        ''' For a not listed key, __getitem__ should raise an UnknownCodeError '''
-            
-        for key in self.invalid_keys:
-            self.assertRaises(UnknownCodeError, self.map.__getitem__, key)
+        
+        self.assertRaises(UnknownCodeError, self.map.__getitem__, 4)
             
 class SumClassificationMapTest(unittest.TestCase):
     
