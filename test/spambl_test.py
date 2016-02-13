@@ -391,6 +391,22 @@ class HostCollectionTest(unittest.TestCase):
         
         self.host_collection = HostCollection()
         
+    def _testForInvalid(self, function, value):
+        
+        self.host_mock.side_effect = ValueError
+        
+        self.assertRaises(ValueError, function, value)
+        
+    @parameterized.expand(invalid_host_parameters)
+    def testAddForInvalid(self, _, value):
+        
+        self._testForInvalid(self.host_collection.add, value)
+        
+    @parameterized.expand(invalid_host_parameters)
+    def testContainsForInvalid(self, _, value):
+        
+        self._testForInvalid(self.host_collection.__contains__, value)
+        
     @parameterized.expand(valid_host_parameters)
     def testAddForValid(self, _, value):
         
@@ -403,13 +419,6 @@ class HostCollectionTest(unittest.TestCase):
         
         self.assertTrue(in_host_collection)
         
-    @parameterized.expand(invalid_host_parameters)
-    def testAddForInvalid(self, _, value):
-        
-        self.host_mock.side_effect = ValueError
-        
-        self.assertRaises(ValueError, self.host_collection.add, value)
-        
     @parameterized.expand(valid_host_parameters)
     def testContainsForListed(self, _, value):
         
@@ -421,13 +430,6 @@ class HostCollectionTest(unittest.TestCase):
     def testContainsForNotListed(self, _, value):
         
         self.assertFalse(value in self.host_collection)
-        
-    @parameterized.expand(invalid_host_parameters)
-    def testContainsForInvalid(self, _, value):
-        
-        self.host_mock.side_effect = ValueError
-        
-        self.assertRaises(ValueError, self.host_collection.__contains__, value)
         
     def tearDown(self):
         self.host_patcher.stop()
