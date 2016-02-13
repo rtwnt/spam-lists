@@ -524,35 +524,57 @@ class IpAddressTest(unittest.TestCase):
         
 class HostTest(unittest.TestCase):
     
-    def testHostForIpV4Address(self):
+    def setUp(self):
         
-        ip = u'127.0.0.1'
-        actual = host(ip)._value
-        expected = ip_address(ip)
+        self.ipaddress_patcher = patch('spambl.IpAddress')
+        self.ipaddress_mock = self.ipaddress_patcher.start()
         
-        self.assertEqual(actual, expected)
+        self.hostname_patcher = patch('spambl.Hostname')
+        self.hostname_mock = self.hostname_patcher.start()
         
-    def testHostForIpV6Address(self):
+    @parameterized.expand([
+                           ('V4',  u'127.0.0.1'),
+                           ('V6', u'2001:db8:abc:125::45'),
+                           ])
+    def testHostForValidIp(self, _, value):
+        ip_address = Mock()
+        self.ipaddress_mock.return_value = ip_address
         
-        ip = u'2001:db8:abc:125::45'
-        actual = host(ip)._value
-        expected = ip_address(ip)
+        actual_ip = host(value)
         
-        self.assertEqual(actual, expected)
+        self.assertEqual(ip_address, actual_ip)
         
     def testHostForHostname(self):
         
-        hostname = 'test.hostname'
-        actual = host(hostname)._value
-        expected = name.from_text(hostname).relativize(name.root) 
+        hostname_str = 'test.hostname'
         
-        self.assertEqual(actual, expected)
+        hostname_mock = Mock()
+        self.hostname_mock.return_value = hostname_mock
         
-    def testHostForInvalidValue(self):
+        self.ipaddress_mock.side_effect = ValueError
         
-        invalid = '/e'
+        actual_hostname = host(hostname_str)
         
-        self.assertRaises(ValueError, host, invalid)
+        self.assertEqual(hostname_mock, actual_hostname)
+        
+    @parameterized.expand([
+                           ('IpV4Address', u'299.0.0.1'),
+                           ('IpV4Address', u'99.22.33.1.23'),
+                           ('IpV6Address', u'2001:db8:abc:125::4h'),
+                           ('IpV6Address', u'2001:db8:abcef:125::43'),
+                           ('Hostname', '-e'),
+                           ('Hostname', '/e')
+                           ])
+    def testHostForInvalid(self, _, value):
+        
+        self.hostname_mock.side_effect = ValueError
+        self.ipaddress_mock.side_effect = ValueError
+        
+        self.assertRaises(ValueError, host, value)
+        
+    def tearDown(self):
+        self.ipaddress_patcher.stop()
+        self.hostname_patcher.stop()
           
 class IsValidUrlTest(unittest.TestCase):
     
