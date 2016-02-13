@@ -6,7 +6,8 @@ from spambl import (UnknownCodeError, NXDOMAIN, HpHosts,
                     IpDNSBL, DomainDNSBL, GeneralDNSBL,
                     GoogleSafeBrowsing, UnathorizedAPIKeyError, HostCollection,
                      CodeClassificationMap, SumClassificationMap, Hostname, IpAddress, 
-                     host, is_valid_url, BaseUrlTester, RedirectUrlResolver)
+                     host, is_valid_url, BaseUrlTester, RedirectUrlResolver,
+    AddressListItem)
 from mock import Mock, patch, MagicMock
 from itertools import combinations, product, chain
 
@@ -275,6 +276,7 @@ class GoogleSafeBrowsingTest(unittest.TestCase):
     
     @classmethod
     def setUpClass(cls):
+        
         cls.valid_urls = 'http://test.domain1.com', 'https://255.255.0.1', 
         'http://[2001:DB8:abc:123::42]', 'ftp://test.domain2.com'
         
@@ -288,22 +290,21 @@ class GoogleSafeBrowsingTest(unittest.TestCase):
         self.mocked_post.return_value = self.post_response
         
     def doTestForUnathorizedAPIKey(self, function):
-        ''' function should raise UnathorizedAPIKeyError '''
+        
         self.post_response.status_code = 401
         self.post_response.raise_for_status.side_effect = HTTPError
         
         self.assertRaises(UnathorizedAPIKeyError, function, self.valid_urls)
         
     def testContainsAnyForUnathorizedAPIKey(self):
-        ''' contains_any should raise UnathorizedAPIKeyError '''
+        
         self.doTestForUnathorizedAPIKey(self.google_safe_browsing.contains_any)
         
     def testLookupForUnathorizedAPIKey(self):
-        ''' lookup should raise UnathorizedAPIKeyError '''
+        
         self.doTestForUnathorizedAPIKey(self.google_safe_browsing.lookup)
     
     def testContainsAnyForAnySpamUrls(self):
-        ''' contains_any should return True for a sequence containing spam urls'''
         
         self.post_response.status_code = 200
         
@@ -311,45 +312,63 @@ class GoogleSafeBrowsingTest(unittest.TestCase):
         self.assertTrue(actual)
         
     def testContainsAnyForNonSpamUrls(self):
-        ''' contains_any should return False for a sequence of non-spam urls'''
+        
         self.post_response.status_code = 204
         
         actual = self.google_safe_browsing.contains_any(self.valid_urls)
         self.assertFalse(actual)
         
-    def testLookupForAnySpamUrls(self):
-        ''' lookup should return a sequence  of objects representing 
-        all spam urls when called with sequence containing spam urls '''
-        
-        classifications = {
-                           'http://test1.com': 'phishing', 
-                           'http://test2.com': 'malware', 
-                           'https://123.22.1.11': 'unwanted',
-                           'http://[2001:DB8:abc:123::42]': 'phishing, malware',
-                           'ftp://test3.com': 'phishing, unwanted', 
-                           'http://test.domain.pl': 'malware,unwanted',
-                           'http://test.domain2.com': 'phishing, malware, unwanted',
-                           'https://domain3.com': 'ok'}
-        
+    def _setPostResult(self, classification):
         def mocked_post(_, body):
             urls = body.splitlines()[1:]
+            classes = [classification.get(u, 'ok') for u in urls]
             
             response = Mock()
             response.status_code = 200
-            response.content = '\n'.join(classifications[u] for u in urls)
+            response.content = '\n'.join(classes)
             
             return response
         
         self.mocked_post.side_effect = mocked_post
         
-        actual = self.google_safe_browsing.lookup(classifications.keys())
+    @parameterized.expand([
+                           ('HostnameUrls',
+                            { 
+                             'http://test1.com': 'phishing',
+                             'http://test2.com': 'malware'
+                             }),
+                           ('IpV6Urls',
+                            {
+                             'https://123.22.1.11': 'unwanted',
+                             'http://66.99.88.121': 'phishing, malware'
+                             }),
+                           ('IpV6Urls',
+                            {
+                             'http://[2001:DB8:abc:123::42]': 'phishing, malware',
+                             'http://[3731:54:65fe:2::a7]': 'phishing, unwanted'
+                             }),
+                           ('SpamUrlsWithDuplicates',
+                            {
+                             'http://abc.com': 'malware, unwanted',
+                             'http://domain.com': 'phishing, malware, unwanted'
+                             }, 
+                            ['http://abc.com'])
+                           ])
+    def testLookupFor(self, _, classification, duplicates = []):
         
-        self.assertTrue(actual)
+        self._setPostResult(classification)
         
-        for item in actual:
-            self.assertEqual(item.source, self.google_safe_browsing)
-            expected = classifications[item.value].split(',')
-            self.assertEqual(item.classification, expected)
+        item = lambda url, classes: AddressListItem(url, 
+                                                    self.google_safe_browsing, 
+                                                    classes.split(','))
+        
+        expected  = [item(u, c) for u, c in classification.items()]
+                
+        non_spam = ['http://nospam.com', 'https://nospam2.pl', 'https://spamfree.com']
+        tested = classification.keys()+ duplicates + non_spam
+        actual = self.google_safe_browsing.lookup(tested)
+        
+        self.assertItemsEqual(actual, expected)
         
     def testLookupForNonSpamUrls(self):
         ''' lookup should return an empty tuple when called for a sequence
