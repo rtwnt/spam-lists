@@ -9,7 +9,7 @@ from spambl import (UnknownCodeError, NXDOMAIN, HpHosts,
                      host, is_valid_url, BaseUrlTester, RedirectUrlResolver,
     AddressListItem)
 from mock import Mock, patch, MagicMock
-from itertools import combinations, product, chain
+from itertools import chain
 
 from requests.exceptions import HTTPError, InvalidSchema, InvalidURL,\
     ConnectionError, Timeout
@@ -143,40 +143,37 @@ class CodeClassificationMapTest(unittest.TestCase):
             
 class SumClassificationMapTest(unittest.TestCase):
     
-    @classmethod
-    def setUpClass(cls):
+    def setUp(self):
         
-        cls.code_item_class = {2: 'Class #1', 4: 'Class #2'}
-    
-        cls.invalid_keys = 8, 16, 17, 21
+        self.code_item_class = {}
+        self.map = SumClassificationMap(self.code_item_class)
         
-        cls.map = SumClassificationMap(cls.code_item_class)
+    def _setCodeItemClass(self, code_class):
+        self.code_item_class.update(code_class)
             
-            
-    def testGetItemForASimpleValidKey(self):
-        ''' For a simple listed key, __getitem__ should return an expected classification'''
-        for key in self.code_item_class:
-            self.assertEqual(self.map[key], tuple([self.code_item_class[key]]))
-            
-    def testGetItemForAnInvalidKey(self):
-        ''' For a non-listed key, __getitem__ should raise UnknownCodeError '''
-        for key in self.invalid_keys:
-            self.assertRaises(UnknownCodeError, self.map.__getitem__, key)
-    
-    def testGetItemForASumOfValidKeys(self):
-        ''' For a sum of valid keys, __getitem__ should return a tuple of expected classifications '''
-        for key_1, key_2 in combinations(self.code_item_class.keys(), 2):
-            
-            expected  = tuple([x for n, x in self.code_item_class.iteritems() if n in (key_1, key_2)])
-            self.assertEqual(self.map[key_1+key_2], expected)
+    @parameterized.expand([
+                           ('ASimpleValidKey', [2]),
+                           ('ASumOfKeys', [2, 4, 8])
+                           ])
+    def testGetItemFor(self, _, keys):
         
-    def testGetItemForASumWithAnInvalidKey(self):
-        ''' For a sum of keys, including at least one invalid, __getitem__ should
-        raise UnknownCodeError
-        '''
-        for key_1, key_2 in product(self.code_item_class.keys(), self.invalid_keys):
-            
-            self.assertRaises(UnknownCodeError, self.map.__getitem__, key_1+key_2)
+        classes = {k: 'Class #{}'.format(k) for k in keys}
+        self._setCodeItemClass(classes)
+        
+        expected = tuple(classes.values())
+        actual = self.map[sum(keys)]
+        
+        self.assertItemsEqual(expected, actual)
+        
+    @parameterized.expand([
+                           ('Key', [16]),
+                           ('SumOfKeys', [2, 4, 16])
+                           ])
+    def testGetItemForInvalid(self, _, keys):
+        
+        self._setCodeItemClass({2: 'Class: 2', 4: 'Class:4'})
+        
+        self.assertRaises(UnknownCodeError, self.map.__getitem__, sum(keys))
             
 class HpHostsTest(unittest.TestCase):
     
