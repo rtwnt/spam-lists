@@ -403,43 +403,45 @@ class HostCollectionTest(unittest.TestCase):
             
 class HostnameTest(unittest.TestCase):
     
-    @classmethod
-    def setUpClass(cls):
-        cls.hostname = Hostname('hostname.pl')
+    @parameterized.expand([
+                           ('InvalidHostname', '-e'),
+                           ('InvalidHostname', '/e'),
+                           ('NonStringValue', 123)
+                           ])
+    def testConstructorFor(self, _, value):
         
-    def testIsMatchForTheSameHostname(self):
-        ''' is_match method should return True for
-        identical hostname '''
+        self.assertRaises(ValueError, Hostname, value)
+    
+    def _getHostnames(self, value_1, value_2):
+        return map(Hostname, (value_1, value_2))
+    
+    def testIsMatchForTheSameDomains(self):
         
-        hostname_2 = Hostname(self.hostname)
+        value = 'hostname.pl'
+        h_1, h_2 = self._getHostnames(value, value)
         
-        self.assertTrue(self.hostname.is_match(hostname_2))
+        self.assertTrue(h_1.is_match(h_2))
+        self.assertTrue(h_2.is_match(h_1))
         
-    def testIsMatchForASubdomain(self):
-        ''' is_match should return False for a subdomain '''
+    def testIsMatchForDomainAndSubdomain(self):
         
-        subdomain = Hostname('subdomain.hostname.pl')
+        domain, subdomain = self._getHostnames('domain.com', 'sub.domain.com')
         
-        self.assertFalse(self.hostname.is_match(subdomain))
+        self.assertTrue(subdomain.is_match(domain))
+        self.assertFalse(domain.is_match(subdomain))
         
-    def testIsMatchForASuperDomain(self):
-        ''' is_match should return True for a superdomain '''
+    def testIsMatchForUnrelatedDomains(self):
         
-        subdomain = Hostname('subdomain.hostname.pl')
+        h_1, h_2 = self._getHostnames('google.com', 'microsoft.com')
         
-        self.assertTrue(subdomain.is_match(self.hostname))
+        self.assertFalse(h_1.is_match(h_2))
+        self.assertFalse(h_2.is_match(h_1))
         
-    def testIsMatchForAnUnrelatedDomain(self):
-        ''' is_match should return False for an unrelated domain '''
+    def testIsMatchForHostnameAndAnotherObject(self):
         
-        unrelated_hostname = Hostname('otherhostname.pl')
+        hostname = Hostname('hostname.pl')
         
-        self.assertFalse(self.hostname.is_match(unrelated_hostname))
-        
-    def testIsMatchForADifferentObject(self):
-        ''' is_match should return False for an object of different type '''
-        
-        self.assertFalse(self.hostname.is_match(tuple()))
+        self.assertFalse(hostname.is_match([]))
         
 
 class IpAddressTest(unittest.TestCase):
