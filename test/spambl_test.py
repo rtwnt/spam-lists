@@ -213,6 +213,21 @@ class HpHostsTest(unittest.TestCase):
             
         self.get_mock.return_value.content = content
         
+    def _testForInvalid(self, function, value):
+        
+        self.host_mock.side_effect = ValueError
+        self.assertRaises(ValueError, function, value)
+        
+    @parameterized.expand(invalid_input)
+    def testContainsForInvalid(self, _, value):
+        
+        self._testForInvalid(self.hp_hosts.__contains__, value)
+        
+    @parameterized.expand(invalid_input)
+    def testLookupForInvalid(self, _, value):
+        
+        self._testForInvalid(self.hp_hosts.lookup, value)
+        
     @parameterized.expand(valid_input)
     def testContainsForListed(self, _, value):
         
@@ -224,12 +239,6 @@ class HpHostsTest(unittest.TestCase):
         
         self._setUpResponseContent(False)
         self.assertFalse(host in self.hp_hosts)
-            
-    @parameterized.expand(invalid_input)
-    def testContainsForInvalid(self, _, value):
-        
-        self.host_mock.side_effect = ValueError
-        self.assertRaises(ValueError, self.hp_hosts.__contains__, value)
                 
     @parameterized.expand(valid_input)
     def testLookupForListed(self, _, value):
@@ -246,12 +255,6 @@ class HpHostsTest(unittest.TestCase):
         
         self._setUpResponseContent(False)
         self.assertEqual(self.hp_hosts.lookup(value), None)
-            
-    @parameterized.expand(invalid_input)
-    def testLookupForInvalid(self, _, value):
-        
-        self.host_mock.side_effect = ValueError
-        self.assertRaises(ValueError, self.hp_hosts.lookup, value)
             
     def tearDown(self):
         self.get_patcher.stop()
