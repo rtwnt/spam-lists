@@ -8,7 +8,6 @@ from spambl import (UnknownCodeError, NXDOMAIN, HpHosts,
                      CodeClassificationMap, SumClassificationMap, Hostname, IpAddress, 
                      host, is_valid_url, BaseUrlTester, RedirectUrlResolver)
 from mock import Mock, patch, MagicMock
-from ipaddress import ip_address
 from itertools import combinations, product, chain
 
 from collections import namedtuple
@@ -16,7 +15,7 @@ from collections import namedtuple
 from urlparse import urlparse
 from requests.exceptions import HTTPError, InvalidSchema, InvalidURL,\
     ConnectionError, Timeout
-from dns import name
+from dns import name, reversename
 
 from nose_parameterized import parameterized
 
@@ -444,83 +443,70 @@ class HostnameTest(unittest.TestCase):
         
 
 class IpAddressTest(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls):
+    ipv4_1 = u'255.0.2.1'
+    ipv4_2 = u'122.44.55.99'
+    ipv6_1 = u'2001:db8:abc:123::42'
+    ipv6_2 = u'fe80::0202:b3ff:fe1e:8329'
+    
+    
+    @parameterized.expand([
+                           ('InvalidIpV4', u'299.0.0.1'),
+                           ('InvalidIpV4', u'99.22.33.1.23'),
+                           ('InvalidIpV6', u'2001:db8:abc:125::4h'),
+                           ('InvalidIpV6', u'2001:db8:abcef:125::43'),
+                           ('Hostname', u'abc.def.gh'),
+                           ('NonUnicodeValue', '299.0.0.1')
+                           ])
+    def testConstructorFor(self, _, value):
         
-        cls.ipv4 = IpAddress(u'255.0.2.1')
-        cls.ipv6 = IpAddress(u'2001:db8:abc:123::42')
+        self.assertRaises(ValueError, IpAddress, value)
         
-    def testRelativeDomainForIpV4(self):
-        ''' relative_domain property of IpAddress containing
-        ipv4 value should be equal to given domain '''
         
-        actual = str(self.ipv4.relative_domain)
+    @parameterized.expand([
+                           ('IpV4', ipv4_1, reversename.ipv4_reverse_domain),
+                           ('IpV6', ipv6_1, reversename.ipv6_reverse_domain)
+                           ])
+    def testRelativeDomainFor(self, _, value, expected_origin):
         
-        self.assertEqual(actual, '1.2.0.255')
+        ip_address = IpAddress(value)
+        expected = reversename.from_address(value).relativize(expected_origin)
         
-    def testRelativeDomainForIpV6(self):
-        ''' relative_domain property of IpAddress containing
-        ipv6 value should be equal to given domain '''
+        self.assertEqual(expected, ip_address.relative_domain)
         
-        actual = str(self.ipv6.relative_domain)
-        expected = '2.4.0.0.0.0.0.0.0.0.0.0.0.0.0.0.3.2.1.0.c.b.a.0.8.b.d.0.1.0.0.2'
+    @parameterized.expand([
+                           ('IpV4Addresses', ipv4_1),
+                           ('IpV6Addresses', ipv6_2),
+                           ])
+    def testIsMatchIsTrueForTheSame(self, _, value):
+        first_ip = IpAddress(value)
+        second_ip = IpAddress(unicode(value))
         
-        self.assertEqual(actual, expected)
+        self.assertTrue(first_ip.is_match(second_ip))
+        self.assertTrue(second_ip.is_match(first_ip))
         
-    def testIsMatchForTheSameIpV4Address(self):
-        ''' is_match for IpAddress objects containing the same IpV4 values
-        should return True '''
+    @parameterized.expand([
+                           ('DifferentIpV4Values', ipv4_1, ipv4_2),
+                           ('IpV4AndIpV6', ipv4_1, ipv6_1),
+                           ('DifferentIpV6Values', ipv6_1, ipv6_2),
+                           ('IpV6AndIpV4', ipv6_1, ipv4_1)
+                           ])
+    def testIsMatchIsFalseFor(self, _, ip_value_1, ip_value_2):
+        ip_1 = IpAddress(ip_value_1)
+        ip_2 = IpAddress(ip_value_2)
         
-        second = IpAddress(unicode(self.ipv4))
+        self.assertFalse(ip_1.is_match(ip_2))
+        self.assertFalse(ip_2.is_match(ip_1))
         
-        self.assertTrue(self.ipv4.is_match(second))
+    @parameterized.expand([
+                           ('IpV4', ipv4_1),
+                           ('IpV6', ipv6_1),
+                           ])
+    def testIsMatchIsFalseForANonIpValueAnd(self, _, ip_value):
         
-    def testIsMatchForDifferentIpV4Address(self):
-        ''' is_match should return False for a value containing a different ipv4 address '''
-        
-        second = IpAddress(u'198.99.111.22')
-        
-        self.assertFalse(self.ipv4.is_match(second))
-        
-    def testIsMatchForIpV6Address(self):
-        ''' is_match should return False for an ipv6 value '''
-        
-        self.assertFalse(self.ipv4.is_match(self.ipv6))
-        
-    def testIsMatchForAValueOtherThanIpV4Address(self):
-        ''' is_match should return False for a value of a different type '''
-        
+        ip = IpAddress(ip_value)
         other = []
         
-        self.assertFalse(self.ipv4.is_match(other))
-        
-    def testIsMatchForTheSameIpV6Address(self):
-        ''' is_match for IpAddress objects containing the same IpV6 values
-        should return True '''
-        
-        second = IpAddress(unicode(self.ipv6))
-        
-        self.assertTrue(self.ipv6.is_match(second))
-        
-    def testIsMatchForDifferentIpV6Address(self):
-        ''' is_match should return False for a value containing a different ipv4 address '''
-        
-        other = IpAddress(u'2001:db8:abc:124::44')
-        
-        self.assertFalse(self.ipv6.is_match(other))
-        
-    def testIsMatchForIpV4Address(self):
-        ''' is_match should return False for an ipv4 value '''
-        
-        self.assertFalse(self.ipv4.is_match(self.ipv6))
-        
-    def testIsMatchForAValueOtherThanIpV6Address(self):
-        ''' is_match should return False for a value of a different type '''
-        
-        other = []
-        
-        self.assertFalse(self.ipv6.is_match(other))
-        
+        self.assertFalse(ip.is_match(other))
         
 class HostTest(unittest.TestCase):
     
