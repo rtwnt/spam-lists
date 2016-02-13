@@ -564,29 +564,35 @@ class HostTest(unittest.TestCase):
           
 class IsValidUrlTest(unittest.TestCase):
     
-    def testIsValidUrlForValidUrls(self):
-        ''' The function should return True for valid urls '''
-        
-        valid_urls = 'http://test.url.com', 'https://google.com', 
-        'https://google.com/',
-        'https://test.domain.com/path/element?var=1&var_2=3#fragment', 
-        'http://test.domain.com?var_1=1&var_2=2',
-        'https://test.domain.com:123', 'https://abc:def@test.domain.com'
-        'http://255.0.0.255', 'http://[2001:db8:abc:125::45]'
-        
-        for u in valid_urls:
-            self.assertTrue(is_valid_url(u))
+    @parameterized.expand([
+                           ('WithHttpScheme', 'http://test.url.com'),
+                           ('WithHttpsScheme', 'https://google.com'),
+                           ('WithFtpScheme', 'ftp://ftp.test.com'),
+                           ('WithNumericHost', 'http://999.com'),
+                           ('EndingWithSlash', 'https://google.com/'),
+                           ('WithPathQueryAndFragment', 'https://test.domain.com/path/element?var=1&var_2=3#fragment'),
+                           ('WithQuery', 'http://test.domain.com?var_1=1&var_2=2'),
+                           ('WithPath', 'http://test.domain.com/path'),
+                           ('WithPathAndFragement', 'http://test.domain.com/path#fragment'),
+                           ('WithQueryAndFragment', 'http://test.domain.com?var_1=1&var_2=2#fragment'),
+                           ('WithPort', 'https://test.domain.com:123'),
+                           ('WithAuthentication', 'https://abc:def@test.domain.com'),
+                           ('WithIpV4Host', 'http://255.0.0.255'),
+                           ('WithIpV6Host', 'http://[2001:db8:abc:125::45]')
+                           ])
+    def testIsValidUrlForValidUrl(self, _, url):
+        self.assertTrue(is_valid_url(url))
              
-    def testAssertValidUrlForInvalidUrls(self):
-        ''' The function should return False for invalid urls '''
-        
-        invalid_urls = 'test.url.com', 'http://266.0.0.266', 'http://127.0.0.1.1', 
-        'http://test.domain.com:aaa', 
-        'https://testdomaincom', 
-        'http://-invalid.domain.com'
-          
-        for u in invalid_urls:
-            self.assertFalse(is_valid_url(u))
+    @parameterized.expand([
+                           ('MissingSchema', 'test.url.com'),
+                           ('WithInvalidIpAddressV6', 'http://266.0.0.266'),
+                           ('WithInvalidIPAddressV6', 'http://127.0.0.1.1'),
+                           ('WithInvalidPort', 'http://test.domain.com:aaa'),
+                           ('MissingTopLevelDomain', 'https://testdomaincom'),
+                           ('WithInvalidHostname', 'http://-invalid.domain.com')
+                           ])
+    def testIsValidUrlForInvalidUrl(self, _, url):
+        self.assertFalse(is_valid_url(url))
             
 class RedirectUrlResolverTest(unittest.TestCase):
     
