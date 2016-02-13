@@ -13,7 +13,6 @@ from itertools import combinations, product, chain
 
 from collections import namedtuple
 
-from urlparse import urlparse
 from requests.exceptions import HTTPError, InvalidSchema, InvalidURL,\
     ConnectionError, Timeout
 from dns import name, reversename
@@ -248,29 +247,6 @@ class HpHostsTest(unittest.TestCase):
 
 Url = namedtuple('Url', 'value location')
 Url.__new__.__defaults__ = (None,)
-
-def get_redirect_urls(urls):
-    ''' Get a sequence of Url objects,
-    each with .location assigned to the next one
-    
-    :param urls: a sequence of url values. If a value has no scheme,
-    http is assumed
-    :returns: a tuple containing instances of urls for given
-    arguments
-    '''
-    
-    result = []
-    location = None
-    
-    for u in reversed(urls):
-        if not urlparse(u).scheme:
-            u = 'http://'+u
-        
-        url = Url(u, location)
-        result.insert(0, url)
-        location = result[0]
-        
-    return result
 
 class GoogleSafeBrowsingTest(unittest.TestCase):
     
