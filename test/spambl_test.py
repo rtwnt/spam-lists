@@ -365,41 +365,65 @@ class GoogleSafeBrowsingTest(unittest.TestCase):
         
 class HostCollectionTest(unittest.TestCase):
     
+    valid_host_parameters = [
+                     ('Host', 'test1.pl'),
+                     ('IpV4', u'127.0.0.1'),
+                     ('IpV6', u'2001:db8:abc:123::42')
+                     ]
+    
+    invalid_host_parameters = [
+                           ('Host', '-e'),
+                           ('IpV4', u'999.999.000.111.222'),
+                           ('IpV6', u'2001:db8:abcef:124::41')
+                           ]
+    
     def setUp(self):
-        self.listed_hosts = 'google.com', 'test1.pl', u'127.0.0.1', u'2001:db8:abc:123::42'
-        self.not_listed_hosts = 'a.com', 'lorem.pl', u'255.0.0.1', u'2001:db8:abc:124::41'
-        self.invalid_hosts = '-k', u'999.999.000.111.222'
         
-        self.host_collection = HostCollection(self.listed_hosts)
+        self.host_patcher = patch('spambl.host')
+        self.host_mock = self.host_patcher.start()
         
-    def testAddValidHost(self):
-        ''' Adding a valid host should result in inclusion of an object representing it in collection '''
+        self.host_collection = HostCollection()
         
-        for h in self.listed_hosts:
-            self.host_collection.add(h)
-            actual = any(str(h) == str(i) for i in self.host_collection.hosts)
-            self.assertTrue(actual)
-            
-    def testAddInvalidHost(self):
-        ''' Adding an invalid host should result in an error '''
+    @parameterized.expand(valid_host_parameters)
+    def testAddForValid(self, _, value):
         
-        for k in self.invalid_hosts:
-            self.assertRaises(ValueError, self.host_collection.add, k)
+        new_item = Mock()
+        self.host_mock.return_value = new_item
         
-    def testContainsForListedValues(self):
-        ''' __contains__ must return True for listed hosts '''
-        for k in self.listed_hosts:
-            self.assertTrue(k in self.host_collection)
-            
-    def testContainsForNotListedValues(self):
-        ''' __contains__ must return False for not listed hosts '''
-        for k in self.not_listed_hosts:
-            self.assertFalse(k in self.host_collection)
-            
-    def testContainsForInvalidArguments(self):
-        ''' __contains__ must raise ValueError for invalid arguments '''
-        for k in self.invalid_hosts:
-            self.assertRaises(ValueError, self.host_collection.__contains__, k)
+        self.host_collection.add(value)
+        
+        in_host_collection = new_item in self.host_collection.hosts
+        
+        self.assertTrue(in_host_collection)
+        
+    @parameterized.expand(invalid_host_parameters)
+    def testAddForInvalid(self, _, value):
+        
+        self.host_mock.side_effect = ValueError
+        
+        self.assertRaises(ValueError, self.host_collection.add, value)
+        
+    @parameterized.expand(valid_host_parameters)
+    def testContainsForListed(self, _, value):
+        
+        self.host_collection.hosts = [Mock()]
+        
+        self.assertTrue(value in self.host_collection)
+        
+    @parameterized.expand(valid_host_parameters)
+    def testContainsForNotListed(self, _, value):
+        
+        self.assertFalse(value in self.host_collection)
+        
+    @parameterized.expand(invalid_host_parameters)
+    def testContainsForInvalid(self, _, value):
+        
+        self.host_mock.side_effect = ValueError
+        
+        self.assertRaises(ValueError, self.host_collection.__contains__, value)
+        
+    def tearDown(self):
+        self.host_patcher.stop()
             
 class HostnameTest(unittest.TestCase):
     
