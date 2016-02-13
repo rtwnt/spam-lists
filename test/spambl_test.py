@@ -523,11 +523,8 @@ class IpAddressTest(unittest.TestCase):
         
         
 class HostTest(unittest.TestCase):
-    ''' Tests host function from spambl module '''
     
     def testHostForIpV4Address(self):
-        ''' host() for ipv4 address should return an IpAddress instance
-        with an expected value of the _value property'''
         
         ip = u'127.0.0.1'
         actual = host(ip)._value
@@ -536,8 +533,6 @@ class HostTest(unittest.TestCase):
         self.assertEqual(actual, expected)
         
     def testHostForIpV6Address(self):
-        ''' host() for ipv6address should return an IpAddress instance
-        with an expected value of the _value property'''
         
         ip = u'2001:db8:abc:125::45'
         actual = host(ip)._value
@@ -546,8 +541,6 @@ class HostTest(unittest.TestCase):
         self.assertEqual(actual, expected)
         
     def testHostForHostname(self):
-        ''' host() for hostname should return a Hostname instance
-        with an expected value of the _value property'''
         
         hostname = 'test.hostname'
         actual = host(hostname)._value
@@ -556,7 +549,6 @@ class HostTest(unittest.TestCase):
         self.assertEqual(actual, expected)
         
     def testHostForInvalidValue(self):
-        ''' For an invalid argument, host() should raise a ValueError'''
         
         invalid = '/e'
         
