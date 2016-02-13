@@ -179,69 +179,86 @@ class SumClassificationMapTest(unittest.TestCase):
             self.assertRaises(UnknownCodeError, self.map.__getitem__, key_1+key_2)
             
 class HpHostsTest(unittest.TestCase):
-    ''' Tests HpHosts methods '''
+    
+    _classification = '[TEST CLASS]'
+    
+    valid_input = [
+                   ('IpV4', u'255.255.0.1'),
+                   ('IpV6', u'2001:DB8:abc:123::42'),
+                   ('Hostname', 'test.hostname.pl')
+                   ]
+                   
+    invalid_input = [
+                     ('IpV4', u'255.255.0.1.11'),
+                     ('IpV6', u'2001:DB8:abcde:123::42'),
+                     ('Hostname', '-e.pl')
+                     ]
     
     @classmethod
     def setUpClass(cls):
-        cls.valid_hosts = 't1.pl', u'255.255.0.1'
-        cls.invalid_hosts = u'266.266.266.266', u'-test.host.pl'
         
         cls.hp_hosts = HpHosts('spambl_test_suite')
         
     def setUp(self):
         
-        self.response = Mock()
+        self.get_patcher = patch('spambl.get')
+        self.get_mock = self.get_patcher.start()
         
-        self.patcher = patch('spambl.get')
-        self.get_mock = self.patcher.start()
-        self.get_mock.return_value = self.response
-    
-    def testContainsForListedHosts(self):
-        ''' For listed hosts, __contains__ should return True'''
+        self.host_patcher = patch('spambl.host')
+        self.host_mock = self.host_patcher.start()
         
-        self.response.content = 'Listed, [TEST CLASS]'
+    def _setUpResponseContent(self, has_listed):
         
-        for host in self.valid_hosts:
-            self.assertTrue(host in self.hp_hosts)
+        content = 'Not listed'
+        
+        if has_listed:
+            content = 'Listed,{}'.format(self._classification)
             
-    def testContainsForNotListedHosts(self):
-        ''' For not listed hosts, __contains__ should return False '''
+        self.get_mock.return_value.content = content
         
-        self.response.content = 'Not listed'
+    @parameterized.expand(valid_input)
+    def testContainsForListed(self, _, value):
         
-        for host in self.valid_hosts:
-            self.assertFalse(host in self.hp_hosts)
+        self._setUpResponseContent(True)
+        self.assertTrue(host in self.hp_hosts)
             
-    def testContainsForInvalidHosts(self):
-        ''' For invalid hosts, __contains__ should raise a ValueError '''
+    @parameterized.expand(valid_input)
+    def testContainsForNotListed(self, _, value):
         
-        for val in self.invalid_hosts:
-            self.assertRaises(ValueError, self.hp_hosts.__contains__, val)
+        self._setUpResponseContent(False)
+        self.assertFalse(host in self.hp_hosts)
+            
+    @parameterized.expand(invalid_input)
+    def testContainsForInvalid(self, _, value):
+        
+        self.host_mock.side_effect = ValueError
+        self.assertRaises(ValueError, self.hp_hosts.__contains__, value)
                 
-    def testLookupForListedHosts(self):
-        ''' For listed hosts, lookup should return an object representing it'''
+    @parameterized.expand(valid_input)
+    def testLookupForListed(self, _, value):
         
-        self.response.content = 'Listed, [TEST CLASS]'
+        self._setUpResponseContent(True)
         
-        for host in self.valid_hosts:
-            self.assertEqual(self.hp_hosts.lookup(host).value, host)
+        expected = AddressListItem(value, self.hp_hosts.identifier,
+                                   self._classification)
+        
+        self.assertEqual(self.hp_hosts.lookup(value), expected)
+          
+    @parameterized.expand(valid_input)  
+    def testLookupForNotListed(self, _, value):
+        
+        self._setUpResponseContent(False)
+        self.assertEqual(self.hp_hosts.lookup(value), None)
             
-    def testLookupForNotListedHosts(self):
-        ''' For not listed hosts, lookup should return None '''
+    @parameterized.expand(invalid_input)
+    def testLookupForInvalid(self, _, value):
         
-        self.response.content = 'Not listed'
-        
-        for host in self.valid_hosts:
-            self.assertEqual(self.hp_hosts.lookup(host), None)
-            
-    def testLookupForInvalidHosts(self):
-        ''' For invalid hosts, lookup should raise a ValueError '''
-        
-        for val in self.invalid_hosts:
-            self.assertRaises(ValueError, self.hp_hosts.lookup, val)
+        self.host_mock.side_effect = ValueError
+        self.assertRaises(ValueError, self.hp_hosts.lookup, value)
             
     def tearDown(self):
-        self.patcher.stop()
+        self.get_patcher.stop()
+        self.host_patcher.stop()
 
 class GoogleSafeBrowsingTest(unittest.TestCase):
     
