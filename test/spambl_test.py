@@ -119,12 +119,15 @@ class GeneralDNSBLTest(BaseDNSBLTest, unittest.TestCase):
     invalid_hosts = u'266.0.120.1', '/e'
     factory = GeneralDNSBL
     
-class CodeClassificationMapTest(unittest.TestCase):
+class BaseClassificationMapTest(object):
     
     def setUp(self):
-        
         self.code_item_class = {}
-        self.map = CodeClassificationMap(self.code_item_class)
+        self.map = self.factory(self.code_item_class)
+        
+class CodeClassificationMapTest(BaseClassificationMapTest, unittest.TestCase):
+    
+    factory = CodeClassificationMap
         
     def testGetItemForValidKey(self):
         
@@ -141,12 +144,9 @@ class CodeClassificationMapTest(unittest.TestCase):
         
         self.assertRaises(UnknownCodeError, self.map.__getitem__, 4)
             
-class SumClassificationMapTest(unittest.TestCase):
+class SumClassificationMapTest(BaseClassificationMapTest, unittest.TestCase):
     
-    def setUp(self):
-        
-        self.code_item_class = {}
-        self.map = SumClassificationMap(self.code_item_class)
+    factory = SumClassificationMap
         
     def _setCodeItemClass(self, code_class):
         self.code_item_class.update(code_class)
