@@ -43,29 +43,24 @@ class BaseDNSBLTest(object):
         self.dns_query_mock.return_value = [dns_answer_mock]
     
     def doTestCallForInvalidArgs(self, function):
-        ''' Perform test of a function that should raise ValueError for given data '''
         
         for h in self.invalid_hosts:
             self.assertRaises(ValueError, function, h)
         
     def testContainsForInvalidArgs(self):
-        ''' The call should raise ValueError '''
         
         self.doTestCallForInvalidArgs(self.dnsbl_service.__contains__)
         
     def testLookupForInvalidArgs(self):
-        ''' The call should raise ValueError '''
         
         self.doTestCallForInvalidArgs(self.dnsbl_service.lookup)
             
     def testContainsForListedValues(self):
-        ''' __contains__ should return  true '''
-
+        
         for h in self.valid_hosts:
             self.assertTrue(h in self.dnsbl_service)
         
     def testContainsForNotListedValues(self):
-        ''' __contains__ should return  true '''
         
         self.dns_query_mock.side_effect = NXDOMAIN('Test NXDOMAIN')
         
@@ -73,15 +68,12 @@ class BaseDNSBLTest(object):
             self.assertFalse(h in self.dnsbl_service)
             
     def testLookupForListedValues(self):
-        ''' lookup method must return object with value equal to
-        ip strings it was passed '''
         
         for h in self.valid_hosts:
             actual = self.dnsbl_service.lookup(h)
             self.assertEqual(actual.value, h)
             
     def testLookupForNotListedValues(self):
-        ''' lookup method must return None  '''
         
         self.dns_query_mock.side_effect = NXDOMAIN('Test NXDOMAIN')
         
@@ -90,7 +82,6 @@ class BaseDNSBLTest(object):
             self.assertIsNone(actual)
             
     def testLookupForListedWithUnknownCodes(self,):
-        ''' lookup method must raise UnknownCodeError '''
         
         self.classification_map.__getitem__.side_effect = UnknownCodeError('Unknown code error')
         
