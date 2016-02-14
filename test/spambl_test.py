@@ -254,7 +254,7 @@ class HpHostsTest(unittest.TestCase):
     def testLookupForNotListed(self, _, value):
         
         self._setUpResponseContent(False)
-        self.assertEqual(self.hp_hosts.lookup(value), None)
+        self.assertIsNone(self.hp_hosts.lookup(value))
             
     def tearDown(self):
         self.get_patcher.stop()
