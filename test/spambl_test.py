@@ -5,7 +5,7 @@ import unittest
 from spambl import (UnknownCodeError, NXDOMAIN, HpHosts, 
                     GoogleSafeBrowsing, UnathorizedAPIKeyError, HostCollection,
                      CodeClassificationMap, SumClassificationMap, Hostname, IpAddress, 
-                     host, is_valid_url, BaseUrlTester, RedirectUrlResolver, AddressListItem, BaseDNSBL)
+                     host, is_valid_url, BaseUrlTester, RedirectUrlResolver, AddressListItem, DNSBL)
 from mock import Mock, patch, MagicMock
 from itertools import chain
 
@@ -27,18 +27,13 @@ class DNSBLTest(unittest.TestCase):
     
     query_domain_str = 'test.query.domain'
     
-    @classmethod
-    def setUpClass(cls):
-        
-        raise unittest.SkipTest
-    
     def setUp(self):
         
         self.classification_map = MagicMock()
         
         self.host_factory_mock = Mock()
         
-        self.dnsbl_service = BaseDNSBL('test_service', self.query_domain_str, 
+        self.dnsbl_service = DNSBL('test_service', self.query_domain_str, 
                                    self.classification_map, self.host_factory_mock)
         
         dns_answer_mock = Mock()

@@ -23,28 +23,33 @@ class UnknownCodeError(SpamBLError):
 class UnathorizedAPIKeyError(SpamBLError):
     ''' Raise when trying to use an unathorized api key '''
     
-class BaseDNSBL(object):
+class DNSBL(object):
     ''' Represents a DNSBL service '''
-    def __init__(self, identifier, query_suffix, code_item_class):
-        ''' Create new BaseDNSBL object
+    def __init__(self, identifier, query_suffix, code_item_class, host_factory):
+        ''' Create new DNSBL object
         
         :param identifier: a value designating DNSBL service provider: its name or url address.
         :param query_suffix: a suffix added to DNSBL query address
         :param code_item_class: item classes associated with DNSBL query return codes
+        :param host_factory: a callable object that returns an object representing host and providing
+        method for getting a relative domain pertaining to it.
         '''
         
         self._identifier = identifier
 
         self._query_suffix = name.from_text(query_suffix)
         self._code_item_class = code_item_class
+        self.host_factory = host_factory
     
-    def _do_query(self, host):
+    def _query(self, host):
         ''' Query DNSBL service for given value
         
-        :param host: a host object that can provide a relative domain value representing it
+        :param host: a host value
         :returns: an integer representing classification code for given value, if it is listed. Otherwise,
         it returns None
         '''
+        
+        host = self.host_factory(host)
         
         hostname = host.relative_domain
         query_name = hostname.derelativize(self._query_suffix)
@@ -72,7 +77,7 @@ class BaseDNSBL(object):
     def lookup(self, host):
         ''' Perform item lookup for given host
         
-        :param host: a host value expected by query_method
+        :param host: a host value
         :returns: an instance of AddressListItem representing given
         host
         :raises UnknownCodeError: if return code does not
@@ -91,39 +96,6 @@ class BaseDNSBL(object):
         
         except UnknownCodeError as e:
             raise exc_info()[0],  '{}\nSource:{}'.format(str(e), str(self)), exc_info()[2]
-        
-class IpDNSBL(BaseDNSBL):
-    
-    def _query(self, ip):
-        ''' Query for given ip
-        
-        :param ip: a value representing ip address
-        :returns: a return code from the service if it lists the ip, otherwise None
-        '''
-        
-        return self._do_query(IpAddress(ip))
-
-class DomainDNSBL(BaseDNSBL):
-    
-    def _query(self, hostname):
-        ''' Query the service for given hostname
-        
-        :param hostname: a string value representing a hostname
-        :returns: a return code from the service if the hostname is listed on it, otherwise None
-        '''
-        
-        return self._do_query(Hostname(hostname))
-
-class GeneralDNSBL(BaseDNSBL):
-    
-    def _query(self, host_value):
-        ''' Query the service for given host
-        
-        :param host: a value representing a host: an ip address or a hostname
-        :returns: a return code from the service if the host is listed on it, otherwise None
-        '''
-        
-        return self._do_query(host(host_value))
 
 class CodeClassificationMap(object):
     ''' A map containing taxonomical units assigned to integer codes'''
