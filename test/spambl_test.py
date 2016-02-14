@@ -3,112 +3,109 @@
 
 import unittest
 from spambl import (UnknownCodeError, NXDOMAIN, HpHosts, 
-                    IpDNSBL, DomainDNSBL, GeneralDNSBL,
                     GoogleSafeBrowsing, UnathorizedAPIKeyError, HostCollection,
                      CodeClassificationMap, SumClassificationMap, Hostname, IpAddress, 
-                     host, is_valid_url, BaseUrlTester, RedirectUrlResolver,
-    AddressListItem)
+                     host, is_valid_url, BaseUrlTester, RedirectUrlResolver, AddressListItem, BaseDNSBL)
 from mock import Mock, patch, MagicMock
 from itertools import chain
 
 from requests.exceptions import HTTPError, InvalidSchema, InvalidURL,\
     ConnectionError, Timeout
-from dns import name, reversename
+from dns import reversename
 
 from nose_parameterized import parameterized
 
-class BaseDNSBLTest(object):
+class DNSBLTest(unittest.TestCase):
     
-    valid_hosts = ()
-    invalid_hosts = ()
-    factory = None
+    valid_input = [('IpV4', u'255.0.120.1'), 
+                   ('IpV6', u'2001:db8:abc:123::42'),
+                   ('Hostname', 'test.pl')]
+    
+    invalid_input = [('IpV4', u'255.0.120.1.1'), 
+                   ('IpV6', u'2001:db8:abcef:123::42'),
+                   ('Host', '-aaa')]
+    
+    query_domain_str = 'test.query.domain'
     
     @classmethod
     def setUpClass(cls):
         
-        cls.query_domain_str = 'test.query.domain'
-        cls.query_domain = name.from_text(cls.query_domain_str)
+        raise unittest.SkipTest
     
     def setUp(self):
         
         self.classification_map = MagicMock()
         
-        self.dnsbl_service = self.factory('test_service', self.query_domain_str, self.classification_map)
+        self.host_factory_mock = Mock()
+        
+        self.dnsbl_service = BaseDNSBL('test_service', self.query_domain_str, 
+                                   self.classification_map, self.host_factory_mock)
         
         dns_answer_mock = Mock()
-        self.dns_answer_string = dns_answer_mock.to_text.return_value = '121.0.0.1'
+        dns_answer_mock.to_text.return_value = '121.0.0.1'
         
         self.patcher = patch('spambl.query')
         self.dns_query_mock = self.patcher.start()
         self.dns_query_mock.return_value = [dns_answer_mock]
     
-    def doTestCallForInvalidArgs(self, function):
+    def doTestCallForInvalidArgs(self, function, host):
         
-        for h in self.invalid_hosts:
-            self.assertRaises(ValueError, function, h)
+        self.host_factory_mock.side_effect = ValueError
+        self.assertRaises(ValueError, function, host)
+       
+    @parameterized.expand(invalid_input)
+    def testContainsForInvalid(self, _, host):
+         
+        self.doTestCallForInvalidArgs(self.dnsbl_service.__contains__, host)
         
-    def testContainsForInvalidArgs(self):
+    @parameterized.expand(invalid_input)
+    def testLookupForInvalid(self, _, host):
         
-        self.doTestCallForInvalidArgs(self.dnsbl_service.__contains__)
-        
-    def testLookupForInvalidArgs(self):
-        
-        self.doTestCallForInvalidArgs(self.dnsbl_service.lookup)
+        self.doTestCallForInvalidArgs(self.dnsbl_service.lookup, host)
             
-    def testContainsForListedValues(self):
+    @parameterized.expand(valid_input)
+    def testContainsForListed(self, _, host):
         
-        for h in self.valid_hosts:
-            self.assertTrue(h in self.dnsbl_service)
+        self.assertTrue(host in self.dnsbl_service)
         
-    def testContainsForNotListedValues(self):
+    @parameterized.expand(valid_input)
+    def testContainsForNotListed(self, _, host):
         
         self.dns_query_mock.side_effect = NXDOMAIN
         
-        for h in self.valid_hosts:
-            self.assertFalse(h in self.dnsbl_service)
-            
-    def testLookupForListedValues(self):
+        self.assertFalse(host in self.dnsbl_service)
+    
+    @parameterized.expand(valid_input)
+    def testLookupForListedValues(self, _, host):
         
-        for h in self.valid_hosts:
-            actual = self.dnsbl_service.lookup(h)
-            self.assertEqual(actual.value, h)
+        classification = 'TEST'
+        self.classification_map.__getitem__.return_value = classification
+        
+        actual = self.dnsbl_service.lookup(host)
+        expected = AddressListItem(host, self.dnsbl_service._identifier, 
+                                   classification)
+        
+        self.assertEqual(expected, actual)
             
-    def testLookupForNotListedValues(self):
+    @parameterized.expand(valid_input)
+    def testLookupForNotListedValues(self, _, host):
         
         self.dns_query_mock.side_effect = NXDOMAIN
         
-        for h in self.valid_hosts:
-            actual = self.dnsbl_service.lookup(h)
-            self.assertIsNone(actual)
+        actual = self.dnsbl_service.lookup(host)
+        
+        self.assertIsNone(actual)
             
-    def testLookupForListedWithUnknownCodes(self,):
+    @parameterized.expand(valid_input)
+    def testLookupForListedWithUnknownCodes(self, _, host):
         
         self.classification_map.__getitem__.side_effect = UnknownCodeError
         
-        for h in self.valid_hosts:
-            self.assertRaises(UnknownCodeError, self.dnsbl_service.lookup, h)
+        self.assertRaises(UnknownCodeError, self.dnsbl_service.lookup, host)
         
     def tearDown(self):
         
         self.patcher.stop()
-            
-class IpDNSBLTest(BaseDNSBLTest, unittest.TestCase):
-    
-    valid_hosts = u'255.0.120.1', u'2001:db8:abc:123::42'
-    invalid_hosts = u't1.pl', u't2.com'
-    factory = IpDNSBL
-        
-class DomainDNSBLTest(BaseDNSBLTest, unittest.TestCase):
-    
-    valid_hosts = u't1.pl', u't2.com'
-    invalid_hosts = u'255.0.120.1', u'2001:db8:abc:123::42', '-aaa'
-    factory = DomainDNSBL
-            
-class GeneralDNSBLTest(BaseDNSBLTest, unittest.TestCase):
-    
-    valid_hosts = u't1.pl', u'255.0.120.1', u'2001:db8:abc:123::42'
-    invalid_hosts = u'266.0.120.1', '/e'
-    factory = GeneralDNSBL
     
 class BaseClassificationMapTest(object):
     
