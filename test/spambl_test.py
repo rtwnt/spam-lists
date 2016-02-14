@@ -62,7 +62,7 @@ class BaseDNSBLTest(object):
         
     def testContainsForNotListedValues(self):
         
-        self.dns_query_mock.side_effect = NXDOMAIN('Test NXDOMAIN')
+        self.dns_query_mock.side_effect = NXDOMAIN
         
         for h in self.valid_hosts:
             self.assertFalse(h in self.dnsbl_service)
@@ -75,7 +75,7 @@ class BaseDNSBLTest(object):
             
     def testLookupForNotListedValues(self):
         
-        self.dns_query_mock.side_effect = NXDOMAIN('Test NXDOMAIN')
+        self.dns_query_mock.side_effect = NXDOMAIN
         
         for h in self.valid_hosts:
             actual = self.dnsbl_service.lookup(h)
@@ -83,7 +83,7 @@ class BaseDNSBLTest(object):
             
     def testLookupForListedWithUnknownCodes(self,):
         
-        self.classification_map.__getitem__.side_effect = UnknownCodeError('Unknown code error')
+        self.classification_map.__getitem__.side_effect = UnknownCodeError
         
         for h in self.valid_hosts:
             self.assertRaises(UnknownCodeError, self.dnsbl_service.lookup, h)
