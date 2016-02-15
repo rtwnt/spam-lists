@@ -42,6 +42,10 @@ class DNSBLTest(unittest.TestCase):
         self.patcher = patch('spambl.query')
         self.dns_query_mock = self.patcher.start()
         self.dns_query_mock.return_value = [dns_answer_mock]
+        
+    def tearDown(self):
+        
+        self.patcher.stop()
     
     def doTestCallForInvalidArgs(self, function, host):
         
@@ -97,10 +101,6 @@ class DNSBLTest(unittest.TestCase):
         self.classification_map.__getitem__.side_effect = UnknownCodeError
         
         self.assertRaises(UnknownCodeError, self.dnsbl_service.lookup, host)
-        
-    def tearDown(self):
-        
-        self.patcher.stop()
     
 class BaseClassificationMapTest(object):
     
@@ -187,6 +187,10 @@ class HpHostsTest(unittest.TestCase):
         self.host_patcher = patch('spambl.host')
         self.host_mock = self.host_patcher.start()
         
+    def tearDown(self):
+        self.get_patcher.stop()
+        self.host_patcher.stop()
+        
     def _setUpResponseContent(self, has_listed):
         
         content = 'Not listed'
@@ -238,10 +242,6 @@ class HpHostsTest(unittest.TestCase):
         
         self._setUpResponseContent(False)
         self.assertIsNone(self.hp_hosts.lookup(value))
-            
-    def tearDown(self):
-        self.get_patcher.stop()
-        self.host_patcher.stop()
 
 class GoogleSafeBrowsingTest(unittest.TestCase):
     
@@ -259,6 +259,9 @@ class GoogleSafeBrowsingTest(unittest.TestCase):
         
         self.post_response = Mock()
         self.mocked_post.return_value = self.post_response
+        
+    def tearDown(self):
+        self.patcher.stop()
         
     def doTestForUnathorizedAPIKey(self, function):
         
@@ -349,9 +352,6 @@ class GoogleSafeBrowsingTest(unittest.TestCase):
         
         actual = self.google_safe_browsing.lookup(self.valid_urls)
         self.assertFalse(actual)
-
-    def tearDown(self):
-        self.patcher.stop()
         
 class HostCollectionTest(unittest.TestCase):
     
@@ -373,6 +373,9 @@ class HostCollectionTest(unittest.TestCase):
         self.host_mock = self.host_patcher.start()
         
         self.host_collection = HostCollection()
+        
+    def tearDown(self):
+        self.host_patcher.stop()
         
     def _testForInvalid(self, function, value):
         
@@ -413,9 +416,6 @@ class HostCollectionTest(unittest.TestCase):
     def testContainsForNotListed(self, _, value):
         
         self.assertFalse(value in self.host_collection)
-        
-    def tearDown(self):
-        self.host_patcher.stop()
             
 class HostnameTest(unittest.TestCase):
     
@@ -536,6 +536,10 @@ class HostTest(unittest.TestCase):
         self.hostname_patcher = patch('spambl.Hostname')
         self.hostname_mock = self.hostname_patcher.start()
         
+    def tearDown(self):
+        self.ipaddress_patcher.stop()
+        self.hostname_patcher.stop()
+        
     @parameterized.expand([
                            ('V4',  u'127.0.0.1'),
                            ('V6', u'2001:db8:abc:125::45'),
@@ -575,10 +579,6 @@ class HostTest(unittest.TestCase):
         self.ipaddress_mock.side_effect = ValueError
         
         self.assertRaises(ValueError, host, value)
-        
-    def tearDown(self):
-        self.ipaddress_patcher.stop()
-        self.hostname_patcher.stop()
           
 class IsValidUrlTest(unittest.TestCase):
     
@@ -629,6 +629,9 @@ class RedirectUrlResolverTest(unittest.TestCase):
         self.patcher = patch('spambl.is_valid_url')
         self.is_valid_url_mock = self.patcher.start()
         
+    def tearDown(self):
+        
+        self.patcher.stop()
         
     def testGetFirstResponseForInvalidUrl(self):
         
@@ -752,11 +755,6 @@ class RedirectUrlResolverTest(unittest.TestCase):
         self._setLastResponseLocationHeader('http://invalid.url.com')
             
         self._testGetRedirectUrlsYields(expected)
-    
-    def tearDown(self):
-        
-        self.patcher.stop()
-        
             
 class BaseUrlTesterTest(unittest.TestCase):
     
@@ -804,6 +802,10 @@ class BaseUrlTesterTest(unittest.TestCase):
         
         self.is_valid_url_patcher = patch('spambl.is_valid_url')
         self.is_valid_url_mock = self.is_valid_url_patcher.start()
+        
+    def tearDown(self):
+        
+        self.is_valid_url_patcher.stop()
         
     @parameterized.expand([
                            ('OneInvalidUrl', ('http://-xyz.com',), False),
@@ -889,10 +891,6 @@ class BaseUrlTesterTest(unittest.TestCase):
         self.assertItemsEqual(original_urls, first_part)
         
         self.assertTrue(set(second_part).issubset(redirect_urls))
-        
-    def tearDown(self):
-        self.is_valid_url_patcher.stop()
-        
         
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
