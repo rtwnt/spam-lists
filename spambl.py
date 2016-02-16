@@ -324,11 +324,17 @@ class HostCollection(object):
     May be used as a local whitelist or blacklist.
     '''
     
-    def __init__(self, hosts=()):
+    def __init__(self, identifier, classification, hosts=()):
         ''' Create new instance
         
+        :param identifier: an identifier of this instance of host collection
+        :param classification: a tuple containing strings representing
+        types of items, assigned to each element of the collection
         :param hosts: a sequence of ip adresses and hostnames
         '''
+        
+        self.identifier = identifier
+        self.classification = classification
         
         self.hosts = set()
         
@@ -345,7 +351,24 @@ class HostCollection(object):
         '''
         
         host_obj = host(host_value)
-        return any(map(host_obj.is_parent_or_the_same, self.hosts))
+        return any(map(host_obj.is_child_or_the_same, self.hosts))
+    
+    def lookup(self, host_value):
+        '''
+        Return an object representing a parent of given value or the exact value, if
+        it there is one in the collection
+        
+        :param host: a value representing ip address or a hostname
+        :returns: AddressListItem for the given value, if it has been added to
+        the collection. Otherwise, return None
+        :raises ValueError: if the host is not avalid ip address or hostname
+        '''
+        host_obj = host(host_value)
+        
+        for h in self.hosts:
+            if host_obj.is_child_or_the_same(h):
+                return AddressListItem(str(h), self.identifier, 
+                                       self.classification)
         
     def add(self, host_value):
         ''' Add the given value to collection

@@ -354,7 +354,7 @@ class GoogleSafeBrowsingTest(unittest.TestCase):
                                                     classes.split(','))
         
         expected  = [item(u, c) for u, c in classification.items()]
-                
+        
         non_spam = ['http://nospam.com', 'https://nospam2.pl', 'https://spamfree.com']
         tested = classification.keys()+ duplicates + non_spam
         actual = self.google_safe_browsing.lookup(tested)
@@ -389,7 +389,8 @@ class HostCollectionTest(unittest.TestCase):
         self.host_patcher = patch('spambl.host')
         self.host_mock = self.host_patcher.start()
         
-        self.host_collection = HostCollection()
+        self.host_collection = HostCollection('test_host_collection',
+                                              ('test_classification',))
         
     def tearDown(self):
         self.host_patcher.stop()
@@ -409,6 +410,11 @@ class HostCollectionTest(unittest.TestCase):
     def test_contains_for_invalid(self, _, value):
         
         self._test_function_for_invalid(self.host_collection.__contains__, value)
+        
+    @parameterized.expand(invalid_host_parameters)
+    def test_lookup_for_invalid(self, _, value):
+        
+        self._test_function_for_invalid(self.host_collection.lookup, value)
         
     @parameterized.expand(valid_host_parameters)
     def test_add_for_valid(self, _, value):
@@ -433,6 +439,29 @@ class HostCollectionTest(unittest.TestCase):
     def test_contains_for_not_listed(self, _, value):
         
         self.assertFalse(value in self.host_collection)
+        
+    @parameterized.expand(valid_host_parameters)
+    def test_lookup_for_listed(self, _, value):
+        
+        listed = MagicMock()
+        listed.__str__.return_value = value
+        self.host_collection.hosts = [listed]
+        
+        expected = AddressListItem(value, self.host_collection.identifier,
+                                   self.host_collection.classification)
+        actual = self.host_collection.lookup(value)
+        
+        self.assertEqual(expected, actual)
+        
+    @parameterized.expand(valid_host_parameters)
+    def test_lookup_for_not_listed(self, _, value):
+        
+        self.host_mock.return_value.is_parent_or_the_same.return_value = False
+        
+        actual = self.host_collection.lookup(value)
+        
+        self.assertIsNone(actual)
+        
             
 class HostnameTest(unittest.TestCase):
     
