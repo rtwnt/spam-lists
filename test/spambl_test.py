@@ -490,7 +490,6 @@ class IpAddressTest(unittest.TestCase):
         second_ip = IpAddress(unicode(value))
         
         self.assertTrue(first_ip.is_child_or_the_same(second_ip))
-        self.assertTrue(second_ip.is_child_or_the_same(first_ip))
         
     @parameterized.expand([
                            ('different_ipv4_values', ipv4_1, ipv4_2),
@@ -503,7 +502,6 @@ class IpAddressTest(unittest.TestCase):
         ip_2 = IpAddress(ip_value_2)
         
         self.assertFalse(ip_1.is_child_or_the_same(ip_2))
-        self.assertFalse(ip_2.is_child_or_the_same(ip_1))
         
     @parameterized.expand([
                            ('ipv4', ipv4_1),
