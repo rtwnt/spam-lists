@@ -431,33 +431,33 @@ class HostnameTest(unittest.TestCase):
     def _get_hostnames(self, value_1, value_2):
         return map(Hostname, (value_1, value_2))
     
-    def test_is_match_for_the_same_domains(self):
+    def test_is_child_or_the_same_for_the_same_domains(self):
         
         value = 'hostname.pl'
         h_1, h_2 = self._get_hostnames(value, value)
         
-        self.assertTrue(h_1.is_match(h_2))
-        self.assertTrue(h_2.is_match(h_1))
+        self.assertTrue(h_1.is_child_or_the_same(h_2))
+        self.assertTrue(h_2.is_child_or_the_same(h_1))
         
-    def test_is_match_for_domain_and_subdomain(self):
+    def test_is_child_or_the_same_for_domain_and_subdomain(self):
         
         domain, subdomain = self._get_hostnames('domain.com', 'sub.domain.com')
         
-        self.assertTrue(subdomain.is_match(domain))
-        self.assertFalse(domain.is_match(subdomain))
+        self.assertTrue(subdomain.is_child_or_the_same(domain))
+        self.assertFalse(domain.is_child_or_the_same(subdomain))
         
-    def test_is_match_for_unrelated_domains(self):
+    def test_is_child_or_the_same_for_unrelated_domains(self):
         
         h_1, h_2 = self._get_hostnames('google.com', 'microsoft.com')
         
-        self.assertFalse(h_1.is_match(h_2))
-        self.assertFalse(h_2.is_match(h_1))
+        self.assertFalse(h_1.is_child_or_the_same(h_2))
+        self.assertFalse(h_2.is_child_or_the_same(h_1))
         
-    def test_is_match_for_non_hostname_object(self):
+    def test_is_child_or_the_same_for_non_hostname_object(self):
         
         hostname = Hostname('hostname.pl')
         
-        self.assertFalse(hostname.is_match([]))
+        self.assertFalse(hostname.is_child_or_the_same([]))
         
 
 class IpAddressTest(unittest.TestCase):
@@ -495,12 +495,12 @@ class IpAddressTest(unittest.TestCase):
                            ('ipv4', ipv4_1),
                            ('ipv6', ipv6_2),
                            ])
-    def test_is_match_for_the_same(self, _, value):
+    def test_is_child_or_the_same_for_the_same(self, _, value):
         first_ip = IpAddress(value)
         second_ip = IpAddress(unicode(value))
         
-        self.assertTrue(first_ip.is_match(second_ip))
-        self.assertTrue(second_ip.is_match(first_ip))
+        self.assertTrue(first_ip.is_child_or_the_same(second_ip))
+        self.assertTrue(second_ip.is_child_or_the_same(first_ip))
         
     @parameterized.expand([
                            ('different_ipv4_values', ipv4_1, ipv4_2),
@@ -508,23 +508,23 @@ class IpAddressTest(unittest.TestCase):
                            ('different_ipv6_values', ipv6_1, ipv6_2),
                            ('Ipv6_and_ipv4', ipv6_1, ipv4_1)
                            ])
-    def test_is_match_for(self, _, ip_value_1, ip_value_2):
+    def test_is_child_or_the_same_for(self, _, ip_value_1, ip_value_2):
         ip_1 = IpAddress(ip_value_1)
         ip_2 = IpAddress(ip_value_2)
         
-        self.assertFalse(ip_1.is_match(ip_2))
-        self.assertFalse(ip_2.is_match(ip_1))
+        self.assertFalse(ip_1.is_child_or_the_same(ip_2))
+        self.assertFalse(ip_2.is_child_or_the_same(ip_1))
         
     @parameterized.expand([
                            ('ipv4', ipv4_1),
                            ('ipv6', ipv6_1),
                            ])
-    def test_is_match_returns_false_for_a_non_ip_value_and(self, _, ip_value):
+    def test_is_child_or_the_same_returns_false_for_a_non_ip_value_and(self, _, ip_value):
         
         ip = IpAddress(ip_value)
         other = []
         
-        self.assertFalse(ip.is_match(other))
+        self.assertFalse(ip.is_child_or_the_same(other))
         
 class HostTest(unittest.TestCase):
     

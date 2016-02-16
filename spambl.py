@@ -340,7 +340,7 @@ class HostCollection(object):
         '''
         
         host_obj = host(host_value)
-        return any(map(host_obj.is_match, self.hosts))
+        return any(map(host_obj.is_parent_or_the_same, self.hosts))
         
     def add(self, host_value):
         ''' Add the given value to collection
@@ -355,11 +355,12 @@ AddressListItem = namedtuple('AddressListItem', 'value source classification')
 
 class Host(object):
     ''' Base host class '''
-    def is_match(self, other):
-        ''' Check if the other object matches this instance
+    def is_child_or_the_same(self, other):
+        ''' Check if this host is a child of or the
+        same host as the other
         
         The rules of matching are implemented in
-        _is_match method of subclasses of Host
+        _is_parent_or_the_same method of subclasses of Host
         
         :param other: other object to which we compare this instance
         :returns: True if the objects match
@@ -367,14 +368,14 @@ class Host(object):
         
         if isinstance(other, self.__class__):
             
-            return self._is_match(other)
+            return self._is_child_or_the_same(other)
         
         return False
     
     def __str__(self):
         return str(self._value)
     
-    def _is_match(self, other):
+    def _is_child_or_the_same(self, other):
         
         raise NotImplementedError
     
@@ -399,8 +400,9 @@ class Hostname(Host):
         '''
         return self._value
     
-    def _is_match(self, other):
-        ''' Test if the object matches the other
+    def _is_child_or_the_same(self, other):
+        ''' Test if the object is a subdomain of the
+        other
         
         :param other: the object to which we compare this instance
         :returns: True if the _value is subdomain of other._value
@@ -434,8 +436,9 @@ class IpAddress(Host):
         
         return name_from_ip(str(self._value)).relativize(root)
     
-    def _is_match(self, other):
-        ''' Test if this object matches the other
+    def _is_child_or_the_same(self, other):
+        ''' Test if this object represents the same
+        ip address as the other
         
         :returns: True if both objects have equal _value properties
         :raises AttributeError: if the other object does not have _value attribute
