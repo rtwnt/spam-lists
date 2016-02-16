@@ -164,7 +164,6 @@ class HpHostsTest(unittest.TestCase):
     
     valid_input = [
                    ('ipv4', u'255.255.0.1'),
-                   ('ipv6', u'2001:DB8:abc:123::42'),
                    ('hostname', 'test.hostname.pl')
                    ]
                    
@@ -215,9 +214,27 @@ class HpHostsTest(unittest.TestCase):
         
         self._test_function_for_invalid(self.hp_hosts.lookup, value)
         
+    def _test_function_for_valid_ipv6(self, function):
+        
+        ipv6 = u'2001:DB8:abc:123::42'
+        
+        ipv6_host = MagicMock()
+        ipv6_host.__str__.return_value = ipv6
+        self.host_mock.return_value = ipv6_host
+        
+        self.assertRaises(ValueError, function, ipv6)
+        
+    def test_contains_for_valid_ipv6(self):
+        
+        self._test_function_for_valid_ipv6(self.hp_hosts.__contains__)
+        
+    def test_lookup_for_valid_ipv6(self):
+        
+        self._test_function_for_valid_ipv6(self.hp_hosts.lookup)
+        
     @parameterized.expand(valid_input)
     def test_contains_for_listed(self, _, value):
-        
+         
         self._set_response_content(True)
         self.assertTrue(host in self.hp_hosts)
             

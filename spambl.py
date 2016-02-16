@@ -182,6 +182,11 @@ class HpHosts(object):
         '''
         
         valid_host = host(host_value)
+        
+        if validators.ipv6(str(valid_host)):
+            msg_template = 'Error for argument: {}. HpHosts does not support ipv6'
+            raise ValueError, msg_template.format(valid_host)
+        
         url = 'http://verify.hosts-file.net/?v={}&s={}'.format(self.app_id, valid_host)
         url = url + '&class=true' if classification else url
         
