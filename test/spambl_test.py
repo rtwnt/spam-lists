@@ -17,13 +17,13 @@ from nose_parameterized import parameterized
 
 class DNSBLTest(unittest.TestCase):
     
-    valid_input = [('IpV4', u'255.0.120.1'), 
-                   ('IpV6', u'2001:db8:abc:123::42'),
-                   ('Hostname', 'test.pl')]
+    valid_input = [('ipv4', u'255.0.120.1'), 
+                   ('ipv6', u'2001:db8:abc:123::42'),
+                   ('hostname', 'test.pl')]
     
-    invalid_input = [('IpV4', u'255.0.120.1.1'), 
-                   ('IpV6', u'2001:db8:abcef:123::42'),
-                   ('Host', '-aaa')]
+    invalid_input = [('ipv4', u'255.0.120.1.1'), 
+                   ('ipv6', u'2001:db8:abcef:123::42'),
+                   ('host', '-aaa')]
     
     query_domain_str = 'test.query.domain'
     
@@ -47,35 +47,35 @@ class DNSBLTest(unittest.TestCase):
         
         self.patcher.stop()
     
-    def doTestCallForInvalidArgs(self, function, host):
+    def _test_function_for_invalid(self, function, host):
         
         self.host_factory_mock.side_effect = ValueError
         self.assertRaises(ValueError, function, host)
        
     @parameterized.expand(invalid_input)
-    def testContainsForInvalid(self, _, host):
+    def test_contains_for_invalid(self, _, host):
          
-        self.doTestCallForInvalidArgs(self.dnsbl_service.__contains__, host)
+        self._test_function_for_invalid(self.dnsbl_service.__contains__, host)
         
     @parameterized.expand(invalid_input)
-    def testLookupForInvalid(self, _, host):
+    def test_lookup_for_invalid(self, _, host):
         
-        self.doTestCallForInvalidArgs(self.dnsbl_service.lookup, host)
+        self._test_function_for_invalid(self.dnsbl_service.lookup, host)
             
     @parameterized.expand(valid_input)
-    def testContainsForListed(self, _, host):
+    def test_contains_for_listed(self, _, host):
         
         self.assertTrue(host in self.dnsbl_service)
         
     @parameterized.expand(valid_input)
-    def testContainsForNotListed(self, _, host):
+    def test_contains_for_not_listed(self, _, host):
         
         self.dns_query_mock.side_effect = NXDOMAIN
         
         self.assertFalse(host in self.dnsbl_service)
     
     @parameterized.expand(valid_input)
-    def testLookupForListedValues(self, _, host):
+    def test_lookup_for_listed(self, _, host):
         
         classification = 'TEST'
         self.classification_map.__getitem__.return_value = classification
@@ -87,7 +87,7 @@ class DNSBLTest(unittest.TestCase):
         self.assertEqual(expected, actual)
             
     @parameterized.expand(valid_input)
-    def testLookupForNotListedValues(self, _, host):
+    def test_lookup_for_not_listed(self, _, host):
         
         self.dns_query_mock.side_effect = NXDOMAIN
         
@@ -96,7 +96,7 @@ class DNSBLTest(unittest.TestCase):
         self.assertIsNone(actual)
             
     @parameterized.expand(valid_input)
-    def testLookupForListedWithUnknownCodes(self, _, host):
+    def test_lookup_for_listed_with_unknown_codes(self, _, host):
         
         self.classification_map.__getitem__.side_effect = UnknownCodeError
         
@@ -112,7 +112,7 @@ class CodeClassificationMapTest(BaseClassificationMapTest, unittest.TestCase):
     
     factory = CodeClassificationMap
         
-    def testGetItemForValidKey(self):
+    def test_getitem_for_valid_key(self):
         
         key = 4
         
@@ -123,7 +123,7 @@ class CodeClassificationMapTest(BaseClassificationMapTest, unittest.TestCase):
         
         self.assertEqual(expected, actual)
             
-    def testGetItemForInvalidKeys(self):
+    def test_getitem_for_invalid_key(self):
         
         self.assertRaises(UnknownCodeError, self.map.__getitem__, 4)
             
@@ -131,17 +131,17 @@ class SumClassificationMapTest(BaseClassificationMapTest, unittest.TestCase):
     
     factory = SumClassificationMap
         
-    def _setCodeItemClass(self, code_class):
+    def _set_code_item_class(self, code_class):
         self.code_item_class.update(code_class)
             
     @parameterized.expand([
-                           ('ASimpleValidKey', [2]),
-                           ('ASumOfKeys', [2, 4, 8])
+                           ('simple_valid_key', [2]),
+                           ('sum_of_keys', [2, 4, 8])
                            ])
-    def testGetItemFor(self, _, keys):
+    def test_getitem_for(self, _, keys):
         
         classes = {k: 'Class #{}'.format(k) for k in keys}
-        self._setCodeItemClass(classes)
+        self._set_code_item_class(classes)
         
         expected = tuple(classes.values())
         actual = self.map[sum(keys)]
@@ -149,12 +149,12 @@ class SumClassificationMapTest(BaseClassificationMapTest, unittest.TestCase):
         self.assertItemsEqual(expected, actual)
         
     @parameterized.expand([
-                           ('Key', [16]),
-                           ('SumOfKeys', [2, 4, 16])
+                           ('key', [16]),
+                           ('sum_of_keys', [2, 4, 16])
                            ])
-    def testGetItemForInvalid(self, _, keys):
+    def test_getitem_for_invalid(self, _, keys):
         
-        self._setCodeItemClass({2: 'Class: 2', 4: 'Class:4'})
+        self._set_code_item_class({2: 'Class: 2', 4: 'Class:4'})
         
         self.assertRaises(UnknownCodeError, self.map.__getitem__, sum(keys))
             
@@ -163,15 +163,15 @@ class HpHostsTest(unittest.TestCase):
     _classification = '[TEST CLASS]'
     
     valid_input = [
-                   ('IpV4', u'255.255.0.1'),
-                   ('IpV6', u'2001:DB8:abc:123::42'),
-                   ('Hostname', 'test.hostname.pl')
+                   ('ipv4', u'255.255.0.1'),
+                   ('ipv6', u'2001:DB8:abc:123::42'),
+                   ('hostname', 'test.hostname.pl')
                    ]
                    
     invalid_input = [
-                     ('IpV4', u'255.255.0.1.11'),
-                     ('IpV6', u'2001:DB8:abcde:123::42'),
-                     ('Hostname', '-e.pl')
+                     ('ipv4', u'255.255.0.1.11'),
+                     ('ipv6', u'2001:DB8:abcde:123::42'),
+                     ('hostname', '-e.pl')
                      ]
     
     @classmethod
@@ -191,7 +191,7 @@ class HpHostsTest(unittest.TestCase):
         self.get_patcher.stop()
         self.host_patcher.stop()
         
-    def _setUpResponseContent(self, has_listed):
+    def _set_response_content(self, has_listed):
         
         content = 'Not listed'
         
@@ -200,37 +200,37 @@ class HpHostsTest(unittest.TestCase):
             
         self.get_mock.return_value.content = content
         
-    def _testForInvalid(self, function, value):
+    def _test_function_for_invalid(self, function, value):
         
         self.host_mock.side_effect = ValueError
         self.assertRaises(ValueError, function, value)
         
     @parameterized.expand(invalid_input)
-    def testContainsForInvalid(self, _, value):
+    def test_contains_for_invalid(self, _, value):
         
-        self._testForInvalid(self.hp_hosts.__contains__, value)
+        self._test_function_for_invalid(self.hp_hosts.__contains__, value)
         
     @parameterized.expand(invalid_input)
-    def testLookupForInvalid(self, _, value):
+    def test_lookup_for_invalid(self, _, value):
         
-        self._testForInvalid(self.hp_hosts.lookup, value)
+        self._test_function_for_invalid(self.hp_hosts.lookup, value)
         
     @parameterized.expand(valid_input)
-    def testContainsForListed(self, _, value):
+    def test_contains_for_listed(self, _, value):
         
-        self._setUpResponseContent(True)
+        self._set_response_content(True)
         self.assertTrue(host in self.hp_hosts)
             
     @parameterized.expand(valid_input)
-    def testContainsForNotListed(self, _, value):
+    def test_contains_for_not_listed(self, _, value):
         
-        self._setUpResponseContent(False)
+        self._set_response_content(False)
         self.assertFalse(host in self.hp_hosts)
                 
     @parameterized.expand(valid_input)
-    def testLookupForListed(self, _, value):
+    def test_lookup_for_listed(self, _, value):
         
-        self._setUpResponseContent(True)
+        self._set_response_content(True)
         
         expected = AddressListItem(value, self.hp_hosts.identifier,
                                    self._classification)
@@ -238,9 +238,9 @@ class HpHostsTest(unittest.TestCase):
         self.assertEqual(self.hp_hosts.lookup(value), expected)
           
     @parameterized.expand(valid_input)  
-    def testLookupForNotListed(self, _, value):
+    def test_lookup_for_not_listed(self, _, value):
         
-        self._setUpResponseContent(False)
+        self._set_response_content(False)
         self.assertIsNone(self.hp_hosts.lookup(value))
 
 class GoogleSafeBrowsingTest(unittest.TestCase):
@@ -263,36 +263,36 @@ class GoogleSafeBrowsingTest(unittest.TestCase):
     def tearDown(self):
         self.patcher.stop()
         
-    def doTestForUnathorizedAPIKey(self, function):
+    def _test_for_unathorized_api_key(self, function):
         
         self.post_response.status_code = 401
         self.post_response.raise_for_status.side_effect = HTTPError
         
         self.assertRaises(UnathorizedAPIKeyError, function, self.valid_urls)
         
-    def testContainsAnyForUnathorizedAPIKey(self):
+    def test_contains_any_for_unathorized_api_key(self):
         
-        self.doTestForUnathorizedAPIKey(self.google_safe_browsing.contains_any)
+        self._test_for_unathorized_api_key(self.google_safe_browsing.contains_any)
         
-    def testLookupForUnathorizedAPIKey(self):
+    def test_lookup_for_unathorized_api_key(self):
         
-        self.doTestForUnathorizedAPIKey(self.google_safe_browsing.lookup)
+        self._test_for_unathorized_api_key(self.google_safe_browsing.lookup)
     
-    def testContainsAnyForAnySpamUrls(self):
+    def test_contains_any_for_any_spam_urls(self):
         
         self.post_response.status_code = 200
         
         actual = self.google_safe_browsing.contains_any(self.valid_urls)
         self.assertTrue(actual)
         
-    def testContainsAnyForNonSpamUrls(self):
+    def test_contains_any_for_no_spam_urls(self):
         
         self.post_response.status_code = 204
         
         actual = self.google_safe_browsing.contains_any(self.valid_urls)
         self.assertFalse(actual)
         
-    def _setPostResult(self, classification):
+    def _set_post_result(self, classification):
         def mocked_post(_, body):
             urls = body.splitlines()[1:]
             classes = [classification.get(u, 'ok') for u in urls]
@@ -306,31 +306,31 @@ class GoogleSafeBrowsingTest(unittest.TestCase):
         self.mocked_post.side_effect = mocked_post
         
     @parameterized.expand([
-                           ('HostnameUrls',
+                           ('hostname_urls',
                             { 
                              'http://test1.com': 'phishing',
                              'http://test2.com': 'malware'
                              }),
-                           ('IpV6Urls',
+                           ('ipv4_urls',
                             {
                              'https://123.22.1.11': 'unwanted',
                              'http://66.99.88.121': 'phishing, malware'
                              }),
-                           ('IpV6Urls',
+                           ('ipv6_urls',
                             {
                              'http://[2001:DB8:abc:123::42]': 'phishing, malware',
                              'http://[3731:54:65fe:2::a7]': 'phishing, unwanted'
                              }),
-                           ('SpamUrlsWithDuplicates',
+                           ('urls_with_duplicates',
                             {
                              'http://abc.com': 'malware, unwanted',
                              'http://domain.com': 'phishing, malware, unwanted'
                              }, 
                             ['http://abc.com'])
                            ])
-    def testLookupFor(self, _, classification, duplicates = []):
+    def test_lookup_for_spam(self, _, classification, duplicates = []):
         
-        self._setPostResult(classification)
+        self._set_post_result(classification)
         
         item = lambda url, classes: AddressListItem(url, 
                                                     self.google_safe_browsing, 
@@ -344,7 +344,7 @@ class GoogleSafeBrowsingTest(unittest.TestCase):
         
         self.assertItemsEqual(actual, expected)
         
-    def testLookupForNonSpamUrls(self):
+    def test_lookup_for_no_spam(self):
         ''' lookup should return an empty tuple when called for a sequence
         of non spam urls as argument '''
         
@@ -356,15 +356,15 @@ class GoogleSafeBrowsingTest(unittest.TestCase):
 class HostCollectionTest(unittest.TestCase):
     
     valid_host_parameters = [
-                     ('Host', 'test1.pl'),
-                     ('IpV4', u'127.0.0.1'),
-                     ('IpV6', u'2001:db8:abc:123::42')
+                     ('host', 'test1.pl'),
+                     ('ipv4', u'127.0.0.1'),
+                     ('Ipv6', u'2001:db8:abc:123::42')
                      ]
     
     invalid_host_parameters = [
-                           ('Host', '-e'),
-                           ('IpV4', u'999.999.000.111.222'),
-                           ('IpV6', u'2001:db8:abcef:124::41')
+                           ('host', '-e'),
+                           ('Ipv4', u'999.999.000.111.222'),
+                           ('Ipv6', u'2001:db8:abcef:124::41')
                            ]
     
     def setUp(self):
@@ -377,24 +377,24 @@ class HostCollectionTest(unittest.TestCase):
     def tearDown(self):
         self.host_patcher.stop()
         
-    def _testForInvalid(self, function, value):
+    def _test_function_for_invalid(self, function, value):
         
         self.host_mock.side_effect = ValueError
         
         self.assertRaises(ValueError, function, value)
         
     @parameterized.expand(invalid_host_parameters)
-    def testAddForInvalid(self, _, value):
+    def test_add_for_invalid(self, _, value):
         
-        self._testForInvalid(self.host_collection.add, value)
+        self._test_function_for_invalid(self.host_collection.add, value)
         
     @parameterized.expand(invalid_host_parameters)
-    def testContainsForInvalid(self, _, value):
+    def test_contains_for_invalid(self, _, value):
         
-        self._testForInvalid(self.host_collection.__contains__, value)
+        self._test_function_for_invalid(self.host_collection.__contains__, value)
         
     @parameterized.expand(valid_host_parameters)
-    def testAddForValid(self, _, value):
+    def test_add_for_valid(self, _, value):
         
         new_item = Mock()
         self.host_mock.return_value = new_item
@@ -406,54 +406,54 @@ class HostCollectionTest(unittest.TestCase):
         self.assertTrue(in_host_collection)
         
     @parameterized.expand(valid_host_parameters)
-    def testContainsForListed(self, _, value):
+    def test_contains_for_listed(self, _, value):
         
         self.host_collection.hosts = [Mock()]
         
         self.assertTrue(value in self.host_collection)
         
     @parameterized.expand(valid_host_parameters)
-    def testContainsForNotListed(self, _, value):
+    def test_contains_for_not_listed(self, _, value):
         
         self.assertFalse(value in self.host_collection)
             
 class HostnameTest(unittest.TestCase):
     
     @parameterized.expand([
-                           ('InvalidHostname', '-e'),
-                           ('InvalidHostname', '/e'),
-                           ('NonStringValue', 123)
+                           ('hostname', '-e'),
+                           ('hostname', '/e'),
+                           ('argument', 123)
                            ])
-    def testConstructorFor(self, _, value):
+    def test_constructor_for_invalid(self, _, value):
         
         self.assertRaises(ValueError, Hostname, value)
     
-    def _getHostnames(self, value_1, value_2):
+    def _get_hostnames(self, value_1, value_2):
         return map(Hostname, (value_1, value_2))
     
-    def testIsMatchForTheSameDomains(self):
+    def test_is_match_for_the_same_domains(self):
         
         value = 'hostname.pl'
-        h_1, h_2 = self._getHostnames(value, value)
+        h_1, h_2 = self._get_hostnames(value, value)
         
         self.assertTrue(h_1.is_match(h_2))
         self.assertTrue(h_2.is_match(h_1))
         
-    def testIsMatchForDomainAndSubdomain(self):
+    def test_is_match_for_domain_and_subdomain(self):
         
-        domain, subdomain = self._getHostnames('domain.com', 'sub.domain.com')
+        domain, subdomain = self._get_hostnames('domain.com', 'sub.domain.com')
         
         self.assertTrue(subdomain.is_match(domain))
         self.assertFalse(domain.is_match(subdomain))
         
-    def testIsMatchForUnrelatedDomains(self):
+    def test_is_match_for_unrelated_domains(self):
         
-        h_1, h_2 = self._getHostnames('google.com', 'microsoft.com')
+        h_1, h_2 = self._get_hostnames('google.com', 'microsoft.com')
         
         self.assertFalse(h_1.is_match(h_2))
         self.assertFalse(h_2.is_match(h_1))
         
-    def testIsMatchForHostnameAndAnotherObject(self):
+    def test_is_match_for_non_hostname_object(self):
         
         hostname = Hostname('hostname.pl')
         
@@ -468,23 +468,23 @@ class IpAddressTest(unittest.TestCase):
     
     
     @parameterized.expand([
-                           ('InvalidIpV4', u'299.0.0.1'),
-                           ('InvalidIpV4', u'99.22.33.1.23'),
-                           ('InvalidIpV6', u'2001:db8:abc:125::4h'),
-                           ('InvalidIpV6', u'2001:db8:abcef:125::43'),
-                           ('Hostname', u'abc.def.gh'),
-                           ('NonUnicodeValue', '299.0.0.1')
+                           ('ipv4', u'299.0.0.1'),
+                           ('ipv4', u'99.22.33.1.23'),
+                           ('ipv6', u'2001:db8:abc:125::4h'),
+                           ('ipv6', u'2001:db8:abcef:125::43'),
+                           ('hostname', u'abc.def.gh'),
+                           ('non_unicode_ipv4', '299.0.0.1')
                            ])
-    def testConstructorFor(self, _, value):
+    def test_constructor_for_invalid(self, _, value):
         
         self.assertRaises(ValueError, IpAddress, value)
         
         
     @parameterized.expand([
-                           ('IpV4', ipv4_1, reversename.ipv4_reverse_domain),
-                           ('IpV6', ipv6_1, reversename.ipv6_reverse_domain)
+                           ('ipv4', ipv4_1, reversename.ipv4_reverse_domain),
+                           ('ipv6', ipv6_1, reversename.ipv6_reverse_domain)
                            ])
-    def testRelativeDomainFor(self, _, value, expected_origin):
+    def test_relative_domain_for(self, _, value, expected_origin):
         
         ip_address = IpAddress(value)
         expected = reversename.from_address(value).relativize(expected_origin)
@@ -492,10 +492,10 @@ class IpAddressTest(unittest.TestCase):
         self.assertEqual(expected, ip_address.relative_domain)
         
     @parameterized.expand([
-                           ('IpV4Addresses', ipv4_1),
-                           ('IpV6Addresses', ipv6_2),
+                           ('ipv4', ipv4_1),
+                           ('ipv6', ipv6_2),
                            ])
-    def testIsMatchIsTrueForTheSame(self, _, value):
+    def test_is_match_for_the_same(self, _, value):
         first_ip = IpAddress(value)
         second_ip = IpAddress(unicode(value))
         
@@ -503,12 +503,12 @@ class IpAddressTest(unittest.TestCase):
         self.assertTrue(second_ip.is_match(first_ip))
         
     @parameterized.expand([
-                           ('DifferentIpV4Values', ipv4_1, ipv4_2),
-                           ('IpV4AndIpV6', ipv4_1, ipv6_1),
-                           ('DifferentIpV6Values', ipv6_1, ipv6_2),
-                           ('IpV6AndIpV4', ipv6_1, ipv4_1)
+                           ('different_ipv4_values', ipv4_1, ipv4_2),
+                           ('ip4_and_ipv6', ipv4_1, ipv6_1),
+                           ('different_ipv6_values', ipv6_1, ipv6_2),
+                           ('Ipv6_and_ipv4', ipv6_1, ipv4_1)
                            ])
-    def testIsMatchIsFalseFor(self, _, ip_value_1, ip_value_2):
+    def test_is_match_for(self, _, ip_value_1, ip_value_2):
         ip_1 = IpAddress(ip_value_1)
         ip_2 = IpAddress(ip_value_2)
         
@@ -516,10 +516,10 @@ class IpAddressTest(unittest.TestCase):
         self.assertFalse(ip_2.is_match(ip_1))
         
     @parameterized.expand([
-                           ('IpV4', ipv4_1),
-                           ('IpV6', ipv6_1),
+                           ('ipv4', ipv4_1),
+                           ('ipv6', ipv6_1),
                            ])
-    def testIsMatchIsFalseForANonIpValueAnd(self, _, ip_value):
+    def test_is_match_returns_false_for_a_non_ip_value_and(self, _, ip_value):
         
         ip = IpAddress(ip_value)
         other = []
@@ -541,10 +541,10 @@ class HostTest(unittest.TestCase):
         self.hostname_patcher.stop()
         
     @parameterized.expand([
-                           ('V4',  u'127.0.0.1'),
-                           ('V6', u'2001:db8:abc:125::45'),
+                           ('v4',  u'127.0.0.1'),
+                           ('v6', u'2001:db8:abc:125::45'),
                            ])
-    def testHostForValidIp(self, _, value):
+    def test_host_for_ip(self, _, value):
         ip_address = Mock()
         self.ipaddress_mock.return_value = ip_address
         
@@ -552,7 +552,7 @@ class HostTest(unittest.TestCase):
         
         self.assertEqual(ip_address, actual_ip)
         
-    def testHostForHostname(self):
+    def test_host_for_hostname(self):
         
         hostname_str = 'test.hostname'
         
@@ -566,14 +566,14 @@ class HostTest(unittest.TestCase):
         self.assertEqual(hostname_mock, actual_hostname)
         
     @parameterized.expand([
-                           ('IpV4Address', u'299.0.0.1'),
-                           ('IpV4Address', u'99.22.33.1.23'),
-                           ('IpV6Address', u'2001:db8:abc:125::4h'),
-                           ('IpV6Address', u'2001:db8:abcef:125::43'),
-                           ('Hostname', '-e'),
-                           ('Hostname', '/e')
+                           ('ipv4', u'299.0.0.1'),
+                           ('ipv4', u'99.22.33.1.23'),
+                           ('ipv6', u'2001:db8:abc:125::4h'),
+                           ('ipv6', u'2001:db8:abcef:125::43'),
+                           ('hostname', '-e'),
+                           ('hostname', '/e')
                            ])
-    def testHostForInvalid(self, _, value):
+    def test_host_for_invalid(self, _, value):
         
         self.hostname_mock.side_effect = ValueError
         self.ipaddress_mock.side_effect = ValueError
@@ -583,33 +583,33 @@ class HostTest(unittest.TestCase):
 class IsValidUrlTest(unittest.TestCase):
     
     @parameterized.expand([
-                           ('WithHttpScheme', 'http://test.url.com'),
-                           ('WithHttpsScheme', 'https://google.com'),
-                           ('WithFtpScheme', 'ftp://ftp.test.com'),
-                           ('WithNumericHost', 'http://999.com'),
-                           ('EndingWithSlash', 'https://google.com/'),
-                           ('WithPathQueryAndFragment', 'https://test.domain.com/path/element?var=1&var_2=3#fragment'),
-                           ('WithQuery', 'http://test.domain.com?var_1=1&var_2=2'),
-                           ('WithPath', 'http://test.domain.com/path'),
-                           ('WithPathAndFragement', 'http://test.domain.com/path#fragment'),
-                           ('WithQueryAndFragment', 'http://test.domain.com?var_1=1&var_2=2#fragment'),
-                           ('WithPort', 'https://test.domain.com:123'),
-                           ('WithAuthentication', 'https://abc:def@test.domain.com'),
-                           ('WithIpV4Host', 'http://255.0.0.255'),
-                           ('WithIpV6Host', 'http://[2001:db8:abc:125::45]')
+                           ('http_scheme', 'http://test.url.com'),
+                           ('https_scheme', 'https://google.com'),
+                           ('ftp_scheme', 'ftp://ftp.test.com'),
+                           ('numeric_hostname', 'http://999.com'),
+                           ('final_slash', 'https://google.com/'),
+                           ('path_query_and_fragment', 'https://test.domain.com/path/element?var=1&var_2=3#fragment'),
+                           ('query', 'http://test.domain.com?var_1=1&var_2=2'),
+                           ('path', 'http://test.domain.com/path'),
+                           ('path_and_fragment', 'http://test.domain.com/path#fragment'),
+                           ('query_and_fragment', 'http://test.domain.com?var_1=1&var_2=2#fragment'),
+                           ('port', 'https://test.domain.com:123'),
+                           ('authentication', 'https://abc:def@test.domain.com'),
+                           ('ipv4', 'http://255.0.0.255'),
+                           ('ipv6', 'http://[2001:db8:abc:125::45]')
                            ])
-    def testIsValidUrlForValidUrl(self, _, url):
+    def test_is_valid_url_for_url_with(self, _, url):
         self.assertTrue(is_valid_url(url))
              
     @parameterized.expand([
-                           ('MissingSchema', 'test.url.com'),
-                           ('WithInvalidIpAddressV6', 'http://266.0.0.266'),
-                           ('WithInvalidIPAddressV6', 'http://127.0.0.1.1'),
-                           ('WithInvalidPort', 'http://test.domain.com:aaa'),
-                           ('MissingTopLevelDomain', 'https://testdomaincom'),
-                           ('WithInvalidHostname', 'http://-invalid.domain.com')
+                           ('no_schema', 'test.url.com'),
+                           ('invalid_ipv4', 'http://266.0.0.266'),
+                           ('invalid_ipv6', 'http://127.0.0.1.1'),
+                           ('invalid_port', 'http://test.domain.com:aaa'),
+                           ('no_top_level_domain', 'https://testdomaincom'),
+                           ('invalid_hostname', 'http://-invalid.domain.com')
                            ])
-    def testIsValidUrlForInvalidUrl(self, _, url):
+    def test_is_valid_url_for_invalid_url_with(self, _, url):
         self.assertFalse(is_valid_url(url))
             
 class RedirectUrlResolverTest(unittest.TestCase):
@@ -633,7 +633,7 @@ class RedirectUrlResolverTest(unittest.TestCase):
         
         self.patcher.stop()
         
-    def testGetFirstResponseForInvalidUrl(self):
+    def test_get_first_response_for_invalid_url(self):
         
         self.is_valid_url_mock.return_value = False
         
@@ -644,12 +644,12 @@ class RedirectUrlResolverTest(unittest.TestCase):
                            ('InvalidSchema', InvalidSchema),
                            ('Timeout', Timeout)
                            ])
-    def testGetFirstResponseForFirstUrlTriggering(self, _, exception_type):
+    def test_get_first_response_for_url_triggering(self, _, exception_type):
         
         self.head_mock.side_effect = exception_type
         self.assertIsNone(self.resolver.get_first_response('http://test.com'))
         
-    def testGetRedirectUrlsForInvalidUrl(self):
+    def test_get_redirect_urls_for_invalid_url(self):
         
         self.is_valid_url_mock.return_value = False
         
@@ -661,7 +661,7 @@ class RedirectUrlResolverTest(unittest.TestCase):
                            ('InvalidSchema', InvalidSchema),
                            ('Timeout', Timeout)
                            ])
-    def testGetRedirectUrlsForFirstUrlTriggering(self, _, exception_type):
+    def test_get_redirect_urls_for_first_url_triggering(self, _, exception_type):
         
         self.head_mock.side_effect = exception_type
         
@@ -669,7 +669,7 @@ class RedirectUrlResolverTest(unittest.TestCase):
         
         self.assertFalse(list(url_generator))
             
-    def _getResponseMocks(self, urls):
+    def _get_response_mocks(self, urls):
         
         response_mocks = []
         
@@ -680,43 +680,43 @@ class RedirectUrlResolverTest(unittest.TestCase):
             
         return response_mocks
     
-    def _setSessionResolveRedirectsSideEffects(self, urls, exception_type=None):
+    def _set_session_resolve_redirects_side_effects(self, urls, exception_type=None):
         
         if not (exception_type is None or 
                 issubclass(exception_type, Exception)):
             raise ValueError, '{} is not a subclass of Exception'.format(exception_type)
         
-        self._response_mocks = self._getResponseMocks(urls)
+        self._response_mocks = self._get_response_mocks(urls)
         
-        def resolveRedirects(response, request):
+        def resolve_redirects(response, request):
             for r in self._response_mocks:
                 yield r
                 
             if exception_type:
                 raise exception_type
                 
-        self.resolve_redirects_mock.side_effect = resolveRedirects
+        self.resolve_redirects_mock.side_effect = resolve_redirects
         
-    def _setLastResponseLocationHeader(self, url):
+    def _set_last_response_location_header(self, url):
         
         all_responses = [self.head_mock.return_value] + self._response_mocks
         all_responses[-1].headers = {'location': url}
     
-    def _testGetRedirectUrlsYields(self, expected):
+    def _test_get_redirect_urls(self, expected):
         
         url_generator = self.resolver.get_redirect_urls('http://test.com')
         
         self.assertEqual(expected, list(url_generator))
         
     @parameterized.expand([
-                           ('YieldingNoUrl', []),
-                           ('YieldingUrls', valid_urls)
+                           ('no_url', []),
+                           ('urls', valid_urls)
                            ])
-    def testGetRedirectUrls(self, _, expected):
+    def test_get_redirect_urls_yields(self, _, expected):
         
-        self._setSessionResolveRedirectsSideEffects(expected)
+        self._set_session_resolve_redirects_side_effects(expected)
         
-        self._testGetRedirectUrlsYields(expected)
+        self._test_get_redirect_urls(expected)
         
     @parameterized.expand([
                            ('Timeout', [], Timeout),
@@ -726,16 +726,16 @@ class RedirectUrlResolverTest(unittest.TestCase):
                            ('InvalidSchema', [], InvalidSchema),
                            ('InvalidSchema', valid_urls, InvalidSchema),
                            ])
-    def testGetRedirectUrlsUntilValidUrlTriggers(self, _, expected, exception_type):
+    def test_get_redirect_urls_until(self, _, expected, exception_type):
         
-        self._setSessionResolveRedirectsSideEffects(expected, exception_type)
+        self._set_session_resolve_redirects_side_effects(expected, exception_type)
         
         error_source = 'http://triggered.error.com'
         expected.append(error_source)
         
-        self._setLastResponseLocationHeader(error_source)
+        self._set_last_response_location_header(error_source)
             
-        self._testGetRedirectUrlsYields(expected)
+        self._test_get_redirect_urls(expected)
         
     @parameterized.expand([
                            ('InvalidURL', [], InvalidURL),
@@ -745,44 +745,44 @@ class RedirectUrlResolverTest(unittest.TestCase):
                            ('InvalidSchema', [], InvalidSchema),
                            ('InvalidSchema', valid_urls, InvalidSchema),
                            ])
-    def testGetRedirectUrlsUntilInvalidUrlTriggers(self, _, expected, exception_type):
+    def test_get_redirect_urls_until_invalid_url_triggers(self, _, expected, exception_type):
         
         is_valid_url = lambda u: u in expected+['http://test.com']
         self.is_valid_url_mock.side_effect = is_valid_url
         
-        self._setSessionResolveRedirectsSideEffects(expected, exception_type)
+        self._set_session_resolve_redirects_side_effects(expected, exception_type)
         
-        self._setLastResponseLocationHeader('http://invalid.url.com')
+        self._set_last_response_location_header('http://invalid.url.com')
             
-        self._testGetRedirectUrlsYields(expected)
+        self._test_get_redirect_urls(expected)
             
 class BaseUrlTesterTest(unittest.TestCase):
     
     urls_and_redirects_test_input = [
-                                     ('NoRedirects',
+                                     ('no_redirects',
                                       ('http://url1.com', 'http://59.99.63.88'),
                                       {}),
-                                     ('DuplicateInputUrlsAndNoRedirects',
+                                     ('duplicate_input_and_no_redirects',
                                       ('http://url1.com', 'http://url1.com', 'http://59.99.63.88'),
                                       {}),
-                                     ('Redirects',
+                                     ('redirects',
                                       ('http://abc.com', 'https://67.23.21.11', 'http://foo.com'),
                                       {
                                        'http://abc.com': ['http://xyz.pl', 'http://final.com'],
                                        'http://foo.com': ['http://bar.com']
                                        }),
-                                     ('DuplicateInputUrlsAndUniqueRedirects',
+                                     ('duplicate_input_and_unique_redirects',
                                       ('http://abc.com', 'https://67.23.21.11', 'http://abc.com'),
                                       {
                                        'http://abc.com': ['http://xyz.pl', 'http://final.com'],
                                        }),
-                                     ('DuplicateRedirectUrls',
+                                     ('duplicate_redirect_urls',
                                       ('http://abc.com', 'https://67.23.21.11', 'http://foo.com'),
                                       {
                                        'http://abc.com': ['http://xyz.pl', 'http://final.com'],
                                        'http://foo.com': ['http://xyz.pl', 'http://final.com']
                                        }),
-                                     ('DuplicateInputUrlsAndRedirects',
+                                     ('duplicates_in_input_and_redirect_urls',
                                       ('http://abc.com', 'https://67.23.21.11', 'https://67.23.21.11'),
                                       {
                                        'http://abc.com': ['http://xyz.pl', 'http://final.com'],
@@ -808,12 +808,12 @@ class BaseUrlTesterTest(unittest.TestCase):
         self.is_valid_url_patcher.stop()
         
     @parameterized.expand([
-                           ('OneInvalidUrl', ('http://-xyz.com',), False),
-                           ('OneInvalidUrlAndRedirectResolution', ('http://-xyz.com',), True),
-                           ('TwoInvalidUrls', ('http://-xyz.com', 'http://999.999.999.999.11'), False),
-                           ('TwoInvalidUrlsAndRedirectResolution', ('http://-xyz.com', 'http://999.999.999.999.11'), True)
+                           ('one_invalid_url', ('http://-xyz.com',), False),
+                           ('one_invalid_url_and_redirect_resolution', ('http://-xyz.com',), True),
+                           ('two_invalid_urls', ('http://-xyz.com', 'http://999.999.999.999.11'), False),
+                           ('two_invalid_urls_and_redirect_resolution', ('http://-xyz.com', 'http://999.999.999.999.11'), True)
                            ])
-    def testGetUrlsToTestFor(self, _, invalid_urls, resolve_redirects):
+    def test_get_urls_to_test_for(self, _, invalid_urls, resolve_redirects):
         
         self.is_valid_url_mock.side_effect = lambda u: u in invalid_urls
         
@@ -824,9 +824,9 @@ class BaseUrlTesterTest(unittest.TestCase):
         
     @parameterized.expand([
                            ('', ('http://url1.com', 'https://122.56.65.99', 'https://google.com')),
-                           ('WithDuplicatesInInput', ('http://abc.com', 'http://66.33.22.11', 'http://abc.com'))
+                           ('with_duplicates_in_input', ('http://abc.com', 'http://66.33.22.11', 'http://abc.com'))
                            ])
-    def testGetUrlsToTestForValidUrls(self, _, input_args):
+    def test_get_urls_to_test_for_valid_urls(self, _, input_args):
         
         expected = list(set(input_args))
         
@@ -834,7 +834,7 @@ class BaseUrlTesterTest(unittest.TestCase):
         
         self.assertItemsEqual(expected, actual)
         
-    def _setResolverGetRedirectUrlsResult(self, urls_to_redirect_urls):
+    def _set_resolver_get_redirect_urls_result(self, urls_to_redirect_urls):
         def get_redirect_urls(url):
             
             urls = urls_to_redirect_urls.get(url, [])
@@ -845,18 +845,18 @@ class BaseUrlTesterTest(unittest.TestCase):
         self.resolver_get_redirect_urls_mock.side_effect = get_redirect_urls
         
     @parameterized.expand(urls_and_redirects_test_input )
-    def testGetRedirectUrlsFor(self, _, input_args, input_to_redirect_urls):
+    def test_get_redirect_urls_for(self, _, input_args, input_to_redirect_urls):
         
-        self._setResolverGetRedirectUrlsResult(input_to_redirect_urls)
+        self._set_resolver_get_redirect_urls_result(input_to_redirect_urls)
         expected = set(chain(*input_to_redirect_urls.values()))
         actual = list(self.url_tester.get_redirect_urls(input_args))
         
         self.assertItemsEqual(expected, actual)
     
     @parameterized.expand(urls_and_redirects_test_input )
-    def testGetUrlsToTestWithRedirectResolutionFor(self, _, input_args, input_to_redirect_urls):
+    def test_get_urls_to_test_with_redirect_resolution_for(self, _, input_args, input_to_redirect_urls):
         
-        self._setResolverGetRedirectUrlsResult(input_to_redirect_urls)
+        self._set_resolver_get_redirect_urls_result(input_to_redirect_urls)
         
         expected = set(chain(input_args, *input_to_redirect_urls.values()))
         actual = list(self.url_tester.get_urls_to_test(input_args, True))
@@ -864,19 +864,19 @@ class BaseUrlTesterTest(unittest.TestCase):
         self.assertItemsEqual(expected, actual)
         
     @parameterized.expand([
-                           ('AndBeingUnique',
+                           ('',
                             ('http://first.com', 'https://122.55.66.29'),
                             {'http://first.com': ['http://redirect.com'],
                              'https://122.55.66.29': ['http://abc.pl', 'http://xyz.com']
                              }),
-                           ('AndSomeBeingTheSame',
+                           ('and_input_has_duplicates',
                             ('http://first.com', 'http://first.redirect.com'),
                             {'http://first.com': ['http://first.redirect.com', 'http://second.redirect.com']
                              })
                            ])
-    def testGetUrlsToTestForRedirectUrlsFollowingInputUrls(self, _, input_args, input_to_redirect_urls):
+    def test_get_urls_to_test_redirects_follow_input(self, _, input_args, input_to_redirect_urls):
         
-        self._setResolverGetRedirectUrlsResult(input_to_redirect_urls)
+        self._set_resolver_get_redirect_urls_result(input_to_redirect_urls)
         
         original_urls = set(input_args)
         redirect_urls = set(chain(*input_to_redirect_urls.values()))
