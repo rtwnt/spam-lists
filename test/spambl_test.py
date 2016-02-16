@@ -428,37 +428,27 @@ class HostnameTest(unittest.TestCase):
         
         self.assertRaises(ValueError, Hostname, value)
     
-    def _get_hostnames(self, value_1, value_2):
-        return map(Hostname, (value_1, value_2))
-    
-    def test_is_child_or_the_same_for_the_same_domains(self):
+    @parameterized.expand([
+                           ('the_same_domain', 'subdomain.hostname.pl'),
+                           ('a_superdomain', 'hostname.pl')
+                           ])
+    def test_is_child_or_the_same_returns_true_for(self, _, other):
         
-        value = 'hostname.pl'
-        h_1, h_2 = self._get_hostnames(value, value)
+        h_1 = Hostname('subdomain.hostname.pl')
+        h_2 = Hostname(other)
         
         self.assertTrue(h_1.is_child_or_the_same(h_2))
-        self.assertTrue(h_2.is_child_or_the_same(h_1))
         
-    def test_is_child_or_the_same_for_domain_and_subdomain(self):
+    @parameterized.expand([
+                           ('unrelated_domain', Hostname('other.com')),
+                           ('a_subdomain', Hostname('subdomain.hostname.pl')),
+                           ('non_hostname_object', '123.4.5.11')
+                           ])
+    def test_is_child_or_the_same_returns_false_for(self, _, other):
         
-        domain, subdomain = self._get_hostnames('domain.com', 'sub.domain.com')
+        h_1 = Hostname('hostname.pl')
         
-        self.assertTrue(subdomain.is_child_or_the_same(domain))
-        self.assertFalse(domain.is_child_or_the_same(subdomain))
-        
-    def test_is_child_or_the_same_for_unrelated_domains(self):
-        
-        h_1, h_2 = self._get_hostnames('google.com', 'microsoft.com')
-        
-        self.assertFalse(h_1.is_child_or_the_same(h_2))
-        self.assertFalse(h_2.is_child_or_the_same(h_1))
-        
-    def test_is_child_or_the_same_for_non_hostname_object(self):
-        
-        hostname = Hostname('hostname.pl')
-        
-        self.assertFalse(hostname.is_child_or_the_same([]))
-        
+        self.assertFalse(h_1.is_child_or_the_same(other))
 
 class IpAddressTest(unittest.TestCase):
     ipv4_1 = u'255.0.2.1'
