@@ -182,7 +182,7 @@ class HpHosts(object):
         '''
         
         valid_host = host(host_value)
-        url = 'http://verify.hosts-file.net/?v={0}&s={1}'.format(self.app_id, valid_host)
+        url = 'http://verify.hosts-file.net/?v={}&s={}'.format(self.app_id, valid_host)
         url = url + '&class=true' if classification else url
         
         return get(url).content
