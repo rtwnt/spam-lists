@@ -236,7 +236,7 @@ class HpHosts(object):
         
         if self._LISTED in data:
             elements = data.split(',')
-            classification = elements[1] if len(elements) > 1 else None
+            classification = tuple(elements[1:])
             
             return AddressListItem(host, self.identifier, classification)
         return None

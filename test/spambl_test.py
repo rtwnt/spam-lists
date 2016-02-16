@@ -251,7 +251,7 @@ class HpHostsTest(unittest.TestCase):
         self._set_response_content(True)
         
         expected = AddressListItem(value, self.hp_hosts.identifier,
-                                   self._classification)
+                                   (self._classification,))
         
         self.assertEqual(self.hp_hosts.lookup(value), expected)
           
