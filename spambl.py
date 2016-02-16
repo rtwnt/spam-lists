@@ -181,8 +181,8 @@ class HpHosts(object):
         :returns: content of response to GET request to hpHosts for data on the given host
         '''
         
-        host_value = host(host_value)
-        url = 'http://verify.hosts-file.net/?v={0}&s={1}'.format(self.app_id, host_value)
+        valid_host = host(host_value)
+        url = 'http://verify.hosts-file.net/?v={0}&s={1}'.format(self.app_id, valid_host)
         url = url + '&class=true' if classification else url
         
         return get(url).content
