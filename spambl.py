@@ -96,6 +96,38 @@ class DNSBL(object):
         
         except UnknownCodeError as e:
             raise exc_info()[0],  '{}\nSource:{}'.format(str(e), str(self)), exc_info()[2]
+        
+class BaseClassificationCodeResolver(object):
+    ''' A class responsible for providing classification 
+    for given return code '''
+    
+    def __init__(self, classification):
+        ''' Create new instance
+        
+        :param classification: a dictionary mapping integer codes 
+        to taxonomical units
+        '''
+        self._classification = classification
+        
+    def _get_single_class(self, index):
+        ''' Get one taxonimical unit from the classification
+        
+        :param index: a value to which a classification may be assigned
+        :return: a taxonomical unit assigned to the code
+        :raises UnknownCodeException: when there is no taxonomical unit
+        for given code in the instance
+        '''
+        _class = self._classification.get(index)
+        
+        if _class is None:
+            msg = 'The classification code {} was not recognized'.format(index)
+            raise UnknownCodeError(msg)
+        
+        return _class
+        
+    def __call__(self, code):
+        
+        raise NotImplementedError
 
 class CodeClassificationMap(object):
     ''' A map containing taxonomical units assigned to integer codes'''
