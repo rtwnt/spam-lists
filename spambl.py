@@ -339,7 +339,8 @@ class GoogleSafeBrowsing(object):
             
             for url, _class in izip(url_list, classification_set):
                 if _class != 'ok':
-                    items.append(AddressListItem(url, self, _class.split(',')))
+                    classification = tuple(_class.split(','))
+                    items.append(AddressListItem(url, self, classification))
                     
         return tuple(items)
     

@@ -352,7 +352,7 @@ class GoogleSafeBrowsingTest(unittest.TestCase):
         
         item = lambda url, classes: AddressListItem(url, 
                                                     self.google_safe_browsing, 
-                                                    classes.split(','))
+                                                    tuple(classes.split(',')))
         
         expected  = [item(u, c) for u, c in classification.items()]
         
