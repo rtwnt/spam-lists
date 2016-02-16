@@ -4,7 +4,7 @@
 import unittest
 from spambl import (UnknownCodeError, NXDOMAIN, HpHosts, 
                     GoogleSafeBrowsing, UnathorizedAPIKeyError, HostCollection,
-                     CodeClassificationMap, SumClassificationMap, Hostname, IpAddress, 
+                     SimpleClassificationCodeResolver, SumClassificationCodeResolver, Hostname, IpAddress, 
                      host, is_valid_url, BaseUrlTester, RedirectUrlResolver, AddressListItem, DNSBL)
 from mock import Mock, patch, MagicMock
 from itertools import chain
@@ -29,12 +29,12 @@ class DNSBLTest(unittest.TestCase):
     
     def setUp(self):
         
-        self.classification_map = MagicMock()
+        self.classification_resolver = Mock()
         
         self.host_factory_mock = Mock()
         
         self.dnsbl_service = DNSBL('test_service', self.query_domain_str, 
-                                   self.classification_map, self.host_factory_mock)
+                                   self.classification_resolver, self.host_factory_mock)
         
         dns_answer_mock = Mock()
         dns_answer_mock.to_text.return_value = '121.0.0.1'
@@ -77,12 +77,12 @@ class DNSBLTest(unittest.TestCase):
     @parameterized.expand(valid_input)
     def test_lookup_for_listed(self, _, host):
         
-        classification = 'TEST'
-        self.classification_map.__getitem__.return_value = classification
+        classifications = ('TEST',)
+        self.classification_resolver.return_value = classifications
         
         actual = self.dnsbl_service.lookup(host)
         expected = AddressListItem(host, self.dnsbl_service._identifier, 
-                                   classification)
+                                   classifications)
         
         self.assertEqual(expected, actual)
             
@@ -98,38 +98,39 @@ class DNSBLTest(unittest.TestCase):
     @parameterized.expand(valid_input)
     def test_lookup_for_listed_with_unknown_codes(self, _, host):
         
-        self.classification_map.__getitem__.side_effect = UnknownCodeError
+        self.classification_resolver.side_effect = UnknownCodeError
         
         self.assertRaises(UnknownCodeError, self.dnsbl_service.lookup, host)
     
-class BaseClassificationMapTest(object):
+class BaseClassificationCodeResolverTest(object):
     
     def setUp(self):
         self.code_item_class = {}
-        self.map = self.factory(self.code_item_class)
+        self.resolver = self.factory(self.code_item_class)
         
-class CodeClassificationMapTest(BaseClassificationMapTest, unittest.TestCase):
+class SimpleClassificationCodeResolverTest(BaseClassificationCodeResolverTest,
+                                           unittest.TestCase):
     
-    factory = CodeClassificationMap
+    factory = SimpleClassificationCodeResolver
         
-    def test_getitem_for_valid_key(self):
+    def test_call_for_valid_key(self):
         
         key = 4
-        
         self.code_item_class.update({key: 'TestClass'})
         
-        expected = self.code_item_class[key]
-        actual = self.map[key]
+        expected = self.code_item_class[key],
+        actual = self.resolver(key)
         
         self.assertEqual(expected, actual)
             
-    def test_getitem_for_invalid_key(self):
+    def test_call_for_invalid_key(self):
         
-        self.assertRaises(UnknownCodeError, self.map.__getitem__, 4)
+        self.assertRaises(UnknownCodeError, self.resolver, 4)
             
-class SumClassificationMapTest(BaseClassificationMapTest, unittest.TestCase):
+class SumClassificationCodeResolverTest(BaseClassificationCodeResolverTest, 
+                               unittest.TestCase):
     
-    factory = SumClassificationMap
+    factory = SumClassificationCodeResolver
         
     def _set_code_item_class(self, code_class):
         self.code_item_class.update(code_class)
@@ -144,7 +145,7 @@ class SumClassificationMapTest(BaseClassificationMapTest, unittest.TestCase):
         self._set_code_item_class(classes)
         
         expected = tuple(classes.values())
-        actual = self.map[sum(keys)]
+        actual = self.resolver(sum(keys))
         
         self.assertItemsEqual(expected, actual)
         
@@ -156,7 +157,7 @@ class SumClassificationMapTest(BaseClassificationMapTest, unittest.TestCase):
         
         self._set_code_item_class({2: 'Class: 2', 4: 'Class:4'})
         
-        self.assertRaises(UnknownCodeError, self.map.__getitem__, sum(keys))
+        self.assertRaises(UnknownCodeError, self.resolver, sum(keys))
             
 class HpHostsTest(unittest.TestCase):
     

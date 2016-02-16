@@ -25,12 +25,12 @@ class UnathorizedAPIKeyError(SpamBLError):
     
 class DNSBL(object):
     ''' Represents a DNSBL service '''
-    def __init__(self, identifier, query_suffix, code_item_class, host_factory):
+    def __init__(self, identifier, query_suffix, classification_resolver, host_factory):
         ''' Create new DNSBL object
         
         :param identifier: a value designating DNSBL service provider: its name or url address.
         :param query_suffix: a suffix added to DNSBL query address
-        :param code_item_class: item classes associated with DNSBL query return codes
+        :param classification_resolver: item classes associated with DNSBL query return codes
         :param host_factory: a callable object that returns an object representing host and providing
         method for getting a relative domain pertaining to it.
         '''
@@ -38,7 +38,7 @@ class DNSBL(object):
         self._identifier = identifier
 
         self._query_suffix = name.from_text(query_suffix)
-        self._code_item_class = code_item_class
+        self._get_classification = classification_resolver
         self.host_factory = host_factory
     
     def _query(self, host):
@@ -81,7 +81,7 @@ class DNSBL(object):
         :returns: an instance of AddressListItem representing given
         host
         :raises UnknownCodeError: if return code does not
-        map to any taxonomic unit present in _code_item_class
+        map to any taxonomic unit present in _get_classification
         '''
         
         return_code = self._query(host)
@@ -90,7 +90,7 @@ class DNSBL(object):
             return None
         
         try:
-            classification = self._code_item_class[return_code]
+            classification = self._get_classification(return_code)
             
             return AddressListItem(str(host), self._identifier, classification)
         
@@ -129,37 +129,29 @@ class BaseClassificationCodeResolver(object):
         
         raise NotImplementedError
 
-class CodeClassificationMap(object):
-    ''' A map containing taxonomical units assigned to integer codes'''
-    def __init__(self, classification):
-        ''' Create new instance
+class SimpleClassificationCodeResolver(BaseClassificationCodeResolver):
+    ''' A classification resolver recognizing only 
+    code values that are stored as indexes of taxonomical units '''
+    
+    def __call__(self, code):
+        ''' Get classification for given code
         
-        :param classification: a dictionary mapping integer codes to taxonomical units
+        :param code: a value to which a taxonomical unit may be assigned
+        :return: a tuple containing taxonomical unit assigned to the code,
+        if it exists
+        :raises UnknownCodeError: when there is no classification
+        for given code
         '''
-        self.classification = classification
         
-    def __getitem__(self, index):
-        ''' Get taxonomical unit for given index 
-        :param index: an integer value that's supposed to map to a class
-        :raises UnknownCodeError: raised when given index does not
-        map to a class
-        '''
-        _class = self.classification.get(index)
+        return self._get_single_class(code),
         
-        if _class is None:
-            msg = 'The classification code {} was not recognized'.format(index)
-            raise UnknownCodeError(msg)
-        
-        return _class
-        
-class SumClassificationMap(CodeClassificationMap):
-    ''' A map containing taxonomical units assigned to integer codes
+class SumClassificationCodeResolver(BaseClassificationCodeResolver):
+    ''' A classification resolver that recognizes arguments in form
+    of both the same codes as stored in the instance and integers
+    that can be represented as a sum of different indexes stored in
+    the instance'''
     
-    Multiple items in the instance of this class may be accessed by
-    providing a sum of valid indexes as index'''
-    
-    
-    def _get_codes(self, index):
+    def _get_codes(self, code):
         ''' Get codes from given index
         
         The valid codes are different powers of 2. This method transforms
@@ -168,24 +160,26 @@ class SumClassificationMap(CodeClassificationMap):
         is enumerated. If it's not 0, it represents one of the powers
         of 2 whose sums result in index
         
-        :param index: an integer that is supposed to represent a sum
+        :param code: an integer that is supposed to represent a sum
         of indexes mapping to classes
         :returns a list of powers of 2 whose sum is equal to index
         '''
         
-        return (2**y for y, x in enumerate(bin(index)[:1:-1]) if int(x))
+        return (2**y for y, x in enumerate(bin(code)[:1:-1]) if int(x))
     
-    def __getitem__(self, index):
-        ''' Get taxonomical units for given index
+    def __call__(self, code):
+        ''' Get classification for given code
         
         :param index: an integer that is supposed to represent a sum
         of indexes mapping to classes
         :returns: a tuple containing taxonomical units
+        :raises: UnknownCodeError, if the code or one of the elements
+        of the sum is not present in the instance
         '''
         classifications = []
         
-        for code in self._get_codes(index):
-            _class = CodeClassificationMap.__getitem__(self, code)
+        for code in self._get_codes(code):
+            _class = self._get_single_class(code)
             classifications.append(_class)
             
         return tuple(classifications)
