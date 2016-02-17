@@ -372,20 +372,24 @@ class HostCollection(object):
         ''' Test membership of the host in the collection
         
         :param host: a value representing ip address or a hostname
-        :returns: True if given ip address or hostame match at least one value in the
-        collection
+        :returns: True if given ip address or hostame is subdomain or an
+        identical value to at least one value in the collection
         :raises ValueError: if the host is not a valid ip address or hostname
         '''
         
         host_obj = host(host_value)
-        return any(map(host_obj.is_child_or_the_same, self.hosts))
+        
+        test = lambda u: host_obj.is_subdomain(u) or host_obj == u
+        
+        return any(map(test, self.hosts))
     
     def lookup(self, host_value):
         '''
         Return an object representing a parent of given value or the exact value, if
         it there is one in the collection
         
-        :param host: a value representing ip address or a hostname
+        :param host: a value representing ip address or a hostname, or
+        a parent domain of hostname
         :returns: AddressListItem for the given value, if it has been added to
         the collection. Otherwise, return None
         :raises ValueError: if the host is not avalid ip address or hostname
@@ -393,7 +397,7 @@ class HostCollection(object):
         host_obj = host(host_value)
         
         for h in self.hosts:
-            if host_obj.is_child_or_the_same(h):
+            if host_obj.is_subdomain(h) or host_obj == h:
                 return AddressListItem(str(h), self.identifier, 
                                        self.classification)
         
@@ -403,8 +407,17 @@ class HostCollection(object):
         :param host: an ip address or a hostname
         :raises ValueError: raised when the given value is not a valid ip address nor a hostname
         '''
+        host_obj = host(host_value)
         
-        self.hosts.add(host(host_value))
+        for h in self.hosts:
+            if host_obj.is_subdomain() or host_obj == h:
+                return
+            
+            if h.is_subdomain(host_obj):
+                self.hosts.remove(h)
+                break;
+            
+        self.hosts.add(host_obj)
 
 AddressListItem = namedtuple('AddressListItem', 'value source classification')
 
