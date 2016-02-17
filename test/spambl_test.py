@@ -497,6 +497,42 @@ class HostnameTest(unittest.TestCase):
         
         self.assertFalse(h_1.is_child_or_the_same(other))
         
+    def test_eq_returns_true(self):
+        
+        h_1 = Hostname('hostname.pl')
+        h_2 = Hostname('hostname.pl')
+        
+        self.assertTrue(h_1 == h_2)
+        
+    @parameterized.expand([
+                           ('unrelated_domain', Hostname('other.com')),
+                           ('a_subdomain', Hostname('subdomain.hostname.pl')),
+                           ('non_hostname_object', '123.4.5.11')
+                           ])
+    def test_eq_returns_false_for(self, _, other):
+        
+        h_1 = Hostname('hostname.pl')
+        
+        self.assertFalse(h_1 == other)
+        
+    @parameterized.expand([
+                           ('unrelated_domain', Hostname('other.com')),
+                           ('a_subdomain', Hostname('subdomain.hostname.pl')),
+                           ('non_hostname_object', '123.4.5.11')
+                           ])
+    def test_ne_returns_true_for(self, _, other):
+        
+        h_1 = Hostname('hostname.pl')
+        
+        self.assertTrue(h_1 != other)
+        
+    def test_ne_returns_false(self):
+        
+        h_1 = Hostname('hostname.pl')
+        h_2 = Hostname('hostname.pl')
+        
+        self.assertFalse(h_1 != h_2)
+        
     @parameterized.expand([
                            ('the_same_domain', 'subdomain.hostname.pl'),
                            ('a_superdomain', 'hostname.pl')
@@ -594,6 +630,53 @@ class IpAddressTest(unittest.TestCase):
     def test_is_subdomain(self, _, value_1, value_2):
         
         self.assertFalse(value_1.is_subdomain(value_2))
+        
+    @parameterized.expand([
+                           ('ipv4', ipv4_1),
+                           ('ipv6', ipv6_1)
+                           ])
+    def test_eq_returns_true_for_the_same(self, _, ip_1):
+        
+        ip_2 = IpAddress(unicode(ip_1))
+        
+        self.assertTrue(ip_1 == ip_2)
+    
+    @parameterized.expand([
+                           ('different_ipv4_values', ipv4_1, ipv4_2),
+                           ('different_ipv4_values', ipv4_2, ipv4_1),
+                           ('ip4_and_ipv6', ipv4_1, ipv6_1),
+                           ('different_ipv6_values', ipv6_1, ipv6_2),
+                           ('different_ipv6_values', ipv6_2, ipv6_1),
+                           ('Ipv6_and_ipv4', ipv6_1, ipv4_1),
+                           ('ipv4_and_non_ip_value', ipv4_1, 'value'),
+                           ('ipv6_and_non_ip_value', ipv6_1, 'value')
+                           ])
+    def test_eq_returns_false_for(self, _, value_1, value_2):
+        
+        self.assertFalse(value_1 == value_2)
+    
+    @parameterized.expand([
+                           ('different_ipv4_values', ipv4_1, ipv4_2),
+                           ('different_ipv4_values', ipv4_2, ipv4_1),
+                           ('ip4_and_ipv6', ipv4_1, ipv6_1),
+                           ('different_ipv6_values', ipv6_1, ipv6_2),
+                           ('different_ipv6_values', ipv6_2, ipv6_1),
+                           ('Ipv6_and_ipv4', ipv6_1, ipv4_1),
+                           ('ipv4_and_non_ip_value', ipv4_1, 'value'),
+                           ('ipv6_and_non_ip_value', ipv6_1, 'value')
+                           ])
+    def test_ne_returns_true_for(self, _, value_1, value_2):
+        
+        self.assertTrue(value_1 != value_2)
+    
+    @parameterized.expand([
+                           ('ipv4', ipv4_1),
+                           ('ipv6', ipv6_1)
+                           ])
+    def test_ne_returns_false_for_the_same(self, _, ip_1):
+        
+        ip_2 = IpAddress(unicode(ip_1))
+        self.assertFalse(ip_1 != ip_2)
         
 class HostTest(unittest.TestCase):
     

@@ -452,6 +452,30 @@ class Host(object):
         
         raise NotImplementedError
     
+    def __eq__(self, other):
+        '''
+        Test if the object and the other are equal
+        
+        :param other: other object
+        :returns: True if the objects have equal _value
+        :raise TypeError: if the _value does not
+        have __eq__ method
+        '''
+        
+        return self._test_other_value(self._value.__eq__, other)
+    
+    def __ne__(self, other):
+        '''
+        Test if the object and the other are not equal
+        
+        :param other: other object
+        :returns: True if the objects don't have equal _value
+        :raise TypeError: if the _value does not
+        have __eq__ method
+        '''
+        
+        return not self == other
+    
 class Hostname(Host):
     def __init__(self, value):
         ''' Create a new instance of Hostname
