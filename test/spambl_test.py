@@ -466,6 +466,16 @@ class HostCollectionTest(unittest.TestCase):
             
 class HostnameTest(unittest.TestCase):
     
+    non_equal_input = [
+                       ('unrelated_domain', Hostname('other.com')),
+                       ('a_subdomain', Hostname('subdomain.hostname.pl')),
+                       ('non_hostname_object', '123.4.5.11')
+                       ]
+    
+    hostname_pl = Hostname('hostname.pl')
+    
+    subdomain_hostname_pl = Hostname('subdomain.hostname.pl')
+    
     @parameterized.expand([
                            ('hostname', '-e'),
                            ('hostname', '/e'),
@@ -477,39 +487,25 @@ class HostnameTest(unittest.TestCase):
         
     def test_eq_returns_true(self):
         
-        h_1 = Hostname('hostname.pl')
-        h_2 = Hostname('hostname.pl')
+        h_2 = Hostname(str(self.hostname_pl))
         
-        self.assertTrue(h_1 == h_2)
+        self.assertTrue(self.hostname_pl == h_2)
         
-    @parameterized.expand([
-                           ('unrelated_domain', Hostname('other.com')),
-                           ('a_subdomain', Hostname('subdomain.hostname.pl')),
-                           ('non_hostname_object', '123.4.5.11')
-                           ])
+    @parameterized.expand(non_equal_input)
     def test_eq_returns_false_for(self, _, other):
         
-        h_1 = Hostname('hostname.pl')
+        self.assertFalse(self.hostname_pl == other)
         
-        self.assertFalse(h_1 == other)
-        
-    @parameterized.expand([
-                           ('unrelated_domain', Hostname('other.com')),
-                           ('a_subdomain', Hostname('subdomain.hostname.pl')),
-                           ('non_hostname_object', '123.4.5.11')
-                           ])
+    @parameterized.expand(non_equal_input)
     def test_ne_returns_true_for(self, _, other):
         
-        h_1 = Hostname('hostname.pl')
-        
-        self.assertTrue(h_1 != other)
+        self.assertTrue(self.hostname_pl != other)
         
     def test_ne_returns_false(self):
         
-        h_1 = Hostname('hostname.pl')
-        h_2 = Hostname('hostname.pl')
+        h_2 = Hostname(str(self.hostname_pl))
         
-        self.assertFalse(h_1 != h_2)
+        self.assertFalse(self.hostname_pl != h_2)
         
     @parameterized.expand([
                            ('the_same_domain', 'subdomain.hostname.pl'),
@@ -517,21 +513,14 @@ class HostnameTest(unittest.TestCase):
                            ])
     def test_is_subdomain_returns_true_for(self, _, other):
         
-        h_1 = Hostname('subdomain.hostname.pl')
         h_2 = Hostname(other)
         
-        self.assertTrue(h_1.is_subdomain(h_2))
+        self.assertTrue(self.subdomain_hostname_pl.is_subdomain(h_2))
         
-    @parameterized.expand([
-                           ('unrelated_domain', Hostname('other.com')),
-                           ('a_subdomain', Hostname('subdomain.hostname.pl')),
-                           ('non_hostname_object', '123.4.5.11')
-                           ])
+    @parameterized.expand(non_equal_input)
     def test_is_subdomain_returns_false_for(self, _, other):
         
-        h_1 = Hostname('hostname.pl')
-        
-        self.assertFalse(h_1.is_subdomain(other))
+        self.assertFalse(self.hostname_pl.is_subdomain(other))
 
 class IpAddressTest(unittest.TestCase):
     ipv4_1 = IpAddress(u'255.0.2.1')
