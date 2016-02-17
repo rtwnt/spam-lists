@@ -496,6 +496,28 @@ class HostnameTest(unittest.TestCase):
         h_1 = Hostname('hostname.pl')
         
         self.assertFalse(h_1.is_child_or_the_same(other))
+        
+    @parameterized.expand([
+                           ('the_same_domain', 'subdomain.hostname.pl'),
+                           ('a_superdomain', 'hostname.pl')
+                           ])
+    def test_is_subdomain_returns_true_for(self, _, other):
+        
+        h_1 = Hostname('subdomain.hostname.pl')
+        h_2 = Hostname(other)
+        
+        self.assertTrue(h_1.is_subdomain(h_2))
+        
+    @parameterized.expand([
+                           ('unrelated_domain', Hostname('other.com')),
+                           ('a_subdomain', Hostname('subdomain.hostname.pl')),
+                           ('non_hostname_object', '123.4.5.11')
+                           ])
+    def test_is_subdomain_returns_false_for(self, _, other):
+        
+        h_1 = Hostname('hostname.pl')
+        
+        self.assertFalse(h_1.is_subdomain(other))
 
 class IpAddressTest(unittest.TestCase):
     ipv4_1 = IpAddress(u'255.0.2.1')
@@ -556,6 +578,22 @@ class IpAddressTest(unittest.TestCase):
         other = []
         
         self.assertFalse(ip.is_child_or_the_same(other))
+        
+    @parameterized.expand([
+                           ('the_same_ipv4', ipv4_1, ipv4_1),
+                           ('the_same_ipv6', ipv6_1, ipv6_1),
+                           ('different_ipv4_values', ipv4_1, ipv4_2),
+                           ('different_ipv4_values', ipv4_2, ipv4_1),
+                           ('ip4_and_ipv6', ipv4_1, ipv6_1),
+                           ('different_ipv6_values', ipv6_1, ipv6_2),
+                           ('different_ipv6_values', ipv6_2, ipv6_1),
+                           ('Ipv6_and_ipv4', ipv6_1, ipv4_1),
+                           ('ipv4_and_non_ip_value', ipv4_1, 'value'),
+                           ('ipv6_and_non_ip_value', ipv6_1, 'value')
+                           ])
+    def test_is_subdomain(self, _, value_1, value_2):
+        
+        self.assertFalse(value_1.is_subdomain(value_2))
         
 class HostTest(unittest.TestCase):
     

@@ -447,6 +447,10 @@ class Host(object):
         
         except AttributeError:
             return False
+        
+    def is_subdomain(self, other):
+        
+        raise NotImplementedError
     
 class Hostname(Host):
     def __init__(self, value):
@@ -481,6 +485,17 @@ class Hostname(Host):
         
         return self._value.is_subdomain(other._value)
     
+    def is_subdomain(self, other):
+        ''' Test if the object is a subdomain of the
+        other
+        
+        :param other: the object to which we compare this instance
+        :returns: True if the _value is subdomain of other._value
+        :raises TypeError: if _value doesn't have is_subdomain method
+        '''
+        
+        return self._test_other_value(self._value.is_subdomain, other)
+    
 class IpAddress(Host):
     def __init__(self, value):
         ''' Create a new instance of IpAddress
@@ -513,6 +528,15 @@ class IpAddress(Host):
         :raises AttributeError: if the other object does not have _value attribute
         '''
         return self._value == other._value
+    
+    def is_subdomain(self, other):
+        ''' Check if the given object is a subdomain of the other
+        
+        :param other: another host
+        :returns: False, because ip address is not a domain
+        '''
+        
+        return False
     
     
 def host(value):
