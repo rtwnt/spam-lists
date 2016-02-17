@@ -434,6 +434,20 @@ class Host(object):
         
         raise NotImplementedError
     
+    def _test_other_value(self, function, other):
+        '''
+        Perform test on _value property of
+        the other using function
+        
+        :param other: the other object
+        :return: value returned by function
+        '''
+        try:
+            return function(other._value)
+        
+        except AttributeError:
+            return False
+    
 class Hostname(Host):
     def __init__(self, value):
         ''' Create a new instance of Hostname
