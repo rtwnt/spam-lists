@@ -81,7 +81,7 @@ class DNSBLTest(unittest.TestCase):
         self.classification_resolver.return_value = classifications
         
         actual = self.dnsbl_service.lookup(host)
-        expected = AddressListItem(host, self.dnsbl_service._identifier, 
+        expected = AddressListItem(host, self.dnsbl_service,
                                    classifications)
         
         self.assertEqual(expected, actual)
@@ -250,7 +250,7 @@ class HpHostsTest(unittest.TestCase):
         
         self._set_response_content(True)
         
-        expected = AddressListItem(value, self.hp_hosts.identifier,
+        expected = AddressListItem(value, self.hp_hosts,
                                    (self._classification,))
         
         self.assertEqual(self.hp_hosts.lookup(value), expected)
@@ -448,7 +448,7 @@ class HostCollectionTest(unittest.TestCase):
         listed.__str__.return_value = value
         self.host_collection.hosts = [listed]
         
-        expected = AddressListItem(value, self.host_collection.identifier,
+        expected = AddressListItem(value, self.host_collection,
                                    self.host_collection.classification)
         actual = self.host_collection.lookup(value)
         

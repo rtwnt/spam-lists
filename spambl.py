@@ -92,7 +92,7 @@ class DNSBL(object):
         try:
             classification = self._get_classification(return_code)
             
-            return AddressListItem(str(host), self._identifier, classification)
+            return AddressListItem(str(host), self, classification)
         
         except UnknownCodeError as e:
             raise exc_info()[0],  '{}\nSource:{}'.format(str(e), str(self)), exc_info()[2]
@@ -238,7 +238,7 @@ class HpHosts(object):
             elements = data.split(',')
             classification = tuple(elements[1:])
             
-            return AddressListItem(host, self.identifier, classification)
+            return AddressListItem(host, self, classification)
         return None
         
 
@@ -398,7 +398,7 @@ class HostCollection(object):
         
         for h in self.hosts:
             if host_obj.is_subdomain(h) or host_obj == h:
-                return AddressListItem(str(h), self.identifier, 
+                return AddressListItem(str(h), self, 
                                        self.classification)
         
     def add(self, host_value):
