@@ -498,10 +498,10 @@ class HostnameTest(unittest.TestCase):
         self.assertFalse(h_1.is_child_or_the_same(other))
 
 class IpAddressTest(unittest.TestCase):
-    ipv4_1 = u'255.0.2.1'
-    ipv4_2 = u'122.44.55.99'
-    ipv6_1 = u'2001:db8:abc:123::42'
-    ipv6_2 = u'fe80::0202:b3ff:fe1e:8329'
+    ipv4_1 = IpAddress(u'255.0.2.1')
+    ipv4_2 = IpAddress(u'122.44.55.99')
+    ipv6_1 = IpAddress(u'2001:db8:abc:123::42')
+    ipv6_2 = IpAddress(u'fe80::0202:b3ff:fe1e:8329')
     
     
     @parameterized.expand([
@@ -523,20 +523,19 @@ class IpAddressTest(unittest.TestCase):
                            ])
     def test_relative_domain_for(self, _, value, expected_origin):
         
-        ip_address = IpAddress(value)
-        expected = reversename.from_address(value).relativize(expected_origin)
+        reversed_name = reversename.from_address(str(value))
+        expected = reversed_name.relativize(expected_origin)
         
-        self.assertEqual(expected, ip_address.relative_domain)
+        self.assertEqual(expected, value.relative_domain)
         
     @parameterized.expand([
                            ('ipv4', ipv4_1),
                            ('ipv6', ipv6_2),
                            ])
-    def test_is_child_or_the_same_for_the_same(self, _, value):
-        first_ip = IpAddress(value)
-        second_ip = IpAddress(unicode(value))
+    def test_is_child_or_the_same_for_the_same(self, _, ip_1):
+        ip_2 = IpAddress(unicode(ip_1))
         
-        self.assertTrue(first_ip.is_child_or_the_same(second_ip))
+        self.assertTrue(ip_1.is_child_or_the_same(ip_2))
         
     @parameterized.expand([
                            ('different_ipv4_values', ipv4_1, ipv4_2),
@@ -544,9 +543,7 @@ class IpAddressTest(unittest.TestCase):
                            ('different_ipv6_values', ipv6_1, ipv6_2),
                            ('Ipv6_and_ipv4', ipv6_1, ipv4_1)
                            ])
-    def test_is_child_or_the_same_for(self, _, ip_value_1, ip_value_2):
-        ip_1 = IpAddress(ip_value_1)
-        ip_2 = IpAddress(ip_value_2)
+    def test_is_child_or_the_same_for(self, _, ip_1, ip_2):
         
         self.assertFalse(ip_1.is_child_or_the_same(ip_2))
         
@@ -554,9 +551,8 @@ class IpAddressTest(unittest.TestCase):
                            ('ipv4', ipv4_1),
                            ('ipv6', ipv6_1),
                            ])
-    def test_is_child_or_the_same_returns_false_for_a_non_ip_value_and(self, _, ip_value):
+    def test_is_child_or_the_same_returns_false_for_a_non_ip_value_and(self, _, ip):
         
-        ip = IpAddress(ip_value)
         other = []
         
         self.assertFalse(ip.is_child_or_the_same(other))
