@@ -474,28 +474,6 @@ class HostnameTest(unittest.TestCase):
     def test_constructor_for_invalid(self, _, value):
         
         self.assertRaises(ValueError, Hostname, value)
-    
-    @parameterized.expand([
-                           ('the_same_domain', 'subdomain.hostname.pl'),
-                           ('a_superdomain', 'hostname.pl')
-                           ])
-    def test_is_child_or_the_same_returns_true_for(self, _, other):
-        
-        h_1 = Hostname('subdomain.hostname.pl')
-        h_2 = Hostname(other)
-        
-        self.assertTrue(h_1.is_child_or_the_same(h_2))
-        
-    @parameterized.expand([
-                           ('unrelated_domain', Hostname('other.com')),
-                           ('a_subdomain', Hostname('subdomain.hostname.pl')),
-                           ('non_hostname_object', '123.4.5.11')
-                           ])
-    def test_is_child_or_the_same_returns_false_for(self, _, other):
-        
-        h_1 = Hostname('hostname.pl')
-        
-        self.assertFalse(h_1.is_child_or_the_same(other))
         
     def test_eq_returns_true(self):
         
@@ -585,35 +563,6 @@ class IpAddressTest(unittest.TestCase):
         expected = reversed_name.relativize(expected_origin)
         
         self.assertEqual(expected, value.relative_domain)
-        
-    @parameterized.expand([
-                           ('ipv4', ipv4_1),
-                           ('ipv6', ipv6_2),
-                           ])
-    def test_is_child_or_the_same_for_the_same(self, _, ip_1):
-        ip_2 = IpAddress(unicode(ip_1))
-        
-        self.assertTrue(ip_1.is_child_or_the_same(ip_2))
-        
-    @parameterized.expand([
-                           ('different_ipv4_values', ipv4_1, ipv4_2),
-                           ('ip4_and_ipv6', ipv4_1, ipv6_1),
-                           ('different_ipv6_values', ipv6_1, ipv6_2),
-                           ('Ipv6_and_ipv4', ipv6_1, ipv4_1)
-                           ])
-    def test_is_child_or_the_same_for(self, _, ip_1, ip_2):
-        
-        self.assertFalse(ip_1.is_child_or_the_same(ip_2))
-        
-    @parameterized.expand([
-                           ('ipv4', ipv4_1),
-                           ('ipv6', ipv6_1),
-                           ])
-    def test_is_child_or_the_same_returns_false_for_a_non_ip_value_and(self, _, ip):
-        
-        other = []
-        
-        self.assertFalse(ip.is_child_or_the_same(other))
         
     @parameterized.expand([
                            ('the_same_ipv4', ipv4_1, ipv4_1),

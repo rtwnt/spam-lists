@@ -423,29 +423,9 @@ AddressListItem = namedtuple('AddressListItem', 'value source classification')
 
 class Host(object):
     ''' Base host class '''
-    def is_child_or_the_same(self, other):
-        ''' Check if this host is a child of or the
-        same host as the other
-        
-        The rules of matching are implemented in
-        _is_parent_or_the_same method of subclasses of Host
-        
-        :param other: other object to which we compare this instance
-        :returns: True if the objects match
-        '''
-        
-        if isinstance(other, self.__class__):
-            
-            return self._is_child_or_the_same(other)
-        
-        return False
     
     def __str__(self):
         return str(self._value)
-    
-    def _is_child_or_the_same(self, other):
-        
-        raise NotImplementedError
     
     def _test_other_value(self, function, other):
         '''
@@ -510,18 +490,6 @@ class Hostname(Host):
         '''
         return self._value
     
-    def _is_child_or_the_same(self, other):
-        ''' Test if the object is a subdomain of the
-        other
-        
-        :param other: the object to which we compare this instance
-        :returns: True if the _value is subdomain of other._value
-        :raises AttributeError, TypeError: if the other object does not
-        contain _value, or _value is not of required type
-        '''
-        
-        return self._value.is_subdomain(other._value)
-    
     def is_subdomain(self, other):
         ''' Test if the object is a subdomain of the
         other
@@ -556,15 +524,6 @@ class IpAddress(Host):
         root = ipv4_reverse_domain if self._value.version == 4 else ipv6_reverse_domain
         
         return name_from_ip(str(self._value)).relativize(root)
-    
-    def _is_child_or_the_same(self, other):
-        ''' Test if this object represents the same
-        ip address as the other
-        
-        :returns: True if both objects have equal _value properties
-        :raises AttributeError: if the other object does not have _value attribute
-        '''
-        return self._value == other._value
     
     def is_subdomain(self, other):
         ''' Check if the given object is a subdomain of the other
