@@ -539,6 +539,21 @@ class IpAddressTest(unittest.TestCase):
     ipv6_1 = IpAddress(u'2001:db8:abc:123::42')
     ipv6_2 = IpAddress(u'fe80::0202:b3ff:fe1e:8329')
     
+    the_same_ip_input = [
+                           ('v4', ipv4_1),
+                           ('v6', ipv6_1)
+                           ]
+    
+    non_equal_input = [
+                       ('different_ips_v4', ipv4_1, ipv4_2),
+                       ('different_ips_v4', ipv4_2, ipv4_1),
+                       ('ip4_and_ipv6', ipv4_1, ipv6_1),
+                       ('different_ips_v6', ipv6_1, ipv6_2),
+                       ('different_ips_v6', ipv6_2, ipv6_1),
+                       ('Ipv6_and_ipv4', ipv6_1, ipv4_1),
+                       ('ipv4_and_non_ip', ipv4_1, 'value'),
+                       ('ipv6_and_non_ip', ipv6_1, 'value')
+                       ]
     
     @parameterized.expand([
                            ('ipv4', u'299.0.0.1'),
@@ -554,10 +569,10 @@ class IpAddressTest(unittest.TestCase):
         
         
     @parameterized.expand([
-                           ('ipv4', ipv4_1, reversename.ipv4_reverse_domain),
-                           ('ipv6', ipv6_1, reversename.ipv6_reverse_domain)
+                           ('v4', ipv4_1, reversename.ipv4_reverse_domain),
+                           ('v6', ipv6_1, reversename.ipv6_reverse_domain)
                            ])
-    def test_relative_domain_for(self, _, value, expected_origin):
+    def test_relative_domain_for_ip(self, _, value, expected_origin):
         
         reversed_name = reversename.from_address(str(value))
         expected = reversed_name.relativize(expected_origin)
@@ -566,63 +581,31 @@ class IpAddressTest(unittest.TestCase):
         
     @parameterized.expand([
                            ('the_same_ipv4', ipv4_1, ipv4_1),
-                           ('the_same_ipv6', ipv6_1, ipv6_1),
-                           ('different_ipv4_values', ipv4_1, ipv4_2),
-                           ('different_ipv4_values', ipv4_2, ipv4_1),
-                           ('ip4_and_ipv6', ipv4_1, ipv6_1),
-                           ('different_ipv6_values', ipv6_1, ipv6_2),
-                           ('different_ipv6_values', ipv6_2, ipv6_1),
-                           ('Ipv6_and_ipv4', ipv6_1, ipv4_1),
-                           ('ipv4_and_non_ip_value', ipv4_1, 'value'),
-                           ('ipv6_and_non_ip_value', ipv6_1, 'value')
-                           ])
+                           ('the_same_ipv6', ipv6_1, ipv6_1)
+                           ] + non_equal_input)
     def test_is_subdomain(self, _, value_1, value_2):
         
         self.assertFalse(value_1.is_subdomain(value_2))
         
-    @parameterized.expand([
-                           ('ipv4', ipv4_1),
-                           ('ipv6', ipv6_1)
-                           ])
-    def test_eq_returns_true_for_the_same(self, _, ip_1):
+    @parameterized.expand(the_same_ip_input)
+    def test_eq_returns_true_for_the_same_ip(self, _, ip_1):
         
         ip_2 = IpAddress(unicode(ip_1))
         
         self.assertTrue(ip_1 == ip_2)
     
-    @parameterized.expand([
-                           ('different_ipv4_values', ipv4_1, ipv4_2),
-                           ('different_ipv4_values', ipv4_2, ipv4_1),
-                           ('ip4_and_ipv6', ipv4_1, ipv6_1),
-                           ('different_ipv6_values', ipv6_1, ipv6_2),
-                           ('different_ipv6_values', ipv6_2, ipv6_1),
-                           ('Ipv6_and_ipv4', ipv6_1, ipv4_1),
-                           ('ipv4_and_non_ip_value', ipv4_1, 'value'),
-                           ('ipv6_and_non_ip_value', ipv6_1, 'value')
-                           ])
+    @parameterized.expand(non_equal_input)
     def test_eq_returns_false_for(self, _, value_1, value_2):
         
         self.assertFalse(value_1 == value_2)
     
-    @parameterized.expand([
-                           ('different_ipv4_values', ipv4_1, ipv4_2),
-                           ('different_ipv4_values', ipv4_2, ipv4_1),
-                           ('ip4_and_ipv6', ipv4_1, ipv6_1),
-                           ('different_ipv6_values', ipv6_1, ipv6_2),
-                           ('different_ipv6_values', ipv6_2, ipv6_1),
-                           ('Ipv6_and_ipv4', ipv6_1, ipv4_1),
-                           ('ipv4_and_non_ip_value', ipv4_1, 'value'),
-                           ('ipv6_and_non_ip_value', ipv6_1, 'value')
-                           ])
+    @parameterized.expand(non_equal_input)
     def test_ne_returns_true_for(self, _, value_1, value_2):
         
         self.assertTrue(value_1 != value_2)
     
-    @parameterized.expand([
-                           ('ipv4', ipv4_1),
-                           ('ipv6', ipv6_1)
-                           ])
-    def test_ne_returns_false_for_the_same(self, _, ip_1):
+    @parameterized.expand(the_same_ip_input)
+    def test_ne_returns_false_for_the_same_ip(self, _, ip_1):
         
         ip_2 = IpAddress(unicode(ip_1))
         self.assertFalse(ip_1 != ip_2)
