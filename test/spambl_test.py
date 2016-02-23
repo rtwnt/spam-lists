@@ -294,7 +294,8 @@ class GoogleSafeBrowsingTest(unittest.TestCase):
         
     def test_lookup_for_unathorized_api_key(self):
         
-        self._test_for_unathorized_api_key(self.google_safe_browsing.lookup)
+        function = lambda u: list(self.google_safe_browsing.lookup(u))
+        self._test_for_unathorized_api_key(function)
     
     def test_contains_any_for_any_spam_urls(self):
         
@@ -358,7 +359,7 @@ class GoogleSafeBrowsingTest(unittest.TestCase):
         
         non_spam = ['http://nospam.com', 'https://nospam2.pl', 'https://spamfree.com']
         tested = classification.keys()+ duplicates + non_spam
-        actual = self.google_safe_browsing.lookup(tested)
+        actual = list(self.google_safe_browsing.lookup(tested))
         
         self.assertItemsEqual(actual, expected)
         
@@ -368,7 +369,7 @@ class GoogleSafeBrowsingTest(unittest.TestCase):
         
         self.post_response.status_code = 204
         
-        actual = self.google_safe_browsing.lookup(self.valid_urls)
+        actual = list(self.google_safe_browsing.lookup(self.valid_urls))
         self.assertFalse(actual)
         
 class HostCollectionTest(unittest.TestCase):

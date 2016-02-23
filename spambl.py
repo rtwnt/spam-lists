@@ -332,17 +332,13 @@ class GoogleSafeBrowsing(object):
         :returns: a tuple containing listed url objects
         '''
         
-        items = []
-        
         for url_list, response in self._query(urls):
             classification_set = response.content.splitlines()
             
             for url, _class in izip(url_list, classification_set):
                 if _class != 'ok':
                     classification = tuple(_class.split(','))
-                    items.append(AddressListItem(url, self, classification))
-                    
-        return tuple(items)
+                    yield AddressListItem(url, self, classification)
     
 
 class HostCollection(object):
