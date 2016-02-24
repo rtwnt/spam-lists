@@ -666,7 +666,7 @@ class BaseUrlTester(object):
             
         return self._redirect_url_resolver
     
-    def get_redirect_urls(self, urls):
+    def _get_redirect_urls(self, urls):
         ''' Get unique redirect urls for given urls
         
         :param urls: original urls
@@ -684,7 +684,7 @@ class BaseUrlTester(object):
                 seen.add(ru)
                 yield ru
                
-    def get_urls_to_test(self, urls, resolve_redirects=False):
+    def _get_urls_to_test(self, urls, resolve_redirects=False):
         ''' From given urls, get all url addresses to test
         
         :param urls: a sequence of url values
@@ -701,7 +701,7 @@ class BaseUrlTester(object):
             yield u
             
         if resolve_redirects:
-            for ru in self.get_redirect_urls(urls):
+            for ru in self._get_redirect_urls(urls):
                 yield ru
                 
 if __name__ == '__main__':

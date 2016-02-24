@@ -5,9 +5,8 @@ import unittest
 from spambl import (UnknownCodeError, NXDOMAIN, HpHosts, 
                     GoogleSafeBrowsing, UnathorizedAPIKeyError, HostCollection,
                      SimpleClassificationCodeResolver, SumClassificationCodeResolver, Hostname, IpAddress, 
-                     host, is_valid_url, BaseUrlTester, RedirectUrlResolver, AddressListItem, DNSBL)
+                     host, is_valid_url, RedirectUrlResolver, AddressListItem, DNSBL)
 from mock import Mock, patch, MagicMock
-from itertools import chain
 
 from requests.exceptions import HTTPError, InvalidSchema, InvalidURL,\
     ConnectionError, Timeout
@@ -829,142 +828,6 @@ class RedirectUrlResolverTest(unittest.TestCase):
         self._set_last_response_location_header('http://invalid.url.com')
             
         self._test_get_redirect_urls(expected)
-            
-class BaseUrlTesterTest(unittest.TestCase):
-    
-    urls_and_redirects_test_input = [
-                                     ('no_redirects',
-                                      ('http://url1.com', 'http://59.99.63.88'),
-                                      {}),
-                                     ('duplicate_input_and_no_redirects',
-                                      ('http://url1.com', 'http://url1.com', 'http://59.99.63.88'),
-                                      {}),
-                                     ('redirects',
-                                      ('http://abc.com', 'https://67.23.21.11', 'http://foo.com'),
-                                      {
-                                       'http://abc.com': ['http://xyz.pl', 'http://final.com'],
-                                       'http://foo.com': ['http://bar.com']
-                                       }),
-                                     ('duplicate_input_and_unique_redirects',
-                                      ('http://abc.com', 'https://67.23.21.11', 'http://abc.com'),
-                                      {
-                                       'http://abc.com': ['http://xyz.pl', 'http://final.com'],
-                                       }),
-                                     ('duplicate_redirect_urls',
-                                      ('http://abc.com', 'https://67.23.21.11', 'http://foo.com'),
-                                      {
-                                       'http://abc.com': ['http://xyz.pl', 'http://final.com'],
-                                       'http://foo.com': ['http://xyz.pl', 'http://final.com']
-                                       }),
-                                     ('duplicates_in_input_and_redirect_urls',
-                                      ('http://abc.com', 'https://67.23.21.11', 'https://67.23.21.11'),
-                                      {
-                                       'http://abc.com': ['http://xyz.pl', 'http://final.com'],
-                                       'https://67.23.21.11': ['http://xyz.pl', 'http://final.com']
-                                       })
-                                     ]
-    
-    def setUp(self):
-        
-        self.url_tester = BaseUrlTester(Mock())
-        
-        resolver_mock = Mock()
-        
-        self.resolver_get_redirect_urls_mock = resolver_mock.get_redirect_urls
-        
-        self.url_tester._redirect_url_resolver = resolver_mock
-        
-        self.is_valid_url_patcher = patch('spambl.is_valid_url')
-        self.is_valid_url_mock = self.is_valid_url_patcher.start()
-        
-    def tearDown(self):
-        
-        self.is_valid_url_patcher.stop()
-        
-    @parameterized.expand([
-                           ('one_invalid_url', ('http://-xyz.com',), False),
-                           ('one_invalid_url_and_redirect_resolution', ('http://-xyz.com',), True),
-                           ('two_invalid_urls', ('http://-xyz.com', 'http://999.999.999.999.11'), False),
-                           ('two_invalid_urls_and_redirect_resolution', ('http://-xyz.com', 'http://999.999.999.999.11'), True)
-                           ])
-    def test_get_urls_to_test_for(self, _, invalid_urls, resolve_redirects):
-        
-        self.is_valid_url_mock.side_effect = lambda u: u in invalid_urls
-        
-        urls = ('http://valid.com', 'http://122.55.29.11') + invalid_urls
-        
-        with self.assertRaises(ValueError):
-            list(self.url_tester.get_urls_to_test(urls, resolve_redirects))
-        
-    @parameterized.expand([
-                           ('', ('http://url1.com', 'https://122.56.65.99', 'https://google.com')),
-                           ('with_duplicates_in_input', ('http://abc.com', 'http://66.33.22.11', 'http://abc.com'))
-                           ])
-    def test_get_urls_to_test_for_valid_urls(self, _, input_args):
-        
-        expected = list(set(input_args))
-        
-        actual = list(self.url_tester.get_urls_to_test(input_args, False))
-        
-        self.assertItemsEqual(expected, actual)
-        
-    def _set_resolver_get_redirect_urls_result(self, urls_to_redirect_urls):
-        def get_redirect_urls(url):
-            
-            urls = urls_to_redirect_urls.get(url, [])
-            
-            for u in urls:
-                yield u
-        
-        self.resolver_get_redirect_urls_mock.side_effect = get_redirect_urls
-        
-    @parameterized.expand(urls_and_redirects_test_input )
-    def test_get_redirect_urls_for(self, _, input_args, input_to_redirect_urls):
-        
-        self._set_resolver_get_redirect_urls_result(input_to_redirect_urls)
-        expected = set(chain(*input_to_redirect_urls.values()))
-        actual = list(self.url_tester.get_redirect_urls(input_args))
-        
-        self.assertItemsEqual(expected, actual)
-    
-    @parameterized.expand(urls_and_redirects_test_input )
-    def test_get_urls_to_test_with_redirect_resolution_for(self, _, input_args, input_to_redirect_urls):
-        
-        self._set_resolver_get_redirect_urls_result(input_to_redirect_urls)
-        
-        expected = set(chain(input_args, *input_to_redirect_urls.values()))
-        actual = list(self.url_tester.get_urls_to_test(input_args, True))
-        
-        self.assertItemsEqual(expected, actual)
-        
-    @parameterized.expand([
-                           ('',
-                            ('http://first.com', 'https://122.55.66.29'),
-                            {'http://first.com': ['http://redirect.com'],
-                             'https://122.55.66.29': ['http://abc.pl', 'http://xyz.com']
-                             }),
-                           ('and_input_has_duplicates',
-                            ('http://first.com', 'http://first.redirect.com'),
-                            {'http://first.com': ['http://first.redirect.com', 'http://second.redirect.com']
-                             })
-                           ])
-    def test_get_urls_to_test_redirects_follow_input(self, _, input_args, input_to_redirect_urls):
-        
-        self._set_resolver_get_redirect_urls_result(input_to_redirect_urls)
-        
-        original_urls = set(input_args)
-        redirect_urls = set(chain(*input_to_redirect_urls.values()))
-        
-        number_of_original_urls = len(original_urls)
-        
-        actual = list(self.url_tester.get_urls_to_test(input_args, True))
-        
-        first_part = actual[:number_of_original_urls]
-        second_part = actual[number_of_original_urls:]
-        
-        self.assertItemsEqual(original_urls, first_part)
-        
-        self.assertTrue(set(second_part).issubset(redirect_urls))
         
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
