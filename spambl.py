@@ -641,12 +641,16 @@ class BaseUrlTester(object):
     
     _redirect_url_resolver = None
     
-    def __init__(self, redirect_session = None):
+    def __init__(self, client, redirect_session = None):
         ''' Create a new instance
         
+        :param client: a client of service responsible
+        for testing criteria of recognizing url as spam
         :param redirect_session: requests.Session instance used for redirect
         url resolution
         '''
+        
+        self.client = client
         
         if redirect_session is not None:
             self.redirect_url_resolver.session = redirect_session

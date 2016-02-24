@@ -866,7 +866,7 @@ class BaseUrlTesterTest(unittest.TestCase):
     
     def setUp(self):
         
-        self.url_tester = BaseUrlTester()
+        self.url_tester = BaseUrlTester(Mock())
         
         resolver_mock = Mock()
         
