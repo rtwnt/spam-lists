@@ -44,6 +44,37 @@ def accepts_valid_urls(f):
     
     return wrapper
     
+class UrlHostTester(object):
+    ''' A class containing methods used to test urls with
+    their hosts as criteria '''
+    
+    @accepts_valid_urls
+    def any_match(self, urls):
+        ''' 
+        Check if any of given urls has a listed host
+        
+        :param urls: an iterable containing urls
+        :returns: True if any host is listed
+        '''
+        
+        return any(urlparse(u).hostname in self for u in urls)
+    
+    @accepts_valid_urls
+    def lookup_matching(self, urls):
+        '''
+        Get objects representing hosts in given urls that match listed hosts
+        
+        :param urls: an iterable containing urls
+        :returns: items representing hosts matching the listed ones
+        '''
+        
+        hosts = (urlparse(u).hostname for u in urls)
+        
+        for h in hosts:
+            item = self.lookup(h)
+            if item is not None:
+                yield item
+    
 class DNSBL(object):
     ''' Represents a DNSBL service '''
     def __init__(self, identifier, query_suffix, classification_resolver, host_factory):
