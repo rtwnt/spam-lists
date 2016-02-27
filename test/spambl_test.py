@@ -5,7 +5,7 @@ import unittest
 from spambl import (UnknownCodeError, NXDOMAIN, HpHosts, 
                     GoogleSafeBrowsing, UnathorizedAPIKeyError, HostCollection,
                      SimpleClassificationCodeResolver, SumClassificationCodeResolver, Hostname, IpAddress, 
-                     host, is_valid_url, RedirectUrlResolver, AddressListItem, DNSBL)
+                     host, is_valid_url, RedirectUrlResolver, AddressListItem, DNSBL, accepts_valid_urls)
 from mock import Mock, patch, MagicMock
 
 from requests.exceptions import HTTPError, InvalidSchema, InvalidURL,\
@@ -14,6 +14,47 @@ from dns import reversename
 
 from nose_parameterized import parameterized
 
+class AcceptValidUrlsTest(unittest.TestCase):
+    
+    def setUp(self):
+        self.is_valid_url_patcher = patch('spambl.is_valid_url')
+        self.is_valid_url_mock = self.is_valid_url_patcher.start()
+        
+        function = Mock()
+        function.__name__ = 'function'
+        
+        self.client = Mock()
+        self.function = function
+        self.decorated_function = accepts_valid_urls(self.function)
+    
+    def tearDown(self):
+        self.is_valid_url_patcher.stop()
+    
+    @parameterized.expand([
+                           ('hostname', 'https://valid.com'),
+                           ('ipv4_host', 'http://122.34.59.109'),
+                           ('ipv6_host', 'http://[2001:db8:abc:123::42]')
+                           ])
+    def test_accept_valid_urls_for_valid(self, _, url):
+        self.decorated_function(self.client, url)
+        self.function.assert_called_once_with(self.client, url)
+    
+    
+    @parameterized.expand([
+                           ('invalid_hostname', 'http://-abc.com'),
+                           ('invalid_schema', 'abc://hostname.com'),
+                           ('no_schema', 'hostname.com'),
+                           ('invalid_ipv4', 'http://999.999.999.999'),
+                           ('invalid_ipv4', 'http://127.0.0.0.1'),
+                           ('invalid_ipv6', 'http://[2001:db8:abcef:123::42]'),
+                           ('invalid_ipv6', 'http://[2001:db8:abch:123::42]')
+                           ])
+    def test_accept_valid_urls_for(self, _, url):
+        self.is_valid_url_mock.return_value = False
+        
+        self.assertRaises(ValueError, self.decorated_function, self.client, url)
+        self.function.assert_not_called()
+        
 class DNSBLTest(unittest.TestCase):
     
     valid_input = [('ipv4', u'255.0.120.1'), 

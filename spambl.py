@@ -13,6 +13,7 @@ import validators
 from dns.reversename import ipv4_reverse_domain, ipv6_reverse_domain, from_address as name_from_ip
 from urlparse import urlparse
 import re
+import functools
 
 class SpamBLError(Exception):
     ''' Base exception class for spambl module '''
@@ -22,6 +23,26 @@ class UnknownCodeError(SpamBLError):
     
 class UnathorizedAPIKeyError(SpamBLError):
     ''' Raise when trying to use an unathorized api key '''
+    
+def accepts_valid_urls(f):
+    @functools.wraps(f)
+    def wrapper(client, urls):
+        '''Run the function and return its return value
+         if all given urls are valid - otherwise raise ValueError
+        :param client:  a client of a service
+        listing hosts or urls
+        :param urls: an iterable containing urls
+        :returns: a return value of the function f
+        :raises ValueError: if the iterable contains invalid urls
+        '''
+        invalid_urls = filter(lambda u: not is_valid_url(u), urls)
+        if invalid_urls:
+            msg = 'The values: {} are not valid urls'.format(','.join(invalid_urls))
+            raise ValueError, msg
+        
+        return f(client, urls)
+    
+    return wrapper
     
 class DNSBL(object):
     ''' Represents a DNSBL service '''
