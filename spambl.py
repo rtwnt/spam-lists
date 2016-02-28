@@ -236,7 +236,7 @@ class SumClassificationCodeResolver(BaseClassificationCodeResolver):
             
         return tuple(classifications)
     
-class HpHosts(object):
+class HpHosts(UrlHostTester):
     ''' hpHosts client '''
     
     identifier = ' http://www.hosts-file.net/'
