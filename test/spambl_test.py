@@ -13,6 +13,8 @@ from requests.exceptions import HTTPError, InvalidSchema, InvalidURL,\
 from dns import reversename
 
 from nose_parameterized import parameterized
+from urlparse import urlparse
+import contextlib
 
 class AcceptValidUrlsTest(unittest.TestCase):
     
@@ -65,6 +67,22 @@ class DNSBLTest(unittest.TestCase):
                    ('ipv6', u'2001:db8:abcef:123::42'),
                    ('host', '-aaa')]
     
+    invalid_url_input = [
+                         ('invalid_hostname', 'http://-abc.com'),
+                         ('invalid_schema', 'abc://hostname.com'),
+                         ('no_schema', 'hostname.com'),
+                         ('invalid_ipv4', 'http://999.999.999.999'),
+                         ('invalid_ipv4', 'http://127.0.0.0.1'),
+                         ('invalid_ipv6', 'http://[2001:db8:abcef:123::42]'),
+                         ('invalid_ipv6', 'http://[2001:db8:abch:123::42]')
+                         ]
+    
+    single_valid_url_input = [
+                              ('ipv6_url', 'http://[bbb:ccc:ddd:111::22]'),
+                              ('ipv4_url', 'http://44.22.99.1'),
+                              ('hostname_url', 'http://abc.com')
+                              ]
+    
     query_domain_str = 'test.query.domain'
     
     def setUp(self):
@@ -79,13 +97,17 @@ class DNSBLTest(unittest.TestCase):
         dns_answer_mock = Mock()
         dns_answer_mock.to_text.return_value = '121.0.0.1'
         
-        self.patcher = patch('spambl.query')
-        self.dns_query_mock = self.patcher.start()
+        self.dns_query_patcher = patch('spambl.query')
+        self.dns_query_mock = self.dns_query_patcher.start()
         self.dns_query_mock.return_value = [dns_answer_mock]
+        
+        self.is_valid_url_patcher = patch('spambl.is_valid_url')
+        self.is_valid_url_mock = self.is_valid_url_patcher.start()
         
     def tearDown(self):
         
-        self.patcher.stop()
+        self.dns_query_patcher.stop()
+        self.is_valid_url_patcher.stop()
     
     def _test_function_for_invalid(self, function, host):
         
@@ -141,6 +163,97 @@ class DNSBLTest(unittest.TestCase):
         self.classification_resolver.side_effect = UnknownCodeError
         
         self.assertRaises(UnknownCodeError, self.dnsbl_service.lookup, host)
+        
+    def _test_for_any_with_invalid(self, function, invalid_url):
+        urls = ['http://test.com', 'http://127.33.22.11',
+                'http://[2001:db8:abc:123::42]']
+        urls.append(invalid_url)
+        
+        self.is_valid_url_mock.side_effect = lambda u: u != invalid_url
+        
+        with self.assertRaises(ValueError):
+                function(urls)
+        
+    @parameterized.expand(invalid_url_input)
+    def test_any_match_for_any_with(self, _, invalid_url):
+        
+        function = self.dnsbl_service.any_match
+        self._test_for_any_with_invalid(function, invalid_url)
+                
+    @parameterized.expand(invalid_url_input)
+    def test_lookup_matching_for_any_with(self, _, invalid_url):
+        
+        function = self.dnsbl_service.lookup_matching
+        self._test_for_any_with_invalid(function, invalid_url)
+        
+    @contextlib.contextmanager
+    def matching_urls(self, urls):
+        '''
+        Provide a set up context manager assuming
+        given urls are spam urls
+        '''
+        
+        listed_hosts = [urlparse(u).hostname for u in urls]
+        host_objects = {h: Mock() for h in listed_hosts}
+        host_factory = lambda h: host_objects.get(h, Mock())
+        self.host_factory_mock.side_effect = host_factory
+        
+        expected_query_names = [h.relative_domain.derelativize() 
+                                for h in host_objects.values()]
+        def dns_query(query_name):
+            if query_name in expected_query_names:
+                return self.dns_query_mock.return_value
+            raise NXDOMAIN
+        self.dns_query_mock.side_effect = dns_query
+        
+        yield
+        
+        self.host_factory_mock.side_effect = None
+        self.dns_query_mock.side_effect = None
+        
+    @parameterized.expand(single_valid_url_input)
+    def test_any_match_returns_true_for(self, _, url):
+        
+        urls = ['http://test.com', 'http://127.33.22.11',
+                'http://[2001:db8:abc:123::42]', url]
+        with self.matching_urls([url]):
+            self.assertTrue(self.dnsbl_service.any_match(urls))
+        
+    def test_any_match_returns_false(self):
+        
+        urls = ['http://test.com', 'http://127.33.22.11',
+                'http://[2001:db8:abc:123::42]']
+        
+        self.dns_query_mock.side_effect = NXDOMAIN
+        
+        self.assertFalse(self.dnsbl_service.any_match(urls))
+        
+    @parameterized.expand([
+                           ('ipv4_url', ['http://55.44.33.21']),
+                           ('ipv6_url', ['http://[2001:ddd:ccc:111::33]']),
+                           ('hostname_url', ['https://abc.com']),
+                           ('two_urls', ['http://55.44.33.21', 'https://abc.com'])
+                           ])
+    def test_lookup_matching_for(self, _, spam_urls):
+        
+        expected_type = ('TEST',)
+        self.classification_resolver.return_value = expected_type
+        expected_item = lambda h: AddressListItem(h, self.dnsbl_service,
+                                                  expected_type)
+        expected = [expected_item(urlparse(u).hostname) for u in spam_urls]
+        
+        urls = ['http://test.com', 'http://127.33.22.11',
+                'http://[2001:db8:abc:123::42]']
+        with self.matching_urls(spam_urls):
+            actual = list(self.dnsbl_service.lookup_matching(urls+spam_urls))
+        
+        self.assertItemsEqual(expected, actual)
+    
+    @parameterized.expand(single_valid_url_input)
+    def test_lookup_matching_with_unknow_codes(self, _, url):
+        self.classification_resolver.side_effect = UnknownCodeError
+        with self.assertRaises(UnknownCodeError):
+            list(self.dnsbl_service.lookup_matching([url]))
     
 class BaseClassificationCodeResolverTest(object):
     

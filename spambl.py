@@ -75,7 +75,7 @@ class UrlHostTester(object):
             if item is not None:
                 yield item
     
-class DNSBL(object):
+class DNSBL(UrlHostTester):
     ''' Represents a DNSBL service '''
     def __init__(self, identifier, query_suffix, classification_resolver, host_factory):
         ''' Create new DNSBL object
