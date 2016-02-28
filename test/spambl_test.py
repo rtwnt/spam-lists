@@ -15,6 +15,7 @@ from dns import reversename
 from nose_parameterized import parameterized
 from urlparse import urlparse, parse_qs
 import contextlib
+import validators
 
 class AcceptValidUrlsTest(unittest.TestCase):
     
@@ -650,16 +651,36 @@ class HostCollectionTest(unittest.TestCase):
                            ('Ipv6', u'2001:db8:abcef:124::41')
                            ]
     
+    single_valid_url_input = [
+                              ('ipv6_url', 'http://[bbb:ccc:ddd:111::22]'),
+                              ('ipv4_url', 'http://44.22.99.1'),
+                              ('hostname_url', 'http://abc.com')
+                              ]
+    
+    invalid_url_input = [
+                         ('invalid_hostname', 'http://-abc.com'),
+                         ('invalid_schema', 'abc://hostname.com'),
+                         ('no_schema', 'hostname.com'),
+                         ('invalid_ipv4', 'http://999.999.999.999'),
+                         ('invalid_ipv4', 'http://127.0.0.0.1'),
+                         ('invalid_ipv6', 'http://[2001:db8:abcef:123::42]'),
+                         ('invalid_ipv6', 'http://[2001:db8:abch:123::42]')
+                         ]
+    
     def setUp(self):
         
         self.host_patcher = patch('spambl.host')
         self.host_mock = self.host_patcher.start()
+        
+        self.is_valid_url_patcher = patch('spambl.is_valid_url')
+        self.is_valid_url_mock = self.is_valid_url_patcher.start()
         
         self.host_collection = HostCollection('test_host_collection',
                                               ('test_classification',))
         
     def tearDown(self):
         self.host_patcher.stop()
+        self.is_valid_url_patcher.stop()
         
     def _test_function_for_invalid(self, function, value):
         
@@ -681,6 +702,26 @@ class HostCollectionTest(unittest.TestCase):
     def test_lookup_for_invalid(self, _, value):
         
         self._test_function_for_invalid(self.host_collection.lookup, value)
+        
+    def _test_for_any_with_invalid(self, function, invalid_url):
+        urls = ['http://test.com', 'http://127.33.22.11',
+                'http://[2001:db8:abc:123::42]']
+        urls.append(invalid_url)
+        
+        self.is_valid_url_mock.side_effect = lambda u: u != invalid_url
+        
+        with self.assertRaises(ValueError):
+            function(urls)
+        
+    @parameterized.expand(invalid_url_input)
+    def test_any_match_for_invalid(self, _, invalid_url):
+        
+        self._test_for_any_with_invalid(self.host_collection.any_match, invalid_url)
+            
+    @parameterized.expand(invalid_url_input)
+    def test_lookup_matching_for_invalid(self, _, invalid_url):
+        
+        self._test_for_any_with_invalid(self.host_collection.lookup_matching, invalid_url)
         
     @parameterized.expand(valid_host_parameters)
     def test_add_for_valid(self, _, value):
@@ -727,6 +768,71 @@ class HostCollectionTest(unittest.TestCase):
         actual = self.host_collection.lookup(value)
         
         self.assertIsNone(actual)
+        
+    @contextlib.contextmanager
+    def matching_urls(self, urls):
+        '''
+        Provide a set up context manager assuming
+        given urls are spam urls
+        '''
+        
+        def host(h):
+            host_object = MagicMock()
+            host_object.__str__.return_value = h
+            host_object.is_subdomain.return_value = False
+            host_object.__eq__.return_value = False
+            
+            test = lambda h2: str(host_object) == str(h2)
+            
+            if validators.ipv4(h) or validators.ipv6(h):
+                host_object.__eq__.side_effect = test
+            else:
+                host_object.is_subdomain.side_effect = test
+                
+            return host_object
+        
+        self.host_mock.side_effect = host
+        
+        listed_hosts = [urlparse(u).hostname for u in urls]
+        self.host_collection.hosts = [host(h) for h in listed_hosts]
+        
+        yield
+        
+        self.host_mock.side_effect = None
+        self.host_collection.hosts = []
+        
+    @parameterized.expand(single_valid_url_input)
+    def test_any_match_returns_true_for(self, _, url):
+        
+        urls = ['http://test.com', 'http://127.33.22.11',
+                'http://[2001:db8:abc:123::42]', url]
+        with self.matching_urls([url]):
+            self.assertTrue(self.host_collection.any_match(urls))
+        
+    def test_any_match_returns_false(self):
+        
+        urls = ['http://test.com', 'http://127.33.22.11',
+                'http://[2001:db8:abc:123::42]']
+        self.assertFalse(self.host_collection.any_match(urls))
+        
+    @parameterized.expand([
+                           ('ipv4_url', ['http://55.44.33.21']),
+                           ('ipv6_url', ['http://[2001:ddd:ccc:111::33]']),
+                           ('hostname_url', ['https://abc.com']),
+                           ('two_urls', ['http://55.44.33.21', 'https://abc.com'])
+                           ])
+    def test_lookup_matching_for(self, _, spam_urls):
+        
+        expected_item = lambda h: AddressListItem(h, self.host_collection,
+                                                  self.host_collection.classification)
+        expected = [expected_item(urlparse(u).hostname) for u in spam_urls]
+        
+        urls = ['http://test.com', 'http://127.33.22.11',
+                'http://[2001:db8:abc:123::42]']
+        with self.matching_urls(spam_urls):
+            actual = list(self.host_collection.lookup_matching(urls+spam_urls))
+        
+        self.assertItemsEqual(expected, actual)
         
             
 class HostnameTest(unittest.TestCase):

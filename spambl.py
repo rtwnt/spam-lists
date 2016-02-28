@@ -393,7 +393,7 @@ class GoogleSafeBrowsing(object):
                     yield AddressListItem(url, self, classification)
     
 
-class HostCollection(object):
+class HostCollection(UrlHostTester):
     ''' Provides a container for ip addresses and domain names.
     
     May be used as a local whitelist or blacklist.
