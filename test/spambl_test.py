@@ -17,7 +17,9 @@ from urlparse import urlparse, parse_qs
 import contextlib
 import validators
 
-from base_test_cases import BaseHostListTest, BaseUrlHostTesterTest, HostListTest, UrlHostTesterTest
+from base_test_cases import BaseHostListTest, BaseUrlHostTesterTest,\
+HostListTest, UrlHostTesterTest, HostListWithoutIpV6SupportTest,\
+UrlHostTesterWithoutIpV6SupportTest
 
 from cachetools import lru_cache
 
@@ -179,219 +181,63 @@ class SumClassificationCodeResolverTest(BaseClassificationCodeResolverTest,
         self._set_code_item_class({2: 'Class: 2', 4: 'Class:4'})
         
         self.assertRaises(UnknownCodeError, self.resolver, sum(keys))
-            
-class HpHostsTest(unittest.TestCase):
-    
-    _classification = '[TEST CLASS]'
-    
-    valid_input = [
-                   ('ipv4', u'255.255.0.1'),
-                   ('hostname', 'test.hostname.pl')
-                   ]
-                   
-    invalid_input = [
-                     ('ipv4', u'255.255.0.1.11'),
-                     ('ipv6', u'2001:DB8:abcde:123::42'),
-                     ('hostname', '-e.pl')
-                     ]
-    
-    invalid_url_input = [
-                         ('invalid_hostname', 'http://-abc.com'),
-                         ('invalid_schema', 'abc://hostname.com'),
-                         ('no_schema', 'hostname.com'),
-                         ('invalid_ipv4', 'http://999.999.999.999'),
-                         ('invalid_ipv4', 'http://127.0.0.0.1'),
-                         ('invalid_ipv6', 'http://[2001:db8:abcef:123::42]'),
-                         ('invalid_ipv6', 'http://[2001:db8:abch:123::42]')
-                         ]
-    
+        
+def hp_hosts_host_factory(host_value):
+    value = MagicMock()
+    value.__str__.return_value = str(host_value)
+    return  value
+
+class HpHostsTest(UrlHostTesterWithoutIpV6SupportTest, HostListWithoutIpV6SupportTest, unittest.TestCase):
+     
     @classmethod
     def setUpClass(cls):
+         
+        cls.tested_instance = HpHosts('spambl_test_suite')
         
-        cls.hp_hosts = HpHosts('spambl_test_suite')
-        
-    def setUp(self):
+    def _set_up_get_mock(self):
+        classification = ','.join(self.classification)
+        def get(url):
+            query_string = urlparse(url).query
+            query_data = parse_qs(query_string)
+             
+            content = 'Not listed'
+            if query_data['s'][0] in self.listed_hosts:
+                content = 'Listed,{}'.format(classification)
+                 
+            response = Mock()
+            response.content = content
+            return response
         
         self.get_patcher = patch('spambl.get')
         self.get_mock = self.get_patcher.start()
+        self.get_mock.side_effect = get
         
+    def setUp(self):
+         
+        self.listed_hosts = []
+        
+        self._set_up_get_mock()
+         
         self.host_patcher = patch('spambl.host')
-        self.host_mock = self.host_patcher.start()
-        
+        self.host_factory_mock = self.host_patcher.start()
+        self.host_factory_mock.side_effect = hp_hosts_host_factory
+         
         self.is_valid_url_patcher = patch('spambl.is_valid_url')
         self.is_valid_url_mock = self.is_valid_url_patcher.start()
-        
+         
     def tearDown(self):
         self.get_patcher.stop()
         self.host_patcher.stop()
         self.is_valid_url_patcher.stop()
-        
-    def _set_response_content(self, has_listed):
-        
-        content = 'Not listed'
-        
-        if has_listed:
-            content = 'Listed,{}'.format(self._classification)
-            
-        self.get_mock.return_value.content = content
-        
-    def _test_function_for_invalid(self, function, value):
-        
-        self.host_mock.side_effect = ValueError
-        self.assertRaises(ValueError, function, value)
-        
-    @parameterized.expand(invalid_input)
-    def test_contains_for_invalid(self, _, value):
-        
-        self._test_function_for_invalid(self.hp_hosts.__contains__, value)
-        
-    @parameterized.expand(invalid_input)
-    def test_lookup_for_invalid(self, _, value):
-        
-        self._test_function_for_invalid(self.hp_hosts.lookup, value)
-        
-    def _test_for_any_with_invalid(self, function, invalid_url):
-        urls = ['http://test.com', 'http://127.33.22.11',
-                'http://[2001:db8:abc:123::42]']
-        urls.append(invalid_url)
-        
-        self.is_valid_url_mock.side_effect = lambda u: u != invalid_url
-        
-        with self.assertRaises(ValueError):
-            function(urls)
-        
-    @parameterized.expand(invalid_url_input)
-    def test_any_match_for_invalid(self, _, invalid_url):
-        
-        self._test_for_any_with_invalid(self.hp_hosts.any_match, invalid_url)
-            
-    @parameterized.expand(invalid_url_input)
-    def test_lookup_matching_for_invalid(self, _, invalid_url):
-        
-        self._test_for_any_with_invalid(self.hp_hosts.lookup_matching, invalid_url)
-        
-    def _test_function_for_valid_ipv6(self, function):
-        
-        ipv6 = u'2001:DB8:abc:123::42'
-        
-        ipv6_host = MagicMock()
-        ipv6_host.__str__.return_value = ipv6
-        self.host_mock.return_value = ipv6_host
-        
-        self.assertRaises(ValueError, function, ipv6)
-        
-    def test_contains_for_valid_ipv6(self):
-        
-        self._test_function_for_valid_ipv6(self.hp_hosts.__contains__)
-        
-    def test_lookup_for_valid_ipv6(self):
-        
-        self._test_function_for_valid_ipv6(self.hp_hosts.lookup)
-        
-    def test_any_match_for_valid_ipv6(self):
-        self._test_function_for_valid_ipv6(self.hp_hosts.any_match)
-        
-    def test_lookup_matching_for_valid_ipv6(self):
-        
-        func = lambda u: list(self.hp_hosts.lookup_matching(u))
-        self._test_function_for_valid_ipv6(func)
-        
-    @parameterized.expand(valid_input)
-    def test_contains_for_listed(self, _, value):
          
-        self._set_response_content(True)
-        self.assertTrue(host in self.hp_hosts)
-            
-    @parameterized.expand(valid_input)
-    def test_contains_for_not_listed(self, _, value):
-        
-        self._set_response_content(False)
-        self.assertFalse(host in self.hp_hosts)
-                
-    @parameterized.expand(valid_input)
-    def test_lookup_for_listed(self, _, value):
-        
-        self._set_response_content(True)
-        
-        expected = AddressListItem(value, self.hp_hosts,
-                                   (self._classification,))
-        
-        self.assertEqual(self.hp_hosts.lookup(value), expected)
-          
-    @parameterized.expand(valid_input)  
-    def test_lookup_for_not_listed(self, _, value):
-        
-        self._set_response_content(False)
-        self.assertIsNone(self.hp_hosts.lookup(value))
-        
-    @contextlib.contextmanager
-    def matching_urls(self, urls):
-        '''
-        Provide a set up context manager assuming
-        given urls are spam urls
-        '''
-        
-        def host(host_value):
-            value = MagicMock()
-            value.__str__.return_value = host_value
-            return  value
-        
-        self.host_mock.side_effect = host
-        
+    def _set_matching_hosts(self, *hosts):
+        self.listed_hosts.extend(hosts)
+         
+    def _set_matching_urls(self, *urls):
+         
         listed_hosts = [urlparse(u).hostname for u in urls]
-        def get(url):
-            query_string = urlparse(url).query
-            query_data = parse_qs(query_string)
-            
-            content = 'Not listed'
-            if query_data['s'][0] in listed_hosts:
-                content = 'Listed,{}'.format(self._classification)
-                
-            response = Mock()
-            response.content = content
-            return response
-            
-        self.get_mock.side_effect = get
+        self._set_matching_hosts(*listed_hosts)
         
-        yield
-        
-        self.get_mock.side_effect = None
-        self.host_mock.side_effect = None
-        
-    @parameterized.expand([
-                              ('ipv4_url', 'http://44.22.99.1'),
-                              ('hostname_url', 'http://abc.com')
-                              ])
-    def test_any_match_returns_true_for(self, _, url):
-        
-        urls = ['http://test.com', 'http://127.33.22.11', url]
-        with self.matching_urls([url]):
-            self.assertTrue(self.hp_hosts.any_match(urls))
-        
-    def test_any_match_returns_false(self):
-        
-        urls = ['http://test.com', 'http://127.33.22.11']
-        
-        self._set_response_content(False)
-        
-        self.assertFalse(self.hp_hosts.any_match(urls))
-        
-    @parameterized.expand([
-                           ('ipv4_url', ['http://55.44.33.21']),
-                           ('hostname_url', ['https://abc.com']),
-                           ('two_urls', ['http://55.44.33.21', 'https://abc.com'])
-                           ])
-    def test_lookup_matching_for(self, _, spam_urls):
-        
-        expected_item = lambda h: AddressListItem(h, self.hp_hosts,
-                                                  (self._classification,))
-        expected = [expected_item(urlparse(u).hostname) for u in spam_urls]
-        
-        urls = ['http://test.com', 'http://127.33.22.11']
-        with self.matching_urls(spam_urls):
-            actual = list(self.hp_hosts.lookup_matching(urls+spam_urls))
-        
-        self.assertItemsEqual(expected, actual)
 
 class GoogleSafeBrowsingTest(unittest.TestCase):
     
