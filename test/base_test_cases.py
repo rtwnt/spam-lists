@@ -98,3 +98,19 @@ class HostListWithoutIpV6SupportTest(BaseHostListTest):
         
         self._test_function_raises_ValueError_for_valid_ipv6(self.tested_instance.lookup)
         
+class HostListTest(BaseHostListTest):
+    ''' A test case for classes representing host lists
+    that have support (or at least: do not raise errors)
+    for ip6 addresses '''
+    
+    def test_contains_for_listed_ipv6(self):
+        self._test_contains_for_listed(self.valid_ipv6)
+            
+    def test_contains_for_not_listed_ipv6(self):
+        self._test_contains_not_for_listed(self.valid_ipv6)
+        
+    def test_lookup_for_listed_ipv6(self):
+        self._test_lookup_for_listed(self.valid_ipv6)
+          
+    def test_lookup_for_not_listed_ipv6(self):
+        self._test_lookup_for_not_listed(self.valid_ipv6)
