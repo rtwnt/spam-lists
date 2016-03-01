@@ -79,5 +79,22 @@ class BaseHostListTest(BaseValueTesterTest):
           
     @parameterized.expand(valid_host_input)  
     def test_lookup_for_not_listed(self, _, value):
-
+        
         self._test_lookup_for_not_listed(value)
+
+class HostListWithoutIpV6SupportTest(BaseHostListTest):
+    ''' A test case for classes representing host list that
+    raise an error when being queried for valid ip6 addresses '''
+    
+    def _test_function_raises_ValueError_for_valid_ipv6(self, function):
+        
+        self.assertRaises(ValueError, function, self.valid_ipv6)
+        
+    def test_contains_raises_ValueError_for_valid_ipv6(self):
+        
+        self._test_function_raises_ValueError_for_valid_ipv6(self.tested_instance.__contains__)
+        
+    def test_lookup_raises_ValueError_for_valid_ipv6(self):
+        
+        self._test_function_raises_ValueError_for_valid_ipv6(self.tested_instance.lookup)
+        
