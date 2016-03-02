@@ -5,7 +5,7 @@ import unittest
 from spambl import (UnknownCodeError, NXDOMAIN, HpHosts, 
                     GoogleSafeBrowsing, UnathorizedAPIKeyError, HostCollection,
                      SimpleClassificationCodeResolver, SumClassificationCodeResolver, Hostname, IpAddress, 
-                     host, is_valid_url, RedirectUrlResolver, AddressListItem, DNSBL, accepts_valid_urls)
+                     host, is_valid_url, RedirectUrlResolver, DNSBL, accepts_valid_urls)
 from mock import Mock, patch, MagicMock
 
 from requests.exceptions import HTTPError, InvalidSchema, InvalidURL,\
@@ -17,7 +17,7 @@ from urlparse import urlparse, parse_qs
 
 from base_test_cases import BaseHostListTest, BaseUrlHostTesterTest,\
 HostListTest, UrlHostTesterTest, HostListWithoutIpV6SupportTest,\
-UrlHostTesterWithoutIpV6SupportTest
+UrlHostTesterWithoutIpV6SupportTest, UrlTesterTest
 
 from cachetools import lru_cache
 
@@ -237,116 +237,65 @@ class HpHostsTest(UrlHostTesterWithoutIpV6SupportTest, HostListWithoutIpV6Suppor
         self._set_matching_hosts(*listed_hosts)
         
 
-class GoogleSafeBrowsingTest(unittest.TestCase):
+class GoogleSafeBrowsingTest(UrlTesterTest, unittest.TestCase):
+    ''' TODO: implement _set_matching_urls method '''
     
     @classmethod
     def setUpClass(cls):
+        cls.tested_instance = GoogleSafeBrowsing('test_client', '0.1', 'test_key')
         
-        cls.valid_urls = 'http://test.domain1.com', 'https://255.255.0.1', 
-        'http://[2001:DB8:abc:123::42]', 'ftp://test.domain2.com'
+    def _set_up_post_mock(self):
         
-        cls.google_safe_browsing = GoogleSafeBrowsing('test_client', '0.1', 'test_key')
-        
-    def setUp(self):
-        self.patcher = patch('spambl.post')
-        self.mocked_post = self.patcher.start()
-        
-        self.post_response = Mock()
-        self.mocked_post.return_value = self.post_response
-        
-    def tearDown(self):
-        self.patcher.stop()
-        
-    def _test_for_unathorized_api_key(self, function):
-        
-        self.post_response.status_code = 401
-        self.post_response.raise_for_status.side_effect = HTTPError
-        
-        self.assertRaises(UnathorizedAPIKeyError, function, self.valid_urls)
-        
-    def test_contains_any_for_unathorized_api_key(self):
-        
-        self._test_for_unathorized_api_key(self.google_safe_browsing.contains_any)
-        
-    def test_lookup_for_unathorized_api_key(self):
-        
-        function = lambda u: list(self.google_safe_browsing.lookup(u))
-        self._test_for_unathorized_api_key(function)
-    
-    def test_contains_any_for_any_spam_urls(self):
-        
-        self.post_response.status_code = 200
-        
-        actual = self.google_safe_browsing.contains_any(self.valid_urls)
-        self.assertTrue(actual)
-        
-    def test_contains_any_for_no_spam_urls(self):
-        
-        self.post_response.status_code = 204
-        
-        actual = self.google_safe_browsing.contains_any(self.valid_urls)
-        self.assertFalse(actual)
-        
-    def _set_post_result(self, classification):
-        def mocked_post(_, body):
-            urls = body.splitlines()[1:]
-            classes = [classification.get(u, 'ok') for u in urls]
-            
+        def post(_, body):
             response = Mock()
-            response.status_code = 200
-            response.content = '\n'.join(classes)
+            if self._expecting_unathorized_api_key_error:
+                response.status_code = 401
+                response.raise_for_status.side_effect = HTTPError
+                
+            else:
+                urls = body.splitlines()[1:]
+                classes = [('ok' if u not in self._spam_urls else 
+                       self.classification[0]) for u in urls]
+                response.content = '\n'.join(classes)
+                code = 200 if self._spam_urls else 204
+                response.status_code = code
             
             return response
         
-        self.mocked_post.side_effect = mocked_post
+        self.post_patcher = patch('spambl.post')
+        self.mocked_post = self.post_patcher.start()
+        self.mocked_post.side_effect = post
         
-    @parameterized.expand([
-                           ('hostname_urls',
-                            { 
-                             'http://test1.com': 'phishing',
-                             'http://test2.com': 'malware'
-                             }),
-                           ('ipv4_urls',
-                            {
-                             'https://123.22.1.11': 'unwanted',
-                             'http://66.99.88.121': 'phishing, malware'
-                             }),
-                           ('ipv6_urls',
-                            {
-                             'http://[2001:DB8:abc:123::42]': 'phishing, malware',
-                             'http://[3731:54:65fe:2::a7]': 'phishing, unwanted'
-                             }),
-                           ('urls_with_duplicates',
-                            {
-                             'http://abc.com': 'malware, unwanted',
-                             'http://domain.com': 'phishing, malware, unwanted'
-                             }, 
-                            ['http://abc.com'])
-                           ])
-    def test_lookup_for_spam(self, _, classification, duplicates = []):
+    def setUp(self):
+        self._spam_urls = []
+        self._expecting_unathorized_api_key_error = False
         
-        self._set_post_result(classification)
+        self._set_up_post_mock()
         
-        item = lambda url, classes: AddressListItem(url, 
-                                                    self.google_safe_browsing, 
-                                                    tuple(classes.split(',')))
+        self.is_valid_url_patcher = patch('spambl.is_valid_url')
+        self.is_valid_url_mock = self.is_valid_url_patcher.start()
         
-        expected  = [item(u, c) for u, c in classification.items()]
+    def tearDown(self):
+        self.post_patcher.stop()
+        self.is_valid_url_patcher.stop()
         
-        non_spam = ['http://nospam.com', 'https://nospam2.pl', 'https://spamfree.com']
-        tested = classification.keys()+ duplicates + non_spam
-        actual = list(self.google_safe_browsing.lookup(tested))
+    def _set_matching_urls(self, *urls):
+        self._spam_urls = urls
         
-        self.assertItemsEqual(actual, expected)
+    def _test_for_unathorized_api_key(self, function):
         
-    def test_lookup_for_no_spam(self):
-        ''' lookup should return an empty tuple when called for a sequence
-        of non spam urls as argument '''
+        self._expecting_unathorized_api_key_error = True
         
-        self.post_response.status_code = 204
+        self.assertRaises(UnathorizedAPIKeyError, function, self.valid_urls)
         
-        actual = list(self.google_safe_browsing.lookup(self.valid_urls))
-        self.assertFalse(actual)
+    def test_any_match_for_unathorized_api_key(self):
+        
+        self._test_for_unathorized_api_key(self.tested_instance.any_match)
+        
+    def test_lookup_matching_for_unathorized_api_key(self):
+        
+        function = lambda u: list(self.tested_instance.lookup_matching(u))
+        self._test_for_unathorized_api_key(function)
         
 def host_collection_host_factory(h):
             host_object = MagicMock()
