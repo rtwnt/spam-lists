@@ -367,8 +367,9 @@ class GoogleSafeBrowsing(object):
             
             if response.status_code == 200:
                 yield chunk, response
-    
-    def contains_any(self, urls):
+                
+    @accepts_valid_urls
+    def any_match(self, urls):
         ''' Check if the service recognizes any of given urls as spam
         
         :param urls: a sequence of urls to be tested
@@ -377,7 +378,8 @@ class GoogleSafeBrowsing(object):
         
         return any(self._query(urls))
     
-    def lookup(self, urls):
+    @accepts_valid_urls
+    def lookup_matching(self, urls):
         ''' Get items for all listed urls
         
         :param urls: a sequence of urls to be tested
