@@ -2,6 +2,7 @@
 
 from spambl import AddressListItem
 from nose_parameterized import parameterized
+from urlparse import urlparse
 
 class BaseValueTesterTest(object):
     
@@ -114,3 +115,129 @@ class HostListTest(BaseHostListTest):
           
     def test_lookup_for_not_listed_ipv6(self):
         self._test_lookup_for_not_listed(self.valid_ipv6)
+        
+class BaseUrlTesterTest(BaseValueTesterTest):
+    ''' A common test case for classes supporting
+    querying local resources or remote services for
+    url addresses '''
+    
+    invalid_url_input = [
+                         ('invalid_hostname', 'http://-abc.com'),
+                         ('invalid_schema', 'abc://hostname.com'),
+                         ('no_schema', 'hostname.com'),
+                         ('invalid_ipv4', 'http://999.999.999.999'),
+                         ('invalid_ipv4', 'http://127.0.0.0.1'),
+                         ('invalid_ipv6', 'http://[2001:db8:abcef:123::42]'),
+                         ('invalid_ipv6', 'http://[2001:db8:abch:123::42]')
+                         ]
+    
+    valid_url_input = [
+                           ('ipv4_url', ['http://55.44.33.21']),
+                           ('hostname_url', ['https://abc.com']),
+                           ]
+    
+    valid_ipv6_urls = ['http://[2001:ddd:ccc:111::33]']
+    
+    valid_urls = ['http://test.com', 'http://127.33.22.11']
+        
+    @parameterized.expand(invalid_url_input)
+    def test_any_match_for_invalid(self, _, invalid_url):
+        
+        self._test_for_any_with_invalid(self.tested_instance.any_match, invalid_url)
+            
+    @parameterized.expand(invalid_url_input)
+    def test_lookup_matching_for_invalid(self, _, invalid_url):
+        
+        self._test_for_any_with_invalid(self.tested_instance.lookup_matching, invalid_url)
+        
+    def _test_any_match_returns_true_for(self, matching_urls):
+        self._set_matching_urls(*matching_urls)
+        self.assertTrue(self.tested_instance.any_match(self.valid_urls + matching_urls))
+        
+    def _test_any_match_returns_false(self, not_matching_urls):
+        self.assertFalse(self.tested_instance.any_match(not_matching_urls))
+        
+    def _test_lookup_matching_for(self, matching_urls):
+        expected = self._get_expected_items(matching_urls)
+        
+        self._set_matching_urls(*matching_urls)
+        actual = list(self.tested_instance.lookup_matching(self.valid_urls + matching_urls))
+        
+        self.assertItemsEqual(expected, actual)
+    
+    @parameterized.expand(valid_url_input)
+    def test_any_match_returns_true_for(self, _, matching_urls):
+        
+        self._test_any_match_returns_true_for(matching_urls)
+        
+    def test_any_match_returns_false(self):
+        
+        self._test_any_match_returns_false(self.valid_urls)
+        
+    @parameterized.expand([
+                           ('no_matching_url', [])
+                           ]+
+                          valid_url_input+[
+                                           ('two_urls', ['http://55.44.33.21', 'https://abc.com'])
+                                           ])
+    def test_lookup_matching_for(self, _, matching_urls):
+        
+        self._test_lookup_matching_for(matching_urls)
+        
+    def _test_for_any_with_invalid(self, function, invalid_url):
+        
+        self.is_valid_url_mock.side_effect = lambda u: u != invalid_url
+        
+        with self.assertRaises(ValueError):
+            function(self.valid_urls + [invalid_url])
+        
+class BaseUrlHostTesterTest(BaseUrlTesterTest):
+    ''' A common test case for classes used
+    to test hosts of given url addresses for items in
+    local or remote lists '''
+    
+    def _get_expected_items(self, values):
+        hosts = [urlparse(u).hostname for u in values]
+        return super(BaseUrlHostTesterTest, self)._get_expected_items(hosts)
+        
+class UrlHostTesterWithoutIpV6SupportTest(BaseUrlHostTesterTest):
+    ''' A test case for classes used
+    to test hosts of given url addresses for items in
+    local or remote lists, if the classes raise an error for given
+    valid ip6 addresses'''
+    
+    def _test_function_raises_ValueError_for_valid_ipv6_url(self, function):
+        
+        self.assertRaises(ValueError, function, self.valid_ipv6_urls)
+        
+    def test_any_match_raises_ValueError_for_ipv6(self):
+        
+        self._test_function_raises_ValueError_for_valid_ipv6_url(self.tested_instance.any_match)
+        
+    def test_lookup_matching_raises_ValueError_for_ipv6(self):
+        function = lambda u: list(self.tested_instance.lookup_matching(u))
+        self._test_function_raises_ValueError_for_valid_ipv6_url(function)
+        
+class UrlTesterTest(BaseUrlTesterTest):
+    '''
+    A common test case for url testers supporting
+    (or at least not raising errors for) ip6 addresses
+    '''
+    
+    def test_any_match_returns_true_for_ipv6(self):
+        
+        self._test_any_match_returns_true_for(self.valid_ipv6_urls)
+        
+    def test_any_match_returns_false_for_ipv6(self):
+        
+        self._test_any_match_returns_false(self.valid_ipv6_urls)
+        
+    def test_lookup_matching_for_ipv6(self):
+        
+        self._test_lookup_matching_for(self.valid_ipv6_urls)
+        
+class UrlHostTesterTest(UrlTesterTest, BaseUrlHostTesterTest):
+    ''' A test case for url testers that both support testing
+    for urls using ipv6 addresses as their hosts and use
+    hosts as criteria for detecting match '''
+    
