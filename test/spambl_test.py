@@ -351,6 +351,19 @@ class HostCollectionTest(UrlHostTesterTest, HostListTest, unittest.TestCase):
         listed_hosts = [urlparse(u).hostname for u in urls]
         self._set_matching_hosts(*listed_hosts)
         
+    @parameterized.expand(UrlHostTesterTest.invalid_url_input)
+    def test_filter_matching_for_invalid(self, _, invalid_url):
+         
+        self._test_for_any_with_invalid(self.tested_instance.filter_matching, invalid_url)
+         
+    @parameterized.expand(UrlHostTesterTest.valid_url_list_input)
+    def test_filter_matching_for(self, _, matching_urls):
+         
+        self._set_matching_urls(*matching_urls)
+        actual = self.tested_instance.filter_matching(self.valid_urls + matching_urls)
+         
+        self.assertItemsEqual(matching_urls, actual)
+        
             
 class HostnameTest(unittest.TestCase):
     

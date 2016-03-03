@@ -433,6 +433,17 @@ class HostCollection(UrlHostTester):
         
         return any(map(test, self.hosts))
     
+    @accepts_valid_urls
+    def filter_matching(self, urls):
+        ''' Get urls with hosts matching items stored in the collection
+        
+        :param urls: an iterable containing url addresses to filter
+        :returns: a list containing matching urls
+        :raises ValueError: when any of given urls is not valid
+        '''
+        is_match = lambda u: urlparse(u).hostname in self
+        return filter(is_match, urls)
+    
     def lookup(self, host_value):
         '''
         Return an object representing a parent of given value or the exact value, if
