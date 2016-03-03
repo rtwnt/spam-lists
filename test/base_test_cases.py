@@ -4,8 +4,16 @@ from spambl import AddressListItem
 from nose_parameterized import parameterized
 from urlparse import urlparse
 
-class BaseValueTesterTest(object):
+class ClientGetExpectedItemsProvider(object):
+    '''
+    Provides implementation of _get_expected_items
+    for test cases testing method of a client
     
+    Clients communicate directly with services, remote
+    or local, and their instances are provided in
+    AddressListItem instances as values of
+    their .source property
+    '''
     classification = ('TEST',)
     
     def _get_expected_items(self, values):
@@ -14,7 +22,7 @@ class BaseValueTesterTest(object):
         return [item(v) for v in values]
 
 
-class BaseHostListTest(BaseValueTesterTest):
+class BaseHostListTest(object):
     ''' A common test case for all classes that represent
     a host list stored locally or by a remote service '''
     
@@ -28,10 +36,6 @@ class BaseHostListTest(BaseValueTesterTest):
                         ('ipv4', u'255.0.120.1'),
                         ('hostname', 'test.pl')
                         ]
-    
-    valid_ipv6 = '2001:ddd:ccc:111::33'
-    
-    __get_expected_items = BaseValueTesterTest._get_expected_items
     
     def _test_function_for_invalid(self, function, value):
         
@@ -49,7 +53,7 @@ class BaseHostListTest(BaseValueTesterTest):
         
     def _test_contains_for_listed(self, value):
         
-        self._set_matching_hosts(value)
+        self._set_matching_hosts([value])
         self.assertTrue(value in self.tested_instance)
         
     def _test_contains_not_for_listed(self, value):
@@ -58,8 +62,8 @@ class BaseHostListTest(BaseValueTesterTest):
         
     def _test_lookup_for_listed(self, value):
         
-        expected = self.__get_expected_items([value])[0]
-        self._set_matching_hosts(value)
+        expected = self._get_expected_items([value])[0]
+        self._set_matching_hosts([value])
         self.assertEqual(self.tested_instance.lookup(value), expected)
         
     def _test_lookup_for_not_listed(self, value):
@@ -83,13 +87,15 @@ class BaseHostListTest(BaseValueTesterTest):
         
         self._test_lookup_for_not_listed(value)
 
-class HostListWithoutIpV6SupportTest(BaseHostListTest):
+valid_ipv6 = '2001:ddd:ccc:111::33'
+        
+class NoIPv6SupportTest(object):
     ''' A test case for classes representing host list that
-    raise an error when being queried for valid ip6 addresses '''
+    raise an error when being queried for valid IPv6 addresses '''
     
     def _test_function_raises_ValueError_for_valid_ipv6(self, function):
         
-        self.assertRaises(ValueError, function, self.valid_ipv6)
+        self.assertRaises(ValueError, function, valid_ipv6)
         
     def test_contains_raises_ValueError_for_valid_ipv6(self):
         
@@ -99,27 +105,27 @@ class HostListWithoutIpV6SupportTest(BaseHostListTest):
         
         self._test_function_raises_ValueError_for_valid_ipv6(self.tested_instance.lookup)
         
-class HostListTest(BaseHostListTest):
+class IPv6SupportTest(object):
     ''' A test case for classes representing host lists
     that have support (or at least: do not raise errors)
-    for ip6 addresses '''
+    for IPv6 addresses '''
     
     def test_contains_for_listed_ipv6(self):
-        self._test_contains_for_listed(self.valid_ipv6)
+        self._test_contains_for_listed(valid_ipv6)
             
     def test_contains_for_not_listed_ipv6(self):
-        self._test_contains_not_for_listed(self.valid_ipv6)
+        self._test_contains_not_for_listed(valid_ipv6)
         
     def test_lookup_for_listed_ipv6(self):
-        self._test_lookup_for_listed(self.valid_ipv6)
+        self._test_lookup_for_listed(valid_ipv6)
           
     def test_lookup_for_not_listed_ipv6(self):
-        self._test_lookup_for_not_listed(self.valid_ipv6)
+        self._test_lookup_for_not_listed(valid_ipv6)
         
-class BaseUrlTesterTest(BaseValueTesterTest):
-    ''' A common test case for classes supporting
-    querying local resources or remote services for
-    url addresses '''
+class BaseUrlTesterTest(object):
+    ''' A common test case for classes  responsible for
+    testing urls for matching criteria supported by the
+    classes or services that they represent'''
     
     invalid_url_input = [
                          ('invalid_hostname', 'http://-abc.com'),
@@ -141,32 +147,29 @@ class BaseUrlTesterTest(BaseValueTesterTest):
                              ('two_urls', ['http://55.44.33.21', 'https://abc.com'])
                              ]+valid_url_input
     
-    
-    valid_ipv6_urls = ['http://[2001:ddd:ccc:111::33]']
-    
     valid_urls = ['http://test.com', 'http://127.33.22.11']
         
     @parameterized.expand(invalid_url_input)
     def test_any_match_for_invalid(self, _, invalid_url):
         
-        self._test_for_any_with_invalid(self.tested_instance.any_match, invalid_url)
+        self._test_function_for_invalid_urls(self.tested_instance.any_match, invalid_url)
             
     @parameterized.expand(invalid_url_input)
     def test_lookup_matching_for_invalid(self, _, invalid_url):
         
-        self._test_for_any_with_invalid(self.tested_instance.lookup_matching, invalid_url)
+        self._test_function_for_invalid_urls(self.tested_instance.lookup_matching, invalid_url)
         
     def _test_any_match_returns_true_for(self, matching_urls):
-        self._set_matching_urls(*matching_urls)
+        self._set_matching_urls(matching_urls)
         self.assertTrue(self.tested_instance.any_match(self.valid_urls + matching_urls))
         
     def _test_any_match_returns_false(self, not_matching_urls):
         self.assertFalse(self.tested_instance.any_match(not_matching_urls))
         
     def _test_lookup_matching_for(self, matching_urls):
-        expected = self._get_expected_items(matching_urls)
+        self._set_matching_urls(matching_urls)
         
-        self._set_matching_urls(*matching_urls)
+        expected = self._get_expected_items_for_urls(matching_urls)
         actual = list(self.tested_instance.lookup_matching(self.valid_urls + matching_urls))
         
         self.assertItemsEqual(expected, actual)
@@ -184,32 +187,35 @@ class BaseUrlTesterTest(BaseValueTesterTest):
     def test_lookup_matching_for(self, _, matching_urls):
         
         self._test_lookup_matching_for(matching_urls)
-        
-    def _test_for_any_with_invalid(self, function, invalid_url):
+            
+class TestFunctionForInvalidUrlProvider(object):
+    ''' Provides a common test method for functions
+    using spambl.is_valid_url for url validation '''
+    
+    def _test_function_for_invalid_urls(self, function, invalid_url):
         
         self.is_valid_url_mock.side_effect = lambda u: u != invalid_url
         
         with self.assertRaises(ValueError):
             function(self.valid_urls + [invalid_url])
         
-class BaseUrlHostTesterTest(BaseUrlTesterTest):
-    ''' A common test case for classes used
-    to test hosts of given url addresses for items in
-    local or remote lists '''
+class GetExpectedItemsForUrlsProvider(ClientGetExpectedItemsProvider):
     
-    def _get_expected_items(self, values):
-        hosts = [urlparse(u).hostname for u in values]
-        return super(BaseUrlHostTesterTest, self)._get_expected_items(hosts)
-        
-class UrlHostTesterWithoutIpV6SupportTest(BaseUrlHostTesterTest):
-    ''' A test case for classes used
-    to test hosts of given url addresses for items in
-    local or remote lists, if the classes raise an error for given
-    valid ip6 addresses'''
+    def _get_expected_items_for_urls(self, urls):
+        hosts = [urlparse(u).hostname for u in urls]
+        return self._get_expected_items(hosts)
+    
+valid_ipv6_urls = ['http://[2001:ddd:ccc:111::33]']
+
+class NoIPv6UrlSupportTest(object):
+    '''
+    A common test case for url testers with
+    no support for IPv6 url addresses
+    '''
     
     def _test_function_raises_ValueError_for_valid_ipv6_url(self, function):
         
-        self.assertRaises(ValueError, function, self.valid_ipv6_urls)
+        self.assertRaises(ValueError, function, valid_ipv6_urls)
         
     def test_any_match_raises_ValueError_for_ipv6(self):
         
@@ -219,26 +225,22 @@ class UrlHostTesterWithoutIpV6SupportTest(BaseUrlHostTesterTest):
         function = lambda u: list(self.tested_instance.lookup_matching(u))
         self._test_function_raises_ValueError_for_valid_ipv6_url(function)
         
-class UrlTesterTest(BaseUrlTesterTest):
+class IPv6UrlSupportTest(object):
     '''
     A common test case for url testers supporting
-    (or at least not raising errors for) ip6 addresses
+    (or at least not raising errors for) IPv6 url addresses
     '''
     
     def test_any_match_returns_true_for_ipv6(self):
         
-        self._test_any_match_returns_true_for(self.valid_ipv6_urls)
+        self._test_any_match_returns_true_for(valid_ipv6_urls)
         
     def test_any_match_returns_false_for_ipv6(self):
         
-        self._test_any_match_returns_false(self.valid_ipv6_urls)
+        self._test_any_match_returns_false(valid_ipv6_urls)
         
     def test_lookup_matching_for_ipv6(self):
         
-        self._test_lookup_matching_for(self.valid_ipv6_urls)
+        self._test_lookup_matching_for(valid_ipv6_urls)
         
-class UrlHostTesterTest(UrlTesterTest, BaseUrlHostTesterTest):
-    ''' A test case for url testers that both support testing
-    for urls using ipv6 addresses as their hosts and use
-    hosts as criteria for detecting match '''
     

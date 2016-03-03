@@ -15,9 +15,10 @@ from dns import reversename
 from nose_parameterized import parameterized
 from urlparse import urlparse, parse_qs
 
-from base_test_cases import BaseHostListTest, BaseUrlHostTesterTest,\
-HostListTest, UrlHostTesterTest, HostListWithoutIpV6SupportTest,\
-UrlHostTesterWithoutIpV6SupportTest, UrlTesterTest
+from test.base_test_cases import BaseHostListTest, BaseUrlTesterTest,\
+ClientGetExpectedItemsProvider, GetExpectedItemsForUrlsProvider,\
+TestFunctionForInvalidUrlProvider, NoIPv6SupportTest, IPv6SupportTest,\
+NoIPv6UrlSupportTest, IPv6UrlSupportTest
 
 from cachetools import lru_cache
 
@@ -62,7 +63,16 @@ class AcceptValidUrlsTest(unittest.TestCase):
         self.assertRaises(ValueError, self.decorated_function, self.client, url)
         self.function.assert_not_called()
         
-class DNSBLTest(UrlHostTesterTest, HostListTest, unittest.TestCase):
+class DNSBLTest(
+                IPv6UrlSupportTest,
+                IPv6SupportTest,
+                BaseUrlTesterTest,
+                BaseHostListTest, 
+                TestFunctionForInvalidUrlProvider,
+                GetExpectedItemsForUrlsProvider,
+                ClientGetExpectedItemsProvider,
+                unittest.TestCase
+                ):
      
     query_domain_str = 'test.query.domain'
      
@@ -100,27 +110,27 @@ class DNSBLTest(UrlHostTesterTest, HostListTest, unittest.TestCase):
     def test_lookup_for_listed_with_unknown_codes(self, _, host):
          
         self.classification_resolver.side_effect = UnknownCodeError
-        self._set_matching_hosts(host)
+        self._set_matching_hosts([host])
         self.assertRaises(UnknownCodeError, self.tested_instance.lookup, host)
          
-    @parameterized.expand(BaseUrlHostTesterTest.valid_url_input)
+    @parameterized.expand(BaseUrlTesterTest.valid_url_input)
     def test_lookup_matching_with_unknow_codes(self, _, urls):
         self.classification_resolver.side_effect = UnknownCodeError
          
-        self._set_matching_urls(*urls)
+        self._set_matching_urls(urls)
         with self.assertRaises(UnknownCodeError):
             list(self.tested_instance.lookup_matching(urls))
          
-    def _set_matching_hosts(self, *hosts):
+    def _set_matching_hosts(self, hosts):
          
         host_objects = [self.host_factory_mock(h) for h in hosts]
         self.expected_query_names = [h.relative_domain.derelativize() 
                                 for h in host_objects]
          
-    def _set_matching_urls(self, *urls):
+    def _set_matching_urls(self, urls):
          
         listed_hosts = [urlparse(u).hostname for u in urls]
-        self._set_matching_hosts(*listed_hosts)
+        self._set_matching_hosts(listed_hosts)
         
     
 class BaseClassificationCodeResolverTest(object):
@@ -129,8 +139,10 @@ class BaseClassificationCodeResolverTest(object):
         self.code_item_class = {}
         self.resolver = self.factory(self.code_item_class)
         
-class SimpleClassificationCodeResolverTest(BaseClassificationCodeResolverTest,
-                                           unittest.TestCase):
+class SimpleClassificationCodeResolverTest(
+                                           BaseClassificationCodeResolverTest,
+                                           unittest.TestCase
+                                           ):
     
     factory = SimpleClassificationCodeResolver
         
@@ -148,8 +160,10 @@ class SimpleClassificationCodeResolverTest(BaseClassificationCodeResolverTest,
         
         self.assertRaises(UnknownCodeError, self.resolver, 4)
             
-class SumClassificationCodeResolverTest(BaseClassificationCodeResolverTest, 
-                               unittest.TestCase):
+class SumClassificationCodeResolverTest(
+                                        BaseClassificationCodeResolverTest,
+                                        unittest.TestCase
+                                        ):
     
     factory = SumClassificationCodeResolver
         
@@ -185,7 +199,16 @@ def hp_hosts_host_factory(host_value):
     value.__str__.return_value = str(host_value)
     return  value
 
-class HpHostsTest(UrlHostTesterWithoutIpV6SupportTest, HostListWithoutIpV6SupportTest, unittest.TestCase):
+class HpHostsTest(
+                  NoIPv6UrlSupportTest,
+                  NoIPv6SupportTest,
+                  BaseUrlTesterTest,
+                  BaseHostListTest,
+                  TestFunctionForInvalidUrlProvider,
+                  GetExpectedItemsForUrlsProvider,
+                  ClientGetExpectedItemsProvider,
+                  unittest.TestCase
+                  ):
      
     @classmethod
     def setUpClass(cls):
@@ -228,17 +251,25 @@ class HpHostsTest(UrlHostTesterWithoutIpV6SupportTest, HostListWithoutIpV6Suppor
         self.host_patcher.stop()
         self.is_valid_url_patcher.stop()
          
-    def _set_matching_hosts(self, *hosts):
+    def _set_matching_hosts(self, hosts):
         self.listed_hosts.extend(hosts)
          
-    def _set_matching_urls(self, *urls):
+    def _set_matching_urls(self, urls):
          
         listed_hosts = [urlparse(u).hostname for u in urls]
-        self._set_matching_hosts(*listed_hosts)
+        self._set_matching_hosts(listed_hosts)
         
 
-class GoogleSafeBrowsingTest(UrlTesterTest, unittest.TestCase):
-    ''' TODO: implement _set_matching_urls method '''
+class GoogleSafeBrowsingTest(
+                             IPv6UrlSupportTest,
+                             BaseUrlTesterTest,
+                             TestFunctionForInvalidUrlProvider,
+                             ClientGetExpectedItemsProvider,
+                             unittest.TestCase
+                             ):
+    
+    def _get_expected_items_for_urls(self, urls):
+        return self._get_expected_items(urls)
     
     @classmethod
     def setUpClass(cls):
@@ -279,7 +310,7 @@ class GoogleSafeBrowsingTest(UrlTesterTest, unittest.TestCase):
         self.post_patcher.stop()
         self.is_valid_url_patcher.stop()
         
-    def _set_matching_urls(self, *urls):
+    def _set_matching_urls(self, urls):
         self._spam_urls = urls
         
     def _test_for_unathorized_api_key(self, function):
@@ -309,7 +340,16 @@ def host_collection_host_factory(h):
                 
             return host_object
         
-class HostCollectionTest(UrlHostTesterTest, HostListTest, unittest.TestCase):
+class HostCollectionTest(
+                         IPv6UrlSupportTest,
+                         IPv6SupportTest,
+                         BaseUrlTesterTest,
+                         BaseHostListTest,
+                         TestFunctionForInvalidUrlProvider,
+                         GetExpectedItemsForUrlsProvider,
+                         ClientGetExpectedItemsProvider,
+                         unittest.TestCase
+                         ):
      
     def setUp(self):
          
@@ -343,23 +383,23 @@ class HostCollectionTest(UrlHostTesterTest, HostListTest, unittest.TestCase):
          
         self.assertTrue(in_host_collection)
          
-    def _set_matching_hosts(self, *hosts):
+    def _set_matching_hosts(self, hosts):
         self.tested_instance.hosts = [self.host_factory_mock(h) for h in hosts]
          
-    def _set_matching_urls(self, *urls):
+    def _set_matching_urls(self, urls):
          
         listed_hosts = [urlparse(u).hostname for u in urls]
-        self._set_matching_hosts(*listed_hosts)
+        self._set_matching_hosts(listed_hosts)
         
-    @parameterized.expand(UrlHostTesterTest.invalid_url_input)
+    @parameterized.expand(BaseUrlTesterTest.invalid_url_input)
     def test_filter_matching_for_invalid(self, _, invalid_url):
          
-        self._test_for_any_with_invalid(self.tested_instance.filter_matching, invalid_url)
+        self._test_function_for_invalid_urls(self.tested_instance.filter_matching, invalid_url)
          
-    @parameterized.expand(UrlHostTesterTest.valid_url_list_input)
+    @parameterized.expand(BaseUrlTesterTest.valid_url_list_input)
     def test_filter_matching_for(self, _, matching_urls):
          
-        self._set_matching_urls(*matching_urls)
+        self._set_matching_urls(matching_urls)
         actual = self.tested_instance.filter_matching(self.valid_urls + matching_urls)
          
         self.assertItemsEqual(matching_urls, actual)
