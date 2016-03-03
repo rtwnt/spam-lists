@@ -136,6 +136,12 @@ class BaseUrlTesterTest(BaseValueTesterTest):
                            ('hostname_url', ['https://abc.com']),
                            ]
     
+    valid_url_list_input = [
+                             ('no_matching_url', []),
+                             ('two_urls', ['http://55.44.33.21', 'https://abc.com'])
+                             ]+valid_url_input
+    
+    
     valid_ipv6_urls = ['http://[2001:ddd:ccc:111::33]']
     
     valid_urls = ['http://test.com', 'http://127.33.22.11']
@@ -174,12 +180,7 @@ class BaseUrlTesterTest(BaseValueTesterTest):
         
         self._test_any_match_returns_false(self.valid_urls)
         
-    @parameterized.expand([
-                           ('no_matching_url', [])
-                           ]+
-                          valid_url_input+[
-                                           ('two_urls', ['http://55.44.33.21', 'https://abc.com'])
-                                           ])
+    @parameterized.expand(valid_url_list_input)
     def test_lookup_matching_for(self, _, matching_urls):
         
         self._test_lookup_matching_for(matching_urls)
