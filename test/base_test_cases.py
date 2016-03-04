@@ -153,7 +153,7 @@ class BaseUrlTesterTest(object):
         
     def _test_any_match_returns_true_for(self, matching_urls):
         self._set_matching_urls(matching_urls)
-        self.assertTrue(self.tested_instance.any_match(self.valid_urls + matching_urls))
+        self.assertTrue(self.tested_instance.any_match(self.valid_urls + list(matching_urls)))
         
     def _test_any_match_returns_false(self, not_matching_urls):
         self.assertFalse(self.tested_instance.any_match(not_matching_urls))
@@ -162,7 +162,7 @@ class BaseUrlTesterTest(object):
         self._set_matching_urls(matching_urls)
         
         expected = self._get_expected_items_for_urls(matching_urls)
-        actual = list(self.tested_instance.lookup_matching(self.valid_urls + matching_urls))
+        actual = list(self.tested_instance.lookup_matching(self.valid_urls + list(matching_urls)))
         
         self.assertItemsEqual(expected, actual)
         
