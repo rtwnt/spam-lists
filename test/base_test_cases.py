@@ -139,16 +139,6 @@ class BaseUrlTesterTest(object):
                          ('invalid_ipv6', 'http://[2001:db8:abch:123::42]')
                          ]
     
-    valid_url_input = [
-                           ('ipv4_url', ['http://55.44.33.21']),
-                           ('hostname_url', ['https://abc.com']),
-                           ]
-    
-    valid_url_list_input = [
-                             ('no_matching_url', []),
-                             ('two_urls', ['http://55.44.33.21', 'https://abc.com'])
-                             ]+valid_url_input
-    
     valid_urls = ['http://test.com', 'http://127.33.22.11']
         
     @parameterized.expand(invalid_url_input)
@@ -175,15 +165,30 @@ class BaseUrlTesterTest(object):
         actual = list(self.tested_instance.lookup_matching(self.valid_urls + matching_urls))
         
         self.assertItemsEqual(expected, actual)
+        
+    def test_any_match_returns_false(self):
+        
+        self._test_any_match_returns_false(self.valid_urls)
+        
+class CommonValidUrlTest(object):
+    ''' A test case containing common tests used for
+    testing a url tester methods for valid url arguments
+    '''
+    
+    valid_url_input = [
+                           ('ipv4_url', ['http://55.44.33.21']),
+                           ('hostname_url', ['https://abc.com']),
+                           ]
+    
+    valid_url_list_input = [
+                             ('no_matching_url', []),
+                             ('two_urls', ['http://55.44.33.21', 'https://abc.com'])
+                             ]+valid_url_input
     
     @parameterized.expand(valid_url_input)
     def test_any_match_returns_true_for(self, _, matching_urls):
         
         self._test_any_match_returns_true_for(matching_urls)
-        
-    def test_any_match_returns_false(self):
-        
-        self._test_any_match_returns_false(self.valid_urls)
         
     @parameterized.expand(valid_url_list_input)
     def test_lookup_matching_for(self, _, matching_urls):

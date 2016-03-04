@@ -18,7 +18,7 @@ from urlparse import urlparse, parse_qs
 from test.base_test_cases import BaseHostListTest, BaseUrlTesterTest,\
 ClientGetExpectedItemsProvider, GetExpectedItemsForUrlsProvider,\
 TestFunctionForInvalidUrlProvider, NoIPv6SupportTest, IPv6SupportTest,\
-NoIPv6UrlSupportTest, IPv6UrlSupportTest
+NoIPv6UrlSupportTest, IPv6UrlSupportTest, CommonValidUrlTest
 
 from cachetools import lru_cache
 
@@ -66,6 +66,7 @@ class AcceptValidUrlsTest(unittest.TestCase):
 class DNSBLTest(
                 IPv6UrlSupportTest,
                 IPv6SupportTest,
+                CommonValidUrlTest,
                 BaseUrlTesterTest,
                 BaseHostListTest, 
                 TestFunctionForInvalidUrlProvider,
@@ -113,7 +114,7 @@ class DNSBLTest(
         self._set_matching_hosts([host])
         self.assertRaises(UnknownCodeError, self.tested_instance.lookup, host)
          
-    @parameterized.expand(BaseUrlTesterTest.valid_url_input)
+    @parameterized.expand(CommonValidUrlTest.valid_url_input)
     def test_lookup_matching_with_unknow_codes(self, _, urls):
         self.classification_resolver.side_effect = UnknownCodeError
          
@@ -202,6 +203,7 @@ def hp_hosts_host_factory(host_value):
 class HpHostsTest(
                   NoIPv6UrlSupportTest,
                   NoIPv6SupportTest,
+                  CommonValidUrlTest,
                   BaseUrlTesterTest,
                   BaseHostListTest,
                   TestFunctionForInvalidUrlProvider,
@@ -262,6 +264,7 @@ class HpHostsTest(
 
 class GoogleSafeBrowsingTest(
                              IPv6UrlSupportTest,
+                             CommonValidUrlTest,
                              BaseUrlTesterTest,
                              TestFunctionForInvalidUrlProvider,
                              ClientGetExpectedItemsProvider,
@@ -343,6 +346,7 @@ def host_collection_host_factory(h):
 class HostCollectionTest(
                          IPv6UrlSupportTest,
                          IPv6SupportTest,
+                         CommonValidUrlTest,
                          BaseUrlTesterTest,
                          BaseHostListTest,
                          TestFunctionForInvalidUrlProvider,
@@ -396,7 +400,7 @@ class HostCollectionTest(
          
         self._test_function_for_invalid_urls(self.tested_instance.filter_matching, invalid_url)
          
-    @parameterized.expand(BaseUrlTesterTest.valid_url_list_input)
+    @parameterized.expand(CommonValidUrlTest.valid_url_list_input)
     def test_filter_matching_for(self, _, matching_urls):
          
         self._set_matching_urls(matching_urls)
