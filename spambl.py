@@ -699,6 +699,43 @@ class RedirectUrlResolver(object):
                 
                 if isinstance(e, Timeout) or is_valid_url(last_url):
                     yield last_url
+
+class UrlTesterChain(object):
+    '''
+    A url tester using a sequence of other url testers
+    '''
+    
+    def __init__(self, *url_testers):
+        '''
+        Constructor
+        
+        :param url_testers: a list of objects having any_match(urls) and lookup_matching(urls)
+        methods
+        '''
+        
+        self.url_testers = list(url_testers)
+        
+    def any_match(self, urls):
+        ''' Check if any of given urls is a match
+        
+        :param urls: a sequence of urls to be tested
+        :returns: True if any of the urls is a match
+        '''
+        
+        return any(t.any_match(urls) for t in self.url_testers)
+    
+    def lookup_matching(self, urls):
+        '''
+        Get objects representing match criteria (hosts, whole urls, etc) for
+        given urls
+        
+        :param urls: an iterable containing urls
+        :returns: items representing match criteria
+        '''
+        
+        for tester in self.url_testers:
+            for item in tester.lookup_matching(urls):
+                yield item
         
                     
 class BaseUrlTester(object):

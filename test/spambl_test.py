@@ -5,7 +5,8 @@ import unittest
 from spambl import (UnknownCodeError, NXDOMAIN, HpHosts, 
                     GoogleSafeBrowsing, UnathorizedAPIKeyError, HostCollection,
                      SimpleClassificationCodeResolver, SumClassificationCodeResolver, Hostname, IpAddress, 
-                     host, is_valid_url, RedirectUrlResolver, DNSBL, accepts_valid_urls)
+                     host, is_valid_url, RedirectUrlResolver, DNSBL, accepts_valid_urls, UrlTesterChain,
+    AddressListItem)
 from mock import Mock, patch, MagicMock
 
 from requests.exceptions import HTTPError, InvalidSchema, InvalidURL,\
@@ -21,6 +22,9 @@ TestFunctionForInvalidUrlProvider, NoIPv6SupportTest, IPv6SupportTest,\
 NoIPv6UrlSupportTest, IPv6UrlSupportTest, CommonValidUrlTest
 
 from cachetools import lru_cache
+from collections import defaultdict
+from random import shuffle
+from types import GeneratorType
 
 class AcceptValidUrlsTest(unittest.TestCase):
     
@@ -408,7 +412,102 @@ class HostCollectionTest(
          
         self.assertItemsEqual(matching_urls, actual)
         
+@lru_cache()
+def get_url_tester_mock(identifier):
+    source = Mock()
+    source.identifier = identifier
+    return source
+
+class UrlTesterChainTest(
+                         IPv6UrlSupportTest,
+                         BaseUrlTesterTest,
+                         unittest.TestCase
+                         ):
+    
+    classification = ('TEST',)
+    
+    valid_ipv6_urls = {
+                       'http://[2001:ddd:ccc:111::22]': ['source_1', 'source_2'],
+                       'http://[2001:abc:111:22::33]': ['source_3']
+                       }
+    
+    url_to_source_id ={
+                       'http://55.44.21.12': ['source_1', 'source_2'],
+                       'http://test.com': ['source_3'],
+                       'https://abc.com': ['source_1']
+                       }
+    
+    def setUp(self):
+        url_testers = []
+        
+        for _ in range(3):
+            tester = Mock()
+            tester.any_match.return_value = False
+            tester.lookup_matching.return_value = []
+            url_testers.append(tester)
+        
+        self.tested_instance = UrlTesterChain(*url_testers)
+    
+    def _add_url_tester(self, source_id, matching_urls):
+        
+        tester = get_url_tester_mock(source_id)
+        any_match = lambda u: not set(u).isdisjoint(set(matching_urls))
+        tester.any_match.side_effect = any_match
+        
+        url_items = [self._get_item(u, source_id) for u in matching_urls]
+        tester.lookup_matching.return_value = url_items
+        
+        if not tester in self.tested_instance.url_testers:
+            self.tested_instance.url_testers.append(tester)
+    
+    def _get_item(self, url, source_id):
+        return AddressListItem(
+                               url,
+                               get_url_tester_mock(source_id),
+                               self.classification
+                               )
+    
+    def _get_expected_items_for_urls(self, urls):
+        
+        return [self._get_item(u, i) for u, ids in urls.items() for i in ids]
             
+    def _test_function_for_invalid_urls(self, function, invalid_url):
+        
+        first_called = self.tested_instance.url_testers[0]
+        mock_function = getattr(first_called, function.__name__)
+        mock_function.side_effect = ValueError
+        
+        with self.assertRaises(ValueError):
+            result = function(self.valid_urls + [invalid_url])\
+            
+            if isinstance(result, GeneratorType):
+                list(result)
+            
+    def _set_matching_urls(self, urls):
+        
+        by_source_id = defaultdict(list)
+        
+        for u, ids in urls.items():
+            for i in ids:
+                by_source_id[i].append(u)
+                
+        for i, urls in by_source_id.items():
+            self._add_url_tester(i, urls)
+            
+        shuffle(self.tested_instance.url_testers)
+    
+    def test_any_match_returns_true_for_matching_urls(self):
+        
+        self._test_any_match_returns_true_for(self.url_to_source_id)
+        
+    @parameterized.expand([
+                             ('no_matching_url', {}),
+                             ('matching_urls', url_to_source_id)
+                             ])
+    def test_lookup_matching_for(self, _, matching_urls):
+        
+        self._test_lookup_matching_for(matching_urls)
+               
 class HostnameTest(unittest.TestCase):
     
     non_equal_input = [
