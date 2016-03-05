@@ -212,44 +212,4 @@ class GetExpectedItemsForUrlsProvider(ClientGetExpectedItemsProvider):
     def _get_expected_items_for_urls(self, urls):
         hosts = [urlparse(u).hostname for u in urls]
         return self._get_expected_items(hosts)
-
-class NoIPv6UrlSupportTest(object):
-    '''
-    A common test case for url testers with
-    no support for IPv6 url addresses
-    '''
-    
-    valid_ipv6_urls = ['http://[2001:ddd:ccc:111::33]']
-    
-    def _test_function_raises_ValueError_for_valid_ipv6_url(self, function):
-        
-        self.assertRaises(ValueError, function, self.valid_ipv6_urls)
-        
-    def test_any_match_raises_ValueError_for_ipv6(self):
-        
-        self._test_function_raises_ValueError_for_valid_ipv6_url(self.tested_instance.any_match)
-        
-    def test_lookup_matching_raises_ValueError_for_ipv6(self):
-        function = lambda u: list(self.tested_instance.lookup_matching(u))
-        self._test_function_raises_ValueError_for_valid_ipv6_url(function)
-        
-class IPv6UrlSupportTest(object):
-    '''
-    A common test case for url testers supporting
-    (or at least not raising errors for) IPv6 url addresses
-    '''
-    
-    valid_ipv6_urls = ['http://[2001:ddd:ccc:111::33]']
-    
-    def test_any_match_returns_true_for_ipv6(self):
-        
-        self._test_any_match_returns_true_for(self.valid_ipv6_urls)
-        
-    def test_any_match_returns_false_for_ipv6(self):
-        
-        self._test_any_match_returns_false(self.valid_ipv6_urls)
-        
-    def test_lookup_matching_for_ipv6(self):
-        
-        self._test_lookup_matching_for(self.valid_ipv6_urls)
     
