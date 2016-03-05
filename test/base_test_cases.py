@@ -178,6 +178,7 @@ class CommonValidUrlTest(object):
     valid_url_input = [
                            ('ipv4_url', ['http://55.44.33.21']),
                            ('hostname_url', ['https://abc.com']),
+                           ('ipv6_url', ['http://[2001:ddd:ccc:111::33]'])
                            ]
     
     valid_url_list_input = [

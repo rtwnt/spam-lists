@@ -415,7 +415,9 @@ class UrlTesterChainTest(
     url_to_source_id ={
                        'http://55.44.21.12': ['source_1', 'source_2'],
                        'http://test.com': ['source_3'],
-                       'https://abc.com': ['source_1']
+                       'https://abc.com': ['source_1'],
+                       'http://[2001:ddd:ccc:111::22]': ['source_1', 'source_2'],
+                       'http://[2001:abc:111:22::33]': ['source_3']
                        }
     
     def setUp(self):
