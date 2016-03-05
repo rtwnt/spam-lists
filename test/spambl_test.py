@@ -6,7 +6,7 @@ from spambl import (UnknownCodeError, NXDOMAIN, HpHosts,
                     GoogleSafeBrowsing, UnathorizedAPIKeyError, HostCollection,
                      SimpleClassificationCodeResolver, SumClassificationCodeResolver, Hostname, IpAddress, 
                      host, is_valid_url, RedirectUrlResolver, DNSBL, accepts_valid_urls, UrlTesterChain,
-    AddressListItem)
+    AddressListItem, UrlHostTester)
 from mock import Mock, patch, MagicMock
 
 from requests.exceptions import HTTPError, InvalidSchema, InvalidURL,\
@@ -66,6 +66,47 @@ class AcceptValidUrlsTest(unittest.TestCase):
         
         self.assertRaises(ValueError, self.decorated_function, self.client, url)
         self.function.assert_not_called()
+        
+class UrlHostTesterTest(
+                        CommonValidUrlTest,
+                        BaseUrlTesterTest,
+                        TestFunctionForInvalidUrlProvider,
+                        GetExpectedItemsForUrlsProvider,
+                        unittest.TestCase):
+    
+    def setUp(self):
+        
+        self.tested_instance = UrlHostTester()
+        
+        self.is_valid_url_patcher = patch('spambl.is_valid_url')
+        self.is_valid_url_mock = self.is_valid_url_patcher.start()
+        
+        self.listed_hosts = []
+        
+        self.contains_mock = Mock()
+        setattr(UrlHostTester, '__contains__', self.contains_mock)
+        self.contains_mock.side_effect = lambda h: h in self.listed_hosts
+        
+        def lookup(h):
+            if h in self.listed_hosts:
+                return AddressListItem(
+                                       h,
+                                       self.tested_instance,
+                                       self.classification
+                                       )
+            return None
+        
+        self.lookup_mock = Mock()
+        setattr(UrlHostTester, 'lookup', self.lookup_mock)
+        self.lookup_mock.side_effect = lookup
+        
+    def tearDown(self):
+        self.is_valid_url_patcher.stop()
+        
+    def _set_matching_urls(self, urls):
+         
+        listed_hosts = [urlparse(u).hostname for u in urls]
+        self.listed_hosts = listed_hosts
         
 class DNSBLTest(
                 IPv6UrlSupportTest,
