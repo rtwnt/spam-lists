@@ -19,7 +19,7 @@ from urlparse import urlparse, parse_qs
 from test.base_test_cases import BaseHostListTest, BaseUrlTesterTest,\
 ClientGetExpectedItemsProvider, GetExpectedItemsForUrlsProvider,\
 TestFunctionForInvalidUrlProvider, NoIPv6SupportTest, IPv6SupportTest,\
-NoIPv6UrlSupportTest, IPv6UrlSupportTest, CommonValidUrlTest
+CommonValidUrlTest
 
 from cachetools import lru_cache
 from collections import defaultdict
@@ -109,13 +109,8 @@ class UrlHostTesterTest(
         self.listed_hosts = listed_hosts
         
 class DNSBLTest(
-                IPv6UrlSupportTest,
                 IPv6SupportTest,
-                CommonValidUrlTest,
-                BaseUrlTesterTest,
                 BaseHostListTest, 
-                TestFunctionForInvalidUrlProvider,
-                GetExpectedItemsForUrlsProvider,
                 ClientGetExpectedItemsProvider,
                 unittest.TestCase
                 ):
@@ -144,41 +139,16 @@ class DNSBLTest(
             raise NXDOMAIN
         self.dns_query_mock.side_effect = dns_query
          
-        self.is_valid_url_patcher = patch('spambl.is_valid_url')
-        self.is_valid_url_mock = self.is_valid_url_patcher.start()
-         
     def tearDown(self):
          
         self.dns_query_patcher.stop()
-        self.is_valid_url_patcher.stop()
-     
-    @parameterized.expand(BaseHostListTest.valid_host_input)
-    def test_lookup_for_listed_with_unknown_codes(self, _, host):
-         
-        self.classification_resolver.side_effect = UnknownCodeError
-        self._set_matching_hosts([host])
-        self.assertRaises(UnknownCodeError, self.tested_instance.lookup, host)
-         
-    @parameterized.expand(CommonValidUrlTest.valid_url_input)
-    def test_lookup_matching_with_unknow_codes(self, _, urls):
-        self.classification_resolver.side_effect = UnknownCodeError
-         
-        self._set_matching_urls(urls)
-        with self.assertRaises(UnknownCodeError):
-            list(self.tested_instance.lookup_matching(urls))
          
     def _set_matching_hosts(self, hosts):
          
         host_objects = [self.host_factory_mock(h) for h in hosts]
         self.expected_query_names = [h.relative_domain.derelativize() 
                                 for h in host_objects]
-         
-    def _set_matching_urls(self, urls):
-         
-        listed_hosts = [urlparse(u).hostname for u in urls]
-        self._set_matching_hosts(listed_hosts)
         
-    
 class BaseClassificationCodeResolverTest(object):
     
     def setUp(self):
@@ -246,13 +216,8 @@ def hp_hosts_host_factory(host_value):
     return  value
 
 class HpHostsTest(
-                  NoIPv6UrlSupportTest,
                   NoIPv6SupportTest,
-                  CommonValidUrlTest,
-                  BaseUrlTesterTest,
                   BaseHostListTest,
-                  TestFunctionForInvalidUrlProvider,
-                  GetExpectedItemsForUrlsProvider,
                   ClientGetExpectedItemsProvider,
                   unittest.TestCase
                   ):
@@ -300,15 +265,8 @@ class HpHostsTest(
          
     def _set_matching_hosts(self, hosts):
         self.listed_hosts.extend(hosts)
-         
-    def _set_matching_urls(self, urls):
-         
-        listed_hosts = [urlparse(u).hostname for u in urls]
-        self._set_matching_hosts(listed_hosts)
         
-
 class GoogleSafeBrowsingTest(
-                             IPv6UrlSupportTest,
                              CommonValidUrlTest,
                              BaseUrlTesterTest,
                              TestFunctionForInvalidUrlProvider,
@@ -389,16 +347,13 @@ def host_collection_host_factory(h):
             return host_object
         
 class HostCollectionTest(
-                         IPv6UrlSupportTest,
                          IPv6SupportTest,
-                         CommonValidUrlTest,
-                         BaseUrlTesterTest,
                          BaseHostListTest,
-                         TestFunctionForInvalidUrlProvider,
-                         GetExpectedItemsForUrlsProvider,
                          ClientGetExpectedItemsProvider,
                          unittest.TestCase
                          ):
+     
+    valid_urls = ['http://test.com', 'http://127.33.22.11']
      
     def setUp(self):
          
@@ -407,16 +362,12 @@ class HostCollectionTest(
          
         self.host_factory_mock.side_effect = lru_cache()(host_collection_host_factory)
          
-        self.is_valid_url_patcher = patch('spambl.is_valid_url')
-        self.is_valid_url_mock = self.is_valid_url_patcher.start()
-         
         self.classification = ('test_classification',)
         self.tested_instance = HostCollection('test_host_collection',
                                               self.classification)
          
     def tearDown(self):
         self.host_patcher.stop()
-        self.is_valid_url_patcher.stop()
          
     @parameterized.expand(BaseHostListTest.invalid_host_input)
     def test_add_for_invalid(self, _, value):
@@ -440,11 +391,6 @@ class HostCollectionTest(
         listed_hosts = [urlparse(u).hostname for u in urls]
         self._set_matching_hosts(listed_hosts)
         
-    @parameterized.expand(BaseUrlTesterTest.invalid_url_input)
-    def test_filter_matching_for_invalid(self, _, invalid_url):
-         
-        self._test_function_for_invalid_urls(self.tested_instance.filter_matching, invalid_url)
-         
     @parameterized.expand(CommonValidUrlTest.valid_url_list_input)
     def test_filter_matching_for(self, _, matching_urls):
          
@@ -460,17 +406,11 @@ def get_url_tester_mock(identifier):
     return source
 
 class UrlTesterChainTest(
-                         IPv6UrlSupportTest,
                          BaseUrlTesterTest,
                          unittest.TestCase
                          ):
     
     classification = ('TEST',)
-    
-    valid_ipv6_urls = {
-                       'http://[2001:ddd:ccc:111::22]': ['source_1', 'source_2'],
-                       'http://[2001:abc:111:22::33]': ['source_3']
-                       }
     
     url_to_source_id ={
                        'http://55.44.21.12': ['source_1', 'source_2'],
