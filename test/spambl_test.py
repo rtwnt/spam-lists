@@ -178,9 +178,8 @@ class DNSBLTest(
         url = 'http://hostwithunknowncode.com'
         self._set_matching_hosts([urlparse(url).hostname])
         
-        func = lambda u: list(self.tested_instance.lookup_matching(u))
         self._test_function_does_not_handle_unknown_code_error(
-                                                               func,
+                                                               self.tested_instance.lookup_matching,
                                                                [url]
                                                                )
         
@@ -567,14 +566,13 @@ class UrlTesterChainTest(
     def test_(self, _, function_name, error_type):
         
         function = getattr(self.tested_instance, function_name)
-        tested_function = lambda u: list(function(u))
         
         for tester in reversed(self.tested_instance.url_testers):
             error_source = getattr(tester, function_name)
             self._test_function_does_not_handle(
                                                 error_type,
                                                 error_source,
-                                                tested_function,
+                                                function,
                                                 ['http://triggeringerror.com']
                                                 )
                

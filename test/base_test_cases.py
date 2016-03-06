@@ -2,6 +2,7 @@
 
 from spambl import AddressListItem
 from nose_parameterized import parameterized
+from types import GeneratorType
 
 class ClientGetExpectedItemsProvider(object):
     '''
@@ -224,5 +225,7 @@ class TestFunctionDoesNotHandleProvider(object):
         exception_origin.side_effect = exception_type
         
         with self.assertRaises(exception_type):
-            function(*args, **kwargs)
-    
+            result = function(*args, **kwargs)
+            if isinstance(result, GeneratorType):
+                list(result)
+                
