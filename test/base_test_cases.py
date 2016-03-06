@@ -127,6 +127,13 @@ class BaseUrlTesterTest(object):
         
         self.assertItemsEqual(expected, actual)
         
+    def _test_filter_matching_for(self, matching_urls):
+        
+        self._set_matching_urls(matching_urls)
+        actual = list(self.tested_instance.filter_matching(self.valid_urls + list(matching_urls)))
+         
+        self.assertItemsEqual(matching_urls, actual)
+        
     def test_any_match_returns_false(self):
         
         self._test_any_match_returns_false(self.valid_urls)
@@ -165,6 +172,11 @@ class GeneratedUrlTesterTest(object):
     def test_lookup_matching_for_invalid(self, _, invalid_url):
         
         self._test_function_for_invalid_urls(self.tested_instance.lookup_matching, invalid_url)
+        
+    @parameterized.expand(invalid_url_input)
+    def test_filter_matching_for_invalid(self, _, invalid_url):
+        
+        self._test_function_for_invalid_urls(self.tested_instance.filter_matching, invalid_url)
     
     @parameterized.expand(valid_url_input)
     def test_any_match_returns_true_for(self, _, matching_urls):
@@ -175,6 +187,11 @@ class GeneratedUrlTesterTest(object):
     def test_lookup_matching_for(self, _, matching_urls):
         
         self._test_lookup_matching_for(matching_urls)
+        
+    @parameterized.expand(valid_url_list_input)
+    def test_filter_matching_for(self, _, matching_urls):
+         
+        self._test_filter_matching_for(matching_urls)
             
 class TestFunctionForInvalidUrlProvider(object):
     ''' Provides a common test method for functions

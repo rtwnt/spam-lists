@@ -80,6 +80,17 @@ class UrlHostTester(object):
             item = self.lookup(h)
             if item is not None:
                 yield item
+                
+    @accepts_valid_urls
+    def filter_matching(self, urls):
+        ''' Get urls with hosts matching listed ones
+        
+        :param urls: an iterable containing url addresses to filter
+        :returns: a list containing matching urls
+        :raises ValueError: when any of given urls is not valid
+        '''
+        is_match = lambda u: urlparse(u).hostname in self
+        return (u for u in urls if is_match(u))
     
 class DNSBL(UrlHostTester):
     ''' Represents a DNSBL service '''
@@ -384,6 +395,20 @@ class GoogleSafeBrowsing(object):
         
         return any(self._query(urls))
     
+    def _get_classification_per_matching(self, urls):
+        ''' Get classification for all matching urls
+        
+        :param urls: a sequence of urls to test
+        :return: a tuple containing matching url and classification
+        string pertaining to it
+        '''
+        for url_list, response in self._query(urls):
+            classification_set = response.content.splitlines()
+            
+            for url, _class in izip(url_list, classification_set):
+                if _class != 'ok':
+                    yield url, _class
+    
     @accepts_valid_urls
     def lookup_matching(self, urls):
         ''' Get items for all listed urls
@@ -392,13 +417,20 @@ class GoogleSafeBrowsing(object):
         :returns: a tuple containing listed url objects
         '''
         
-        for url_list, response in self._query(urls):
-            classification_set = response.content.splitlines()
-            
-            for url, _class in izip(url_list, classification_set):
-                if _class != 'ok':
-                    classification = tuple(_class.split(','))
-                    yield AddressListItem(url, self, classification)
+        for url, _class in self._get_classification_per_matching(urls):
+            classification = tuple(_class.split(','))
+            yield AddressListItem(url, self, classification)
+                    
+    @accepts_valid_urls
+    def filter_matching(self, urls):
+        ''' Get all listed urls
+        
+        :param urls: a sequence of urls to be tested
+        :returns: spam urls
+        '''
+        
+        for url, _ in self._get_classification_per_matching(urls):
+            yield url
     
 
 class HostCollection(UrlHostTester):
@@ -438,17 +470,6 @@ class HostCollection(UrlHostTester):
         test = lambda u: host_obj.is_subdomain(u) or host_obj == u
         
         return any(map(test, self.hosts))
-    
-    @accepts_valid_urls
-    def filter_matching(self, urls):
-        ''' Get urls with hosts matching items stored in the collection
-        
-        :param urls: an iterable containing url addresses to filter
-        :returns: a list containing matching urls
-        :raises ValueError: when any of given urls is not valid
-        '''
-        is_match = lambda u: urlparse(u).hostname in self
-        return filter(is_match, urls)
     
     def lookup(self, host_value):
         '''

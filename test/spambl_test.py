@@ -465,14 +465,6 @@ class HostCollectionTest(
         listed_hosts = [urlparse(u).hostname for u in urls]
         self._set_matching_hosts(listed_hosts)
         
-    @parameterized.expand(GeneratedUrlTesterTest.valid_url_list_input)
-    def test_filter_matching_for(self, _, matching_urls):
-         
-        self._set_matching_urls(matching_urls)
-        actual = self.tested_instance.filter_matching(self.valid_urls + matching_urls)
-         
-        self.assertItemsEqual(matching_urls, actual)
-        
 @lru_cache()
 def get_url_tester_mock(identifier):
     source = Mock()
