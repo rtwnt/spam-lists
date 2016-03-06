@@ -18,7 +18,8 @@ from urlparse import urlparse, parse_qs
 
 from test.base_test_cases import BaseHostListTest, BaseUrlTesterTest,\
 ClientGetExpectedItemsProvider, TestFunctionForInvalidUrlProvider,\
-NoIPv6SupportTest, IPv6SupportTest, GeneratedUrlTesterTest
+NoIPv6SupportTest, IPv6SupportTest, GeneratedUrlTesterTest,\
+TestFunctionDoesNotHandleProvider
 
 from cachetools import lru_cache
 from collections import defaultdict
@@ -116,6 +117,7 @@ class DNSBLTest(
                 IPv6SupportTest,
                 BaseHostListTest, 
                 ClientGetExpectedItemsProvider,
+                TestFunctionDoesNotHandleProvider,
                 unittest.TestCase
                 ):
      
@@ -152,6 +154,36 @@ class DNSBLTest(
         host_objects = [self.host_factory_mock(h) for h in hosts]
         self.expected_query_names = [h.relative_domain.derelativize() 
                                 for h in host_objects]
+        
+    def _test_function_does_not_handle_unknown_code_error(self, function, *args, **kwargs):
+        
+        self._test_function_does_not_handle(
+                                            UnknownCodeError,
+                                            self.classification_resolver,
+                                            function,
+                                            *args,
+                                            **kwargs
+                                            )
+        
+    def test_lookup_does_not_handle_unknown_code_error(self):
+        
+        host = 'hostwithunknowncode.com'
+        self._set_matching_hosts([host])
+        self._test_function_does_not_handle_unknown_code_error(
+                                                               self.tested_instance.lookup,
+                                                               host
+                                                               )
+        
+    def test_lookup_matching_does_not_handle_unknown_code_error(self):
+        
+        url = 'http://hostwithunknowncode.com'
+        self._set_matching_hosts([urlparse(url).hostname])
+        
+        func = lambda u: list(self.tested_instance.lookup_matching(u))
+        self._test_function_does_not_handle_unknown_code_error(
+                                                               func,
+                                                               [url]
+                                                               )
         
 class BaseClassificationCodeResolverTest(object):
     
