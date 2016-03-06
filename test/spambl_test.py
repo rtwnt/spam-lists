@@ -73,18 +73,18 @@ class UrlHostTesterTest(
                         unittest.TestCase):
     
     def setUp(self):
-        
+          
         self.tested_instance = UrlHostTester()
-        
+          
         self.is_valid_url_patcher = patch('spambl.is_valid_url')
         self.is_valid_url_mock = self.is_valid_url_patcher.start()
-        
+          
         self.listed_hosts = []
-        
-        self.contains_mock = Mock()
-        setattr(UrlHostTester, '__contains__', self.contains_mock)
+          
+        self.contains_patcher = patch('spambl.UrlHostTester.__contains__')
+        self.contains_mock = self.contains_patcher.start()
         self.contains_mock.side_effect = lambda h: h in self.listed_hosts
-        
+          
         def lookup(h):
             if h in self.listed_hosts:
                 return AddressListItem(
@@ -93,19 +93,21 @@ class UrlHostTesterTest(
                                        self.classification
                                        )
             return None
-        
-        self.lookup_mock = Mock()
-        setattr(UrlHostTester, 'lookup', self.lookup_mock)
+          
+        self.lookup_patcher = patch('spambl.UrlHostTester.lookup')
+        self.lookup_mock = self.lookup_patcher.start()
         self.lookup_mock.side_effect = lookup
-        
+          
     def tearDown(self):
         self.is_valid_url_patcher.stop()
-        
+        self.contains_patcher.stop()
+        self.lookup_patcher.stop()
+          
     def _set_matching_urls(self, urls):
-         
+           
         listed_hosts = [urlparse(u).hostname for u in urls]
         self.listed_hosts = listed_hosts
-        
+          
     def _get_expected_items_for_urls(self, urls):
         hosts = [urlparse(u).hostname for u in urls]
         return self._get_expected_items(hosts)
