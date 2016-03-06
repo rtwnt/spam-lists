@@ -763,8 +763,24 @@ class UrlTesterChain(object):
         for tester in self.url_testers:
             for item in tester.lookup_matching(urls):
                 yield item
+                
+    def filter_matching(self, urls):
+        ''' Get those of given ruls that match listing criteria 
+        (hosts, whole urls, etc.)
         
-                    
+        :param urls: an iterable containing urls
+        :returns: matching urls
+        '''
+        seen = set()
+        urls = set(urls)
+        for tester in self.url_testers:
+            urls = urls - seen
+            for u in tester.filter_matching(urls):
+                if u not in seen:
+                    seen.add(u)
+                    yield u
+    
+        
 class BaseUrlTester(object):
     ''' A base for classes responsible for url testing '''
     

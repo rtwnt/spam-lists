@@ -492,6 +492,7 @@ class UrlTesterChainTest(
             tester = Mock()
             tester.any_match.return_value = False
             tester.lookup_matching.return_value = []
+            tester.filter_matching.return_value = []
             url_testers.append(tester)
         
         self.tested_instance = UrlTesterChain(*url_testers)
@@ -501,6 +502,8 @@ class UrlTesterChainTest(
         tester = get_url_tester_mock(source_id)
         any_match = lambda u: not set(u).isdisjoint(set(matching_urls))
         tester.any_match.side_effect = any_match
+        
+        tester.filter_matching.return_value = list(matching_urls)
         
         url_items = [self._get_item(u, source_id) for u in matching_urls]
         tester.lookup_matching.return_value = url_items
@@ -543,6 +546,14 @@ class UrlTesterChainTest(
     def test_lookup_matching_for(self, _, matching_urls):
         
         self._test_lookup_matching_for(matching_urls)
+        
+    @parameterized.expand([
+                             ('no_matching_url', {}),
+                             ('matching_urls', url_to_source_id)
+                             ])
+    def test_filter_matching_for(self, _, matching_urls):
+        
+        self._test_filter_matching_for(matching_urls)
                
 class HostnameTest(unittest.TestCase):
     
