@@ -85,24 +85,6 @@ class BaseHostListTest(object):
     def test_lookup_for_not_listed(self, _, value):
         
         self._test_lookup_for_not_listed(value)
-
-class NoIPv6SupportTest(object):
-    ''' A test case for classes representing host list that
-    raise an error when being queried for valid IPv6 addresses '''
-    
-    valid_ipv6 = '2001:ddd:ccc:111::33'
-    
-    def _test_function_raises_ValueError_for_valid_ipv6(self, function):
-        
-        self.assertRaises(ValueError, function, self.valid_ipv6)
-        
-    def test_contains_raises_ValueError_for_valid_ipv6(self):
-        
-        self._test_function_raises_ValueError_for_valid_ipv6(self.tested_instance.__contains__)
-        
-    def test_lookup_raises_ValueError_for_valid_ipv6(self):
-        
-        self._test_function_raises_ValueError_for_valid_ipv6(self.tested_instance.lookup)
         
 class IPv6SupportTest(object):
     ''' A test case for classes representing host lists

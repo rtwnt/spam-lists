@@ -18,8 +18,7 @@ from urlparse import urlparse, parse_qs
 
 from test.base_test_cases import BaseHostListTest, BaseUrlTesterTest,\
 ClientGetExpectedItemsProvider, TestFunctionForInvalidUrlProvider,\
-NoIPv6SupportTest, IPv6SupportTest, GeneratedUrlTesterTest,\
-TestFunctionDoesNotHandleProvider
+IPv6SupportTest, GeneratedUrlTesterTest, TestFunctionDoesNotHandleProvider
 
 from cachetools import lru_cache
 from collections import defaultdict
@@ -252,12 +251,13 @@ def hp_hosts_host_factory(host_value):
     return  value
 
 class HpHostsTest(
-                  NoIPv6SupportTest,
                   BaseHostListTest,
                   ClientGetExpectedItemsProvider,
                   unittest.TestCase
                   ):
-     
+    
+    valid_ipv6 = '2001:ddd:ccc:111::33'
+    
     @classmethod
     def setUpClass(cls):
          
@@ -301,6 +301,24 @@ class HpHostsTest(
          
     def _set_matching_hosts(self, hosts):
         self.listed_hosts.extend(hosts)
+    
+    def _test_function_raises_value_error_for_valid_ipv6(self, function, ipv6_arg):
+        
+        self.assertRaises(ValueError, function, ipv6_arg)
+        
+    def test_contains_raises_value_error_for_valid_ipv6(self):
+        
+        self._test_function_raises_value_error_for_valid_ipv6(
+                                                             self.tested_instance.__contains__,
+                                                             self.valid_ipv6
+                                                             )
+        
+    def test_lookup_raises_value_error_for_valid_ipv6(self):
+        
+        self._test_function_raises_value_error_for_valid_ipv6(
+                                                             self.tested_instance.lookup,
+                                                             self.valid_ipv6
+                                                             )
         
 class GoogleSafeBrowsingTest(
                              GeneratedUrlTesterTest,
