@@ -129,27 +129,7 @@ class BaseUrlTesterTest(object):
     testing urls for matching criteria supported by the
     classes or services that they represent'''
     
-    invalid_url_input = [
-                         ('invalid_hostname', 'http://-abc.com'),
-                         ('invalid_schema', 'abc://hostname.com'),
-                         ('no_schema', 'hostname.com'),
-                         ('invalid_ipv4', 'http://999.999.999.999'),
-                         ('invalid_ipv4', 'http://127.0.0.0.1'),
-                         ('invalid_ipv6', 'http://[2001:db8:abcef:123::42]'),
-                         ('invalid_ipv6', 'http://[2001:db8:abch:123::42]')
-                         ]
-    
     valid_urls = ['http://test.com', 'http://127.33.22.11']
-        
-    @parameterized.expand(invalid_url_input)
-    def test_any_match_for_invalid(self, _, invalid_url):
-        
-        self._test_function_for_invalid_urls(self.tested_instance.any_match, invalid_url)
-            
-    @parameterized.expand(invalid_url_input)
-    def test_lookup_matching_for_invalid(self, _, invalid_url):
-        
-        self._test_function_for_invalid_urls(self.tested_instance.lookup_matching, invalid_url)
         
     def _test_any_match_returns_true_for(self, matching_urls):
         self._set_matching_urls(matching_urls)
@@ -170,10 +150,19 @@ class BaseUrlTesterTest(object):
         
         self._test_any_match_returns_false(self.valid_urls)
         
-class CommonValidUrlTest(object):
-    ''' A test case containing common tests used for
-    testing a url tester methods for valid url arguments
-    '''
+class GeneratedUrlTesterTest(object):
+    ''' A class containing data for url tester test generation
+    and test methods generated using the data '''
+    
+    invalid_url_input = [
+                         ('invalid_hostname', 'http://-abc.com'),
+                         ('invalid_schema', 'abc://hostname.com'),
+                         ('no_schema', 'hostname.com'),
+                         ('invalid_ipv4', 'http://999.999.999.999'),
+                         ('invalid_ipv4', 'http://127.0.0.0.1'),
+                         ('invalid_ipv6', 'http://[2001:db8:abcef:123::42]'),
+                         ('invalid_ipv6', 'http://[2001:db8:abch:123::42]')
+                         ]
     
     valid_url_input = [
                            ('ipv4_url', ['http://55.44.33.21']),
@@ -185,6 +174,16 @@ class CommonValidUrlTest(object):
                              ('no_matching_url', []),
                              ('two_urls', ['http://55.44.33.21', 'https://abc.com'])
                              ]+valid_url_input
+    
+    @parameterized.expand(invalid_url_input)
+    def test_any_match_for_invalid(self, _, invalid_url):
+        
+        self._test_function_for_invalid_urls(self.tested_instance.any_match, invalid_url)
+            
+    @parameterized.expand(invalid_url_input)
+    def test_lookup_matching_for_invalid(self, _, invalid_url):
+        
+        self._test_function_for_invalid_urls(self.tested_instance.lookup_matching, invalid_url)
     
     @parameterized.expand(valid_url_input)
     def test_any_match_returns_true_for(self, _, matching_urls):

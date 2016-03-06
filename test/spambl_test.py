@@ -19,12 +19,11 @@ from urlparse import urlparse, parse_qs
 from test.base_test_cases import BaseHostListTest, BaseUrlTesterTest,\
 ClientGetExpectedItemsProvider, GetExpectedItemsForUrlsProvider,\
 TestFunctionForInvalidUrlProvider, NoIPv6SupportTest, IPv6SupportTest,\
-CommonValidUrlTest
+GeneratedUrlTesterTest
 
 from cachetools import lru_cache
 from collections import defaultdict
 from random import shuffle
-from types import GeneratorType
 
 class AcceptValidUrlsTest(unittest.TestCase):
     
@@ -68,7 +67,7 @@ class AcceptValidUrlsTest(unittest.TestCase):
         self.function.assert_not_called()
         
 class UrlHostTesterTest(
-                        CommonValidUrlTest,
+                        GeneratedUrlTesterTest,
                         BaseUrlTesterTest,
                         TestFunctionForInvalidUrlProvider,
                         GetExpectedItemsForUrlsProvider,
@@ -267,7 +266,7 @@ class HpHostsTest(
         self.listed_hosts.extend(hosts)
         
 class GoogleSafeBrowsingTest(
-                             CommonValidUrlTest,
+                             GeneratedUrlTesterTest,
                              BaseUrlTesterTest,
                              TestFunctionForInvalidUrlProvider,
                              ClientGetExpectedItemsProvider,
@@ -391,7 +390,7 @@ class HostCollectionTest(
         listed_hosts = [urlparse(u).hostname for u in urls]
         self._set_matching_hosts(listed_hosts)
         
-    @parameterized.expand(CommonValidUrlTest.valid_url_list_input)
+    @parameterized.expand(GeneratedUrlTesterTest.valid_url_list_input)
     def test_filter_matching_for(self, _, matching_urls):
          
         self._set_matching_urls(matching_urls)
@@ -409,7 +408,6 @@ class UrlTesterChainTest(
                          BaseUrlTesterTest,
                          unittest.TestCase
                          ):
-    
     classification = ('TEST',)
     
     url_to_source_id ={
@@ -453,18 +451,6 @@ class UrlTesterChainTest(
     def _get_expected_items_for_urls(self, urls):
         
         return [self._get_item(u, i) for u, ids in urls.items() for i in ids]
-            
-    def _test_function_for_invalid_urls(self, function, invalid_url):
-        
-        first_called = self.tested_instance.url_testers[0]
-        mock_function = getattr(first_called, function.__name__)
-        mock_function.side_effect = ValueError
-        
-        with self.assertRaises(ValueError):
-            result = function(self.valid_urls + [invalid_url])\
-            
-            if isinstance(result, GeneratorType):
-                list(result)
             
     def _set_matching_urls(self, urls):
         
