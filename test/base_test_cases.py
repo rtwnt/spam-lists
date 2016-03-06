@@ -2,7 +2,6 @@
 
 from spambl import AddressListItem
 from nose_parameterized import parameterized
-from urlparse import urlparse
 
 class ClientGetExpectedItemsProvider(object):
     '''
@@ -205,10 +204,4 @@ class TestFunctionForInvalidUrlProvider(object):
         
         with self.assertRaises(ValueError):
             function(self.valid_urls + [invalid_url])
-        
-class GetExpectedItemsForUrlsProvider(ClientGetExpectedItemsProvider):
-    
-    def _get_expected_items_for_urls(self, urls):
-        hosts = [urlparse(u).hostname for u in urls]
-        return self._get_expected_items(hosts)
     

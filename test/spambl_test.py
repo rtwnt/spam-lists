@@ -17,9 +17,8 @@ from nose_parameterized import parameterized
 from urlparse import urlparse, parse_qs
 
 from test.base_test_cases import BaseHostListTest, BaseUrlTesterTest,\
-ClientGetExpectedItemsProvider, GetExpectedItemsForUrlsProvider,\
-TestFunctionForInvalidUrlProvider, NoIPv6SupportTest, IPv6SupportTest,\
-GeneratedUrlTesterTest
+ClientGetExpectedItemsProvider, TestFunctionForInvalidUrlProvider,\
+NoIPv6SupportTest, IPv6SupportTest, GeneratedUrlTesterTest
 
 from cachetools import lru_cache
 from collections import defaultdict
@@ -70,7 +69,7 @@ class UrlHostTesterTest(
                         GeneratedUrlTesterTest,
                         BaseUrlTesterTest,
                         TestFunctionForInvalidUrlProvider,
-                        GetExpectedItemsForUrlsProvider,
+                        ClientGetExpectedItemsProvider,
                         unittest.TestCase):
     
     def setUp(self):
@@ -106,6 +105,10 @@ class UrlHostTesterTest(
          
         listed_hosts = [urlparse(u).hostname for u in urls]
         self.listed_hosts = listed_hosts
+        
+    def _get_expected_items_for_urls(self, urls):
+        hosts = [urlparse(u).hostname for u in urls]
+        return self._get_expected_items(hosts)
         
 class DNSBLTest(
                 IPv6SupportTest,
