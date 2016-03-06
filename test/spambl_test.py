@@ -473,6 +473,7 @@ def get_url_tester_mock(identifier):
 
 class UrlTesterChainTest(
                          BaseUrlTesterTest,
+                         TestFunctionDoesNotHandleProvider,
                          unittest.TestCase
                          ):
     classification = ('TEST',)
@@ -554,6 +555,28 @@ class UrlTesterChainTest(
     def test_filter_matching_for(self, _, matching_urls):
         
         self._test_filter_matching_for(matching_urls)
+        
+    @parameterized.expand([
+                           ('any_match_does_not_handle_value_error', 'any_match', ValueError),
+                           ('any_match_does_not_handle_unknown_code_error', 'any_match', UnknownCodeError),
+                           ('lookup_matching_does_not_handle_value_error', 'lookup_matching', ValueError),
+                           ('lookup_matching_does_not_handle_unknown_code_error', 'lookup_matching', UnknownCodeError),
+                           ('filter_matching_does_not_handle_value_error', 'filter_matching', ValueError),
+                           ('filter_matching_does_not_handle_unknown_code_error', 'filter_matching', UnknownCodeError)
+                           ])
+    def test_(self, _, function_name, error_type):
+        
+        function = getattr(self.tested_instance, function_name)
+        tested_function = lambda u: list(function(u))
+        
+        for tester in reversed(self.tested_instance.url_testers):
+            error_source = getattr(tester, function_name)
+            self._test_function_does_not_handle(
+                                                error_type,
+                                                error_source,
+                                                tested_function,
+                                                ['http://triggeringerror.com']
+                                                )
                
 class HostnameTest(unittest.TestCase):
     
