@@ -204,4 +204,26 @@ class TestFunctionForInvalidUrlProvider(object):
         
         with self.assertRaises(ValueError):
             function(self.valid_urls + [invalid_url])
+            
+class TestFunctionDoesNotHandleProvider(object):
+
+    def _test_function_does_not_handle(self, exception_type, exception_origin,
+                                       function, *args, **kwargs):
+        '''
+        Test if a given function does not handle an error raised by a dependency
+        
+        :param exception_type: a type of exception to be raised
+        :param exception_origin: a function raising the error, 
+        represented by an instance of Mock
+        :param function: a function to be tested
+        :param *args: positional arguments to be passed to
+        the tested function
+        :param **kwargs: keyword arguments to be passed to
+        the tested function
+        '''
+        
+        exception_origin.side_effect = exception_type
+        
+        with self.assertRaises(exception_type):
+            function(*args, **kwargs)
     
