@@ -48,6 +48,12 @@ class UrlHostTester(object):
     ''' A class containing methods used to test urls with
     their hosts as criteria '''
     
+    def __contains__(self, other):
+        raise NotImplementedError
+    
+    def lookup(self, other):
+        raise NotImplementedError
+    
     @accepts_valid_urls
     def any_match(self, urls):
         ''' 
