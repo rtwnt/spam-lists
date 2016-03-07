@@ -148,6 +148,14 @@ def dnsbl_host_factory(h):
     host_object.__str__.return_value = h
     return host_object
 
+def create_dns_query_function(expected_query_names):
+    def dns_query(query_name):
+            if query_name in expected_query_names:
+                dns_answer_mock = Mock()
+                dns_answer_mock.to_text.return_value = '121.0.0.1'
+                return [dns_answer_mock]
+            raise NXDOMAIN
+    return dns_query
         
 class DNSBLTest(
                 IPv6SupportTest,
@@ -172,14 +180,7 @@ class DNSBLTest(
          
         self.dns_query_patcher = patch('spambl.query')
         self.dns_query_mock = self.dns_query_patcher.start()
-        self.expected_query_names = []
-        def dns_query(query_name):
-            if query_name in self.expected_query_names:
-                dns_answer_mock = Mock()
-                dns_answer_mock.to_text.return_value = '121.0.0.1'
-                return [dns_answer_mock]
-            raise NXDOMAIN
-        self.dns_query_mock.side_effect = dns_query
+        self.dns_query_mock.side_effect = create_dns_query_function([])
          
     def tearDown(self):
          
@@ -188,8 +189,9 @@ class DNSBLTest(
     def _set_matching_hosts(self, hosts):
          
         host_objects = [self.host_factory_mock(h) for h in hosts]
-        self.expected_query_names = [h.relative_domain.derelativize() 
+        expected_query_names = [h.relative_domain.derelativize() 
                                 for h in host_objects]
+        self.dns_query_mock.side_effect = create_dns_query_function(expected_query_names)
         
     def _test_function_does_not_handle_unknown_code_error(self, function, *args, **kwargs):
         
