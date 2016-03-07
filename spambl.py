@@ -301,7 +301,7 @@ class SumClassificationCodeResolver(BaseClassificationCodeResolver):
             
         return tuple(classifications)
     
-class HpHosts(UrlHostTester):
+class HpHosts(HostList, UrlHostTester):
     ''' hpHosts client '''
     
     identifier = ' http://www.hosts-file.net/'
@@ -316,47 +316,39 @@ class HpHosts(UrlHostTester):
         
         self.app_id = client_name
         
-    def _query(self, host_value, classification = False):
+        super(HpHosts, self).__init__(host)
+        
+    def _query(self, host_object, classification = False):
         ''' Query the client for data of given host
         
-        :param host: a valid host string
+        :param host_object: an object representing a host value
         :param classification: if True: hpHosts is queried also for classification for given host, if listed
         :returns: content of response to GET request to hpHosts for data on the given host
         '''
         
-        valid_host = host(host_value)
-        
-        if validators.ipv6(str(valid_host)):
+        if validators.ipv6(str(host_object)):
             msg_template = 'Error for argument: {}. HpHosts does not support ipv6'
-            raise ValueError, msg_template.format(valid_host)
+            raise ValueError, msg_template.format(host_object)
         
-        url = 'http://verify.hosts-file.net/?v={}&s={}'.format(self.app_id, valid_host)
+        url = 'http://verify.hosts-file.net/?v={}&s={}'.format(self.app_id, host_object)
         url = url + '&class=true' if classification else url
         
         return get(url).content
     
-    def __contains__(self, host):
-        ''' Check if given host is present in hpHosts blacklist
+    def _contains(self, host_object):
         
-        :param host: a valid host string
-        :returns: a boolean value True if given host is listed on hpHosts, False otherwise
-        '''
-        return self._LISTED in self._query(host)
+        return self._LISTED in self._query(host_object)
     
-    def lookup(self, host):
-        ''' Get an object representing a value for a given host, if listed in hpHosts
+    def _get_match_and_classification(self, host_object):
         
-        :param host: a valid host string
-        :returns: a ListItem object, or None if host is not listed
-        '''
-        data = self._query(host, True)
+        data = self._query(host_object, True)
         
         if self._LISTED in data:
             elements = data.split(',')
             classification = tuple(elements[1:])
             
-            return AddressListItem(host, self, classification)
-        return None
+            return host_object, classification
+        return None, None
         
 
 class GoogleSafeBrowsing(object):

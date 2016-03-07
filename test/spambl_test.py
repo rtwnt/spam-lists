@@ -309,7 +309,8 @@ class HpHostsTest(
             query_data = parse_qs(query_string)
              
             content = 'Not listed'
-            if query_data['s'][0] in self.listed_hosts:
+            host = query_data['s'][0]
+            if host in self.listed_hosts:
                 content = 'Listed,{}'.format(classification)
                  
             response = Mock()
@@ -325,9 +326,12 @@ class HpHostsTest(
         self.listed_hosts = []
         
         self._set_up_get_mock()
+        
+        self.host_factory_mock = Mock()
+        
+        self.tested_instance = HpHosts('spambl_test_suite')
+        self.tested_instance._host_factory = self.host_factory_mock
          
-        self.host_patcher = patch('spambl.host')
-        self.host_factory_mock = self.host_patcher.start()
         self.host_factory_mock.side_effect = hp_hosts_host_factory
          
         self.is_valid_url_patcher = patch('spambl.is_valid_url')
@@ -335,7 +339,6 @@ class HpHostsTest(
          
     def tearDown(self):
         self.get_patcher.stop()
-        self.host_patcher.stop()
         self.is_valid_url_patcher.stop()
          
     def _set_matching_hosts(self, hosts):
