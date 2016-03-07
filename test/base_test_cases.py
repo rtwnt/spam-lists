@@ -26,30 +26,29 @@ class BaseHostListTest(object):
     ''' A common test case for all classes that represent
     a host list stored locally or by a remote service '''
     
-    invalid_host_input = [
-                          ('ipv4', u'255.0.120.1.1'),
-                          ('ipv6', '2001:db8:abcef:123::42'),
-                          ('host', '-aaa')
-                          ]
-    
     valid_host_input = [
                         ('ipv4', u'255.0.120.1'),
                         ('hostname', 'test.pl')
                         ]
     
-    def _test_function_for_invalid(self, function, value):
+    def _test_function_does_not_handle_value_error(self, function, arg):
+        self._test_function_does_not_handle(ValueError,
+                                            self.host_factory_mock,
+                                            function,
+                                            arg
+                                            )
+    
+    @parameterized.expand([
+                           ('__contains__'),
+                           ('lookup')
+                           ])
+    def test_value_error_is_not_handled_by(self, function_name):
         
-        self.host_factory_mock.side_effect = ValueError
-        self.assertRaises(ValueError, function, value)
-        
-    @parameterized.expand(invalid_host_input)
-    def test_contains_for_invalid(self, _, value):
-        
-        self._test_function_for_invalid(self.tested_instance.__contains__, value)
-        
-    @parameterized.expand(invalid_host_input)
-    def test_lookup_for_invalid(self, _, value):
-        self._test_function_for_invalid(self.tested_instance.lookup, value)
+        function = getattr(self.tested_instance, function_name)
+        self._test_function_does_not_handle_value_error(
+                                            function,
+                                            'invalidhost.com'
+                                            )
         
     def _test_contains_for_listed(self, value):
         
@@ -143,16 +142,6 @@ class GeneratedUrlTesterTest(object):
     ''' A class containing data for url tester test generation
     and test methods generated using the data '''
     
-    invalid_url_input = [
-                         ('invalid_hostname', 'http://-abc.com'),
-                         ('invalid_schema', 'abc://hostname.com'),
-                         ('no_schema', 'hostname.com'),
-                         ('invalid_ipv4', 'http://999.999.999.999'),
-                         ('invalid_ipv4', 'http://127.0.0.0.1'),
-                         ('invalid_ipv6', 'http://[2001:db8:abcef:123::42]'),
-                         ('invalid_ipv6', 'http://[2001:db8:abch:123::42]')
-                         ]
-    
     valid_url_input = [
                            ('ipv4_url', ['http://55.44.33.21']),
                            ('hostname_url', ['https://abc.com']),
@@ -163,21 +152,19 @@ class GeneratedUrlTesterTest(object):
                              ('no_matching_url', []),
                              ('two_urls', ['http://55.44.33.21', 'https://abc.com'])
                              ]+valid_url_input
-    
-    @parameterized.expand(invalid_url_input)
-    def test_any_match_for_invalid(self, _, invalid_url):
+                             
+    @parameterized.expand([
+                           ('any_match'),
+                           ('lookup_matching'),
+                           ('filter_matching')
+                           ])
+    def test_value_error_is_raised_by(self, function_name):
+        invalid_url = 'http://invalid.url.com'
+        self.is_valid_url_mock.side_effect = lambda u: u != invalid_url
         
-        self._test_function_for_invalid_urls(self.tested_instance.any_match, invalid_url)
-            
-    @parameterized.expand(invalid_url_input)
-    def test_lookup_matching_for_invalid(self, _, invalid_url):
-        
-        self._test_function_for_invalid_urls(self.tested_instance.lookup_matching, invalid_url)
-        
-    @parameterized.expand(invalid_url_input)
-    def test_filter_matching_for_invalid(self, _, invalid_url):
-        
-        self._test_function_for_invalid_urls(self.tested_instance.filter_matching, invalid_url)
+        function = getattr(self.tested_instance, function_name)
+        with self.assertRaises(ValueError):
+            function(self.valid_urls + [invalid_url])
     
     @parameterized.expand(valid_url_input)
     def test_any_match_returns_true_for(self, _, matching_urls):
@@ -193,17 +180,6 @@ class GeneratedUrlTesterTest(object):
     def test_filter_matching_for(self, _, matching_urls):
          
         self._test_filter_matching_for(matching_urls)
-            
-class TestFunctionForInvalidUrlProvider(object):
-    ''' Provides a common test method for functions
-    using spambl.is_valid_url for url validation '''
-    
-    def _test_function_for_invalid_urls(self, function, invalid_url):
-        
-        self.is_valid_url_mock.side_effect = lambda u: u != invalid_url
-        
-        with self.assertRaises(ValueError):
-            function(self.valid_urls + [invalid_url])
             
 class TestFunctionDoesNotHandleProvider(object):
 

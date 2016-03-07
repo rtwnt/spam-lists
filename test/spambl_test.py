@@ -17,8 +17,8 @@ from nose_parameterized import parameterized
 from urlparse import urlparse, parse_qs
 
 from test.base_test_cases import BaseHostListTest, BaseUrlTesterTest,\
-ClientGetExpectedItemsProvider, TestFunctionForInvalidUrlProvider,\
-IPv6SupportTest, GeneratedUrlTesterTest, TestFunctionDoesNotHandleProvider
+ClientGetExpectedItemsProvider, IPv6SupportTest, GeneratedUrlTesterTest,\
+TestFunctionDoesNotHandleProvider
 
 from cachetools import lru_cache
 from collections import defaultdict
@@ -68,7 +68,6 @@ class AcceptValidUrlsTest(unittest.TestCase):
 class UrlHostTesterTest(
                         GeneratedUrlTesterTest,
                         BaseUrlTesterTest,
-                        TestFunctionForInvalidUrlProvider,
                         ClientGetExpectedItemsProvider,
                         unittest.TestCase):
     
@@ -251,6 +250,7 @@ def hp_hosts_host_factory(host_value):
 
 class HpHostsTest(
                   BaseHostListTest,
+                  TestFunctionDoesNotHandleProvider,
                   ClientGetExpectedItemsProvider,
                   unittest.TestCase
                   ):
@@ -342,7 +342,6 @@ class HpHostsTest(
 class GoogleSafeBrowsingTest(
                              GeneratedUrlTesterTest,
                              BaseUrlTesterTest,
-                             TestFunctionForInvalidUrlProvider,
                              ClientGetExpectedItemsProvider,
                              unittest.TestCase
                              ):
@@ -422,12 +421,13 @@ def host_collection_host_factory(h):
 class HostCollectionTest(
                          IPv6SupportTest,
                          BaseHostListTest,
+                         TestFunctionDoesNotHandleProvider,
                          ClientGetExpectedItemsProvider,
                          unittest.TestCase
                          ):
      
     valid_urls = ['http://test.com', 'http://127.33.22.11']
-     
+    
     def setUp(self):
          
         self.host_patcher = patch('spambl.host')
@@ -441,11 +441,11 @@ class HostCollectionTest(
          
     def tearDown(self):
         self.host_patcher.stop()
-         
-    @parameterized.expand(BaseHostListTest.invalid_host_input)
-    def test_add_for_invalid(self, _, value):
-         
-        self._test_function_for_invalid(self.tested_instance.add, value)
+        
+    def test_add_does_not_handle_value_error(self):
+        function = self.tested_instance.add
+        
+        self._test_function_does_not_handle_value_error(function, 'invalidhost.com')
          
     @parameterized.expand(BaseHostListTest.valid_host_input)
     def test_add_for_valid(self, _, value):
