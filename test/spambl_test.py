@@ -288,6 +288,22 @@ def hp_hosts_host_factory(host_value):
     value.__str__.return_value = str(host_value)
     return  value
 
+def create_hp_hosts_get(classification, listed_hosts):
+    class_str = ','.join(classification)
+    def hp_hosts_get(url):
+        query_string = urlparse(url).query
+        query_data = parse_qs(query_string)
+        
+        content = 'Not listed'
+        host = query_data['s'][0]
+        if host in listed_hosts:
+            content = 'Listed,{}'.format(class_str)
+            
+        response = Mock()
+        response.content = content
+        return response
+    return hp_hosts_get
+
 class HpHostsTest(
                   BaseHostListTest,
                   TestFunctionDoesNotHandleProvider,
@@ -303,23 +319,9 @@ class HpHostsTest(
         cls.tested_instance = HpHosts('spambl_test_suite')
         
     def _set_up_get_mock(self):
-        classification = ','.join(self.classification)
-        def get(url):
-            query_string = urlparse(url).query
-            query_data = parse_qs(query_string)
-             
-            content = 'Not listed'
-            host = query_data['s'][0]
-            if host in self.listed_hosts:
-                content = 'Listed,{}'.format(classification)
-                 
-            response = Mock()
-            response.content = content
-            return response
-        
         self.get_patcher = patch('spambl.get')
         self.get_mock = self.get_patcher.start()
-        self.get_mock.side_effect = get
+        self.get_mock.side_effect = create_hp_hosts_get(self.classification, [])
         
     def setUp(self):
          
@@ -342,7 +344,7 @@ class HpHostsTest(
         self.is_valid_url_patcher.stop()
          
     def _set_matching_hosts(self, hosts):
-        self.listed_hosts.extend(hosts)
+        self.get_mock.side_effect = create_hp_hosts_get(self.classification, hosts)
     
     def _test_function_raises_value_error_for_valid_ipv6(self, function, ipv6_arg):
         
