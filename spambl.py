@@ -153,7 +153,7 @@ class UrlHostTester(object):
         is_match = lambda u: urlparse(u).hostname in self
         return (u for u in urls if is_match(u))
     
-class DNSBL(UrlHostTester):
+class DNSBL(HostList, UrlHostTester):
     ''' Represents a DNSBL service '''
     def __init__(self, identifier, query_suffix, classification_resolver, host_factory):
         ''' Create new DNSBL object
@@ -169,20 +169,19 @@ class DNSBL(UrlHostTester):
 
         self._query_suffix = name.from_text(query_suffix)
         self._get_classification = classification_resolver
-        self.host_factory = host_factory
+        self._host_factory = host_factory
+        
+        super(DNSBL, self).__init__(host_factory)
     
-    def _query(self, host):
+    def _query(self, host_object):
         ''' Query DNSBL service for given value
         
-        :param host: a host value
+        :param host_object: an object representing host, created by _host_factory
         :returns: an integer representing classification code for given value, if it is listed. Otherwise,
         it returns None
         '''
-        
-        host = self.host_factory(host)
-        
-        hostname = host.relative_domain
-        query_name = hostname.derelativize(self._query_suffix)
+        host_to_query = host_object.relative_domain
+        query_name = host_to_query.derelativize(self._query_suffix)
         
         try:
             response = query(query_name)
@@ -196,33 +195,21 @@ class DNSBL(UrlHostTester):
     def __str__(self):
         return str(self._identifier)
         
-    def __contains__(self, host):
-        ''' Check if given host is listed by this service
+    def _contains(self, host_object):
         
-        :param host: a host string
-        :return: True if the host is listed, otherwise False
-        '''
-        return bool(self._query(host))
+        return bool(self._query(host_object))
     
-    def lookup(self, host):
-        ''' Perform item lookup for given host
+    def _get_match_and_classification(self, host_object):
         
-        :param host: a host value
-        :returns: an instance of AddressListItem representing given
-        host
-        :raises UnknownCodeError: if return code does not
-        map to any taxonomic unit present in _get_classification
-        '''
-        
-        return_code = self._query(host)
+        return_code = self._query(host_object)
         
         if not return_code:
-            return None
+            return None, None
         
         try:
             classification = self._get_classification(return_code)
             
-            return AddressListItem(str(host), self, classification)
+            return host_object, classification
         
         except UnknownCodeError as e:
             raise exc_info()[0],  '{}\nSource:{}'.format(str(e), str(self)), exc_info()[2]

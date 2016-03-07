@@ -141,6 +141,13 @@ class UrlHostTesterTest(
     def _get_expected_items_for_urls(self, urls):
         hosts = [urlparse(u).hostname for u in urls]
         return self._get_expected_items(hosts)
+    
+@lru_cache()
+def dnsbl_host_factory(h):
+    host_object = MagicMock()
+    host_object.__str__.return_value = h
+    return host_object
+
         
 class DNSBLTest(
                 IPv6SupportTest,
@@ -158,7 +165,7 @@ class DNSBLTest(
         self.classification_resolver.return_value = self.classification
          
         self.host_factory_mock = Mock()
-        self.host_factory_mock.side_effect = lru_cache()(lambda h: Mock())
+        self.host_factory_mock.side_effect = dnsbl_host_factory
          
         self.tested_instance = DNSBL('test_service', self.query_domain_str, 
                                    self.classification_resolver, self.host_factory_mock)
