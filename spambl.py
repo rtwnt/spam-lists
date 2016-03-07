@@ -43,6 +43,67 @@ def accepts_valid_urls(f):
         return f(client, urls)
     
     return wrapper
+
+class HostList(object):
+    ''' A class of clients for local or remote host list services '''
+    
+    def __init__(self, host_factory):
+        ''' Constructor
+        
+        :param host_factory: a function responsible for
+        creating valid host objects. It may raise ValueError
+        (or its subclasses) if a value passed to it is not
+        a valid host of type accepted by the factory.
+        '''
+        
+        self._host_factory = host_factory
+        
+    def _contains(self, host_value):
+        ''' Check if the service lists an item
+        matching given host value
+        
+        :param host_value: a host value
+        :returns: True if the service lists a matching
+        value
+        '''
+        raise NotImplementedError
+        
+    def _get_match_and_classification(self, host_value):
+        ''' Get a listed value that matches
+        given host value and its classification
+        
+        :param host_value: a host value
+        :returns: a tuple containing listed item and its classification as
+        a tuple containing all classification groups to which the item belongs
+        '''
+        raise NotImplementedError
+        
+    def __contains__(self, host_value):
+        ''' Check if given host value is listed by the service
+        
+        :param host_value: a value of the host of a type
+        that can be listed by the service
+        :returns: True if the host is listed
+        '''
+        host_object = self._host_factory(host_value)
+        return self._contains(host_object)
+    
+    def lookup(self, host_value):
+        ''' Get an object representing a host value
+        matched by this host
+        
+        :param host_value: a value of the host of a type
+        that can be listed by the service
+        :returns: an instance of AddressListItem representing
+        a matched value
+        '''
+        host_object = self._host_factory(host_value)
+        host_item, classification = self._get_match_and_classification(host_object)
+        
+        if host_item is not None:
+            return AddressListItem(str(host_item), self, classification)
+        return None
+        
     
 class UrlHostTester(object):
     ''' A class containing methods used to test urls with

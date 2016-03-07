@@ -6,7 +6,7 @@ from spambl import (UnknownCodeError, NXDOMAIN, HpHosts,
                     GoogleSafeBrowsing, UnathorizedAPIKeyError, HostCollection,
                      SimpleClassificationCodeResolver, SumClassificationCodeResolver, Hostname, IpAddress, 
                      host, is_valid_url, RedirectUrlResolver, DNSBL, accepts_valid_urls, UrlTesterChain,
-    AddressListItem, UrlHostTester)
+    AddressListItem, UrlHostTester, HostList)
 from mock import Mock, patch, MagicMock
 
 from requests.exceptions import HTTPError, InvalidSchema, InvalidURL,\
@@ -64,6 +64,37 @@ class AcceptValidUrlsTest(unittest.TestCase):
         
         self.assertRaises(ValueError, self.decorated_function, self.client, url)
         self.function.assert_not_called()
+        
+class HostListTest(TestFunctionDoesNotHandleProvider, unittest.TestCase):
+    
+    def setUp(self):
+        self.host_factory_mock = Mock()
+        self.tested_instance = HostList(self.host_factory_mock)
+        
+        self._contains_patcher = patch('spambl.HostList._contains')
+        self._contains_mock = self._contains_patcher.start()
+        
+        self._get_match_and_classification_patcher = patch('spambl.HostList._get_match_and_classification')
+        self._get_match_and_classification_mock = self._get_match_and_classification_patcher.start()
+        self._get_match_and_classification_mock.return_value = None, None
+        
+    def tearDown(self):
+        self._contains_patcher.stop()
+        self._get_match_and_classification_patcher.stop()
+        
+    @parameterized.expand([
+                           ('__contains__', '_contains'),
+                           ('lookup', '_get_match_and_classification'),
+                           ])
+    def test_nonpublic_function_call_for(self, function_name, non_public_function_name):
+        
+        function = getattr(self.tested_instance, function_name)
+        nonpublic_function = getattr(self.tested_instance, non_public_function_name)
+        valid_host = 'validhost.com'
+        function(valid_host)
+        
+        expected_argument = self.host_factory_mock(valid_host)
+        nonpublic_function.assert_called_once_with(expected_argument)
         
 class UrlHostTesterTest(
                         GeneratedUrlTesterTest,
