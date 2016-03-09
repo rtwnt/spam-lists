@@ -530,54 +530,6 @@ class HostCollection(HostList, UrlHostTester):
 
 AddressListItem = namedtuple('AddressListItem', 'value source classification')
 
-class Host(object):
-    ''' Base host class '''
-    
-    def __str__(self):
-        return str(self._value)
-    
-    def _test_other_value(self, function, other):
-        '''
-        Perform test on _value property of
-        the other using function
-        
-        :param other: the other object
-        :return: value returned by function
-        '''
-        try:
-            return function(other._value)
-        
-        except AttributeError:
-            return False
-        
-    def is_subdomain(self, other):
-        
-        raise NotImplementedError
-    
-    def __eq__(self, other):
-        '''
-        Test if the object and the other are equal
-        
-        :param other: other object
-        :returns: True if the objects have equal _value
-        :raise TypeError: if the _value does not
-        have __eq__ method
-        '''
-        
-        return self._test_other_value(self._value.__eq__, other)
-    
-    def __ne__(self, other):
-        '''
-        Test if the object and the other are not equal
-        
-        :param other: other object
-        :returns: True if the objects don't have equal _value
-        :raise TypeError: if the _value does not
-        have __eq__ method
-        '''
-        
-        return not self == other
-    
 class Hostname(name.Name):
     def __init__(self, value):
         ''' Create a new instance of Hostname
