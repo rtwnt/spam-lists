@@ -594,26 +594,43 @@ class IPv4Address(ipaddress.IPv4Address, IPAddress):
     
 class IPv6Address(ipaddress.IPv6Address, IPAddress):
     reverse_domain = ipv6_reverse_domain
-    
-def host(value):
-    ''' Create an instance of IpAddress or Hostname from a given value
-    
-    :param value: an ip address or a hostname
-    :returns: an instance of a subclass of Host, either an ip address or a hostname
-    :raises ValueError: if the value is not a valid ip address or hostname
-    '''
 
-    data = [value]
+def get_create_host(*factories):
+    '''
+    Get an instance of create_host function
+    that uses given factories
     
-    for f in IPAddress, Hostname:
-        try:
-            return  f(value)
+    :param factories: functions responsible for constructing
+    objects representing hostnames and ip addresses
+    :returns: create_host function with the factories in its
+    scope
+    '''
+    def create_host(value):
+        ''' Create an instance of host object for given value, using
+        the available factories.
         
-        except ValueError as e:
-            data.append(str(e))
-    
-    msg_tpl = "The value '{}' is not a valid host:\n* {}\n* {}"
-    raise ValueError, msg_tpl.format(*data)
+        :param value: a value to be passed as argument to factories
+        :returns: an object representing value, created by one of the factories.
+        It's a return value of the first factory that could create it for the given argument
+        :raises ValueError: if the value is not a valid input for any factory used
+        by this function
+        '''
+        
+        data = [value]
+        
+        for f in factories:
+            try:
+                return  f(value)
+            
+            except ValueError as e:
+                data.append(str(e))
+                
+        msg_tpl = "Failed to create a host object for '{}', raising the following\
+         errors in the process:"+"\n".join(data)
+        raise ValueError, msg_tpl.format(value)
+    return create_host
+
+host = get_create_host(IPv4Address, IPv6Address, Hostname)
 
 url_regex = re.compile(r'^[a-z0-9\.\-\+]*://' #scheme
                        r'(?:\S+(?::\S*)?@)?' #authentication

@@ -4,9 +4,9 @@
 import unittest
 from spambl import (UnknownCodeError, NXDOMAIN, HpHosts, 
                     GoogleSafeBrowsing, UnathorizedAPIKeyError, HostCollection,
-                     SimpleClassificationCodeResolver, SumClassificationCodeResolver, Hostname, 
-                     host, is_valid_url, RedirectUrlResolver, DNSBL, accepts_valid_urls, UrlTesterChain,
-    AddressListItem, UrlHostTester, HostList, IPv4Address, IPv6Address)
+                     SimpleClassificationCodeResolver, SumClassificationCodeResolver, Hostname,
+                      is_valid_url, RedirectUrlResolver, DNSBL, accepts_valid_urls, UrlTesterChain, 
+                      AddressListItem, UrlHostTester, HostList, IPv4Address, IPv6Address, get_create_host)
 from mock import Mock, patch, MagicMock
 
 from requests.exceptions import HTTPError, InvalidSchema, InvalidURL,\
@@ -684,44 +684,39 @@ class IPv6AddressTest(IpAddressTest, unittest.TestCase):
     constructor = IPv6Address
     ip_address = u'fe80::0202:b3ff:fe1e:8329'
         
-class HostTest(unittest.TestCase):
+class CreateHostTest(unittest.TestCase):
     
     def setUp(self):
-        
-        self.ipaddress_patcher = patch('spambl.IPAddress')
-        self.ipaddress_mock = self.ipaddress_patcher.start()
-        
-        self.hostname_patcher = patch('spambl.Hostname')
-        self.hostname_mock = self.hostname_patcher.start()
-        
-    def tearDown(self):
-        self.ipaddress_patcher.stop()
-        self.hostname_patcher.stop()
+        self.factories = [Mock() for _ in range(5)]
+        self.create_host = get_create_host(*self.factories)
         
     @parameterized.expand([
                            ('v4',  u'127.0.0.1'),
                            ('v6', u'2001:db8:abc:125::45'),
                            ])
     def test_host_for_ip(self, _, value):
-        ip_address = Mock()
-        self.ipaddress_mock.return_value = ip_address
+        ip_address = self.factories[0]
+        ip_address.return_value = ip_address
         
-        actual_ip = host(value)
+        expected = ip_address(value)
+        actual = self.create_host(value)
         
-        self.assertEqual(ip_address, actual_ip)
+        self.assertEqual(actual, expected)
         
     def test_host_for_hostname(self):
         
-        hostname_str = 'test.hostname'
+        for i, factory in enumerate(self.factories):
+            if i != 1:
+                factory.side_effect = ValueError
         
-        hostname_mock = Mock()
-        self.hostname_mock.return_value = hostname_mock
+        host_factory = self.factories[1]
         
-        self.ipaddress_mock.side_effect = ValueError
+        host_value = 'abc.com'
         
-        actual_hostname = host(hostname_str)
+        expected = host_factory(host_value)
+        actual = self.create_host(host_value)
         
-        self.assertEqual(hostname_mock, actual_hostname)
+        self.assertEqual(expected, actual)
         
     @parameterized.expand([
                            ('ipv4', u'299.0.0.1'),
@@ -733,10 +728,10 @@ class HostTest(unittest.TestCase):
                            ])
     def test_host_for_invalid(self, _, value):
         
-        self.hostname_mock.side_effect = ValueError
-        self.ipaddress_mock.side_effect = ValueError
+        for f in self.factories:
+            f.side_effect = ValueError
         
-        self.assertRaises(ValueError, host, value)
+        self.assertRaises(ValueError, self.create_host, value)
           
 class IsValidUrlTest(unittest.TestCase):
     
@@ -758,7 +753,7 @@ class IsValidUrlTest(unittest.TestCase):
                            ])
     def test_is_valid_url_for_url_with(self, _, url):
         self.assertTrue(is_valid_url(url))
-             
+        
     @parameterized.expand([
                            ('no_schema', 'test.url.com'),
                            ('invalid_ipv4', 'http://266.0.0.266'),
@@ -769,7 +764,7 @@ class IsValidUrlTest(unittest.TestCase):
                            ])
     def test_is_valid_url_for_invalid_url_with(self, _, url):
         self.assertFalse(is_valid_url(url))
-            
+        
 class RedirectUrlResolverTest(unittest.TestCase):
     
     valid_urls = ['http://first.com', 'http://122.55.33.21',
