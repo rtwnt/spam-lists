@@ -578,37 +578,42 @@ class Host(object):
         
         return not self == other
     
-class Hostname(Host):
+class Hostname(name.Name):
     def __init__(self, value):
         ''' Create a new instance of Hostname
         
         :param value: a string representing a hostname
-        :raises ValueError: if value parameter is not a string
+        :raises ValueError: if value parameter is not a string or
+        not a valid domain
         '''
         value  = str(value)
         if not validators.domain(value):
             raise ValueError, "'{}' is not a valid hostname".format(value), exc_info()[2]
         
-        self._value = name.from_text(value).relativize(name.root)
+        super(Hostname, self).__init__(value.split('.'))
         
     @property
     def relative_domain(self):
-        ''' Return a relative domain representing the value
+        ''' Return a relative domain representing the host
         
-        :returns: the _value property of the object
+        :returns: this instance
         '''
-        return self._value
+        return self
     
     def is_subdomain(self, other):
         ''' Test if the object is a subdomain of the
         other
         
         :param other: the object to which we compare this instance
-        :returns: True if the _value is subdomain of other._value
-        :raises TypeError: if _value doesn't have is_subdomain method
+        :returns: True if this instance is a subdomain of the other
         '''
-        
-        return self._test_other_value(self._value.is_subdomain, other)
+        try:
+            return name.Name.is_subdomain(self, other)
+            
+        except AttributeError:
+            return False
+    
+    
     
 class IpAddress(Host):
     def __init__(self, value):
