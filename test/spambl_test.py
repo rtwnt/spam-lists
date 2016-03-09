@@ -4,9 +4,9 @@
 import unittest
 from spambl import (UnknownCodeError, NXDOMAIN, HpHosts, 
                     GoogleSafeBrowsing, UnathorizedAPIKeyError, HostCollection,
-                     SimpleClassificationCodeResolver, SumClassificationCodeResolver, Hostname, IpAddress, 
+                     SimpleClassificationCodeResolver, SumClassificationCodeResolver, Hostname, 
                      host, is_valid_url, RedirectUrlResolver, DNSBL, accepts_valid_urls, UrlTesterChain,
-    AddressListItem, UrlHostTester, HostList)
+    AddressListItem, UrlHostTester, HostList, IPv4Address, IPv6Address)
 from mock import Mock, patch, MagicMock
 
 from requests.exceptions import HTTPError, InvalidSchema, InvalidURL,\
@@ -653,27 +653,7 @@ class HostnameTest(unittest.TestCase):
         
         self.assertFalse(self.hostname_pl.is_subdomain(other))
 
-class IpAddressTest(unittest.TestCase):
-    ipv4_1 = IpAddress(u'255.0.2.1')
-    ipv4_2 = IpAddress(u'122.44.55.99')
-    ipv6_1 = IpAddress(u'2001:db8:abc:123::42')
-    ipv6_2 = IpAddress(u'fe80::0202:b3ff:fe1e:8329')
-    
-    the_same_ip_input = [
-                           ('v4', ipv4_1),
-                           ('v6', ipv6_1)
-                           ]
-    
-    non_equal_input = [
-                       ('different_ips_v4', ipv4_1, ipv4_2),
-                       ('different_ips_v4', ipv4_2, ipv4_1),
-                       ('ip4_and_ipv6', ipv4_1, ipv6_1),
-                       ('different_ips_v6', ipv6_1, ipv6_2),
-                       ('different_ips_v6', ipv6_2, ipv6_1),
-                       ('Ipv6_and_ipv4', ipv6_1, ipv4_1),
-                       ('ipv4_and_non_ip', ipv4_1, 'value'),
-                       ('ipv6_and_non_ip', ipv6_1, 'value')
-                       ]
+class IpAddressTest(object):
     
     @parameterized.expand([
                            ('ipv4', u'299.0.0.1'),
@@ -685,56 +665,30 @@ class IpAddressTest(unittest.TestCase):
                            ])
     def test_constructor_for_invalid(self, _, value):
         
-        self.assertRaises(ValueError, IpAddress, value)
+        self.assertRaises(ValueError, self.constructor, value)
         
+    def test_relative_domain_for_ip(self):
+        ip = self.constructor(self.ip_address)
+        reversed_name = reversename.from_address(str(ip))
+        expected = reversed_name.relativize(self.reverse_name_root)
         
-    @parameterized.expand([
-                           ('v4', ipv4_1, reversename.ipv4_reverse_domain),
-                           ('v6', ipv6_1, reversename.ipv6_reverse_domain)
-                           ])
-    def test_relative_domain_for_ip(self, _, value, expected_origin):
-        
-        reversed_name = reversename.from_address(str(value))
-        expected = reversed_name.relativize(expected_origin)
-        
-        self.assertEqual(expected, value.relative_domain)
-        
-    @parameterized.expand([
-                           ('the_same_ipv4', ipv4_1, ipv4_1),
-                           ('the_same_ipv6', ipv6_1, ipv6_1)
-                           ] + non_equal_input)
-    def test_is_subdomain(self, _, value_1, value_2):
-        
-        self.assertFalse(value_1.is_subdomain(value_2))
-        
-    @parameterized.expand(the_same_ip_input)
-    def test_eq_returns_true_for_the_same_ip(self, _, ip_1):
-        
-        ip_2 = IpAddress(unicode(ip_1))
-        
-        self.assertTrue(ip_1 == ip_2)
+        self.assertEqual(expected, ip.relative_domain)
     
-    @parameterized.expand(non_equal_input)
-    def test_eq_returns_false_for(self, _, value_1, value_2):
-        
-        self.assertFalse(value_1 == value_2)
-    
-    @parameterized.expand(non_equal_input)
-    def test_ne_returns_true_for(self, _, value_1, value_2):
-        
-        self.assertTrue(value_1 != value_2)
-    
-    @parameterized.expand(the_same_ip_input)
-    def test_ne_returns_false_for_the_same_ip(self, _, ip_1):
-        
-        ip_2 = IpAddress(unicode(ip_1))
-        self.assertFalse(ip_1 != ip_2)
+class IPv4AddressTest(IpAddressTest, unittest.TestCase):
+    reverse_name_root = reversename.ipv4_reverse_domain
+    constructor = IPv4Address
+    ip_address = u'122.44.55.99'
+
+class IPv6AddressTest(IpAddressTest, unittest.TestCase):
+    reverse_name_root = reversename.ipv6_reverse_domain
+    constructor = IPv6Address
+    ip_address = u'fe80::0202:b3ff:fe1e:8329'
         
 class HostTest(unittest.TestCase):
     
     def setUp(self):
         
-        self.ipaddress_patcher = patch('spambl.IpAddress')
+        self.ipaddress_patcher = patch('spambl.IPAddress')
         self.ipaddress_mock = self.ipaddress_patcher.start()
         
         self.hostname_patcher = patch('spambl.Hostname')

@@ -6,7 +6,7 @@ from dns.resolver import query, NXDOMAIN
 from requests import get, post, Session
 from requests.exceptions import HTTPError, Timeout, ConnectionError, InvalidSchema, InvalidURL
 from itertools import izip
-from ipaddress import ip_address
+import ipaddress
 from dns import name
 from collections import namedtuple
 import validators
@@ -614,33 +614,22 @@ class Hostname(name.Name):
             return False
     
     
+class IPAddress(object):
     
-class IpAddress(Host):
-    def __init__(self, value):
-        ''' Create a new instance of IpAddress
-        
-        :param value: a value representing ip address
-        :raises AddressValueError: if the value is an instance of bytes (python3)
-        or str (python 2)
-        :raises ValueError: if the value is not a valid ip v4 or ip v6 address
-        '''
-        
-        self._value = ip_address(value)
-        
+    reverse_domain = None
+    
     @property
     def relative_domain(self):
         ''' Get a relative domain name representing the ip address
         
         :returns: the reverse pointer relative to the common root
-        depending on the version of ip address stored in _value
+        depending on the version of ip address represented by this object
         '''
         
-        root = ipv4_reverse_domain if self._value.version == 4 else ipv6_reverse_domain
-        
-        return name_from_ip(str(self._value)).relativize(root)
+        return name_from_ip(str(self)).relativize(self.reverse_domain)
     
     def is_subdomain(self, other):
-        ''' Check if the given object is a subdomain of the other
+        ''' Check if this object is a subdomain of the other
         
         :param other: another host
         :returns: False, because ip address is not a domain
@@ -648,6 +637,11 @@ class IpAddress(Host):
         
         return False
     
+class IPv4Address(ipaddress.IPv4Address, IPAddress):
+    reverse_domain = ipv4_reverse_domain
+    
+class IPv6Address(ipaddress.IPv6Address, IPAddress):
+    reverse_domain = ipv6_reverse_domain
     
 def host(value):
     ''' Create an instance of IpAddress or Hostname from a given value
@@ -659,7 +653,7 @@ def host(value):
 
     data = [value]
     
-    for f in IpAddress, Hostname:
+    for f in IPAddress, Hostname:
         try:
             return  f(value)
         
