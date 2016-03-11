@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import unittest
-from spambl import (UnknownCodeError, NXDOMAIN, HpHosts, 
+from spam_lists.spambl import (UnknownCodeError, NXDOMAIN, HpHosts, 
                     GoogleSafeBrowsing, UnathorizedAPIKeyError, HostCollection,
                      SimpleClassificationCodeResolver, SumClassificationCodeResolver, Hostname,
                       is_valid_url, RedirectUrlResolver, DNSBL, accepts_valid_urls, UrlTesterChain, 
@@ -30,7 +30,7 @@ from itertools import chain
 class AcceptValidUrlsTest(unittest.TestCase):
     
     def setUp(self):
-        self.is_valid_url_patcher = patch('spambl.is_valid_url')
+        self.is_valid_url_patcher = patch('spam_lists.spambl.is_valid_url')
         self.is_valid_url_mock = self.is_valid_url_patcher.start()
         
         function = Mock()
@@ -74,10 +74,10 @@ class HostListTest(TestFunctionDoesNotHandleProvider, unittest.TestCase):
         self.host_factory_mock = Mock()
         self.tested_instance = HostList(self.host_factory_mock)
         
-        self._contains_patcher = patch('spambl.HostList._contains')
+        self._contains_patcher = patch('spam_lists.spambl.HostList._contains')
         self._contains_mock = self._contains_patcher.start()
         
-        self._get_match_and_classification_patcher = patch('spambl.HostList._get_match_and_classification')
+        self._get_match_and_classification_patcher = patch('spam_lists.spambl.HostList._get_match_and_classification')
         self._get_match_and_classification_mock = self._get_match_and_classification_patcher.start()
         self._get_match_and_classification_mock.return_value = None, None
         
@@ -109,12 +109,12 @@ class UrlHostTesterTest(
           
         self.tested_instance = UrlHostTester()
           
-        self.is_valid_url_patcher = patch('spambl.is_valid_url')
+        self.is_valid_url_patcher = patch('spam_lists.spambl.is_valid_url')
         self.is_valid_url_mock = self.is_valid_url_patcher.start()
           
         self.listed_hosts = []
           
-        self.contains_patcher = patch('spambl.UrlHostTester.__contains__')
+        self.contains_patcher = patch('spam_lists.spambl.UrlHostTester.__contains__')
         self.contains_mock = self.contains_patcher.start()
         self.contains_mock.side_effect = lambda h: h in self.listed_hosts
           
@@ -127,7 +127,7 @@ class UrlHostTesterTest(
                                        )
             return None
           
-        self.lookup_patcher = patch('spambl.UrlHostTester.lookup')
+        self.lookup_patcher = patch('spam_lists.spambl.UrlHostTester.lookup')
         self.lookup_mock = self.lookup_patcher.start()
         self.lookup_mock.side_effect = lookup
           
@@ -181,7 +181,7 @@ class DNSBLTest(
         self.tested_instance = DNSBL('test_service', self.query_domain_str, 
                                    self.classification_resolver, self.host_factory_mock)
          
-        self.dns_query_patcher = patch('spambl.query')
+        self.dns_query_patcher = patch('spam_lists.spambl.query')
         self.dns_query_mock = self.dns_query_patcher.start()
         self.dns_query_mock.side_effect = create_dns_query_function([])
          
@@ -322,7 +322,7 @@ class HpHostsTest(
         cls.tested_instance = HpHosts('spambl_test_suite')
         
     def _set_up_get_mock(self):
-        self.get_patcher = patch('spambl.get')
+        self.get_patcher = patch('spam_lists.spambl.get')
         self.get_mock = self.get_patcher.start()
         self.get_mock.side_effect = create_hp_hosts_get(self.classification, [])
         
@@ -339,7 +339,7 @@ class HpHostsTest(
          
         self.host_factory_mock.side_effect = hp_hosts_host_factory
          
-        self.is_valid_url_patcher = patch('spambl.is_valid_url')
+        self.is_valid_url_patcher = patch('spam_lists.spambl.is_valid_url')
         self.is_valid_url_mock = self.is_valid_url_patcher.start()
          
     def tearDown(self):
@@ -419,7 +419,7 @@ class GoogleSafeBrowsingTest(
             
             return response
         
-        self.post_patcher = patch('spambl.post')
+        self.post_patcher = patch('spam_lists.spambl.post')
         self.mocked_post = self.post_patcher.start()
         self.mocked_post.side_effect = post
         
@@ -429,7 +429,7 @@ class GoogleSafeBrowsingTest(
         
         self._set_up_post_mock()
         
-        self.is_valid_url_patcher = patch('spambl.is_valid_url')
+        self.is_valid_url_patcher = patch('spam_lists.spambl.is_valid_url')
         self.is_valid_url_mock = self.is_valid_url_patcher.start()
         
     def tearDown(self):
@@ -478,7 +478,7 @@ class HostCollectionTest(
     
     def setUp(self):
          
-        self.host_patcher = patch('spambl.host')
+        self.host_patcher = patch('spam_lists.spambl.host')
         self.host_factory_mock = self.host_patcher.start()
          
         self.host_factory_mock.side_effect = lru_cache()(host_collection_host_factory)
@@ -779,7 +779,7 @@ class UrlsAndLocationsTest(unittest.TestCase):
                      }
     
     def setUp(self):
-        self.is_valid_url_patcher = patch('spambl.is_valid_url')
+        self.is_valid_url_patcher = patch('spam_lists.spambl.is_valid_url')
         self.is_valid_url_mock = self.is_valid_url_patcher.start()
         self.redirect_resolver_mock = Mock()
         
@@ -851,7 +851,7 @@ class RedirectUrlResolverTest(unittest.TestCase):
         
         self.resolver = RedirectUrlResolver(session_mock)
         
-        self.patcher = patch('spambl.is_valid_url')
+        self.patcher = patch('spam_lists.spambl.is_valid_url')
         self.is_valid_url_mock = self.patcher.start()
         
     def tearDown(self):
