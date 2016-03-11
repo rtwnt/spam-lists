@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
-class SpamBLError(Exception):
+class SpamListsError(Exception):
     '''There was an error during testing a url or host'''
     
-class UnknownCodeError(SpamBLError):
+class UnknownCodeError(SpamListsError):
     '''The classification code from the service was not recognized'''
     
-class UnathorizedAPIKeyError(SpamBLError):
+class UnathorizedAPIKeyError(SpamListsError):
     '''The API key used to query the service was not authorized'''
