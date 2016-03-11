@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
 class SpamBLError(Exception):
-    ''' Base exception class for spambl module '''
+    '''There was an error during testing a url or host'''
     
 class UnknownCodeError(SpamBLError):
-    ''' Raise when trying to use an unexpected value of dnsbl return code '''
+    '''The classification code from the service was not recognized'''
     
 class UnathorizedAPIKeyError(SpamBLError):
-    ''' Raise when trying to use an unathorized api key '''
+    '''The API key used to query the service was not authorized'''
