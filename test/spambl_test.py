@@ -2,12 +2,13 @@
 # -*- coding: utf-8 -*-
 
 import unittest
-from spam_lists.spambl import (UnknownCodeError, NXDOMAIN, HpHosts, 
-                    GoogleSafeBrowsing, UnathorizedAPIKeyError, HostCollection,
+from spam_lists.spambl import (NXDOMAIN, HpHosts, 
+                    GoogleSafeBrowsing, HostCollection,
                      SimpleClassificationCodeResolver, SumClassificationCodeResolver, Hostname,
                       is_valid_url, RedirectUrlResolver, DNSBL, accepts_valid_urls, UrlTesterChain, 
                       AddressListItem, UrlHostTester, HostList, IPv4Address, IPv6Address, get_create_host,
                       UrlsAndLocations)
+from spam_lists.exceptions import UnknownCodeError, UnathorizedAPIKeyError
 from mock import Mock, patch, MagicMock
 
 from requests.exceptions import HTTPError, InvalidSchema, InvalidURL,\
