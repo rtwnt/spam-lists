@@ -6,7 +6,8 @@ from spambl import (UnknownCodeError, NXDOMAIN, HpHosts,
                     GoogleSafeBrowsing, UnathorizedAPIKeyError, HostCollection,
                      SimpleClassificationCodeResolver, SumClassificationCodeResolver, Hostname,
                       is_valid_url, RedirectUrlResolver, DNSBL, accepts_valid_urls, UrlTesterChain, 
-                      AddressListItem, UrlHostTester, HostList, IPv4Address, IPv6Address, get_create_host)
+                      AddressListItem, UrlHostTester, HostList, IPv4Address, IPv6Address, get_create_host,
+                      UrlsAndLocations)
 from mock import Mock, patch, MagicMock
 
 from requests.exceptions import HTTPError, InvalidSchema, InvalidURL,\
@@ -23,6 +24,8 @@ TestFunctionDoesNotHandleProvider
 from cachetools import lru_cache
 from collections import defaultdict
 from random import shuffle
+
+from itertools import chain
 
 class AcceptValidUrlsTest(unittest.TestCase):
     
@@ -764,6 +767,75 @@ class IsValidUrlTest(unittest.TestCase):
                            ])
     def test_is_valid_url_for_invalid_url_with(self, _, url):
         self.assertFalse(is_valid_url(url))
+           
+class UrlsAndLocationsTest(unittest.TestCase):
+    
+    valid_urls = ['http://first.com', 'http://122.55.33.21',
+    'http://[2001:db8:abc:123::42]']
+    url_redirects = {
+                     'http://url1.com': ('http://redirect1.com', 'http://redirect2.com'),
+                     'http://88.66.55.22': ['http://abc.com', 'https://def.com'],
+                     'http://host.com': ['http://88.66.55.22', 'http://abc.com', 'https://def.com']
+                     }
+    
+    def setUp(self):
+        self.is_valid_url_patcher = patch('spambl.is_valid_url')
+        self.is_valid_url_mock = self.is_valid_url_patcher.start()
+        self.redirect_resolver_mock = Mock()
+        
+    def tearDown(self):
+        
+        self.is_valid_url_patcher.stop()
+        
+    def _get_tested_instance(self):
+        self._set_redirect_urls(self.url_redirects)
+        initial_urls = self.url_redirects.keys()
+        return UrlsAndLocations(initial_urls, self.redirect_resolver_mock)
+    
+    def test_constructor_for_invalid_url(self):
+        invalid_url = 'invalid.url.com'
+        self.is_valid_url_mock.side_effect = lambda u: u != invalid_url
+
+        self.assertRaises(ValueError, UrlsAndLocations, self.valid_urls+[invalid_url])
+        
+    def _set_redirect_urls(self, redirect_locations_per_url):
+        
+        side_effect = lambda u: redirect_locations_per_url.get(u, [])
+        self.redirect_resolver_mock.get_redirect_urls.side_effect = side_effect
+        
+    def test_iter_returns_initial_urls_before_resolving_redirects(self):
+        urls_and_locations = self._get_tested_instance()
+        
+        for i, _ in enumerate(urls_and_locations):
+            if i == len(self.url_redirects.keys()) - 1:
+                break
+            
+        self.redirect_resolver_mock.get_redirect_urls.assert_not_called()
+        
+    def test_iter_maintains_order_betten_runs(self):
+        urls_and_locations = self._get_tested_instance()
+        
+        first_run_results = list(urls_and_locations)
+        second_run_results = list(urls_and_locations)
+        
+        self.assertSequenceEqual(first_run_results, second_run_results)
+        
+    def test_iter_returns_no_duplicates(self):
+        urls_and_locations = self._get_tested_instance()
+        
+        expected_items = set(chain(self.url_redirects.keys(), *self.url_redirects.values()))
+        actual_items = list(urls_and_locations)
+            
+        self.assertItemsEqual(expected_items, actual_items)
+        
+    def test_iter_does_not_resolve_redirects_during_second_run(self):
+        urls_and_locations = self._get_tested_instance()
+        
+        list(urls_and_locations)
+        self.redirect_resolver_mock.get_redirect_urls.reset_mock()
+        
+        list(urls_and_locations)
+        self.redirect_resolver_mock.get_redirect_urls.assert_not_called()
         
 class RedirectUrlResolverTest(unittest.TestCase):
     
