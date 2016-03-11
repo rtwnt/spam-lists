@@ -6,5 +6,5 @@ class SpamListsError(Exception):
 class UnknownCodeError(SpamListsError, KeyError):
     '''The classification code from the service was not recognized'''
     
-class UnathorizedAPIKeyError(SpamListsError):
+class UnathorizedAPIKeyError(SpamListsError, ValueError):
     '''The API key used to query the service was not authorized'''
