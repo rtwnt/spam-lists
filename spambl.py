@@ -26,7 +26,7 @@ class UnathorizedAPIKeyError(SpamBLError):
     
 def accepts_valid_urls(f):
     @functools.wraps(f)
-    def wrapper(client, urls):
+    def wrapper(client, urls, *args, **kwargs):
         '''Run the function and return its return value
          if all given urls are valid - otherwise raise ValueError
         :param client:  a client of a service
@@ -40,7 +40,7 @@ def accepts_valid_urls(f):
             msg = 'The values: {} are not valid urls'.format(','.join(invalid_urls))
             raise ValueError, msg
         
-        return f(client, urls)
+        return f(client, urls, *args, **kwargs)
     
     return wrapper
 
