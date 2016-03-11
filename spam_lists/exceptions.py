@@ -3,7 +3,7 @@
 class SpamListsError(Exception):
     '''There was an error during testing a url or host'''
     
-class UnknownCodeError(SpamListsError):
+class UnknownCodeError(SpamListsError, KeyError):
     '''The classification code from the service was not recognized'''
     
 class UnathorizedAPIKeyError(SpamListsError):
