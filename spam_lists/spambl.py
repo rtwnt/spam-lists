@@ -116,6 +116,7 @@ class UrlHostTester(object):
         
         :param urls: an iterable containing urls
         :returns: True if any host is listed
+        :raises InvalidURLError: if there are any invalid urls in the sequence
         '''
         
         return any(urlparse(u).hostname in self for u in urls)
@@ -127,6 +128,7 @@ class UrlHostTester(object):
         
         :param urls: an iterable containing urls
         :returns: items representing hosts matching the listed ones
+        :raises InvalidURLError: if there are any invalid urls in the sequence
         '''
         
         hosts = (urlparse(u).hostname for u in urls)
@@ -425,6 +427,7 @@ class GoogleSafeBrowsing(object):
         
         :param urls: a sequence of urls to be tested
         :returns: True if any of the urls was recognized as spam
+        :raises InvalidURLError: if there are any invalid urls in the sequence
         '''
         
         return any(self._query(urls))
@@ -448,7 +451,9 @@ class GoogleSafeBrowsing(object):
         ''' Get items for all listed urls
         
         :param urls: a sequence of urls to be tested
-        :returns: a tuple containing listed url objects
+
+        :returns: objects representing listed urls
+        :raises InvalidURLError: if there are any invalid urls in the sequence
         '''
         
         for url, _class in self._get_classification_per_matching(urls):
@@ -461,6 +466,7 @@ class GoogleSafeBrowsing(object):
         
         :param urls: a sequence of urls to be tested
         :returns: spam urls
+        :raises InvalidURLError: if there are any invalid urls in the sequence
         '''
         
         for url, _ in self._get_classification_per_matching(urls):
