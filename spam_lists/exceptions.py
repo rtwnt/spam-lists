@@ -8,6 +8,9 @@ class UnknownCodeError(SpamListsError, KeyError):
     
 class UnathorizedAPIKeyError(SpamListsError, ValueError):
     '''The API key used to query the service was not authorized'''
+    
+class InvalidHostError(SpamListsError, ValueError):
+    '''The value is not a valid host'''
 
 class InvalidHostnameError(SpamListsError, ValueError):
     '''The value is not a valid hostname'''

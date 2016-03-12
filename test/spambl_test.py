@@ -9,7 +9,7 @@ from spam_lists.spambl import (NXDOMAIN, HpHosts,
                       AddressListItem, UrlHostTester, HostList, IPv4Address, IPv6Address, get_create_host,
                       UrlsAndLocations)
 from spam_lists.exceptions import UnknownCodeError, UnathorizedAPIKeyError,\
-    InvalidHostnameError, InvalidURLError
+    InvalidHostnameError, InvalidURLError, InvalidHostError
 from mock import Mock, patch, MagicMock
 
 from requests.exceptions import HTTPError, InvalidSchema, InvalidURL,\
@@ -495,7 +495,7 @@ class HostCollectionTest(
     def test_add_does_not_handle_value_error(self):
         function = self.tested_instance.add
         
-        self._test_function_does_not_handle_value_error(function, 'invalidhost.com')
+        self._test_function_does_not_handle_invalid_host_error(function, 'invalidhost.com')
          
     @parameterized.expand(BaseHostListTest.valid_host_input)
     def test_add_for_valid(self, _, value):
@@ -712,7 +712,7 @@ class CreateHostTest(unittest.TestCase):
         
         for i, factory in enumerate(self.factories):
             if i != 1:
-                factory.side_effect = ValueError
+                factory.side_effect = InvalidHostError
         
         host_factory = self.factories[1]
         
@@ -734,9 +734,9 @@ class CreateHostTest(unittest.TestCase):
     def test_host_for_invalid(self, _, value):
         
         for f in self.factories:
-            f.side_effect = ValueError
+            f.side_effect = InvalidHostError
         
-        self.assertRaises(ValueError, self.create_host, value)
+        self.assertRaises(InvalidHostError, self.create_host, value)
           
 class IsValidUrlTest(unittest.TestCase):
     

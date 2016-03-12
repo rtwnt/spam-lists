@@ -17,6 +17,7 @@ import functools
 
 from .exceptions import UnknownCodeError, UnathorizedAPIKeyError, InvalidHostnameError,\
 InvalidURLError
+from spam_lists.exceptions import InvalidHostError
     
 def accepts_valid_urls(f):
     @functools.wraps(f)
@@ -45,7 +46,7 @@ class HostList(object):
         ''' Constructor
         
         :param host_factory: a function responsible for
-        creating valid host objects. It may raise ValueError
+        creating valid host objects. It may raise InvalidHostError
         (or its subclasses) if a value passed to it is not
         a valid host of type accepted by the factory.
         '''
@@ -514,7 +515,7 @@ class HostCollection(HostList, UrlHostTester):
         ''' Add the given value to collection
         
         :param host: an ip address or a hostname
-        :raises ValueError: raised when the given value is not a valid ip address nor a hostname
+        :raises InvalidHostError: raised when the given value is not a valid ip address nor a hostname
         '''
         host_obj = self._host_factory(host_value)
         
@@ -611,7 +612,7 @@ def get_create_host(*factories):
         :param value: a value to be passed as argument to factories
         :returns: an object representing value, created by one of the factories.
         It's a return value of the first factory that could create it for the given argument
-        :raises ValueError: if the value is not a valid input for any factory used
+        :raises InvalidHostError: if the value is not a valid input for any factory used
         by this function
         '''
         
@@ -621,12 +622,12 @@ def get_create_host(*factories):
             try:
                 return  f(value)
             
-            except ValueError as e:
+            except InvalidHostError as e:
                 data.append(str(e))
                 
         msg_tpl = "Failed to create a host object for '{}', raising the following\
          errors in the process:"+"\n".join(data)
-        raise ValueError, msg_tpl.format(value)
+        raise InvalidHostError, msg_tpl.format(value)
     return create_host
 
 host = get_create_host(IPv4Address, IPv6Address, Hostname)

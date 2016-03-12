@@ -3,7 +3,7 @@
 from spam_lists.spambl import AddressListItem
 from nose_parameterized import parameterized
 from types import GeneratorType
-from spam_lists.exceptions import InvalidURLError
+from spam_lists.exceptions import InvalidURLError, InvalidHostError
 
 class ClientGetExpectedItemsProvider(object):
     '''
@@ -32,8 +32,8 @@ class BaseHostListTest(object):
                         ('hostname', 'test.pl')
                         ]
     
-    def _test_function_does_not_handle_value_error(self, function, arg):
-        self._test_function_does_not_handle(ValueError,
+    def _test_function_does_not_handle_invalid_host_error(self, function, arg):
+        self._test_function_does_not_handle(InvalidHostError,
                                             self.host_factory_mock,
                                             function,
                                             arg
@@ -43,10 +43,10 @@ class BaseHostListTest(object):
                            ('__contains__'),
                            ('lookup')
                            ])
-    def test_value_error_is_not_handled_by(self, function_name):
+    def test_invalid_host_error_is_not_handled_by(self, function_name):
         
         function = getattr(self.tested_instance, function_name)
-        self._test_function_does_not_handle_value_error(
+        self._test_function_does_not_handle_invalid_host_error(
                                             function,
                                             'invalidhost.com'
                                             )
