@@ -15,7 +15,7 @@ from urlparse import urlparse
 import re
 import functools
 
-from .exceptions import UnknownCodeError, UnathorizedAPIKeyError
+from .exceptions import UnknownCodeError, UnathorizedAPIKeyError, InvalidHostnameError
     
 def accepts_valid_urls(f):
     @functools.wraps(f)
@@ -528,12 +528,11 @@ class Hostname(name.Name):
         ''' Create a new instance of Hostname
         
         :param value: a string representing a hostname
-        :raises ValueError: if value parameter is not a string or
-        not a valid domain
+        :raises InvalidHostnameError: if value parameter is not a valid domain
         '''
         value  = str(value)
         if not validators.domain(value):
-            raise ValueError, "'{}' is not a valid hostname".format(value), exc_info()[2]
+            raise InvalidHostnameError, "'{}' is not a valid hostname".format(value), exc_info()[2]
         
         super(Hostname, self).__init__(value.split('.'))
         

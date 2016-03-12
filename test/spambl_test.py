@@ -8,7 +8,8 @@ from spam_lists.spambl import (NXDOMAIN, HpHosts,
                       is_valid_url, RedirectUrlResolver, DNSBL, accepts_valid_urls, UrlTesterChain, 
                       AddressListItem, UrlHostTester, HostList, IPv4Address, IPv6Address, get_create_host,
                       UrlsAndLocations)
-from spam_lists.exceptions import UnknownCodeError, UnathorizedAPIKeyError
+from spam_lists.exceptions import UnknownCodeError, UnathorizedAPIKeyError,\
+    InvalidHostnameError
 from mock import Mock, patch, MagicMock
 
 from requests.exceptions import HTTPError, InvalidSchema, InvalidURL,\
@@ -638,7 +639,7 @@ class HostnameTest(unittest.TestCase):
                            ])
     def test_constructor_for_invalid(self, _, value):
         
-        self.assertRaises(ValueError, Hostname, value)
+        self.assertRaises(InvalidHostnameError, Hostname, value)
         
     @parameterized.expand([
                            ('the_same_domain', Hostname('subdomain.hostname.pl')),
