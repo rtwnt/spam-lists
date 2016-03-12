@@ -20,11 +20,10 @@ InvalidURLError, InvalidHostError, InvalidIPv4Error, InvalidIPv6Error
     
 def accepts_valid_urls(f):
     @functools.wraps(f)
-    def wrapper(client, urls, *args, **kwargs):
+    def wrapper(obj, urls, *args, **kwargs):
         '''Run the function and return its return value
          if all given urls are valid - otherwise raise InvalidURLError
-        :param client:  a client of a service
-        listing hosts or urls
+        :param obj: an object in whose class f is defined
         :param urls: an iterable containing urls
         :returns: a return value of the function f
         :raises InvalidURLError: if the iterable contains invalid urls
@@ -34,7 +33,7 @@ def accepts_valid_urls(f):
             msg = 'The values: {} are not valid urls'.format(','.join(invalid_urls))
             raise InvalidURLError, msg
         
-        return f(client, urls, *args, **kwargs)
+        return f(obj, urls, *args, **kwargs)
     
     return wrapper
 
