@@ -16,8 +16,7 @@ import re
 import functools
 
 from .exceptions import UnknownCodeError, UnathorizedAPIKeyError, InvalidHostnameError,\
-InvalidURLError
-from spam_lists.exceptions import InvalidHostError
+InvalidURLError, InvalidHostError, InvalidIPv4Error
     
 def accepts_valid_urls(f):
     @functools.wraps(f)
@@ -591,6 +590,21 @@ class IPAddress(object):
     
 class IPv4Address(ipaddress.IPv4Address, IPAddress):
     reverse_domain = ipv4_reverse_domain
+    
+    def __init__(self, value):
+        ''' Constructor
+        
+        :param value: a valid IPv4 address
+        :raises InvalidIPv4Error: if the value was not a valid IPv4 address,
+        or if it was a bytes string instead of unicode
+        '''
+        try:
+            super(IPv4Address, self).__init__(value)
+            
+        except ValueError:
+            msg = '{} is not a valid IPv4 address'.format(value)
+            raise InvalidIPv4Error, msg, exc_info()[2]
+        
     
 class IPv6Address(ipaddress.IPv6Address, IPAddress):
     reverse_domain = ipv6_reverse_domain
