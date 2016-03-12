@@ -9,7 +9,7 @@ from spam_lists.spambl import (NXDOMAIN, HpHosts,
                       AddressListItem, UrlHostTester, HostList, IPv4Address, IPv6Address, get_create_host,
                       UrlsAndLocations)
 from spam_lists.exceptions import UnknownCodeError, UnathorizedAPIKeyError,\
-    InvalidHostnameError
+    InvalidHostnameError, InvalidURLError
 from mock import Mock, patch, MagicMock
 
 from requests.exceptions import HTTPError, InvalidSchema, InvalidURL,\
@@ -67,7 +67,7 @@ class AcceptValidUrlsTest(unittest.TestCase):
     def test_accept_valid_urls_for(self, _, url):
         self.is_valid_url_mock.return_value = False
         
-        self.assertRaises(ValueError, self.decorated_function, self.client, url)
+        self.assertRaises(InvalidURLError, self.decorated_function, self.client, url)
         self.function.assert_not_called()
         
 class HostListTest(TestFunctionDoesNotHandleProvider, unittest.TestCase):
@@ -798,7 +798,7 @@ class UrlsAndLocationsTest(unittest.TestCase):
         invalid_url = 'invalid.url.com'
         self.is_valid_url_mock.side_effect = lambda u: u != invalid_url
 
-        self.assertRaises(ValueError, UrlsAndLocations, self.valid_urls+[invalid_url])
+        self.assertRaises(InvalidURLError, UrlsAndLocations, self.valid_urls+[invalid_url])
         
     def _set_redirect_urls(self, redirect_locations_per_url):
         
@@ -864,7 +864,7 @@ class RedirectUrlResolverTest(unittest.TestCase):
         
         self.is_valid_url_mock.return_value = False
         
-        self.assertRaises(ValueError, self.resolver.get_first_response, 'http://test.com')
+        self.assertRaises(InvalidURLError, self.resolver.get_first_response, 'http://test.com')
         
     @parameterized.expand([
                            ('ConnectionError', ConnectionError),
@@ -880,7 +880,7 @@ class RedirectUrlResolverTest(unittest.TestCase):
         
         self.is_valid_url_mock.return_value = False
         
-        with self.assertRaises(ValueError):
+        with self.assertRaises(InvalidURLError):
             self.resolver.get_redirect_urls('http://test.com').next()
         
     @parameterized.expand([

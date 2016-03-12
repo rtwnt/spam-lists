@@ -11,3 +11,6 @@ class UnathorizedAPIKeyError(SpamListsError, ValueError):
 
 class InvalidHostnameError(SpamListsError, ValueError):
     '''The value is not a valid hostname'''
+    
+class InvalidURLError(SpamListsError, ValueError):
+    '''The value is not a valid url'''

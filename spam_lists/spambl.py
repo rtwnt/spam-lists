@@ -15,23 +15,24 @@ from urlparse import urlparse
 import re
 import functools
 
-from .exceptions import UnknownCodeError, UnathorizedAPIKeyError, InvalidHostnameError
+from .exceptions import UnknownCodeError, UnathorizedAPIKeyError, InvalidHostnameError,\
+InvalidURLError
     
 def accepts_valid_urls(f):
     @functools.wraps(f)
     def wrapper(client, urls, *args, **kwargs):
         '''Run the function and return its return value
-         if all given urls are valid - otherwise raise ValueError
+         if all given urls are valid - otherwise raise InvalidURLError
         :param client:  a client of a service
         listing hosts or urls
         :param urls: an iterable containing urls
         :returns: a return value of the function f
-        :raises ValueError: if the iterable contains invalid urls
+        :raises InvalidURLError: if the iterable contains invalid urls
         '''
         invalid_urls = filter(lambda u: not is_valid_url(u), urls)
         if invalid_urls:
             msg = 'The values: {} are not valid urls'.format(','.join(invalid_urls))
-            raise ValueError, msg
+            raise InvalidURLError, msg
         
         return f(client, urls, *args, **kwargs)
     
@@ -141,7 +142,7 @@ class UrlHostTester(object):
         
         :param urls: an iterable containing url addresses to filter
         :returns: a list containing matching urls
-        :raises ValueError: when any of given urls is not valid
+        :raises InvalidURLError: if there are any invalid urls in the sequence
         '''
         is_match = lambda u: urlparse(u).hostname in self
         return (u for u in urls if is_match(u))
@@ -669,11 +670,11 @@ class RedirectUrlResolver(object):
         
         Otherwise, None is returned.
         
-        :raises ValueError: if the parameter is not a valid url value
+        :raises InvalidURLError: if the parameter is not a valid url value
         '''
         
         if not is_valid_url(url):
-            raise ValueError, '{} is not a valid url'.format(url)
+            raise InvalidURLError, '{} is not a valid url'.format(url)
         
         try:
             return self.session.head(url)
@@ -773,7 +774,7 @@ class UrlsAndLocations(object):
         
         :param urls: a sequence of urls
         :param redirect resolver: an object that has get_redirect_urls method
-        :raises ValueError: if the urls argument contains an invalid url
+        :raises InvalidURLError: if the urls argument contains an invalid url
         '''
         
         self._redirect_resolver = redirect_resolver

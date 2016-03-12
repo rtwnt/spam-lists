@@ -3,6 +3,7 @@
 from spam_lists.spambl import AddressListItem
 from nose_parameterized import parameterized
 from types import GeneratorType
+from spam_lists.exceptions import InvalidURLError
 
 class ClientGetExpectedItemsProvider(object):
     '''
@@ -158,12 +159,12 @@ class GeneratedUrlTesterTest(object):
                            ('lookup_matching'),
                            ('filter_matching')
                            ])
-    def test_value_error_is_raised_by(self, function_name):
+    def test_invalid_url_error_is_raised_by(self, function_name):
         invalid_url = 'http://invalid.url.com'
         self.is_valid_url_mock.side_effect = lambda u: u != invalid_url
         
         function = getattr(self.tested_instance, function_name)
-        with self.assertRaises(ValueError):
+        with self.assertRaises(InvalidURLError):
             function(self.valid_urls + [invalid_url])
     
     @parameterized.expand(valid_url_input)
