@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 
-from spam_lists.spambl import AddressListItem
-from nose_parameterized import parameterized
 from types import GeneratorType
+
+from nose_parameterized import parameterized
+
+from spam_lists.structures import AddressListItem
 from spam_lists.exceptions import InvalidURLError, InvalidHostError
 
 class ClientGetExpectedItemsProvider(object):

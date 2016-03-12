@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+'''
+This module contains all classes of exceptions raised
+by the library
+'''
 
 class SpamListsError(Exception):
     '''There was an error during testing a url or host'''
