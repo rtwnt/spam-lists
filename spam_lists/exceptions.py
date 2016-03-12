@@ -11,6 +11,9 @@ class UnathorizedAPIKeyError(SpamListsError, ValueError):
     
 class InvalidHostError(SpamListsError, ValueError):
     '''The value is not a valid host'''
+    
+class InvalidIPv4Error(InvalidHostError):
+    '''The value is not a valid IPv4 address'''
 
 class InvalidHostnameError(InvalidHostError):
     '''The value is not a valid hostname'''
