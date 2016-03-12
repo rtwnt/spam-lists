@@ -9,7 +9,7 @@ from spam_lists.spambl import (NXDOMAIN, HpHosts,
                       AddressListItem, UrlHostTester, HostList, IPv4Address, IPv6Address, get_create_host,
                       UrlsAndLocations)
 from spam_lists.exceptions import UnknownCodeError, UnathorizedAPIKeyError,\
-    InvalidHostnameError, InvalidURLError, InvalidHostError, InvalidIPv4Error
+    InvalidHostnameError, InvalidURLError, InvalidHostError, InvalidIPv4Error, InvalidIPv6Error
 from mock import Mock, patch, MagicMock
 
 from requests.exceptions import HTTPError, InvalidSchema, InvalidURL,\
@@ -688,7 +688,7 @@ class IPv4AddressTest(IpAddressTest, unittest.TestCase):
 class IPv6AddressTest(IpAddressTest, unittest.TestCase):
     reverse_name_root = reversename.ipv6_reverse_domain
     constructor = IPv6Address
-    value_error_type = ValueError
+    value_error_type = InvalidIPv6Error
     ip_address = u'fe80::0202:b3ff:fe1e:8329'
         
 class CreateHostTest(unittest.TestCase):

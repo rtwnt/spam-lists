@@ -16,7 +16,7 @@ import re
 import functools
 
 from .exceptions import UnknownCodeError, UnathorizedAPIKeyError, InvalidHostnameError,\
-InvalidURLError, InvalidHostError, InvalidIPv4Error
+InvalidURLError, InvalidHostError, InvalidIPv4Error, InvalidIPv6Error
     
 def accepts_valid_urls(f):
     @functools.wraps(f)
@@ -608,6 +608,20 @@ class IPv4Address(ipaddress.IPv4Address, IPAddress):
     
 class IPv6Address(ipaddress.IPv6Address, IPAddress):
     reverse_domain = ipv6_reverse_domain
+    
+    def __init__(self, value):
+        ''' Constructor
+        
+        :param value: a valid IPv6 address
+        :raises InvalidIPv6Error: if the value was not a valid IPv6 address,
+        or if it was a bytes string instead of unicode
+        '''
+        try:
+            super(IPv6Address, self).__init__(value)
+            
+        except ValueError:
+            msg = '{} is not a valid IPv6 address'.format(value)
+            raise InvalidIPv6Error, msg, exc_info()[2]
 
 def get_create_host(*factories):
     '''
