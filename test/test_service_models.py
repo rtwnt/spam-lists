@@ -14,7 +14,7 @@ HostCollection, HostList, HpHosts
 from spam_lists.exceptions import UnathorizedAPIKeyError, UnknownCodeError
 
 from .base_test_cases import HostListTestBase, UrlTesterTest,\
-TestFunctionDoesNotHandleProvider, UrlHostTesterTestSetupProvider
+TestFunctionDoesNotHandleProvider
 
 @lru_cache()
 def host_list_host_factory(h):
@@ -23,11 +23,7 @@ def host_list_host_factory(h):
     return host_object
 
 
-class HostListTest(
-                   HostListTestBase,
-                   UrlHostTesterTestSetupProvider,
-                   unittest.TestCase
-                   ):
+class HostListTest(HostListTestBase, unittest.TestCase):
     
     def setUp(self):
         self.listed_hosts = []
@@ -68,7 +64,6 @@ def create_dns_query_function(expected_query_names):
     return dns_query
         
 class DNSBLTest(
-                UrlHostTesterTestSetupProvider,
                 HostListTestBase,
                 TestFunctionDoesNotHandleProvider,
                 unittest.TestCase
@@ -147,11 +142,7 @@ def create_hp_hosts_get(classification, listed_hosts):
         return response
     return hp_hosts_get
 
-class HpHostsTest(
-                  UrlHostTesterTestSetupProvider,
-                  HostListTestBase,
-                  unittest.TestCase
-                  ):
+class HpHostsTest(HostListTestBase, unittest.TestCase):
     
     valid_ipv6 = '2001:ddd:ccc:111::33'
     
@@ -188,10 +179,7 @@ class HpHostsTest(
     def _set_matching_hosts(self, hosts):
         self.get_mock.side_effect = create_hp_hosts_get(self.classification, hosts)
         
-class GoogleSafeBrowsingTest(
-                             UrlTesterTest,
-                             unittest.TestCase
-                             ):
+class GoogleSafeBrowsingTest(UrlTesterTest, unittest.TestCase):
     
     def _get_expected_items_for_urls(self, urls):
         return self._get_expected_items(urls)
@@ -262,7 +250,6 @@ def host_collection_host_factory(h):
             return host_object
         
 class HostCollectionTest(
-                         UrlHostTesterTestSetupProvider,
                          HostListTestBase,
                          TestFunctionDoesNotHandleProvider,
                          unittest.TestCase

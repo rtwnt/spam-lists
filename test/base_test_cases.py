@@ -97,6 +97,10 @@ class UrlTesterTest(UrlTesterTestBase):
         item = lambda i: AddressListItem(i, self.tested_instance,
                                              self.classification)
         return [item(v) for v in values]
+    
+def get_hosts(urls):
+    
+    return [urlparse(u).hostname for u in urls]
 
 class HostListTestBase(UrlTesterTest):
     ''' A common test case for all classes that represent
@@ -107,6 +111,12 @@ class HostListTestBase(UrlTesterTest):
                         ('hostname', 'test.pl'),
                         ('ipv6', '2001:ddd:ccc:111::33')
                         ]
+    
+    def _set_matching_urls(self, urls):
+        self._set_matching_hosts(get_hosts(urls))
+        
+    def _get_expected_items_for_urls(self, urls):
+        return self._get_expected_items(get_hosts(urls))
     
     def _test_function_does_not_handle_invalid_host_error(self, function, arg):
         self._test_function_does_not_handle(InvalidHostError,
@@ -186,18 +196,6 @@ class HostListTestBase(UrlTesterTest):
         
         self._test_lookup_for_not_listed(value)
 
-        
-def get_hosts(urls):
-    
-    return [urlparse(u).hostname for u in urls]
-        
-class UrlHostTesterTestSetupProvider(object):
-    
-    def _set_matching_urls(self, urls):
-        self._set_matching_hosts(get_hosts(urls))
-        
-    def _get_expected_items_for_urls(self, urls):
-        return self._get_expected_items(get_hosts(urls))
             
 class TestFunctionDoesNotHandleProvider(object):
 
