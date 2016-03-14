@@ -59,12 +59,7 @@ class HostListTest(
     def _set_matching_hosts(self, matching_hosts):
         
         self.listed_hosts = [self.host_factory_mock(mh) for mh in matching_hosts]
-    
-@lru_cache()
-def dnsbl_host_factory(h):
-    host_object = MagicMock()
-    host_object.__str__.return_value = h
-    return host_object
+
 
 def create_dns_query_function(expected_query_names):
     def dns_query(query_name):
@@ -94,7 +89,7 @@ class DNSBLTest(
         self.classification_resolver.return_value = self.classification
          
         self.host_factory_mock = Mock()
-        self.host_factory_mock.side_effect = dnsbl_host_factory
+        self.host_factory_mock.side_effect = host_list_host_factory
          
         self.tested_instance = DNSBL('test_service', self.query_domain_str, 
                                    self.classification_resolver, self.host_factory_mock)
@@ -141,11 +136,7 @@ class DNSBLTest(
                                                                self.tested_instance.lookup_matching,
                                                                [url]
                                                                )
-        
-def hp_hosts_host_factory(host_value):
-    value = MagicMock()
-    value.__str__.return_value = str(host_value)
-    return  value
+
 
 def create_hp_hosts_get(classification, listed_hosts):
     class_str = ','.join(classification)
@@ -195,7 +186,7 @@ class HpHostsTest(
         self.tested_instance = HpHosts('spambl_test_suite')
         self.tested_instance._host_factory = self.host_factory_mock
          
-        self.host_factory_mock.side_effect = hp_hosts_host_factory
+        self.host_factory_mock.side_effect = host_list_host_factory
          
         self.is_valid_url_patcher = patch('spam_lists.validation.is_valid_url')
         self.is_valid_url_mock = self.is_valid_url_patcher.start()
