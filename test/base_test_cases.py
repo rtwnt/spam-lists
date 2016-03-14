@@ -131,7 +131,7 @@ class UrlTesterTestBase(object):
         
         self._test_any_match_returns_false(self.valid_urls)
         
-class GeneratedUrlTesterTest(object):
+class GeneratedUrlTesterTest(UrlTesterTestBase):
     ''' A class containing data for url tester test generation
     and test methods generated using the data '''
     

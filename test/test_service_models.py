@@ -13,9 +13,8 @@ from spam_lists.service_models import DNSBL, GoogleSafeBrowsing,\
 HostCollection, HostList, HpHosts
 from spam_lists.exceptions import UnathorizedAPIKeyError, UnknownCodeError
 
-from .base_test_cases import HostListTestBase, UrlTesterTestBase,\
-GeneratedUrlTesterTest, TestFunctionDoesNotHandleProvider,\
-UrlHostTesterTestSetupProvider
+from .base_test_cases import HostListTestBase, GeneratedUrlTesterTest,\
+TestFunctionDoesNotHandleProvider, UrlHostTesterTestSetupProvider
 
 @lru_cache()
 def host_list_host_factory(h):
@@ -28,7 +27,6 @@ class HostListTest(
                    HostListTestBase,
                    UrlHostTesterTestSetupProvider,
                    GeneratedUrlTesterTest,
-                   UrlTesterTestBase,
                    unittest.TestCase
                    ):
     
@@ -72,7 +70,6 @@ def create_dns_query_function(expected_query_names):
         
 class DNSBLTest(
                 GeneratedUrlTesterTest,
-                UrlTesterTestBase,
                 UrlHostTesterTestSetupProvider,
                 HostListTestBase,
                 TestFunctionDoesNotHandleProvider,
@@ -154,7 +151,6 @@ def create_hp_hosts_get(classification, listed_hosts):
 
 class HpHostsTest(
                   GeneratedUrlTesterTest,
-                  UrlTesterTestBase,
                   UrlHostTesterTestSetupProvider,
                   HostListTestBase,
                   unittest.TestCase
@@ -197,7 +193,6 @@ class HpHostsTest(
         
 class GoogleSafeBrowsingTest(
                              GeneratedUrlTesterTest,
-                             UrlTesterTestBase,
                              unittest.TestCase
                              ):
     
@@ -271,7 +266,6 @@ def host_collection_host_factory(h):
         
 class HostCollectionTest(
                          GeneratedUrlTesterTest,
-                         UrlTesterTestBase,
                          UrlHostTesterTestSetupProvider,
                          HostListTestBase,
                          TestFunctionDoesNotHandleProvider,
