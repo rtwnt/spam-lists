@@ -99,9 +99,11 @@ class HostListTestBase(object):
         self._test_lookup_for_not_listed(value)
         
 class UrlTesterTestBase(object):
-    ''' A common test case for classes  responsible for
-    testing urls for matching criteria supported by the
-    classes or services that they represent'''
+    ''' A class providing basic methods for performing tests for classes
+    having any_match, filter_matching and lookup_matching methods
+    
+    The methods are to be used to write and generate actual test methods
+    '''
     
     valid_urls = ['http://test.com', 'http://127.33.22.11', 'https://[2001:ddd:ccc:123::55]']
         
