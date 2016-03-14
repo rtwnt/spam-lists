@@ -9,14 +9,13 @@ from sys import exc_info
 from urlparse import urlparse
 from itertools import izip
 
-import validators
 from requests import get, post
 from requests.exceptions import HTTPError
 from dns import name
 from dns.resolver import NXDOMAIN, query
 
 from .validation import accepts_valid_urls, accepts_valid_host
-from .structures import AddressListItem, host
+from .structures import AddressListItem, host, non_ipv6_host
 from .exceptions import UnathorizedAPIKeyError, UnknownCodeError, InvalidHostError
 
 
@@ -220,7 +219,7 @@ class HpHosts(HostList, UrlHostTester):
         
         self.app_id = client_name
         
-        super(HpHosts, self).__init__(host)
+        super(HpHosts, self).__init__(non_ipv6_host)
         
     def _query(self, host_object, classification = False):
         ''' Query the client for data of given host
@@ -229,10 +228,6 @@ class HpHosts(HostList, UrlHostTester):
         :param classification: if True: hpHosts is queried also for classification for given host, if listed
         :returns: content of response to GET request to hpHosts for data on the given host
         '''
-        
-        if validators.ipv6(str(host_object)):
-            msg_template = 'Error for argument: {}. HpHosts does not support ipv6'
-            raise ValueError, msg_template.format(host_object)
         
         url = 'http://verify.hosts-file.net/?v={}&s={}'.format(self.app_id, host_object)
         url = url + '&class=true' if classification else url

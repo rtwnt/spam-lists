@@ -235,44 +235,6 @@ class HpHostsTest(
          
     def _set_matching_hosts(self, hosts):
         self.get_mock.side_effect = create_hp_hosts_get(self.classification, hosts)
-    
-    def _test_function_raises_value_error_for_valid_ipv6(self, function, ipv6_arg):
-        
-        self.assertRaises(ValueError, function, ipv6_arg)
-        
-    def test_contains_raises_value_error_for_valid_ipv6(self):
-        
-        self._test_function_raises_value_error_for_valid_ipv6(
-                                                             self.tested_instance.__contains__,
-                                                             self.valid_ipv6
-                                                             )
-        
-    def test_lookup_raises_value_error_for_valid_ipv6(self):
-        
-        self._test_function_raises_value_error_for_valid_ipv6(
-                                                             self.tested_instance.lookup,
-                                                             self.valid_ipv6
-                                                             )
-    def _test_function_raises_value_error_for_valid_ipv6_url(self, function):
-        
-        url = 'http://[{}]'.format(self.valid_ipv6)
-        
-        self._test_function_raises_value_error_for_valid_ipv6(
-                                                              function,
-                                                              [url]
-                                                              )
-        
-    def test_any_match_raises_value_error_for_valid_ipv6_url(self):
-        
-        self._test_function_raises_value_error_for_valid_ipv6_url(
-                                                                  self.tested_instance.any_match
-                                                                  )
-        
-    def test_lookup_matching_raises_value_error_for_valid_ipv6_url(self):
-        
-        function = lambda u: list(self.tested_instance.lookup_matching(u))
-        
-        self._test_function_raises_value_error_for_valid_ipv6_url(function)
         
 class GoogleSafeBrowsingTest(
                              GeneratedUrlTesterTest,

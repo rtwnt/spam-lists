@@ -234,5 +234,6 @@ def get_create_host(*factories):
     return create_host
 
 host = get_create_host(IPv4Address, IPv6Address, Hostname)
+non_ipv6_host = get_create_host(IPv4Address, Hostname)
 
 AddressListItem = namedtuple('AddressListItem', 'value source classification')
