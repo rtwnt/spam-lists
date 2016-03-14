@@ -3,6 +3,7 @@
 from types import GeneratorType
 
 from nose_parameterized import parameterized
+from mock import patch
 
 from spam_lists.structures import AddressListItem
 from spam_lists.exceptions import InvalidURLError, InvalidHostError
@@ -52,6 +53,23 @@ class BaseHostListTest(object):
                                             function,
                                             'invalidhost.com'
                                             )
+        
+    @patch('spam_lists.validation.is_valid_host')
+    def _test_function_raises_invalid_host_error(self, function, is_valid_host_mock):
+        invalid_host = 'invalid.com'
+        is_valid_host_mock.side_effect = lambda h: h != invalid_host
+        
+        with self.assertRaises(InvalidHostError):
+            function(invalid_host)
+        
+    @parameterized.expand([
+                           ('__contains__'),
+                           ('lookup')
+                           ])
+    def test_invalid_host_error_is_raised_by(self, function_name):
+        
+        function = getattr(self.tested_instance, function_name)
+        self._test_function_raises_invalid_host_error(function)
         
     def _test_contains_for_listed(self, value):
         

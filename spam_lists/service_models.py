@@ -15,7 +15,7 @@ from requests.exceptions import HTTPError
 from dns import name
 from dns.resolver import NXDOMAIN, query
 
-from .validation import accepts_valid_urls
+from .validation import accepts_valid_urls, accepts_valid_host
 from .structures import AddressListItem, host
 from .exceptions import UnathorizedAPIKeyError, UnknownCodeError
 
@@ -53,16 +53,20 @@ class HostList(object):
         '''
         raise NotImplementedError
         
+    @accepts_valid_host
     def __contains__(self, host_value):
         ''' Check if given host value is listed by the service
         
         :param host_value: a value of the host of a type
         that can be listed by the service
         :returns: True if the host is listed
+        :raises InvalidHostError: if the argument is not a valid host string
         '''
+        
         host_object = self._host_factory(host_value)
         return self._contains(host_object)
     
+    @accepts_valid_host
     def lookup(self, host_value):
         ''' Get an object representing a host value
         matched by this host
@@ -71,6 +75,7 @@ class HostList(object):
         that can be listed by the service
         :returns: an instance of AddressListItem representing
         a matched value
+        :raises InvalidHostError: if the argument is not a valid host string
         '''
         host_object = self._host_factory(host_value)
         host_item, classification = self._get_match_and_classification(host_object)
