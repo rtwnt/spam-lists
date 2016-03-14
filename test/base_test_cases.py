@@ -41,18 +41,24 @@ class BaseHostListTest(object):
                                             function,
                                             arg
                                             )
-    
-    @parameterized.expand([
-                           ('__contains__'),
-                           ('lookup')
-                           ])
-    def test_invalid_host_error_is_not_handled_by(self, function_name):
         
-        function = getattr(self.tested_instance, function_name)
-        self._test_function_does_not_handle_invalid_host_error(
-                                            function,
-                                            'invalidhost.com'
-                                            )
+    def _get_return_value_for_unsupported_host(self, function):
+        unsupported_host = 'unsupported.com'
+        self.host_factory_mock.side_effect = InvalidHostError
+        
+        return function(unsupported_host)
+        
+    def test_contains_returns_false_for_unsupported_host(self):
+        actual = self._get_return_value_for_unsupported_host(
+                                                             self.tested_instance.__contains__
+                                                             )
+        self.assertFalse(actual)
+        
+    def test_lookup_returns_none_for_unsupported_host(self):
+        actual = self._get_return_value_for_unsupported_host(
+                                                             self.tested_instance.lookup
+                                                             )
+        self.assertIsNone(actual)
         
     @patch('spam_lists.validation.is_valid_host')
     def _test_function_raises_invalid_host_error(self, function, is_valid_host_mock):

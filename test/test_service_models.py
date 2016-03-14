@@ -18,7 +18,7 @@ from .base_test_cases import BaseHostListTest, BaseUrlTesterTest,\
 ClientGetExpectedItemsProvider, GeneratedUrlTesterTest, IPv6SupportTest,\
 TestFunctionDoesNotHandleProvider
 
-class HostListTest(TestFunctionDoesNotHandleProvider, unittest.TestCase):
+class HostListTest(unittest.TestCase):
     
     def setUp(self):
         self.host_factory_mock = Mock()
@@ -147,7 +147,6 @@ class DNSBLTest(
         self.dns_query_mock.side_effect = create_dns_query_function(expected_query_names)
         
     def _test_function_does_not_handle_unknown_code_error(self, function, *args, **kwargs):
-        
         self._test_function_does_not_handle(
                                             UnknownCodeError,
                                             self.classification_resolver,
@@ -198,7 +197,6 @@ def create_hp_hosts_get(classification, listed_hosts):
 
 class HpHostsTest(
                   BaseHostListTest,
-                  TestFunctionDoesNotHandleProvider,
                   ClientGetExpectedItemsProvider,
                   unittest.TestCase
                   ):
