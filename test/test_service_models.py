@@ -13,7 +13,7 @@ from spam_lists.service_models import DNSBL, GoogleSafeBrowsing,\
 HostCollection, HostList, HpHosts
 from spam_lists.exceptions import UnathorizedAPIKeyError, UnknownCodeError
 
-from .base_test_cases import HostListTestBase, GeneratedUrlTesterTest,\
+from .base_test_cases import HostListTestBase, UrlTesterTest,\
 TestFunctionDoesNotHandleProvider, UrlHostTesterTestSetupProvider
 
 @lru_cache()
@@ -26,7 +26,7 @@ def host_list_host_factory(h):
 class HostListTest(
                    HostListTestBase,
                    UrlHostTesterTestSetupProvider,
-                   GeneratedUrlTesterTest,
+                   UrlTesterTest,
                    unittest.TestCase
                    ):
     
@@ -69,7 +69,7 @@ def create_dns_query_function(expected_query_names):
     return dns_query
         
 class DNSBLTest(
-                GeneratedUrlTesterTest,
+                UrlTesterTest,
                 UrlHostTesterTestSetupProvider,
                 HostListTestBase,
                 TestFunctionDoesNotHandleProvider,
@@ -150,7 +150,7 @@ def create_hp_hosts_get(classification, listed_hosts):
     return hp_hosts_get
 
 class HpHostsTest(
-                  GeneratedUrlTesterTest,
+                  UrlTesterTest,
                   UrlHostTesterTestSetupProvider,
                   HostListTestBase,
                   unittest.TestCase
@@ -192,7 +192,7 @@ class HpHostsTest(
         self.get_mock.side_effect = create_hp_hosts_get(self.classification, hosts)
         
 class GoogleSafeBrowsingTest(
-                             GeneratedUrlTesterTest,
+                             UrlTesterTest,
                              unittest.TestCase
                              ):
     
@@ -265,7 +265,7 @@ def host_collection_host_factory(h):
             return host_object
         
 class HostCollectionTest(
-                         GeneratedUrlTesterTest,
+                         UrlTesterTest,
                          UrlHostTesterTestSetupProvider,
                          HostListTestBase,
                          TestFunctionDoesNotHandleProvider,
