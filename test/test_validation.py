@@ -10,46 +10,57 @@ from nose_parameterized import parameterized
 from spam_lists.validation import accepts_valid_urls, is_valid_url
 from spam_lists.exceptions import InvalidURLError
 
-class AcceptValidUrlsTest(unittest.TestCase):
+class ValidationDecoratorTest(object):
     
     def setUp(self):
-        self.is_valid_url_patcher = patch('spam_lists.validation.is_valid_url')
-        self.is_valid_url_mock = self.is_valid_url_patcher.start()
+        self.validity_tester_patcher = patch(self.validity_tester)
+        self.validity_tester_mock = self.validity_tester_patcher.start()
         
         function = Mock()
         function.__name__ = 'function'
         
-        self.client = Mock()
+        self.obj = Mock()
         self.function = function
-        self.decorated_function = accepts_valid_urls(self.function)
+        self.decorated_function = self.decorator(self.function)
     
     def tearDown(self):
-        self.is_valid_url_patcher.stop()
+        self.validity_tester_patcher.stop()
     
-    @parameterized.expand([
-                           ('hostname', 'https://valid.com'),
-                           ('ipv4_host', 'http://122.34.59.109'),
-                           ('ipv6_host', 'http://[2001:db8:abc:123::42]')
-                           ])
-    def test_accept_valid_urls_for_valid(self, _, url):
-        self.decorated_function(self.client, url)
-        self.function.assert_called_once_with(self.client, url)
+    def _test_wrapper_for_valid(self, value):
+        self.decorated_function(self.obj, value)
+        self.function.assert_called_once_with(self.obj, value)
     
-    
-    @parameterized.expand([
-                           ('invalid_hostname', 'http://-abc.com'),
-                           ('invalid_schema', 'abc://hostname.com'),
-                           ('no_schema', 'hostname.com'),
-                           ('invalid_ipv4', 'http://999.999.999.999'),
-                           ('invalid_ipv4', 'http://127.0.0.0.1'),
-                           ('invalid_ipv6', 'http://[2001:db8:abcef:123::42]'),
-                           ('invalid_ipv6', 'http://[2001:db8:abch:123::42]')
-                           ])
-    def test_accept_valid_urls_for(self, _, url):
-        self.is_valid_url_mock.return_value = False
+    def _test_wrapper_for_invalid(self, value):
+        self.validity_tester_mock.return_value = False
         
-        self.assertRaises(InvalidURLError, self.decorated_function, self.client, url)
+        self.assertRaises(self.exception_type, self.decorated_function, self.obj, value)
         self.function.assert_not_called()
+
+class AcceptValidUrlsTest(ValidationDecoratorTest, unittest.TestCase):
+    exception_type = InvalidURLError
+    decorator = staticmethod(accepts_valid_urls)
+    validity_tester = 'spam_lists.validation.is_valid_url'
+    
+    @parameterized.expand([
+                           ('hostname', ['https://valid.com']),
+                           ('ipv4_host', ['http://122.34.59.109']),
+                           ('ipv6_host', ['http://[2001:db8:abc:123::42]'])
+                           ])
+    def test_accept_valid_urls_for_urls_with_valid(self, _, urls):
+        self._test_wrapper_for_valid(urls)
+    
+    
+    @parameterized.expand([
+                           ('invalid_hostname', ['http://-abc.com']),
+                           ('invalid_schema', ['abc://hostname.com']),
+                           ('no_schema', ['hostname.com']),
+                           ('invalid_ipv4', ['http://999.999.999.999']),
+                           ('invalid_ipv4', ['http://127.0.0.0.1']),
+                           ('invalid_ipv6', ['http://[2001:db8:abcef:123::42]']),
+                           ('invalid_ipv6', ['http://[2001:db8:abch:123::42]'])
+                           ])
+    def test_accept_valid_urls_for_urls_with(self, _, urls):
+        self._test_wrapper_for_invalid(urls)
         
 @lru_cache()
 def get_url_tester_mock(identifier):
@@ -88,32 +99,6 @@ class IsValidUrlTest(unittest.TestCase):
                            ])
     def test_is_valid_url_for_invalid_url_with(self, _, url):
         self.assertFalse(is_valid_url(url))
-        
-class ValidationDecoratorTest(object):
-    
-    def setUp(self):
-        self.validity_tester_patcher = patch(self.validity_tester)
-        self.validity_tester_mock = self.validity_tester_patcher.start()
-        
-        function = Mock()
-        function.__name__ = 'function'
-        
-        self.obj = Mock()
-        self.function = function
-        self.decorated_function = self.decorator(self.function)
-    
-    def tearDown(self):
-        self.validity_tester_patcher.stop()
-    
-    def _test_wrapper_for_valid(self, value):
-        self.decorated_function(self.obj, value)
-        self.function.assert_called_once_with(self.obj, value)
-    
-    def _test_wrapper_for_invalid(self, value):
-        self.validity_tester_mock.return_value = False
-        
-        self.assertRaises(self.exception_type, self.decorated_function, self.obj, value)
-        self.function.assert_not_called()
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
