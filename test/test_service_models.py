@@ -16,7 +16,7 @@ from spam_lists.exceptions import UnathorizedAPIKeyError, UnknownCodeError
 
 from .base_test_cases import BaseHostListTest, BaseUrlTesterTest,\
 ClientGetExpectedItemsProvider, GeneratedUrlTesterTest, IPv6SupportTest,\
-TestFunctionDoesNotHandleProvider
+TestFunctionDoesNotHandleProvider, UrlHostTesterTestSetupProvider
 
 class HostListTest(unittest.TestCase):
     
@@ -107,6 +107,9 @@ def create_dns_query_function(expected_query_names):
     return dns_query
         
 class DNSBLTest(
+                GeneratedUrlTesterTest,
+                BaseUrlTesterTest,
+                UrlHostTesterTestSetupProvider,
                 IPv6SupportTest,
                 BaseHostListTest, 
                 ClientGetExpectedItemsProvider,
@@ -192,6 +195,9 @@ def create_hp_hosts_get(classification, listed_hosts):
     return hp_hosts_get
 
 class HpHostsTest(
+                  GeneratedUrlTesterTest,
+                  BaseUrlTesterTest,
+                  UrlHostTesterTestSetupProvider,
                   BaseHostListTest,
                   ClientGetExpectedItemsProvider,
                   unittest.TestCase
@@ -308,6 +314,9 @@ def host_collection_host_factory(h):
             return host_object
         
 class HostCollectionTest(
+                         GeneratedUrlTesterTest,
+                         BaseUrlTesterTest,
+                         UrlHostTesterTestSetupProvider,
                          IPv6SupportTest,
                          BaseHostListTest,
                          TestFunctionDoesNotHandleProvider,
@@ -347,11 +356,7 @@ class HostCollectionTest(
          
     def _set_matching_hosts(self, hosts):
         self.tested_instance.hosts = [self.host_factory_mock(h) for h in hosts]
-         
-    def _set_matching_urls(self, urls):
-         
-        listed_hosts = [urlparse(u).hostname for u in urls]
-        self._set_matching_hosts(listed_hosts)
+        
 
 
 if __name__ == "__main__":

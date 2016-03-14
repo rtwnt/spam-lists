@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from types import GeneratorType
+from urlparse import urlparse
 
 from nose_parameterized import parameterized
 from mock import patch
@@ -208,6 +209,18 @@ class GeneratedUrlTesterTest(object):
     def test_filter_matching_for(self, _, matching_urls):
          
         self._test_filter_matching_for(matching_urls)
+        
+def get_hosts(urls):
+    
+    return [urlparse(u).hostname for u in urls]
+        
+class UrlHostTesterTestSetupProvider(object):
+    
+    def _set_matching_urls(self, urls):
+        self._set_matching_hosts(get_hosts(urls))
+        
+    def _get_expected_items_for_urls(self, urls):
+        return self._get_expected_items(get_hosts(urls))
             
 class TestFunctionDoesNotHandleProvider(object):
 
