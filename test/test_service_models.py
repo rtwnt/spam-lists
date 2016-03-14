@@ -73,14 +73,14 @@ class DNSBLTest(
      
     def setUp(self):
          
-        self.classification_resolver = Mock()
-        self.classification_resolver.return_value = self.classification
+        self.classification_map = MagicMock()
+        self.classification_map.__getitem__.return_value = self.classification
          
         self.host_factory_mock = Mock()
         self.host_factory_mock.side_effect = host_list_host_factory
          
         self.tested_instance = DNSBL('test_service', self.query_domain_str, 
-                                   self.classification_resolver, self.host_factory_mock)
+                                   self.classification_map, self.host_factory_mock)
          
         self.dns_query_patcher = patch('spam_lists.service_models.query')
         self.dns_query_mock = self.dns_query_patcher.start()
@@ -100,7 +100,7 @@ class DNSBLTest(
     def _test_function_does_not_handle_unknown_code_error(self, function, *args, **kwargs):
         self._test_function_does_not_handle(
                                             UnknownCodeError,
-                                            self.classification_resolver,
+                                            self.classification_map.__getitem__,
                                             function,
                                             *args,
                                             **kwargs

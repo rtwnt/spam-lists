@@ -18,7 +18,7 @@ import validators
 from .exceptions import InvalidHostError, InvalidHostnameError,\
 InvalidIPv4Error, InvalidIPv6Error, UnknownCodeError
 
-class BaseClassificationCodeResolver(object):
+class BaseClassificationCodeMap(object):
     ''' A class responsible for providing classification 
     for given return code '''
     
@@ -46,15 +46,15 @@ class BaseClassificationCodeResolver(object):
         
         return _class
         
-    def __call__(self, code):
+    def __getitem__(self, code):
         
         raise NotImplementedError
 
-class SimpleClassificationCodeResolver(BaseClassificationCodeResolver):
-    ''' A classification resolver recognizing only 
+class SimpleClassificationCodeMap(BaseClassificationCodeMap):
+    ''' A classification map recognizing only 
     code values that are stored as indexes of taxonomical units '''
     
-    def __call__(self, code):
+    def __getitem__(self, code):
         ''' Get classification for given code
         
         :param code: a value to which a taxonomical unit may be assigned
@@ -66,8 +66,8 @@ class SimpleClassificationCodeResolver(BaseClassificationCodeResolver):
         
         return self._get_single_class(code),
         
-class SumClassificationCodeResolver(BaseClassificationCodeResolver):
-    ''' A classification resolver that recognizes arguments in form
+class SumClassificationCodeMap(BaseClassificationCodeMap):
+    ''' A classification map that recognizes indexes in form
     of both the same codes as stored in the instance and integers
     that can be represented as a sum of different indexes stored in
     the instance'''
@@ -88,7 +88,7 @@ class SumClassificationCodeResolver(BaseClassificationCodeResolver):
         
         return (2**y for y, x in enumerate(bin(code)[:1:-1]) if int(x))
     
-    def __call__(self, code):
+    def __getitem__(self, code):
         ''' Get classification for given code
         
         :param index: an integer that is supposed to represent a sum

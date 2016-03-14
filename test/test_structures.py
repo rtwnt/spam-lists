@@ -8,7 +8,7 @@ from nose_parameterized import parameterized
 from dns import reversename
 
 from spam_lists.structures import get_create_host, Hostname, IPv4Address,\
-IPv6Address, SimpleClassificationCodeResolver, SumClassificationCodeResolver
+IPv6Address, SimpleClassificationCodeMap, SumClassificationCodeMap
 from spam_lists.exceptions import InvalidHostError, InvalidHostnameError,\
 InvalidIPv4Error, InvalidIPv6Error, UnknownCodeError
 
@@ -17,35 +17,35 @@ class BaseClassificationCodeResolverTest(object):
     
     def setUp(self):
         self.code_item_class = {}
-        self.resolver = self.factory(self.code_item_class)
+        self.classification_code_map = self.factory(self.code_item_class)
         
-class SimpleClassificationCodeResolverTest(
+class SimpleClassificationCodeMapTest(
                                            BaseClassificationCodeResolverTest,
                                            unittest.TestCase
                                            ):
     
-    factory = SimpleClassificationCodeResolver
+    factory = SimpleClassificationCodeMap
         
-    def test_call_for_valid_key(self):
+    def test_getitem_for_valid_key(self):
         
         key = 4
         self.code_item_class.update({key: 'TestClass'})
         
         expected = self.code_item_class[key],
-        actual = self.resolver(key)
+        actual = self.classification_code_map[key]
         
         self.assertEqual(expected, actual)
             
-    def test_call_for_invalid_key(self):
+    def test_getitem_for_invalid_key(self):
         
-        self.assertRaises(UnknownCodeError, self.resolver, 4)
+        self.assertRaises(UnknownCodeError, self.classification_code_map.__getitem__, 4)
             
-class SumClassificationCodeResolverTest(
+class SumClassificationCodeMapTest(
                                         BaseClassificationCodeResolverTest,
                                         unittest.TestCase
                                         ):
     
-    factory = SumClassificationCodeResolver
+    factory = SumClassificationCodeMap
         
     def _set_code_item_class(self, code_class):
         self.code_item_class.update(code_class)
@@ -60,7 +60,7 @@ class SumClassificationCodeResolverTest(
         self._set_code_item_class(classes)
         
         expected = tuple(classes.values())
-        actual = self.resolver(sum(keys))
+        actual = self.classification_code_map[sum(keys)]
         
         self.assertItemsEqual(expected, actual)
         
@@ -72,7 +72,7 @@ class SumClassificationCodeResolverTest(
         
         self._set_code_item_class({2: 'Class: 2', 4: 'Class:4'})
         
-        self.assertRaises(UnknownCodeError, self.resolver, sum(keys))
+        self.assertRaises(UnknownCodeError, self.classification_code_map.__getitem__, sum(keys))
 
 
 class HostnameTest(unittest.TestCase):

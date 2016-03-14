@@ -134,12 +134,12 @@ class HostList(object):
     
 class DNSBL(HostList):
     ''' Represents a DNSBL service '''
-    def __init__(self, identifier, query_suffix, classification_resolver, host_factory):
+    def __init__(self, identifier, query_suffix, classification_map, host_factory):
         ''' Create new DNSBL object
         
         :param identifier: a value designating DNSBL service provider: its name or url address.
         :param query_suffix: a suffix added to DNSBL query address
-        :param classification_resolver: item classes associated with DNSBL query return codes
+        :param classification_map: item classes associated with DNSBL query return codes
         :param host_factory: a callable object that returns an object representing host and providing
         method for getting a relative domain pertaining to it.
         '''
@@ -147,7 +147,7 @@ class DNSBL(HostList):
         self._identifier = identifier
 
         self._query_suffix = name.from_text(query_suffix)
-        self._get_classification = classification_resolver
+        self._classification_map = classification_map
         self._host_factory = host_factory
         
         super(DNSBL, self).__init__(host_factory)
@@ -186,7 +186,7 @@ class DNSBL(HostList):
             return None, None
         
         try:
-            classification = self._get_classification(return_code)
+            classification = self._classification_map[return_code]
             
             return host_object, classification
         
