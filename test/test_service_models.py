@@ -14,8 +14,8 @@ HostCollection, HostList, HpHosts
 from spam_lists.exceptions import UnathorizedAPIKeyError, UnknownCodeError
 
 from .base_test_cases import HostListTestBase, UrlTesterTestBase,\
-ClientGetExpectedItemsProvider, GeneratedUrlTesterTest,\
-TestFunctionDoesNotHandleProvider, UrlHostTesterTestSetupProvider
+GeneratedUrlTesterTest, TestFunctionDoesNotHandleProvider,\
+UrlHostTesterTestSetupProvider
 
 @lru_cache()
 def host_list_host_factory(h):
@@ -29,7 +29,6 @@ class HostListTest(
                    UrlHostTesterTestSetupProvider,
                    GeneratedUrlTesterTest,
                    UrlTesterTestBase,
-                   ClientGetExpectedItemsProvider,
                    unittest.TestCase
                    ):
     
@@ -75,8 +74,7 @@ class DNSBLTest(
                 GeneratedUrlTesterTest,
                 UrlTesterTestBase,
                 UrlHostTesterTestSetupProvider,
-                HostListTestBase, 
-                ClientGetExpectedItemsProvider,
+                HostListTestBase,
                 TestFunctionDoesNotHandleProvider,
                 unittest.TestCase
                 ):
@@ -159,7 +157,6 @@ class HpHostsTest(
                   UrlTesterTestBase,
                   UrlHostTesterTestSetupProvider,
                   HostListTestBase,
-                  ClientGetExpectedItemsProvider,
                   unittest.TestCase
                   ):
     
@@ -201,7 +198,6 @@ class HpHostsTest(
 class GoogleSafeBrowsingTest(
                              GeneratedUrlTesterTest,
                              UrlTesterTestBase,
-                             ClientGetExpectedItemsProvider,
                              unittest.TestCase
                              ):
     
@@ -279,7 +275,6 @@ class HostCollectionTest(
                          UrlHostTesterTestSetupProvider,
                          HostListTestBase,
                          TestFunctionDoesNotHandleProvider,
-                         ClientGetExpectedItemsProvider,
                          unittest.TestCase
                          ):
      

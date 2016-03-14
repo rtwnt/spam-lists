@@ -9,23 +9,6 @@ from mock import patch
 from spam_lists.structures import AddressListItem
 from spam_lists.exceptions import InvalidURLError, InvalidHostError
 
-class ClientGetExpectedItemsProvider(object):
-    '''
-    Provides implementation of _get_expected_items
-    for test cases testing method of a client
-    
-    Clients communicate directly with services, remote
-    or local, and their instances are provided in
-    AddressListItem instances as values of
-    their .source property
-    '''
-    classification = ('TEST',)
-    
-    def _get_expected_items(self, values):
-        item = lambda i: AddressListItem(i, self.tested_instance,
-                                             self.classification)
-        return [item(v) for v in values]
-
 
 class HostListTestBase(object):
     ''' A common test case for all classes that represent
@@ -152,6 +135,8 @@ class GeneratedUrlTesterTest(object):
     ''' A class containing data for url tester test generation
     and test methods generated using the data '''
     
+    classification = ('TEST',)
+    
     valid_url_input = [
                            ('ipv4_url', ['http://55.44.33.21']),
                            ('hostname_url', ['https://abc.com']),
@@ -191,6 +176,11 @@ class GeneratedUrlTesterTest(object):
     def test_filter_matching_for(self, _, matching_urls):
          
         self._test_filter_matching_for(matching_urls)
+        
+    def _get_expected_items(self, values):
+        item = lambda i: AddressListItem(i, self.tested_instance,
+                                             self.classification)
+        return [item(v) for v in values]
         
 def get_hosts(urls):
     
