@@ -13,7 +13,7 @@ from spam_lists.service_models import DNSBL, GoogleSafeBrowsing,\
 HostCollection, HostList, HpHosts
 from spam_lists.exceptions import UnathorizedAPIKeyError, UnknownCodeError
 
-from .base_test_cases import BaseHostListTest, BaseUrlTesterTest,\
+from .base_test_cases import HostListTestBase, BaseUrlTesterTest,\
 ClientGetExpectedItemsProvider, GeneratedUrlTesterTest,\
 TestFunctionDoesNotHandleProvider, UrlHostTesterTestSetupProvider
 
@@ -25,7 +25,7 @@ def host_list_host_factory(h):
 
 
 class HostListTest(
-                   BaseHostListTest,
+                   HostListTestBase,
                    UrlHostTesterTestSetupProvider,
                    GeneratedUrlTesterTest,
                    BaseUrlTesterTest,
@@ -75,7 +75,7 @@ class DNSBLTest(
                 GeneratedUrlTesterTest,
                 BaseUrlTesterTest,
                 UrlHostTesterTestSetupProvider,
-                BaseHostListTest, 
+                HostListTestBase, 
                 ClientGetExpectedItemsProvider,
                 TestFunctionDoesNotHandleProvider,
                 unittest.TestCase
@@ -158,7 +158,7 @@ class HpHostsTest(
                   GeneratedUrlTesterTest,
                   BaseUrlTesterTest,
                   UrlHostTesterTestSetupProvider,
-                  BaseHostListTest,
+                  HostListTestBase,
                   ClientGetExpectedItemsProvider,
                   unittest.TestCase
                   ):
@@ -277,7 +277,7 @@ class HostCollectionTest(
                          GeneratedUrlTesterTest,
                          BaseUrlTesterTest,
                          UrlHostTesterTestSetupProvider,
-                         BaseHostListTest,
+                         HostListTestBase,
                          TestFunctionDoesNotHandleProvider,
                          ClientGetExpectedItemsProvider,
                          unittest.TestCase
@@ -304,7 +304,7 @@ class HostCollectionTest(
         
         self._test_function_does_not_handle_invalid_host_error(function, 'invalidhost.com')
          
-    @parameterized.expand(BaseHostListTest.valid_host_input)
+    @parameterized.expand(HostListTestBase.valid_host_input)
     def test_add_for_valid(self, _, value):
          
         self.tested_instance.add(value)

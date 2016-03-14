@@ -27,7 +27,7 @@ class ClientGetExpectedItemsProvider(object):
         return [item(v) for v in values]
 
 
-class BaseHostListTest(object):
+class HostListTestBase(object):
     ''' A common test case for all classes that represent
     a host list stored locally or by a remote service '''
     
