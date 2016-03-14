@@ -22,6 +22,25 @@ def is_valid_host(value):
     '''
     host_validators = validators.ipv4, validators.ipv6, validators.domain
     return any(f(value) for f in host_validators)
+
+url_regex = re.compile(r'^[a-z0-9\.\-\+]*://' #scheme
+                       r'(?:\S+(?::\S*)?@)?' #authentication
+                       r'(?:[^/:]+|\[[0-9a-f:\.]+\])' # host
+                       r'(?::\d{2,5})?' # port
+                       r'(?:[/?#][^\s]*)?' # path, query or fragment
+                       r'$', re.IGNORECASE)
+
+def is_valid_url(value):
+    ''' Check if given value is valid url string
+    
+    :param value: a value to test
+    :returns: True if the value is valid url string
+    '''
+    
+    match = url_regex.match(value)
+    host_str = urlparse(value).hostname
+    
+    return (match and is_valid_host(host_str))
     
 
 def accepts_valid_urls(f):
@@ -42,22 +61,3 @@ def accepts_valid_urls(f):
         return f(obj, urls, *args, **kwargs)
     
     return wrapper
-
-url_regex = re.compile(r'^[a-z0-9\.\-\+]*://' #scheme
-                       r'(?:\S+(?::\S*)?@)?' #authentication
-                       r'(?:[^/:]+|\[[0-9a-f:\.]+\])' # host
-                       r'(?::\d{2,5})?' # port
-                       r'(?:[/?#][^\s]*)?' # path, query or fragment
-                       r'$', re.IGNORECASE)
-
-def is_valid_url(value):
-    ''' Check if given value is valid url string
-    
-    :param value: a value to test
-    :returns: True if the value is valid url string
-    '''
-    
-    match = url_regex.match(value)
-    host_str = urlparse(value).hostname
-    
-    return (match and is_valid_host(host_str))
