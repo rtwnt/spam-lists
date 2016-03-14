@@ -115,7 +115,7 @@ class HostListTestBase(object):
         
         self._test_lookup_for_not_listed(value)
         
-class BaseUrlTesterTest(object):
+class UrlTesterTestBase(object):
     ''' A common test case for classes  responsible for
     testing urls for matching criteria supported by the
     classes or services that they represent'''

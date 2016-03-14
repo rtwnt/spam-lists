@@ -15,7 +15,7 @@ from spam_lists.utils import RedirectUrlResolver, UrlsAndLocations, UrlTesterCha
 from spam_lists.structures import AddressListItem
 from spam_lists.exceptions import InvalidURLError, UnknownCodeError
 
-from .base_test_cases import BaseUrlTesterTest, TestFunctionDoesNotHandleProvider
+from .base_test_cases import UrlTesterTestBase, TestFunctionDoesNotHandleProvider
 
 class RedirectUrlResolverTest(unittest.TestCase):
     
@@ -239,7 +239,7 @@ def get_url_tester_mock(identifier):
     return source
 
 class UrlTesterChainTest(
-                         BaseUrlTesterTest,
+                         UrlTesterTestBase,
                          TestFunctionDoesNotHandleProvider,
                          unittest.TestCase
                          ):

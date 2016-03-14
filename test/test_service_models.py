@@ -13,7 +13,7 @@ from spam_lists.service_models import DNSBL, GoogleSafeBrowsing,\
 HostCollection, HostList, HpHosts
 from spam_lists.exceptions import UnathorizedAPIKeyError, UnknownCodeError
 
-from .base_test_cases import HostListTestBase, BaseUrlTesterTest,\
+from .base_test_cases import HostListTestBase, UrlTesterTestBase,\
 ClientGetExpectedItemsProvider, GeneratedUrlTesterTest,\
 TestFunctionDoesNotHandleProvider, UrlHostTesterTestSetupProvider
 
@@ -28,7 +28,7 @@ class HostListTest(
                    HostListTestBase,
                    UrlHostTesterTestSetupProvider,
                    GeneratedUrlTesterTest,
-                   BaseUrlTesterTest,
+                   UrlTesterTestBase,
                    ClientGetExpectedItemsProvider,
                    unittest.TestCase
                    ):
@@ -73,7 +73,7 @@ def create_dns_query_function(expected_query_names):
         
 class DNSBLTest(
                 GeneratedUrlTesterTest,
-                BaseUrlTesterTest,
+                UrlTesterTestBase,
                 UrlHostTesterTestSetupProvider,
                 HostListTestBase, 
                 ClientGetExpectedItemsProvider,
@@ -156,7 +156,7 @@ def create_hp_hosts_get(classification, listed_hosts):
 
 class HpHostsTest(
                   GeneratedUrlTesterTest,
-                  BaseUrlTesterTest,
+                  UrlTesterTestBase,
                   UrlHostTesterTestSetupProvider,
                   HostListTestBase,
                   ClientGetExpectedItemsProvider,
@@ -200,7 +200,7 @@ class HpHostsTest(
         
 class GoogleSafeBrowsingTest(
                              GeneratedUrlTesterTest,
-                             BaseUrlTesterTest,
+                             UrlTesterTestBase,
                              ClientGetExpectedItemsProvider,
                              unittest.TestCase
                              ):
@@ -275,7 +275,7 @@ def host_collection_host_factory(h):
         
 class HostCollectionTest(
                          GeneratedUrlTesterTest,
-                         BaseUrlTesterTest,
+                         UrlTesterTestBase,
                          UrlHostTesterTestSetupProvider,
                          HostListTestBase,
                          TestFunctionDoesNotHandleProvider,
