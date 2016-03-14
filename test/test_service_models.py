@@ -26,7 +26,6 @@ def host_list_host_factory(h):
 class HostListTest(
                    HostListTestBase,
                    UrlHostTesterTestSetupProvider,
-                   UrlTesterTest,
                    unittest.TestCase
                    ):
     
@@ -69,7 +68,6 @@ def create_dns_query_function(expected_query_names):
     return dns_query
         
 class DNSBLTest(
-                UrlTesterTest,
                 UrlHostTesterTestSetupProvider,
                 HostListTestBase,
                 TestFunctionDoesNotHandleProvider,
@@ -150,7 +148,6 @@ def create_hp_hosts_get(classification, listed_hosts):
     return hp_hosts_get
 
 class HpHostsTest(
-                  UrlTesterTest,
                   UrlHostTesterTestSetupProvider,
                   HostListTestBase,
                   unittest.TestCase
@@ -265,7 +262,6 @@ def host_collection_host_factory(h):
             return host_object
         
 class HostCollectionTest(
-                         UrlTesterTest,
                          UrlHostTesterTestSetupProvider,
                          HostListTestBase,
                          TestFunctionDoesNotHandleProvider,

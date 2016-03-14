@@ -10,7 +10,95 @@ from spam_lists.structures import AddressListItem
 from spam_lists.exceptions import InvalidURLError, InvalidHostError
 
 
-class HostListTestBase(object):
+class UrlTesterTestBase(object):
+    ''' A class providing basic methods for performing tests for classes
+    having any_match, filter_matching and lookup_matching methods
+    
+    The methods are to be used to write and generate actual test methods
+    '''
+    
+    valid_urls = ['http://test.com', 'http://127.33.22.11', 'https://[2001:ddd:ccc:123::55]']
+        
+    def _test_any_match_returns_true_for(self, matching_urls):
+        self._set_matching_urls(matching_urls)
+        self.assertTrue(self.tested_instance.any_match(self.valid_urls + list(matching_urls)))
+        
+    def _test_any_match_returns_false(self, not_matching_urls):
+        self.assertFalse(self.tested_instance.any_match(not_matching_urls))
+        
+    def _test_lookup_matching_for(self, matching_urls):
+        self._set_matching_urls(matching_urls)
+        
+        expected = self._get_expected_items_for_urls(matching_urls)
+        actual = list(self.tested_instance.lookup_matching(self.valid_urls + list(matching_urls)))
+        
+        self.assertItemsEqual(expected, actual)
+        
+    def _test_filter_matching_for(self, matching_urls):
+        
+        self._set_matching_urls(matching_urls)
+        actual = list(self.tested_instance.filter_matching(self.valid_urls + list(matching_urls)))
+         
+        self.assertItemsEqual(matching_urls, actual)
+        
+    def test_any_match_returns_false(self):
+        
+        self._test_any_match_returns_false(self.valid_urls)
+
+
+class UrlTesterTest(UrlTesterTestBase):
+    ''' A class providing pre-generated tests for classes
+    having any_match, filter_matching and lookup_matching
+    methods '''
+    
+    classification = ('TEST',)
+    
+    valid_url_input = [
+                           ('ipv4_url', ['http://55.44.33.21']),
+                           ('hostname_url', ['https://abc.com']),
+                           ('ipv6_url', ['http://[2001:ddd:ccc:111::33]'])
+                           ]
+    
+    valid_url_list_input = [
+                             ('no_matching_url', []),
+                             ('two_urls', ['http://55.44.33.21', 'https://abc.com'])
+                             ]+valid_url_input
+                             
+    @parameterized.expand([
+                           ('any_match'),
+                           ('lookup_matching'),
+                           ('filter_matching')
+                           ])
+    @patch('spam_lists.validation.is_valid_url')
+    def test_invalid_url_error_is_raised_by(self, function_name, is_valid_url_mock):
+        invalid_url = 'http://invalid.url.com'
+        is_valid_url_mock.side_effect = lambda u: u != invalid_url
+        
+        function = getattr(self.tested_instance, function_name)
+        with self.assertRaises(InvalidURLError):
+            function(self.valid_urls + [invalid_url])
+    
+    @parameterized.expand(valid_url_input)
+    def test_any_match_returns_true_for(self, _, matching_urls):
+        
+        self._test_any_match_returns_true_for(matching_urls)
+        
+    @parameterized.expand(valid_url_list_input)
+    def test_lookup_matching_for(self, _, matching_urls):
+        
+        self._test_lookup_matching_for(matching_urls)
+        
+    @parameterized.expand(valid_url_list_input)
+    def test_filter_matching_for(self, _, matching_urls):
+         
+        self._test_filter_matching_for(matching_urls)
+        
+    def _get_expected_items(self, values):
+        item = lambda i: AddressListItem(i, self.tested_instance,
+                                             self.classification)
+        return [item(v) for v in values]
+
+class HostListTestBase(UrlTesterTest):
     ''' A common test case for all classes that represent
     a host list stored locally or by a remote service '''
     
@@ -97,93 +185,7 @@ class HostListTestBase(object):
     def test_lookup_for_not_listed(self, _, value):
         
         self._test_lookup_for_not_listed(value)
-        
-class UrlTesterTestBase(object):
-    ''' A class providing basic methods for performing tests for classes
-    having any_match, filter_matching and lookup_matching methods
-    
-    The methods are to be used to write and generate actual test methods
-    '''
-    
-    valid_urls = ['http://test.com', 'http://127.33.22.11', 'https://[2001:ddd:ccc:123::55]']
-        
-    def _test_any_match_returns_true_for(self, matching_urls):
-        self._set_matching_urls(matching_urls)
-        self.assertTrue(self.tested_instance.any_match(self.valid_urls + list(matching_urls)))
-        
-    def _test_any_match_returns_false(self, not_matching_urls):
-        self.assertFalse(self.tested_instance.any_match(not_matching_urls))
-        
-    def _test_lookup_matching_for(self, matching_urls):
-        self._set_matching_urls(matching_urls)
-        
-        expected = self._get_expected_items_for_urls(matching_urls)
-        actual = list(self.tested_instance.lookup_matching(self.valid_urls + list(matching_urls)))
-        
-        self.assertItemsEqual(expected, actual)
-        
-    def _test_filter_matching_for(self, matching_urls):
-        
-        self._set_matching_urls(matching_urls)
-        actual = list(self.tested_instance.filter_matching(self.valid_urls + list(matching_urls)))
-         
-        self.assertItemsEqual(matching_urls, actual)
-        
-    def test_any_match_returns_false(self):
-        
-        self._test_any_match_returns_false(self.valid_urls)
-        
-class UrlTesterTest(UrlTesterTestBase):
-    ''' A class providing pre-generated tests for classes
-    having any_match, filter_matching and lookup_matching
-    methods '''
-    
-    classification = ('TEST',)
-    
-    valid_url_input = [
-                           ('ipv4_url', ['http://55.44.33.21']),
-                           ('hostname_url', ['https://abc.com']),
-                           ('ipv6_url', ['http://[2001:ddd:ccc:111::33]'])
-                           ]
-    
-    valid_url_list_input = [
-                             ('no_matching_url', []),
-                             ('two_urls', ['http://55.44.33.21', 'https://abc.com'])
-                             ]+valid_url_input
-                             
-    @parameterized.expand([
-                           ('any_match'),
-                           ('lookup_matching'),
-                           ('filter_matching')
-                           ])
-    @patch('spam_lists.validation.is_valid_url')
-    def test_invalid_url_error_is_raised_by(self, function_name, is_valid_url_mock):
-        invalid_url = 'http://invalid.url.com'
-        is_valid_url_mock.side_effect = lambda u: u != invalid_url
-        
-        function = getattr(self.tested_instance, function_name)
-        with self.assertRaises(InvalidURLError):
-            function(self.valid_urls + [invalid_url])
-    
-    @parameterized.expand(valid_url_input)
-    def test_any_match_returns_true_for(self, _, matching_urls):
-        
-        self._test_any_match_returns_true_for(matching_urls)
-        
-    @parameterized.expand(valid_url_list_input)
-    def test_lookup_matching_for(self, _, matching_urls):
-        
-        self._test_lookup_matching_for(matching_urls)
-        
-    @parameterized.expand(valid_url_list_input)
-    def test_filter_matching_for(self, _, matching_urls):
-         
-        self._test_filter_matching_for(matching_urls)
-        
-    def _get_expected_items(self, values):
-        item = lambda i: AddressListItem(i, self.tested_instance,
-                                             self.classification)
-        return [item(v) for v in values]
+
         
 def get_hosts(urls):
     
