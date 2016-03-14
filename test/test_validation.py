@@ -7,8 +7,8 @@ from mock import Mock, patch
 from cachetools.func import lru_cache
 from nose_parameterized import parameterized
 
-from spam_lists.validation import accepts_valid_urls, is_valid_url
-from spam_lists.exceptions import InvalidURLError
+from spam_lists.validation import accepts_valid_urls, is_valid_url, accepts_valid_host
+from spam_lists.exceptions import InvalidURLError, InvalidHostError
 
 class ValidationDecoratorTest(object):
     
@@ -61,6 +61,29 @@ class AcceptValidUrlsTest(ValidationDecoratorTest, unittest.TestCase):
                            ])
     def test_accept_valid_urls_for_urls_with(self, _, urls):
         self._test_wrapper_for_invalid(urls)
+        
+class AcceptsValidHostTest(ValidationDecoratorTest, unittest.TestCase):
+    exception_type = InvalidHostError
+    decorator = staticmethod(accepts_valid_host)
+    validity_tester = 'spam_lists.validation.is_valid_host'
+    
+    @parameterized.expand([
+                           ('hostname', 'valid.com'),
+                           ('ipv4', '122.34.59.109'),
+                           ('ipv6', '2001:db8:abc:123::42')
+                           ])
+    def test_accepts_valid_host_for_valid(self, _, value):
+        self._test_wrapper_for_valid(value)
+    
+    @parameterized.expand([
+                           ('hostname', '-abc.com'),
+                           ('ipv4', '999.999.999.999'),
+                           ('ipv4', '127.0.0.0.1'),
+                           ('ipv6', '2001:db8:abcef:123::42'),
+                           ('ipv6', '2001:db8:abch:123::42')
+                           ])
+    def test_accepts_valid_host_for_invalid(self, _, value):
+        self._test_wrapper_for_invalid(value)
         
 @lru_cache()
 def get_url_tester_mock(identifier):

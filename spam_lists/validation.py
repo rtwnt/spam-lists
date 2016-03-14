@@ -12,7 +12,7 @@ from urlparse import urlparse
 
 import validators
 
-from .exceptions import InvalidURLError
+from .exceptions import InvalidURLError, InvalidHostError
 
 def is_valid_host(value):
     ''' Check if given value is valid host string
@@ -41,7 +41,24 @@ def is_valid_url(value):
     host_str = urlparse(value).hostname
     
     return (match and is_valid_host(host_str))
+
+
+def accepts_valid_host(f):
+    @functools.wraps(f)
+    def wrapper(obj, value, *args, **kwargs):
+        ''' Run the function and return its return value
+        if the value is host - otherwise raise InvalidHostError
+        :param obj": an object in whose class f is defined
+        :param value: a value expected to be a valid host string
+        :returns: a return value of the function f
+        :raises InvalidHostError: if the value is not a valid host string
+        '''
+        if not is_valid_host(value):
+            raise InvalidHostError
+        
+        return f(obj, value, *args, **kwargs)
     
+    return wrapper
 
 def accepts_valid_urls(f):
     @functools.wraps(f)
