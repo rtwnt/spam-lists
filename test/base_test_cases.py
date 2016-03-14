@@ -160,41 +160,24 @@ class HostListTestBase(UrlTesterTest):
         function = getattr(self.tested_instance, function_name)
         self._test_function_raises_invalid_host_error(function)
         
-    def _test_contains_for_listed(self, value):
-        
-        self._set_matching_hosts([value])
-        self.assertTrue(value in self.tested_instance)
-        
-    def _test_contains_not_for_listed(self, value):
-        
-        self.assertFalse(value in self.tested_instance)
-        
-    def _test_lookup_for_listed(self, value):
-        
-        expected = self._get_expected_items([value])[0]
-        self._set_matching_hosts([value])
-        self.assertEqual(self.tested_instance.lookup(value), expected)
-        
-    def _test_lookup_for_not_listed(self, value):
-        
-        self.assertIsNone(self.tested_instance.lookup(value))
-        
     @parameterized.expand(valid_host_input)
     def test_contains_for_listed(self, _, value):
-        self._test_contains_for_listed(value)
+        self._set_matching_hosts([value])
+        self.assertTrue(value in self.tested_instance)
             
     @parameterized.expand(valid_host_input)
     def test_contains_for_not_listed(self, _, value):
-        self._test_contains_not_for_listed(value)
+        self.assertFalse(value in self.tested_instance)
                 
     @parameterized.expand(valid_host_input)
     def test_lookup_for_listed(self, _, value):
-        self._test_lookup_for_listed(value)
+        expected = self._get_expected_items([value])[0]
+        self._set_matching_hosts([value])
+        self.assertEqual(self.tested_instance.lookup(value), expected)
           
     @parameterized.expand(valid_host_input)  
     def test_lookup_for_not_listed(self, _, value):
-        
-        self._test_lookup_for_not_listed(value)
+        self.assertIsNone(self.tested_instance.lookup(value))
 
             
 class TestFunctionDoesNotHandleProvider(object):
