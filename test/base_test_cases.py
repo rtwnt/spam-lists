@@ -185,9 +185,10 @@ class GeneratedUrlTesterTest(object):
                            ('lookup_matching'),
                            ('filter_matching')
                            ])
-    def test_invalid_url_error_is_raised_by(self, function_name):
+    @patch('spam_lists.validation.is_valid_url')
+    def test_invalid_url_error_is_raised_by(self, function_name, is_valid_url_mock):
         invalid_url = 'http://invalid.url.com'
-        self.is_valid_url_mock.side_effect = lambda u: u != invalid_url
+        is_valid_url_mock.side_effect = lambda u: u != invalid_url
         
         function = getattr(self.tested_instance, function_name)
         with self.assertRaises(InvalidURLError):

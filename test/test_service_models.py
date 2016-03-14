@@ -59,9 +59,6 @@ class UrlHostTesterTest(
           
         self.tested_instance = UrlHostTester()
           
-        self.is_valid_url_patcher = patch('spam_lists.validation.is_valid_url')
-        self.is_valid_url_mock = self.is_valid_url_patcher.start()
-          
         self.listed_hosts = []
           
         self.contains_patcher = patch('spam_lists.service_models.UrlHostTester.__contains__')
@@ -82,7 +79,6 @@ class UrlHostTesterTest(
         self.lookup_mock.side_effect = lookup
           
     def tearDown(self):
-        self.is_valid_url_patcher.stop()
         self.contains_patcher.stop()
         self.lookup_patcher.stop()
           
@@ -278,12 +274,8 @@ class GoogleSafeBrowsingTest(
         
         self._set_up_post_mock()
         
-        self.is_valid_url_patcher = patch('spam_lists.validation.is_valid_url')
-        self.is_valid_url_mock = self.is_valid_url_patcher.start()
-        
     def tearDown(self):
         self.post_patcher.stop()
-        self.is_valid_url_patcher.stop()
         
     def _set_matching_urls(self, urls):
         self._spam_urls = urls
