@@ -88,6 +88,32 @@ class IsValidUrlTest(unittest.TestCase):
                            ])
     def test_is_valid_url_for_invalid_url_with(self, _, url):
         self.assertFalse(is_valid_url(url))
+        
+class ValidationDecoratorTest(object):
+    
+    def setUp(self):
+        self.validity_tester_patcher = patch(self.validity_tester)
+        self.validity_tester_mock = self.validity_tester_patcher.start()
+        
+        function = Mock()
+        function.__name__ = 'function'
+        
+        self.obj = Mock()
+        self.function = function
+        self.decorated_function = self.decorator(self.function)
+    
+    def tearDown(self):
+        self.validity_tester_patcher.stop()
+    
+    def _test_wrapper_for_valid(self, value):
+        self.decorated_function(self.obj, value)
+        self.function.assert_called_once_with(self.obj, value)
+    
+    def _test_wrapper_for_invalid(self, value):
+        self.validity_tester_mock.return_value = False
+        
+        self.assertRaises(self.exception_type, self.decorated_function, self.obj, value)
+        self.function.assert_not_called()
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
