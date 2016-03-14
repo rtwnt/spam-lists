@@ -14,6 +14,16 @@ import validators
 
 from .exceptions import InvalidURLError
 
+def is_valid_host(value):
+    ''' Check if given value is valid host string
+    
+    :param value: a value to test
+    :returns: True if the value is valid host string
+    '''
+    host_validators = validators.ipv4, validators.ipv6, validators.domain
+    return any(f(value) for f in host_validators)
+    
+
 def accepts_valid_urls(f):
     @functools.wraps(f)
     def wrapper(obj, urls, *args, **kwargs):
