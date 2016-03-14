@@ -33,7 +33,8 @@ class BaseHostListTest(object):
     
     valid_host_input = [
                         ('ipv4', u'255.0.120.1'),
-                        ('hostname', 'test.pl')
+                        ('hostname', 'test.pl'),
+                        ('ipv6', '2001:ddd:ccc:111::33')
                         ]
     
     def _test_function_does_not_handle_invalid_host_error(self, function, arg):
@@ -114,31 +115,12 @@ class BaseHostListTest(object):
         
         self._test_lookup_for_not_listed(value)
         
-class IPv6SupportTest(object):
-    ''' A test case for classes representing host lists
-    that have support (or at least: do not raise errors)
-    for IPv6 addresses '''
-    
-    valid_ipv6 = '2001:ddd:ccc:111::33'
-    
-    def test_contains_for_listed_ipv6(self):
-        self._test_contains_for_listed(self.valid_ipv6)
-            
-    def test_contains_for_not_listed_ipv6(self):
-        self._test_contains_not_for_listed(self.valid_ipv6)
-        
-    def test_lookup_for_listed_ipv6(self):
-        self._test_lookup_for_listed(self.valid_ipv6)
-          
-    def test_lookup_for_not_listed_ipv6(self):
-        self._test_lookup_for_not_listed(self.valid_ipv6)
-        
 class BaseUrlTesterTest(object):
     ''' A common test case for classes  responsible for
     testing urls for matching criteria supported by the
     classes or services that they represent'''
     
-    valid_urls = ['http://test.com', 'http://127.33.22.11']
+    valid_urls = ['http://test.com', 'http://127.33.22.11', 'https://[2001:ddd:ccc:123::55]']
         
     def _test_any_match_returns_true_for(self, matching_urls):
         self._set_matching_urls(matching_urls)

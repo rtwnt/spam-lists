@@ -14,7 +14,7 @@ HostCollection, HostList, HpHosts
 from spam_lists.exceptions import UnathorizedAPIKeyError, UnknownCodeError
 
 from .base_test_cases import BaseHostListTest, BaseUrlTesterTest,\
-ClientGetExpectedItemsProvider, GeneratedUrlTesterTest, IPv6SupportTest,\
+ClientGetExpectedItemsProvider, GeneratedUrlTesterTest,\
 TestFunctionDoesNotHandleProvider, UrlHostTesterTestSetupProvider
 
 @lru_cache()
@@ -75,7 +75,6 @@ class DNSBLTest(
                 GeneratedUrlTesterTest,
                 BaseUrlTesterTest,
                 UrlHostTesterTestSetupProvider,
-                IPv6SupportTest,
                 BaseHostListTest, 
                 ClientGetExpectedItemsProvider,
                 TestFunctionDoesNotHandleProvider,
@@ -278,7 +277,6 @@ class HostCollectionTest(
                          GeneratedUrlTesterTest,
                          BaseUrlTesterTest,
                          UrlHostTesterTestSetupProvider,
-                         IPv6SupportTest,
                          BaseHostListTest,
                          TestFunctionDoesNotHandleProvider,
                          ClientGetExpectedItemsProvider,
