@@ -10,86 +10,55 @@ from nose_parameterized import parameterized
 from cachetools.func import lru_cache
 
 from spam_lists.service_models import DNSBL, GoogleSafeBrowsing,\
-HostCollection, HostList, HpHosts, UrlHostTester
-from spam_lists.structures import AddressListItem
+HostCollection, HostList, HpHosts
 from spam_lists.exceptions import UnathorizedAPIKeyError, UnknownCodeError
 
 from .base_test_cases import BaseHostListTest, BaseUrlTesterTest,\
 ClientGetExpectedItemsProvider, GeneratedUrlTesterTest, IPv6SupportTest,\
 TestFunctionDoesNotHandleProvider, UrlHostTesterTestSetupProvider
 
-class HostListTest(unittest.TestCase):
+@lru_cache()
+def host_list_host_factory(h):
+    host_object = MagicMock()
+    host_object.__str__.return_value = h
+    return host_object
+
+
+class HostListTest(
+                   UrlHostTesterTestSetupProvider,
+                   GeneratedUrlTesterTest,
+                   BaseUrlTesterTest,
+                   ClientGetExpectedItemsProvider,
+                   unittest.TestCase
+                   ):
     
     def setUp(self):
+        self.listed_hosts = []
         self.host_factory_mock = Mock()
+        self.host_factory_mock.side_effect = host_list_host_factory
         self.tested_instance = HostList(self.host_factory_mock)
         
         self._contains_patcher = patch('spam_lists.service_models.HostList._contains')
         self._contains_mock = self._contains_patcher.start()
+        self._contains_mock.side_effect = lambda h: h in self.listed_hosts
         
         self._get_match_and_classification_patcher = patch('spam_lists.service_models.HostList._get_match_and_classification')
         self._get_match_and_classification_mock = self._get_match_and_classification_patcher.start()
-        self._get_match_and_classification_mock.return_value = None, None
+        
+        def _get_match_and_classification(h):
+            if h in self.listed_hosts:
+                return h, self.classification
+            return None, None
+        
+        self._get_match_and_classification_mock.side_effect = _get_match_and_classification
         
     def tearDown(self):
         self._contains_patcher.stop()
         self._get_match_and_classification_patcher.stop()
         
-    @parameterized.expand([
-                           ('__contains__', '_contains'),
-                           ('lookup', '_get_match_and_classification'),
-                           ])
-    def test_nonpublic_function_call_for(self, function_name, non_public_function_name):
+    def _set_matching_hosts(self, matching_hosts):
         
-        function = getattr(self.tested_instance, function_name)
-        nonpublic_function = getattr(self.tested_instance, non_public_function_name)
-        valid_host = 'validhost.com'
-        function(valid_host)
-        
-        expected_argument = self.host_factory_mock(valid_host)
-        nonpublic_function.assert_called_once_with(expected_argument)
-        
-class UrlHostTesterTest(
-                        GeneratedUrlTesterTest,
-                        BaseUrlTesterTest,
-                        ClientGetExpectedItemsProvider,
-                        unittest.TestCase):
-    
-    def setUp(self):
-          
-        self.tested_instance = UrlHostTester()
-          
-        self.listed_hosts = []
-          
-        self.contains_patcher = patch('spam_lists.service_models.UrlHostTester.__contains__')
-        self.contains_mock = self.contains_patcher.start()
-        self.contains_mock.side_effect = lambda h: h in self.listed_hosts
-          
-        def lookup(h):
-            if h in self.listed_hosts:
-                return AddressListItem(
-                                       h,
-                                       self.tested_instance,
-                                       self.classification
-                                       )
-            return None
-          
-        self.lookup_patcher = patch('spam_lists.service_models.UrlHostTester.lookup')
-        self.lookup_mock = self.lookup_patcher.start()
-        self.lookup_mock.side_effect = lookup
-          
-    def tearDown(self):
-        self.contains_patcher.stop()
-        self.lookup_patcher.stop()
-          
-    def _set_matching_urls(self, urls):
-           
-        listed_hosts = [urlparse(u).hostname for u in urls]
-        self.listed_hosts = listed_hosts
-          
-    def _get_expected_items_for_urls(self, urls):
-        hosts = [urlparse(u).hostname for u in urls]
-        return self._get_expected_items(hosts)
+        self.listed_hosts = [self.host_factory_mock(mh) for mh in matching_hosts]
     
 @lru_cache()
 def dnsbl_host_factory(h):

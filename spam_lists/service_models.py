@@ -91,17 +91,6 @@ class HostList(object):
         if host_item is not None:
             return AddressListItem(str(host_item), self, classification)
         return None
-        
-    
-class UrlHostTester(object):
-    ''' A class containing methods used to test urls with
-    their hosts as criteria '''
-    
-    def __contains__(self, other):
-        raise NotImplementedError
-    
-    def lookup(self, other):
-        raise NotImplementedError
     
     @accepts_valid_urls
     def any_match(self, urls):
@@ -143,7 +132,7 @@ class UrlHostTester(object):
         is_match = lambda u: urlparse(u).hostname in self
         return (u for u in urls if is_match(u))
     
-class DNSBL(HostList, UrlHostTester):
+class DNSBL(HostList):
     ''' Represents a DNSBL service '''
     def __init__(self, identifier, query_suffix, classification_resolver, host_factory):
         ''' Create new DNSBL object
@@ -204,7 +193,7 @@ class DNSBL(HostList, UrlHostTester):
         except UnknownCodeError as e:
             raise exc_info()[0],  '{}\nSource:{}'.format(str(e), str(self)), exc_info()[2]
         
-class HpHosts(HostList, UrlHostTester):
+class HpHosts(HostList):
     ''' hpHosts client '''
     
     identifier = ' http://www.hosts-file.net/'
@@ -375,7 +364,7 @@ class GoogleSafeBrowsing(object):
             yield url
     
 
-class HostCollection(HostList, UrlHostTester):
+class HostCollection(HostList):
     ''' Provides a container for ip addresses and domain names.
     
     May be used as a local whitelist or blacklist.
