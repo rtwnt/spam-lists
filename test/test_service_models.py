@@ -25,6 +25,7 @@ def host_list_host_factory(h):
 
 
 class HostListTest(
+                   BaseHostListTest,
                    UrlHostTesterTestSetupProvider,
                    GeneratedUrlTesterTest,
                    BaseUrlTesterTest,
