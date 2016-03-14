@@ -56,10 +56,8 @@ def is_valid_url(value):
     :param value: a value to test
     :returns: True if the value is valid url string
     '''
-    host_validators = validators.ipv4, validators.ipv6, validators.domain
     
     match = url_regex.match(value)
+    host_str = urlparse(value).hostname
     
-    host = urlparse(value).hostname
-    
-    return (match and any(f(host) for f in host_validators))
+    return (match and is_valid_host(host_str))
