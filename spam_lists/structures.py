@@ -297,7 +297,15 @@ def registered_domain_or_ip(value):
     factories = IPv4Address, IPv6Address, registered_domain
     return create_host(factories, value)
     
+def non_ipv6_host(value):
+    ''' Create host object representing a registered domain or an IPv4 address
     
-non_ipv6_host = get_create_host(IPv4Address, Hostname)
+    :param value: a valid hostname or IPv4 string
+    :returns: a host object representing a registered domain extracted from
+    given hostname, or an IPv4 address
+    :raises InvalidHostError: if value is not a valid hostname or IPv4 address
+    '''
+    factories = IPv4Address, registered_domain
+    return create_host(factories, value)
 
 AddressListItem = namedtuple('AddressListItem', 'value source classification')
