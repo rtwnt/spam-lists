@@ -284,6 +284,18 @@ def registered_domain(value):
     
     registered_domain_string = tld_extractor(value).registered_domain
     return Hostname(registered_domain_string)
+
+def registered_domain_or_ip(value):
+    ''' Get host object representing a registered domain or an ip address
+    
+    :param value: a valid hostname or ip string
+    :returns: a host object representing a registered domain extracted from
+    given hostname, or an ip address
+    :raises InvalidHostError: if value is not a valid host
+    '''
+    
+    factories = IPv4Address, IPv6Address, registered_domain
+    return create_host(factories, value)
     
     
 non_ipv6_host = get_create_host(IPv4Address, Hostname)
