@@ -259,8 +259,18 @@ def create_host(factories, value):
          errors in the process:"+"\n".join(data)
         raise InvalidHostError, msg_tpl.format(value)
 
-
-host = get_create_host(IPv4Address, IPv6Address, Hostname)
+def hostname_or_ip(value):
+    ''' Create a hostname or ip address object
+    for given value
+    
+    :param value: a valid host string
+    :returns: a host object for given value
+    :raises InvalidHostError: if the value is not a valid hostname or
+    ip address
+    '''
+    factories = IPv4Address, IPv6Address, Hostname
+    return create_host(factories, value)
+    
 non_ipv6_host = get_create_host(IPv4Address, Hostname)
 
 AddressListItem = namedtuple('AddressListItem', 'value source classification')

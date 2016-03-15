@@ -15,7 +15,7 @@ from dns import name
 from dns.resolver import NXDOMAIN, query
 
 from .validation import accepts_valid_urls, accepts_valid_host
-from .structures import AddressListItem, host, non_ipv6_host
+from .structures import AddressListItem, hostname_or_ip, non_ipv6_host
 from .exceptions import UnathorizedAPIKeyError, UnknownCodeError, InvalidHostError
 
 
@@ -387,7 +387,7 @@ class HostCollection(HostList):
         for host_value in hosts:
             self.add(host_value)
             
-        super(HostCollection, self).__init__(host)
+        super(HostCollection, self).__init__(hostname_or_ip)
             
     def _contains(self, host_object):
         

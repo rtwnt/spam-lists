@@ -259,8 +259,8 @@ class HostCollectionTest(
     
     def setUp(self):
          
-        self.host_patcher = patch('spam_lists.service_models.host')
-        self.host_factory_mock = self.host_patcher.start()
+        self.host_factory_patcher = patch('spam_lists.service_models.hostname_or_ip')
+        self.host_factory_mock = self.host_factory_patcher.start()
          
         self.host_factory_mock.side_effect = lru_cache()(host_collection_host_factory)
          
@@ -269,7 +269,7 @@ class HostCollectionTest(
                                               self.classification)
          
     def tearDown(self):
-        self.host_patcher.stop()
+        self.host_factory_patcher.stop()
         
     def test_add_does_not_handle_value_error(self):
         function = self.tested_instance.add
