@@ -17,6 +17,7 @@ import validators
 
 from .exceptions import InvalidHostError, InvalidHostnameError,\
 InvalidIPv4Error, InvalidIPv6Error, UnknownCodeError
+from .utils import tld_extractor
 
 class BaseClassificationCodeMap(object):
     ''' A class responsible for providing classification 
@@ -270,6 +271,20 @@ def hostname_or_ip(value):
     '''
     factories = IPv4Address, IPv6Address, Hostname
     return create_host(factories, value)
+
+
+def registered_domain(value):
+    ''' Create a Hostname instance representing registered domain
+    extracted from the value
+    
+    :param value: a valid host string
+    :returns: a Hostname instance representing registered domain
+    :raises InvalidHostnameError: if the value is not a valid hostname
+    '''
+    
+    registered_domain_string = tld_extractor(value).registered_domain
+    return Hostname(registered_domain_string)
+    
     
 non_ipv6_host = get_create_host(IPv4Address, Hostname)
 
