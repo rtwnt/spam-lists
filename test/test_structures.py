@@ -8,7 +8,8 @@ from nose_parameterized import parameterized
 from dns import reversename
 
 from spam_lists.structures import get_create_host, Hostname, IPv4Address,\
-IPv6Address, SimpleClassificationCodeMap, SumClassificationCodeMap
+IPv6Address, SimpleClassificationCodeMap, SumClassificationCodeMap,\
+create_host
 from spam_lists.exceptions import InvalidHostError, InvalidHostnameError,\
 InvalidIPv4Error, InvalidIPv6Error, UnknownCodeError
 
@@ -188,6 +189,53 @@ class CreateHostTest(unittest.TestCase):
             f.side_effect = InvalidHostError
         
         self.assertRaises(InvalidHostError, self.create_host, value)
+        
+class CreateHostTest_2(unittest.TestCase):
+    
+    def setUp(self):
+        self.factories = [Mock() for _ in range(5)]
+        
+    @parameterized.expand([
+                           ('v4',  u'127.0.0.1'),
+                           ('v6', u'2001:db8:abc:125::45'),
+                           ])
+    def test_host_for_ip(self, _, value):
+        ip_address = self.factories[0]
+        
+        expected = ip_address(value)
+        actual = create_host(self.factories, value)
+        
+        self.assertEqual(actual, expected)
+        
+    def test_host_for_hostname(self):
+        
+        for i, factory in enumerate(self.factories):
+            if i != 1:
+                factory.side_effect = InvalidHostError
+        
+        host_factory = self.factories[1]
+        
+        host_value = 'abc.com'
+        
+        expected = host_factory(host_value)
+        actual = create_host(self.factories, host_value)
+        
+        self.assertEqual(expected, actual)
+        
+    @parameterized.expand([
+                           ('ipv4', u'299.0.0.1'),
+                           ('ipv4', u'99.22.33.1.23'),
+                           ('ipv6', u'2001:db8:abc:125::4h'),
+                           ('ipv6', u'2001:db8:abcef:125::43'),
+                           ('hostname', '-e'),
+                           ('hostname', '/e')
+                           ])
+    def test_host_for_invalid(self, _, value):
+        
+        for f in self.factories:
+            f.side_effect = InvalidHostError
+        
+        self.assertRaises(InvalidHostError, create_host, self.factories, value)
 
 
 if __name__ == "__main__":
