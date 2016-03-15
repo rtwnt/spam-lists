@@ -199,40 +199,6 @@ class IPv6Address(ipaddress.IPv6Address, IPAddress):
             msg = '{} is not a valid IPv6 address'.format(value)
             raise InvalidIPv6Error, msg, exc_info()[2]
 
-def get_create_host(*factories):
-    '''
-    Get an instance of create_host function
-    that uses given factories
-    
-    :param factories: functions responsible for constructing
-    objects representing hostnames and ip addresses
-    :returns: create_host function with the factories in its
-    scope
-    '''
-    def create_host(value):
-        ''' Create an instance of host object for given value, using
-        the available factories.
-        
-        :param value: a value to be passed as argument to factories
-        :returns: an object representing value, created by one of the factories.
-        It's a return value of the first factory that could create it for the given argument
-        :raises InvalidHostError: if the value is not a valid input for any factory used
-        by this function
-        '''
-        
-        data = [value]
-        
-        for f in factories:
-            try:
-                return  f(value)
-            
-            except InvalidHostError as e:
-                data.append(str(e))
-                
-        msg_tpl = "Failed to create a host object for '{}', raising the following\
-         errors in the process:"+"\n".join(data)
-        raise InvalidHostError, msg_tpl.format(value)
-    return create_host
 
 def create_host(factories, value):
         ''' Create an instance of host object for given value, using
