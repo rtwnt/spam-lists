@@ -7,14 +7,11 @@ composite spam url checkers.
 
 from itertools import chain
 
-import tldextract
 from requests import Session
 from requests.exceptions import ConnectionError, InvalidSchema, InvalidURL, Timeout
 
 from .validation import accepts_valid_urls, is_valid_url
 from .exceptions import InvalidURLError
-
-tld_extractor = tldextract.TLDExtract()
 
 class RedirectUrlResolver(object):
     
