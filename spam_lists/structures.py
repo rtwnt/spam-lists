@@ -225,6 +225,17 @@ def create_host(factories, value):
         msg_tpl = "Failed to create a host object for '{}', raising the following\
          errors in the process:"+"\n".join(data)
         raise InvalidHostError, msg_tpl.format(value)
+    
+def ip_address(value):
+    ''' Create an ip address object
+    
+    :param value: a valid ip address
+    :returns: a .structures.IPAddress subclass instance
+    :raises InvalidHostError: if the value is not a valid IPv4 or
+    IPv6 value
+    '''
+    factories = IPv4Address, IPv6Address
+    return create_host(factories, value)
 
 def hostname_or_ip(value):
     ''' Create a hostname or ip address object
