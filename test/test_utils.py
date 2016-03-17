@@ -243,7 +243,7 @@ class UrlTesterChainTest(
                          TestFunctionDoesNotHandleProvider,
                          unittest.TestCase
                          ):
-    classification = ('TEST',)
+    classification = set(['TEST'])
     
     url_to_source_id ={
                        'http://55.44.21.12': ['source_1', 'source_2'],

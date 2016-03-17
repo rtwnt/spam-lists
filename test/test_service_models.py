@@ -23,7 +23,7 @@ class UrlTesterTest(UrlTesterTestBase):
     having any_match, filter_matching and lookup_matching
     methods '''
     
-    classification = ('TEST',)
+    classification = set(['TEST'])
     
     valid_url_input = [
                            ('ipv4_url', ['http://55.44.33.21']),
@@ -334,8 +334,8 @@ class GoogleSafeBrowsingTest(UrlTesterTest, unittest.TestCase):
                 
             else:
                 urls = body.splitlines()[1:]
-                classes = [('ok' if u not in self._spam_urls else 
-                       self.classification[0]) for u in urls]
+                classes = ['ok' if u not in self._spam_urls else 
+                       ','.join(self.classification) for u in urls]
                 response.content = '\n'.join(classes)
                 code = 200 if self._spam_urls else 204
                 response.status_code = code
@@ -400,7 +400,7 @@ class HostCollectionTest(
          
         self.host_factory_mock.side_effect = lru_cache()(host_collection_host_factory)
          
-        self.classification = ('test_classification',)
+        self.classification = set(['test_classification'])
         self.tested_instance = HostCollection('test_host_collection',
                                               self.classification)
          

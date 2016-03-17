@@ -59,13 +59,13 @@ class SimpleClassificationCodeMap(BaseClassificationCodeMap):
         ''' Get classification for given code
         
         :param code: a value to which a taxonomical unit may be assigned
-        :return: a tuple containing taxonomical unit assigned to the code,
+        :return: a set containing taxonomical unit assigned to the code,
         if it exists
         :raises UnknownCodeError: when there is no classification
         for given code
         '''
         
-        return self._get_single_class(code),
+        return set([self._get_single_class(code)])
         
 class SumClassificationCodeMap(BaseClassificationCodeMap):
     ''' A classification map that recognizes indexes in form
@@ -94,7 +94,7 @@ class SumClassificationCodeMap(BaseClassificationCodeMap):
         
         :param index: an integer that is supposed to represent a sum
         of indexes mapping to classes
-        :returns: a tuple containing taxonomical units
+        :returns: a set containing taxonomical units
         :raises: UnknownCodeError, if the code or one of the elements
         of the sum is not present in the instance
         '''
@@ -104,7 +104,7 @@ class SumClassificationCodeMap(BaseClassificationCodeMap):
             _class = self._get_single_class(code)
             classifications.append(_class)
             
-        return tuple(classifications)
+        return set(classifications)
     
 class Hostname(name.Name):
     def __init__(self, value):

@@ -183,10 +183,10 @@ class DNSBL(HostList):
             return None, None
         
         try:
-            classification = ()
+            classification = set()
             for a in answer:
                 last_octet = a.to_text().split('.')[-1]
-                classification += self._classification_map[int(last_octet)]
+                classification |= self._classification_map[int(last_octet)]
             
             return host_object, classification
         
@@ -233,7 +233,7 @@ class HpHosts(HostList):
         
         if self._LISTED in data:
             elements = data.split(',')
-            classification = tuple(elements[1:])
+            classification = set(elements[1:])
             
             return host_object, classification
         return None, None
@@ -348,7 +348,7 @@ class GoogleSafeBrowsing(object):
         '''
         
         for url, _class in self._get_classification_per_matching(urls):
-            classification = tuple(_class.split(','))
+            classification = set(_class.split(','))
             yield AddressListItem(url, self, classification)
                     
     @accepts_valid_urls
@@ -374,13 +374,13 @@ class HostCollection(HostList):
         ''' Create new instance
         
         :param identifier: an identifier of this instance of host collection
-        :param classification: a tuple containing strings representing
+        :param classification: a list or tuple containing strings representing
         types of items, assigned to each element of the collection
         :param hosts: a sequence of ip adresses and hostnames
         '''
         
         self.identifier = identifier
-        self.classification = classification
+        self.classification = set(classification)
         
         self.hosts = set()
         

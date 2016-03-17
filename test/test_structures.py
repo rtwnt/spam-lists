@@ -31,7 +31,7 @@ class SimpleClassificationCodeMapTest(
         key = 4
         self.code_item_class.update({key: 'TestClass'})
         
-        expected = self.code_item_class[key],
+        expected = set([self.code_item_class[key]])
         actual = self.classification_code_map[key]
         
         self.assertEqual(expected, actual)
@@ -59,7 +59,7 @@ class SumClassificationCodeMapTest(
         classes = {k: 'Class #{}'.format(k) for k in keys}
         self._set_code_item_class(classes)
         
-        expected = tuple(classes.values())
+        expected = set(classes.values())
         actual = self.classification_code_map[sum(keys)]
         
         self.assertItemsEqual(expected, actual)
