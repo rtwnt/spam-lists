@@ -156,18 +156,15 @@ class DNSBL(HostList):
         ''' Query DNSBL service for given value
         
         :param host_object: an object representing host, created by _host_factory
-        :returns: an integer representing classification code for given value, if it is listed. Otherwise,
+        :returns: an instance of dns.resolver.Answer for given value, if it is listed. Otherwise,
         it returns None
         '''
         host_to_query = host_object.relative_domain
         query_name = host_to_query.derelativize(self._query_suffix)
         
         try:
-            response = query(query_name)
-            last_octet = response[0].to_text().split('.')[-1]
+            return query(query_name)
             
-            return int(last_octet)
-                
         except NXDOMAIN:
             return None
         
@@ -180,13 +177,16 @@ class DNSBL(HostList):
     
     def _get_match_and_classification(self, host_object):
         
-        return_code = self._query(host_object)
+        answer = self._query(host_object)
         
-        if not return_code:
+        if answer is None:
             return None, None
         
         try:
-            classification = self._classification_map[return_code]
+            classification = ()
+            for a in answer:
+                last_octet = a.to_text().split('.')[-1]
+                classification += self._classification_map[int(last_octet)]
             
             return host_object, classification
         
