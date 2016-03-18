@@ -9,6 +9,7 @@ from spam_lists.clients import spamhaus_zen, spamhaus_zen_classification,\
 spamhaus_dbl, spamhaus_dbl_classification, surbl_multi,\
 surbl_multi_classification
 from spam_lists.structures import AddressListItem
+from spam_lists.service_models import HpHosts
 
 def ip_or_registered_domain(host):
     registered_domain = tldextract.extract(host).registered_domain
@@ -137,6 +138,22 @@ class SURBLMultiDomainTest(SURBLTest, unittest.TestCase):
     listed = 'surbl-org-permanent-test-point.com'
     not_listed = 'test.com'
     not_listed_2 = 'google.com'
+    
+hp_hosts = HpHosts('spam-lists-test-suite')
+
+class HpHostsIPTest(ClientTest, unittest.TestCase):
+    listed = u'174.36.207.146'
+    not_listed = u'64.233.160.0'
+    not_listed_2 = u'2001:ddd:ccc:123::55'
+    tested_client = hp_hosts
+    classification = set()
+    
+class HpHostsDomainTest(ClientTest, unittest.TestCase):
+    listed = 'ecardmountain.com'
+    not_listed = 'google.com'
+    not_listed_2 = 'microsoft.com'
+    tested_client = hp_hosts
+    classification = set(['EMD'])
 
 
 if __name__ == "__main__":
