@@ -3,6 +3,7 @@
 import unittest
 
 import tldextract
+from validators import ipv6
 
 from spam_lists.clients import spamhaus_zen, spamhaus_zen_classification,\
 spamhaus_dbl, spamhaus_dbl_classification, surbl_multi,\
@@ -15,6 +16,8 @@ def ip_or_registered_domain(host):
 
 
 def url_from_host(host):
+    if ipv6(host):
+        host = '['+host+']'
     return u'http://'+host
 
 
