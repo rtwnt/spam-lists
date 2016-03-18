@@ -8,7 +8,7 @@ API codes, application identifiers or custom data sets.
 
 from .service_models import DNSBL
 from .structures import SimpleClassificationCodeMap, ip_address,\
-registered_domain
+registered_domain, registered_domain_or_ip, SumClassificationCodeMap
 
 spamhaus_xbl_classification = (
                                'CBL (3rd party exploits such as proxies,'
@@ -63,3 +63,23 @@ spamhaus_dbl = DNSBL(
                      registered_domain
                      )
 
+surbl_multi_classification = {
+                              2: 'deprecated (previously SpamCop web sites)',
+                              4: 'listed on WS (will migrate to ABUSE'
+                              ' on 1 May 2016)',
+                              8: 'phishing',
+                              16: 'malware',
+                              32: 'deprecated (previously AbuseButler'
+                              ' web sites)',
+                              64: 'spam and other abuse sites: (previously'
+                              ' jwSpamSpy + Prolocation sites, SpamCop'
+                              ' web sites, AbuseButler web sites)',
+                              128: 'Cracked sites'
+                              }
+
+surbl_multi = DNSBL(
+                    'surbl_multi',
+                    'multi.surbl.org',
+                    SumClassificationCodeMap(surbl_multi_classification),
+                    registered_domain_or_ip
+                    )

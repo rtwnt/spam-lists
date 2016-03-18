@@ -5,7 +5,8 @@ import unittest
 import tldextract
 
 from spam_lists.clients import spamhaus_zen, spamhaus_zen_classification,\
-spamhaus_dbl, spamhaus_dbl_classification
+spamhaus_dbl, spamhaus_dbl_classification, surbl_multi,\
+surbl_multi_classification
 from spam_lists.structures import AddressListItem
 
 def ip_or_registered_domain(host):
@@ -110,6 +111,30 @@ class SpamhausDBLTest(ClientTest, unittest.TestCase):
                                                  spamhaus_dbl_classification,
                                                  [2]
                                                  )
+
+
+expected_surbl_classification = get_expected_classification(
+                                                            surbl_multi_classification,
+                                                            [2, 126]
+                                                            )
+
+class SURBLTest(ClientTest):
+    tested_client = surbl_multi
+    classification = get_expected_classification(
+                                                 surbl_multi_classification,
+                                                 [2, 4, 8, 16, 32, 64]
+                                                 )
+
+class SURBLMultiIPTest(SURBLTest, unittest.TestCase):
+    listed = u'127.0.0.2'
+    not_listed = u'127.0.0.1'
+    not_listed_2 = u'8.8.8.8'
+    
+class SURBLMultiDomainTest(SURBLTest, unittest.TestCase):
+    listed = 'surbl-org-permanent-test-point.com'
+    not_listed = 'test.com'
+    not_listed_2 = 'google.com'
+
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
