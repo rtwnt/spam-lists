@@ -197,7 +197,7 @@ class HpHosts(HostList):
     ''' hpHosts client '''
     
     identifier = ' http://www.hosts-file.net/'
-    _LISTED = 'Listed'
+    _NOT_LISTED = 'Not Listed'
     
     def __init__(self, client_name):
         '''
@@ -225,18 +225,19 @@ class HpHosts(HostList):
     
     def _contains(self, host_object):
         
-        return self._LISTED in self._query(host_object)
+        return not (self._NOT_LISTED in self._query(host_object))
     
     def _get_match_and_classification(self, host_object):
         
         data = self._query(host_object, True)
         
-        if self._LISTED in data:
-            elements = data.split(',')
-            classification = set(elements[1:])
+        if self._NOT_LISTED in data:
+            return None, None
             
-            return host_object, classification
-        return None, None
+        elements = data.split(',')
+        classification = set(elements[1:])
+            
+        return host_object, classification
         
 
 class GoogleSafeBrowsing(object):

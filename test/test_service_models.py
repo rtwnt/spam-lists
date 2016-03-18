@@ -268,7 +268,7 @@ def create_hp_hosts_get(classification, listed_hosts):
         query_string = urlparse(url).query
         query_data = parse_qs(query_string)
         
-        content = 'Not listed'
+        content = 'Not Listed'
         host = query_data['s'][0]
         if host in listed_hosts:
             content = 'Listed,{}'.format(class_str)
