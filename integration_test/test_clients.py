@@ -4,6 +4,7 @@ import unittest
 
 import tldextract
 
+from spam_lists.clients import spamhaus_zen, spamhaus_zen_classification
 from spam_lists.structures import AddressListItem
 
 def ip_or_registered_domain(host):
@@ -78,6 +79,24 @@ class ClientTest(object):
         actual = list(self.tested_client.lookup_matching(self.urls_with_listed))
         self.assertItemsEqual(expected, actual)
 
+
+reason_to_skip = (
+                  'These tests are expected to fail frequently for users of'
+                  ' public DNS resolvers:'
+                  ' https://www.spamhaus.org/faq/section/DNSBL%20Usage#261'
+                  )
+
+
+@unittest.skip(reason_to_skip)
+class SpamhausZenTest(ClientTest, unittest.TestCase):
+    tested_client = spamhaus_zen
+    listed = u'127.0.0.2'
+    not_listed = u'127.0.0.1'
+    not_listed_2 = u'8.8.8.8'
+    classification = get_expected_classification(
+                                                 spamhaus_zen_classification,
+                                                 [2, 4, 10]
+                                                 )
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
