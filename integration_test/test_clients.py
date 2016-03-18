@@ -4,7 +4,8 @@ import unittest
 
 import tldextract
 
-from spam_lists.clients import spamhaus_zen, spamhaus_zen_classification
+from spam_lists.clients import spamhaus_zen, spamhaus_zen_classification,\
+spamhaus_dbl, spamhaus_dbl_classification
 from spam_lists.structures import AddressListItem
 
 def ip_or_registered_domain(host):
@@ -96,6 +97,18 @@ class SpamhausZenTest(ClientTest, unittest.TestCase):
     classification = get_expected_classification(
                                                  spamhaus_zen_classification,
                                                  [2, 4, 10]
+                                                 )
+    
+
+@unittest.skip(reason_to_skip)
+class SpamhausDBLTest(ClientTest, unittest.TestCase):
+    tested_client = spamhaus_dbl
+    listed = 'dbltest.com'
+    not_listed = 'example.com'
+    not_listed_2 = 'google.com'
+    classification = get_expected_classification(
+                                                 spamhaus_dbl_classification,
+                                                 [2]
                                                  )
 
 if __name__ == "__main__":

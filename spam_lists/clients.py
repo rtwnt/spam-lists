@@ -7,7 +7,8 @@ API codes, application identifiers or custom data sets.
 '''
 
 from .service_models import DNSBL
-from .structures import SimpleClassificationCodeMap, ip_address
+from .structures import SimpleClassificationCodeMap, ip_address,\
+registered_domain
 
 spamhaus_xbl_classification = (
                                'CBL (3rd party exploits such as proxies,'
@@ -40,5 +41,25 @@ spamhaus_zen = DNSBL(
                      'zen.spamhaus.org',
                      SimpleClassificationCodeMap(spamhaus_zen_classification),
                      ip_address
+                     )
+
+
+spamhaus_dbl_classification = {
+                               2: 'spam domain',
+                               4: 'phishing domain',
+                               5: 'malware domain',
+                               6: 'botnet C&C domain',
+                               102: 'abused legit spam',
+                               103: 'abused spammed redirector domain',
+                               104: 'abused legit phishing',
+                               105: 'abused legit malware',
+                               106: 'abused legit botnet C&C',
+                               }
+
+spamhaus_dbl = DNSBL(
+                     'spamhaus_dbl',
+                     'dbl.spamhaus.org',
+                     SimpleClassificationCodeMap(spamhaus_dbl_classification),
+                     registered_domain
                      )
 
