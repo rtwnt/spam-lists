@@ -15,7 +15,7 @@ from spam_lists.exceptions import UnathorizedAPIKeyError, UnknownCodeError,\
 InvalidURLError, InvalidHostError
 from spam_lists.structures import AddressListItem
 
-from .base_test_cases import UrlTesterTestBase, TestFunctionDoesNotHandleProvider
+from test.common_definitions import UrlTesterTestBase, TestFunctionDoesNotHandleProvider
 
 
 class UrlTesterTest(UrlTesterTestBase):

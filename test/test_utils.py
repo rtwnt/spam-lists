@@ -15,7 +15,7 @@ from spam_lists.utils import RedirectUrlResolver, UrlsAndLocations, UrlTesterCha
 from spam_lists.structures import AddressListItem
 from spam_lists.exceptions import InvalidURLError, UnknownCodeError
 
-from .base_test_cases import UrlTesterTestBase, TestFunctionDoesNotHandleProvider
+from test.common_definitions import UrlTesterTestBase, TestFunctionDoesNotHandleProvider
 
 class RedirectUrlResolverTest(unittest.TestCase):
     
