@@ -27,7 +27,35 @@ def get_expected_classification(classification, return_codes):
                if k in return_codes)
     
 
-class ClientTest(object):
+class UrlTesterClientTest(object):
+    def test_any_match_for_not_listed(self):
+        actual = self.tested_client.any_match(self.urls_without_listed)
+        self.assertFalse(actual)    
+    
+    def test_any_match_for_listed(self):
+        actual = self.tested_client.any_match(self.urls_with_listed)
+        self.assertTrue(actual)
+        
+    def test_filter_matching_for_not_listed(self):
+        actual = list(self.tested_client.filter_matching(self.urls_without_listed))
+        self.assertItemsEqual([], actual)
+        
+    def test_filter_matching_for_listed(self):
+        expected = [self.listed_url]
+        actual = list(self.tested_client.filter_matching(self.urls_with_listed))
+        self.assertItemsEqual(expected, actual)
+        
+    def test_lookup_matching_for_not_listed(self):
+        actual = list(self.tested_client.lookup_matching(self.urls_without_listed))
+        self.assertItemsEqual([], actual)
+        
+    def test_lookup_matching_for_listed(self):
+        expected = [self.listed_item]
+        actual = list(self.tested_client.lookup_matching(self.urls_with_listed))
+        self.assertItemsEqual(expected, actual)
+
+
+class HostListClientTest(UrlTesterClientTest):
     @classmethod
     def setUpClass(cls):
         cls.listed_url = url_from_host(cls.listed)
@@ -58,33 +86,6 @@ class ClientTest(object):
     def test_lookup_for_listed(self):
         actual = self.tested_client.lookup(self.listed)
         self.assertEqual(self.listed_item, actual)
-        
-    def test_any_match_for_not_listed(self):
-        actual = self.tested_client.any_match(self.urls_without_listed)
-        self.assertFalse(actual)    
-    
-    def test_any_match_for_listed(self):
-        actual = self.tested_client.any_match(self.urls_with_listed)
-        self.assertTrue(actual)
-        
-    def test_filter_matching_for_not_listed(self):
-        actual = list(self.tested_client.filter_matching(self.urls_without_listed))
-        self.assertItemsEqual([], actual)
-        
-    def test_filter_matching_for_listed(self):
-        expected = [self.listed_url]
-        actual = list(self.tested_client.filter_matching(self.urls_with_listed))
-        self.assertItemsEqual(expected, actual)
-        
-    def test_lookup_matching_for_not_listed(self):
-        actual = list(self.tested_client.lookup_matching(self.urls_without_listed))
-        self.assertItemsEqual([], actual)
-        
-    def test_lookup_matching_for_listed(self):
-        expected = [self.listed_item]
-        actual = list(self.tested_client.lookup_matching(self.urls_with_listed))
-        self.assertItemsEqual(expected, actual)
-
 
 reason_to_skip = (
                   'These tests are expected to fail frequently for users of'
@@ -94,7 +95,7 @@ reason_to_skip = (
 
 
 @unittest.skip(reason_to_skip)
-class SpamhausZenTest(ClientTest, unittest.TestCase):
+class SpamhausZenTest(HostListClientTest, unittest.TestCase):
     tested_client = spamhaus_zen
     listed = u'127.0.0.2'
     not_listed = u'127.0.0.1'
@@ -106,7 +107,7 @@ class SpamhausZenTest(ClientTest, unittest.TestCase):
     
 
 @unittest.skip(reason_to_skip)
-class SpamhausDBLTest(ClientTest, unittest.TestCase):
+class SpamhausDBLTest(HostListClientTest, unittest.TestCase):
     tested_client = spamhaus_dbl
     listed = 'dbltest.com'
     not_listed = 'example.com'
@@ -122,7 +123,7 @@ expected_surbl_classification = get_expected_classification(
                                                             [2, 126]
                                                             )
 
-class SURBLTest(ClientTest):
+class SURBLTest(HostListClientTest):
     tested_client = surbl_multi
     classification = get_expected_classification(
                                                  surbl_multi_classification,
@@ -141,14 +142,16 @@ class SURBLMultiDomainTest(SURBLTest, unittest.TestCase):
     
 hp_hosts = HpHosts('spam-lists-test-suite')
 
-class HpHostsIPTest(ClientTest, unittest.TestCase):
+
+class HpHostsIPTest(HostListClientTest, unittest.TestCase):
     listed = u'174.36.207.146'
     not_listed = u'64.233.160.0'
     not_listed_2 = u'2001:ddd:ccc:123::55'
     tested_client = hp_hosts
     classification = set()
-    
-class HpHostsDomainTest(ClientTest, unittest.TestCase):
+
+
+class HpHostsDomainTest(HostListClientTest, unittest.TestCase):
     listed = 'ecardmountain.com'
     not_listed = 'google.com'
     not_listed_2 = 'microsoft.com'
