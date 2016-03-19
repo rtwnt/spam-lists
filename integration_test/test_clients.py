@@ -1,16 +1,17 @@
 # -*- coding: utf-8 -*-
 
-import unittest
 import os.path
+import unittest
 
 import tldextract
 from validators import ipv6
 
-from spam_lists.clients import spamhaus_zen, spamhaus_zen_classification,\
-spamhaus_dbl, spamhaus_dbl_classification, surbl_multi,\
+from spam_lists.clients import spamhaus_zen, spamhaus_zen_classification, \
+spamhaus_dbl, spamhaus_dbl_classification, surbl_multi, \
 surbl_multi_classification
-from spam_lists.structures import AddressListItem
 from spam_lists.service_models import HpHosts, GoogleSafeBrowsing
+from spam_lists.structures import AddressListItem
+
 
 def ip_or_registered_domain(host):
     registered_domain = tldextract.extract(host).registered_domain

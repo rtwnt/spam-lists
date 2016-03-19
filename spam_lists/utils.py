@@ -10,8 +10,9 @@ from itertools import chain
 from requests import Session
 from requests.exceptions import ConnectionError, InvalidSchema, InvalidURL, Timeout
 
-from .validation import accepts_valid_urls, is_valid_url
 from .exceptions import InvalidURLError
+from .validation import accepts_valid_urls, is_valid_url
+
 
 class RedirectUrlResolver(object):
     

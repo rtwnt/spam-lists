@@ -3,12 +3,13 @@
 
 import unittest
 
-from mock import Mock, patch
 from cachetools.func import lru_cache
+from mock import Mock, patch
 from nose_parameterized import parameterized
 
-from spam_lists.validation import accepts_valid_urls, is_valid_url, accepts_valid_host
 from spam_lists.exceptions import InvalidURLError, InvalidHostError
+from spam_lists.validation import accepts_valid_urls, is_valid_url, accepts_valid_host
+
 
 class ValidationDecoratorTest(object):
     

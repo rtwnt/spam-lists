@@ -1,21 +1,21 @@
 # -*- coding: utf-8 -*-
 
-import unittest
-from itertools import chain
 from collections import defaultdict
+from itertools import chain
 from random import shuffle
+import unittest
 
+from cachetools.func import lru_cache
 from mock import Mock, patch
 from nose_parameterized import parameterized
-from cachetools.func import lru_cache
-from requests.exceptions import ConnectionError, InvalidSchema, InvalidURL,\
+from requests.exceptions import ConnectionError, InvalidSchema, InvalidURL, \
 Timeout
 
-from spam_lists.utils import RedirectUrlResolver, UrlsAndLocations, UrlTesterChain
-from spam_lists.structures import AddressListItem
 from spam_lists.exceptions import InvalidURLError, UnknownCodeError
-
+from spam_lists.structures import AddressListItem
+from spam_lists.utils import RedirectUrlResolver, UrlsAndLocations, UrlTesterChain
 from test.common_definitions import UrlTesterTestBase, TestFunctionDoesNotHandleProvider
+
 
 class RedirectUrlResolverTest(unittest.TestCase):
     

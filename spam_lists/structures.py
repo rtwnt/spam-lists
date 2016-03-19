@@ -6,18 +6,19 @@ functions for creating proper objects for given arguments. They are used
 by service models in spam_lists.service_models module
 '''
 
-from sys import exc_info
 from collections import namedtuple
+from sys import exc_info
 
-import tldextract
-import ipaddress
 from dns import name
-from dns.reversename import ipv4_reverse_domain, ipv6_reverse_domain,\
+from dns.reversename import ipv4_reverse_domain, ipv6_reverse_domain, \
 from_address as name_from_ip
+import ipaddress
+import tldextract
 import validators
 
-from .exceptions import InvalidHostError, InvalidHostnameError,\
+from .exceptions import InvalidHostError, InvalidHostnameError, \
 InvalidIPv4Error, InvalidIPv6Error, UnknownCodeError
+
 
 class BaseClassificationCodeMap(object):
     ''' A class responsible for providing classification 

@@ -5,18 +5,18 @@ This module contains classes of objects serving as clients
 for remote and local spam listing services
 '''
 
+from itertools import izip
 from sys import exc_info
 from urlparse import urlparse
-from itertools import izip
 
-from requests import get, post
-from requests.exceptions import HTTPError
 from dns import name
 from dns.resolver import NXDOMAIN, query
+from requests import get, post
+from requests.exceptions import HTTPError
 
-from .validation import accepts_valid_urls, accepts_valid_host
-from .structures import AddressListItem, hostname_or_ip, non_ipv6_host
 from .exceptions import UnathorizedAPIKeyError, UnknownCodeError, InvalidHostError
+from .structures import AddressListItem, hostname_or_ip, non_ipv6_host
+from .validation import accepts_valid_urls, accepts_valid_host
 
 
 class HostList(object):

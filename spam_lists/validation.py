@@ -14,6 +14,7 @@ import validators
 
 from .exceptions import InvalidURLError, InvalidHostError
 
+
 def is_valid_host(value):
     ''' Check if given value is valid host string
     

@@ -7,8 +7,9 @@ API codes, application identifiers or custom data sets.
 '''
 
 from .service_models import DNSBL
-from .structures import SimpleClassificationCodeMap, ip_address,\
+from .structures import SimpleClassificationCodeMap, ip_address, \
 registered_domain, registered_domain_or_ip, SumClassificationCodeMap
+
 
 spamhaus_xbl_classification = (
                                'CBL (3rd party exploits such as proxies,'

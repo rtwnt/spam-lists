@@ -3,14 +3,14 @@
 
 import unittest
 
+from dns import reversename
 from mock import Mock
 from nose_parameterized import parameterized
-from dns import reversename
 
-from spam_lists.structures import Hostname, IPv4Address, IPv6Address,\
-SimpleClassificationCodeMap, SumClassificationCodeMap, create_host
-from spam_lists.exceptions import InvalidHostError, InvalidHostnameError,\
+from spam_lists.exceptions import InvalidHostError, InvalidHostnameError, \
 InvalidIPv4Error, InvalidIPv6Error, UnknownCodeError
+from spam_lists.structures import Hostname, IPv4Address, IPv6Address, \
+SimpleClassificationCodeMap, SumClassificationCodeMap, create_host
 
 
 class BaseClassificationCodeResolverTest(object):

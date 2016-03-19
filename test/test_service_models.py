@@ -3,18 +3,17 @@
 import unittest
 from urlparse import parse_qs, urlparse
 
-from requests.exceptions import HTTPError
-from mock import MagicMock, Mock, patch
-from dns.resolver import NXDOMAIN
-from nose_parameterized import parameterized
 from cachetools.func import lru_cache
+from dns.resolver import NXDOMAIN
+from mock import MagicMock, Mock, patch
+from nose_parameterized import parameterized
+from requests.exceptions import HTTPError
 
-from spam_lists.service_models import DNSBL, GoogleSafeBrowsing,\
-HostCollection, HostList, HpHosts
-from spam_lists.exceptions import UnathorizedAPIKeyError, UnknownCodeError,\
+from spam_lists.exceptions import UnathorizedAPIKeyError, UnknownCodeError, \
 InvalidURLError, InvalidHostError
+from spam_lists.service_models import DNSBL, GoogleSafeBrowsing, \
+HostCollection, HostList, HpHosts
 from spam_lists.structures import AddressListItem
-
 from test.common_definitions import UrlTesterTestBase, TestFunctionDoesNotHandleProvider
 
 
