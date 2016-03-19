@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
-
+'''
+This module contains definitions used by some of the test_ modules
+'''
 from types import GeneratorType
 
 
