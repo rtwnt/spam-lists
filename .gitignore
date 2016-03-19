@@ -6,4 +6,7 @@
 #virtualenv
 env/
 
+#private data for integration tests
+integration_test/google_safe_browsing_api_key.txt
+
 *.pyc

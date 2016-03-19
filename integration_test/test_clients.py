@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import unittest
+import os.path
 
 import tldextract
 from validators import ipv6
@@ -9,7 +10,7 @@ from spam_lists.clients import spamhaus_zen, spamhaus_zen_classification,\
 spamhaus_dbl, spamhaus_dbl_classification, surbl_multi,\
 surbl_multi_classification
 from spam_lists.structures import AddressListItem
-from spam_lists.service_models import HpHosts
+from spam_lists.service_models import HpHosts, GoogleSafeBrowsing
 
 def ip_or_registered_domain(host):
     registered_domain = tldextract.extract(host).registered_domain
@@ -157,6 +158,45 @@ class HpHostsDomainTest(HostListClientTest, unittest.TestCase):
     not_listed_2 = 'microsoft.com'
     tested_client = hp_hosts
     classification = set(['EMD'])
+    
+gsb_api_key_file = os.path.join(
+                                os.path.dirname(__file__), 
+                                'google_safe_browsing_api_key.txt'
+                                )
+try:
+    with open(gsb_api_key_file, 'r') as key_file:
+        safe_browsing_api_key = key_file.readline().rstrip()
+        
+except IOError:
+    safe_browsing_api_key = None
+
+reason_to_skip_gsb_test = (
+                           'No api key provided. Provide the key in'
+                           ' file: {}'.format(gsb_api_key_file)
+                           )
+
+@unittest.skipIf(not safe_browsing_api_key, reason_to_skip_gsb_test)
+class GoogleSafeBrowsingTest(UrlTesterClientTest, unittest.TestCase):
+    listed_url = 'http://www.gumblar.cn/'
+    not_listed_url = 'http://www.google.com/'
+    not_listed_url_2 = 'https://github.com/'
+    urls_with_listed = not_listed_url, listed_url
+    urls_without_listed = not_listed_url, not_listed_url_2
+    
+    @classmethod
+    def setUpClass(cls):
+        cls.tested_client = GoogleSafeBrowsing(
+                                       'spam-lists-test-suite',
+                                       '0.5',
+                                       safe_browsing_api_key
+                                       )
+        
+        cls.listed_item = AddressListItem(
+                                    cls.listed_url,
+                                    cls.tested_client,
+                                    set(['malware'])
+                                    )
+    
 
 
 if __name__ == "__main__":
