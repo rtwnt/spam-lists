@@ -14,7 +14,7 @@ Timeout
 from spam_lists.exceptions import InvalidURLError, UnknownCodeError
 from spam_lists.structures import AddressListItem
 from spam_lists.utils import RedirectUrlResolver, UrlsAndLocations, UrlTesterChain
-from test.common_definitions import UrlTesterTestBase, TestFunctionDoesNotHandleProvider
+from test.unit.common_definitions import UrlTesterTestBase, TestFunctionDoesNotHandleProvider
 
 
 class RedirectUrlResolverTest(unittest.TestCase):

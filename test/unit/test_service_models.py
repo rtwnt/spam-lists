@@ -14,7 +14,7 @@ InvalidURLError, InvalidHostError
 from spam_lists.service_models import DNSBL, GoogleSafeBrowsing, \
 HostCollection, HostList, HpHosts
 from spam_lists.structures import AddressListItem
-from test.common_definitions import UrlTesterTestBase, TestFunctionDoesNotHandleProvider
+from test.unit.common_definitions import UrlTesterTestBase, TestFunctionDoesNotHandleProvider
 
 
 class UrlTesterTest(UrlTesterTestBase):

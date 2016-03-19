@@ -3,7 +3,6 @@
 
 import unittest
 
-from cachetools.func import lru_cache
 from mock import Mock, patch
 from nose_parameterized import parameterized
 
@@ -85,12 +84,7 @@ class AcceptsValidHostTest(ValidationDecoratorTest, unittest.TestCase):
                            ])
     def test_accepts_valid_host_for_invalid(self, _, value):
         self._test_wrapper_for_invalid(value)
-        
-@lru_cache()
-def get_url_tester_mock(identifier):
-    source = Mock()
-    source.identifier = identifier
-    return source
+
           
 class IsValidUrlTest(unittest.TestCase):
     
