@@ -6,7 +6,6 @@ from itertools import chain
 from random import shuffle
 
 from builtins import next, range
-from cachetools.func import lru_cache
 from nose_parameterized import parameterized
 from requests.exceptions import ConnectionError, InvalidSchema, InvalidURL, \
 Timeout
@@ -14,7 +13,7 @@ Timeout
 from spam_lists.exceptions import InvalidURLError, UnknownCodeError
 from spam_lists.structures import AddressListItem
 from spam_lists.utils import RedirectUrlResolver, UrlsAndLocations, UrlTesterChain
-from test.compat import unittest, Mock, patch
+from test.compat import unittest, Mock, patch, lru_cache
 from test.unit.common_definitions import UrlTesterTestBase, TestFunctionDoesNotHandleProvider
 
 

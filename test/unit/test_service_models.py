@@ -2,7 +2,6 @@
 
 from __future__ import unicode_literals
 
-from cachetools.func import lru_cache
 from dns.resolver import NXDOMAIN
 from future.moves.urllib.parse import urlparse, parse_qs
 from nose_parameterized import parameterized
@@ -13,7 +12,7 @@ InvalidURLError, InvalidHostError
 from spam_lists.service_models import DNSBL, GoogleSafeBrowsing, \
 HostCollection, HostList, HpHosts
 from spam_lists.structures import AddressListItem
-from test.compat import unittest, Mock, MagicMock, patch
+from test.compat import unittest, Mock, MagicMock, patch, lru_cache
 from test.unit.common_definitions import UrlTesterTestBase, \
 TestFunctionDoesNotHandleProvider
 
