@@ -165,6 +165,14 @@ class IPAddress(object):
         
         return False
     
+    def to_unicode(self):
+        ''' Get unicode string representing the object
+        
+        :returns: the ip value as unicode string
+        '''
+        
+        return unicode(self)
+    
 class IPv4Address(ipaddress.IPv4Address, IPAddress):
     reverse_domain = ipv4_reverse_domain
     
