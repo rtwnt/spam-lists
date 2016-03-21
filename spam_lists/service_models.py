@@ -89,7 +89,7 @@ class HostList(object):
         host_item, classification = self._get_match_and_classification(host_object)
         
         if host_item is not None:
-            return AddressListItem(str(host_item), self, classification)
+            return AddressListItem(host_item.to_unicode(), self, classification)
         return None
     
     @accepts_valid_urls
@@ -218,7 +218,7 @@ class HpHosts(HostList):
         :returns: content of response to GET request to hpHosts for data on the given host
         '''
         
-        url = 'http://verify.hosts-file.net/?v={}&s={}'.format(self.app_id, host_object)
+        url = 'http://verify.hosts-file.net/?v={}&s={}'.format(self.app_id, host_object.to_unicode())
         url = url + '&class=true' if classification else url
         
         return get(url).content

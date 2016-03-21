@@ -154,7 +154,7 @@ class HostListTestBase(UrlTesterTest):
 @lru_cache()
 def host_list_host_factory(h):
     host_object = MagicMock()
-    host_object.__str__.return_value = h
+    host_object.to_unicode.return_value = h
     return host_object
 
 
