@@ -221,7 +221,7 @@ class HpHosts(HostList):
         url = 'http://verify.hosts-file.net/?v={}&s={}'.format(self.app_id, host_object.to_unicode())
         url = url + '&class=true' if classification else url
         
-        return get(url).content
+        return get(url).text
     
     def _contains(self, host_object):
         
@@ -333,7 +333,7 @@ class GoogleSafeBrowsing(object):
         string pertaining to it
         '''
         for url_list, response in self._query(urls):
-            classification_set = response.content.splitlines()
+            classification_set = response.text.splitlines()
             
             for url, _class in izip(url_list, classification_set):
                 if _class != 'ok':

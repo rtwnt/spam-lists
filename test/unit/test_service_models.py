@@ -269,11 +269,12 @@ def create_hp_hosts_get(classification, listed_hosts):
         
         content = 'Not Listed'
         host = query_data['s'][0]
+        
         if host in listed_hosts:
             content = 'Listed,{}'.format(class_str)
             
         response = Mock()
-        response.content = content
+        response.text = content
         return response
     return hp_hosts_get
 
@@ -335,7 +336,7 @@ class GoogleSafeBrowsingTest(UrlTesterTest, unittest.TestCase):
                 urls = body.splitlines()[1:]
                 classes = ['ok' if u not in self._spam_urls else 
                        ','.join(self.classification) for u in urls]
-                response.content = '\n'.join(classes)
+                response.text = '\n'.join(classes)
                 code = 200 if self._spam_urls else 204
                 response.status_code = code
             
