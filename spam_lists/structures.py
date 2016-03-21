@@ -6,13 +6,16 @@ functions for creating proper objects for given arguments. They are used
 by service models in spam_lists.service_models module
 '''
 
-from collections import namedtuple
-from sys import exc_info
+from __future__ import unicode_literals
 
+from collections import namedtuple
+import ipaddress
+
+from builtins import str, object
 from dns import name
 from dns.reversename import ipv4_reverse_domain, ipv6_reverse_domain, \
 from_address as name_from_ip
-import ipaddress
+from future.utils import raise_with_traceback
 import tldextract
 import validators
 
@@ -116,7 +119,8 @@ class Hostname(name.Name):
         '''
         value  = str(value)
         if not validators.domain(value):
-            raise InvalidHostnameError, "'{}' is not a valid hostname".format(value), exc_info()[2]
+            msg = "'{}' is not a valid hostname".format(value)
+            raise_with_traceback(InvalidHostnameError(msg))
         
         super(Hostname, self).__init__(value.split('.'))
         
@@ -171,7 +175,7 @@ class IPAddress(object):
         :returns: the ip value as unicode string
         '''
         
-        return unicode(self)
+        return str(self)
     
 class IPv4Address(ipaddress.IPv4Address, IPAddress):
     reverse_domain = ipv4_reverse_domain
@@ -188,9 +192,9 @@ class IPv4Address(ipaddress.IPv4Address, IPAddress):
             
         except ValueError:
             msg = '{} is not a valid IPv4 address'.format(value)
-            raise InvalidIPv4Error, msg, exc_info()[2]
-        
-    
+            raise_with_traceback(InvalidIPv4Error(msg))
+
+
 class IPv6Address(ipaddress.IPv6Address, IPAddress):
     reverse_domain = ipv6_reverse_domain
     
@@ -206,7 +210,7 @@ class IPv6Address(ipaddress.IPv6Address, IPAddress):
             
         except ValueError:
             msg = '{} is not a valid IPv6 address'.format(value)
-            raise InvalidIPv6Error, msg, exc_info()[2]
+            raise_with_traceback(InvalidIPv6Error(msg))
 
 
 def create_host(factories, value):
@@ -233,7 +237,7 @@ def create_host(factories, value):
                 
         msg_tpl = "Failed to create a host object for '{}', raising the following\
          errors in the process:"+"\n".join(data)
-        raise InvalidHostError, msg_tpl.format(value)
+        raise InvalidHostError(msg_tpl.format(value))
     
 def ip_address(value):
     ''' Create an ip address object

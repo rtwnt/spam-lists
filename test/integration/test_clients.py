@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 
-import os.path
-import unittest
+from __future__ import unicode_literals
 
+import os.path
+
+from builtins import object
 import tldextract
 from validators import ipv6
 
@@ -11,6 +13,7 @@ spamhaus_dbl, spamhaus_dbl_classification, surbl_multi, \
 surbl_multi_classification
 from spam_lists.service_models import HpHosts, GoogleSafeBrowsing
 from spam_lists.structures import AddressListItem
+from test.compat import unittest
 
 
 def ip_or_registered_domain(host):
@@ -21,12 +24,11 @@ def ip_or_registered_domain(host):
 def url_from_host(host):
     if ipv6(host):
         host = '['+host+']'
-    return u'http://'+host
+    return 'http://'+host
 
 
 def get_expected_classification(classification, return_codes):
-    return set(v for k, v in classification.items()
-               if k in return_codes)
+    return set(v for k, v in list(classification.items()) if k in return_codes)
     
 
 class UrlTesterClientTest(object):
@@ -40,21 +42,21 @@ class UrlTesterClientTest(object):
         
     def test_filter_matching_for_not_listed(self):
         actual = list(self.tested_client.filter_matching(self.urls_without_listed))
-        self.assertItemsEqual([], actual)
+        self.assertCountEqual([], actual)
         
     def test_filter_matching_for_listed(self):
         expected = [self.listed_url]
         actual = list(self.tested_client.filter_matching(self.urls_with_listed))
-        self.assertItemsEqual(expected, actual)
+        self.assertCountEqual(expected, actual)
         
     def test_lookup_matching_for_not_listed(self):
         actual = list(self.tested_client.lookup_matching(self.urls_without_listed))
-        self.assertItemsEqual([], actual)
+        self.assertCountEqual([], actual)
         
     def test_lookup_matching_for_listed(self):
         expected = [self.listed_item]
         actual = list(self.tested_client.lookup_matching(self.urls_with_listed))
-        self.assertItemsEqual(expected, actual)
+        self.assertCountEqual(expected, actual)
 
 
 class HostListClientTest(UrlTesterClientTest):
@@ -99,9 +101,9 @@ reason_to_skip = (
 @unittest.skip(reason_to_skip)
 class SpamhausZenTest(HostListClientTest, unittest.TestCase):
     tested_client = spamhaus_zen
-    listed = u'127.0.0.2'
-    not_listed = u'127.0.0.1'
-    not_listed_2 = u'8.8.8.8'
+    listed = '127.0.0.2'
+    not_listed = '127.0.0.1'
+    not_listed_2 = '8.8.8.8'
     classification = get_expected_classification(
                                                  spamhaus_zen_classification,
                                                  [2, 4, 10]
@@ -133,9 +135,9 @@ class SURBLTest(HostListClientTest):
                                                  )
 
 class SURBLMultiIPTest(SURBLTest, unittest.TestCase):
-    listed = u'127.0.0.2'
-    not_listed = u'127.0.0.1'
-    not_listed_2 = u'8.8.8.8'
+    listed = '127.0.0.2'
+    not_listed = '127.0.0.1'
+    not_listed_2 = '8.8.8.8'
     
 class SURBLMultiDomainTest(SURBLTest, unittest.TestCase):
     listed = 'surbl-org-permanent-test-point.com'
@@ -146,9 +148,9 @@ hp_hosts = HpHosts('spam-lists-test-suite')
 
 
 class HpHostsIPTest(HostListClientTest, unittest.TestCase):
-    listed = u'174.36.207.146'
-    not_listed = u'64.233.160.0'
-    not_listed_2 = u'2001:ddd:ccc:123::55'
+    listed = '174.36.207.146'
+    not_listed = '64.233.160.0'
+    not_listed_2 = '2001:ddd:ccc:123::55'
     tested_client = hp_hosts
     classification = set()
 

@@ -4,13 +4,13 @@
 This module contains classes of objects serving as clients
 for remote and local spam listing services
 '''
+from __future__ import unicode_literals
 
-from itertools import izip
-from sys import exc_info
-from urlparse import urlparse
-
+from builtins import zip, map, str, range, object
 from dns import name
 from dns.resolver import NXDOMAIN, query
+from future.moves.urllib.parse import urlparse
+from future.utils import raise_from
 from requests import get, post
 from requests.exceptions import HTTPError
 
@@ -191,7 +191,8 @@ class DNSBL(HostList):
             return host_object, classification
         
         except UnknownCodeError as e:
-            raise exc_info()[0],  '{}\nSource:{}'.format(str(e), str(self)), exc_info()[2]
+            msg = '{}\nSource:{}'.format(str(e), str(self))
+            raise_from(UnknownCodeError(msg), e)
         
 class HpHosts(HostList):
     ''' hpHosts client '''
@@ -287,9 +288,9 @@ class GoogleSafeBrowsing(object):
         try:
                 response.raise_for_status()
                 
-        except HTTPError:
+        except HTTPError as e:
             if response.status_code == 401:
-                raise UnathorizedAPIKeyError('The API key is not authorized'), None, exc_info()[2]
+                raise_from(UnathorizedAPIKeyError('The API key is not authorized'), e)
             else:
                 raise
             
@@ -335,7 +336,7 @@ class GoogleSafeBrowsing(object):
         for url_list, response in self._query(urls):
             classification_set = response.text.splitlines()
             
-            for url, _class in izip(url_list, classification_set):
+            for url, _class in zip(url_list, classification_set):
                 if _class != 'ok':
                     yield url, _class
     

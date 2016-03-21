@@ -5,9 +5,11 @@ definitions used during testing
 '''
 
 from __future__ import unicode_literals
+
 import unittest
 
 from six import assertCountEqual, PY2
+
 
 try:
     from unittest.mock import Mock, MagicMock, patch # @NoMove

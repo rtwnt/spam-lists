@@ -5,6 +5,7 @@ This module contains instances of objects representing clients of services
 that can be ready for use without providing custom, user-specific data, like
 API codes, application identifiers or custom data sets.
 '''
+from __future__ import unicode_literals
 
 from .service_models import DNSBL
 from .structures import SimpleClassificationCodeMap, ip_address, \

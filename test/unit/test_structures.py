@@ -1,16 +1,15 @@
 # -*- coding: utf-8 -*-
+from __future__ import unicode_literals
 
-
-import unittest
-
+from builtins import str, range, object
 from dns import reversename
-from mock import Mock
 from nose_parameterized import parameterized
 
 from spam_lists.exceptions import InvalidHostError, InvalidHostnameError, \
 InvalidIPv4Error, InvalidIPv6Error, UnknownCodeError
 from spam_lists.structures import Hostname, IPv4Address, IPv6Address, \
 SimpleClassificationCodeMap, SumClassificationCodeMap, create_host
+from test.compat import unittest, Mock
 
 
 class BaseClassificationCodeResolverTest(object):
@@ -62,7 +61,7 @@ class SumClassificationCodeMapTest(
         expected = set(classes.values())
         actual = self.classification_code_map[sum(keys)]
         
-        self.assertItemsEqual(expected, actual)
+        self.assertCountEqual(expected, actual)
         
     @parameterized.expand([
                            ('key', [16]),
@@ -110,11 +109,11 @@ class HostnameTest(unittest.TestCase):
 class IpAddressTest(object):
     
     @parameterized.expand([
-                           ('ipv4', u'299.0.0.1'),
-                           ('ipv4', u'99.22.33.1.23'),
-                           ('ipv6', u'2001:db8:abc:125::4h'),
-                           ('ipv6', u'2001:db8:abcef:125::43'),
-                           ('hostname', u'abc.def.gh'),
+                           ('ipv4', '299.0.0.1'),
+                           ('ipv4', '99.22.33.1.23'),
+                           ('ipv6', '2001:db8:abc:125::4h'),
+                           ('ipv6', '2001:db8:abcef:125::43'),
+                           ('hostname', 'abc.def.gh'),
                            ('non_unicode_ipv4', '299.0.0.1')
                            ])
     def test_constructor_for_invalid(self, _, value):
@@ -132,13 +131,13 @@ class IPv4AddressTest(IpAddressTest, unittest.TestCase):
     reverse_name_root = reversename.ipv4_reverse_domain
     constructor = IPv4Address
     value_error_type = InvalidIPv4Error
-    ip_address = u'122.44.55.99'
+    ip_address = '122.44.55.99'
 
 class IPv6AddressTest(IpAddressTest, unittest.TestCase):
     reverse_name_root = reversename.ipv6_reverse_domain
     constructor = IPv6Address
     value_error_type = InvalidIPv6Error
-    ip_address = u'fe80::0202:b3ff:fe1e:8329'
+    ip_address ='fe80::0202:b3ff:fe1e:8329'
 
         
 class CreateHostTest(unittest.TestCase):
@@ -147,8 +146,8 @@ class CreateHostTest(unittest.TestCase):
         self.factories = [Mock() for _ in range(5)]
         
     @parameterized.expand([
-                           ('v4',  u'127.0.0.1'),
-                           ('v6', u'2001:db8:abc:125::45'),
+                           ('v4',  '127.0.0.1'),
+                           ('v6', '2001:db8:abc:125::45'),
                            ])
     def test_host_for_ip(self, _, value):
         ip_address = self.factories[0]
@@ -174,10 +173,10 @@ class CreateHostTest(unittest.TestCase):
         self.assertEqual(expected, actual)
         
     @parameterized.expand([
-                           ('ipv4', u'299.0.0.1'),
-                           ('ipv4', u'99.22.33.1.23'),
-                           ('ipv6', u'2001:db8:abc:125::4h'),
-                           ('ipv6', u'2001:db8:abcef:125::43'),
+                           ('ipv4', '299.0.0.1'),
+                           ('ipv4', '99.22.33.1.23'),
+                           ('ipv6', '2001:db8:abc:125::4h'),
+                           ('ipv6', '2001:db8:abcef:125::43'),
                            ('hostname', '-e'),
                            ('hostname', '/e')
                            ])

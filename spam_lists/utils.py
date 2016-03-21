@@ -5,8 +5,11 @@ This module contains various utilities to be used to create
 composite spam url checkers.
 '''
 
+from __future__ import unicode_literals
+
 from itertools import chain
 
+from builtins import object
 from requests import Session
 from requests.exceptions import ConnectionError, InvalidSchema, InvalidURL, Timeout
 
@@ -42,7 +45,7 @@ class RedirectUrlResolver(object):
         '''
         
         if not is_valid_url(url):
-            raise InvalidURLError, '{} is not a valid url'.format(url)
+            raise InvalidURLError('{} is not a valid url'.format(url))
         
         try:
             return self.session.head(url)

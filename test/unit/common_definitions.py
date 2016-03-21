@@ -2,7 +2,11 @@
 '''
 This module contains definitions used by some of the test_ modules
 '''
+from __future__ import unicode_literals
+
 from types import GeneratorType
+
+from builtins import object
 
 
 class UrlTesterTestBase(object):
@@ -27,14 +31,14 @@ class UrlTesterTestBase(object):
         expected = self._get_expected_items_for_urls(matching_urls)
         actual = list(self.tested_instance.lookup_matching(self.valid_urls + list(matching_urls)))
         
-        self.assertItemsEqual(expected, actual)
+        self.assertCountEqual(expected, actual)
         
     def _test_filter_matching_for(self, matching_urls):
         
         self._set_matching_urls(matching_urls)
         actual = list(self.tested_instance.filter_matching(self.valid_urls + list(matching_urls)))
          
-        self.assertItemsEqual(matching_urls, actual)
+        self.assertCountEqual(matching_urls, actual)
         
     def test_any_match_returns_false(self):
         

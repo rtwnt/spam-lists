@@ -5,11 +5,12 @@ This module contains functions responsible for
 validating arguments for other functions and
 methods provided by the library
 '''
+from __future__ import unicode_literals
 
 import functools
 import re
-from urlparse import urlparse
 
+from future.moves.urllib.parse import urlparse
 import validators
 
 from .exceptions import InvalidURLError, InvalidHostError
@@ -71,10 +72,10 @@ def accepts_valid_urls(f):
         :returns: a return value of the function f
         :raises InvalidURLError: if the iterable contains invalid urls
         '''
-        invalid_urls = filter(lambda u: not is_valid_url(u), urls)
+        invalid_urls = [u for u in urls if not is_valid_url(u)]
         if invalid_urls:
             msg = 'The values: {} are not valid urls'.format(','.join(invalid_urls))
-            raise InvalidURLError, msg
+            raise InvalidURLError(msg)
         
         return f(obj, urls, *args, **kwargs)
     

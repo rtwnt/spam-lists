@@ -3,6 +3,8 @@
 This module contains all classes of exceptions raised
 by the library
 '''
+from __future__ import unicode_literals
+
 
 class SpamListsError(Exception):
     '''There was an error during testing a url or host'''

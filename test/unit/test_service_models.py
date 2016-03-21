@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
 
-import unittest
-from urlparse import parse_qs, urlparse
+from __future__ import unicode_literals
 
 from cachetools.func import lru_cache
 from dns.resolver import NXDOMAIN
-from mock import MagicMock, Mock, patch
+from future.moves.urllib.parse import urlparse, parse_qs
 from nose_parameterized import parameterized
 from requests.exceptions import HTTPError
 
@@ -14,7 +13,9 @@ InvalidURLError, InvalidHostError
 from spam_lists.service_models import DNSBL, GoogleSafeBrowsing, \
 HostCollection, HostList, HpHosts
 from spam_lists.structures import AddressListItem
-from test.unit.common_definitions import UrlTesterTestBase, TestFunctionDoesNotHandleProvider
+from test.compat import unittest, Mock, MagicMock, patch
+from test.unit.common_definitions import UrlTesterTestBase, \
+TestFunctionDoesNotHandleProvider
 
 
 class UrlTesterTest(UrlTesterTestBase):
@@ -61,9 +62,8 @@ class UrlTesterTest(UrlTesterTestBase):
         
     @parameterized.expand(valid_url_list_input)
     def test_filter_matching_for(self, _, matching_urls):
-         
         self._test_filter_matching_for(matching_urls)
-        
+    
     def _get_expected_items(self, values):
         item = lambda i: AddressListItem(i, self.tested_instance,
                                              self.classification)
@@ -78,7 +78,7 @@ class HostListTestBase(UrlTesterTest):
     a host list stored locally or by a remote service '''
     
     valid_host_input = [
-                        ('ipv4', u'255.0.120.1'),
+                        ('ipv4', '255.0.120.1'),
                         ('hostname', 'test.pl'),
                         ('ipv6', '2001:ddd:ccc:111::33')
                         ]

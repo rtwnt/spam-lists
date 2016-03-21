@@ -1,13 +1,15 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import unicode_literals
 
 import unittest
 
-from mock import Mock, patch
+from builtins import object
 from nose_parameterized import parameterized
 
 from spam_lists.exceptions import InvalidURLError, InvalidHostError
 from spam_lists.validation import accepts_valid_urls, is_valid_url, accepts_valid_host
+from test.compat import Mock, patch
 
 
 class ValidationDecoratorTest(object):
@@ -17,7 +19,7 @@ class ValidationDecoratorTest(object):
         self.validity_tester_mock = self.validity_tester_patcher.start()
         
         function = Mock()
-        function.__name__ = 'function'
+        function.__name__ = str('function')
         
         self.obj = Mock()
         self.function = function

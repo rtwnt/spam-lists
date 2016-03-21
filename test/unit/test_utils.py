@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
+from __future__ import unicode_literals
 
 from collections import defaultdict
 from itertools import chain
 from random import shuffle
-import unittest
 
+from builtins import next, range
 from cachetools.func import lru_cache
-from mock import Mock, patch
 from nose_parameterized import parameterized
 from requests.exceptions import ConnectionError, InvalidSchema, InvalidURL, \
 Timeout
@@ -14,6 +14,7 @@ Timeout
 from spam_lists.exceptions import InvalidURLError, UnknownCodeError
 from spam_lists.structures import AddressListItem
 from spam_lists.utils import RedirectUrlResolver, UrlsAndLocations, UrlTesterChain
+from test.compat import unittest, Mock, patch
 from test.unit.common_definitions import UrlTesterTestBase, TestFunctionDoesNotHandleProvider
 
 
@@ -59,7 +60,7 @@ class RedirectUrlResolverTest(unittest.TestCase):
         self.is_valid_url_mock.return_value = False
         
         with self.assertRaises(InvalidURLError):
-            self.resolver.get_redirect_urls('http://test.com').next()
+            next(self.resolver.get_redirect_urls('http://test.com'))
         
     @parameterized.expand([
                            ('ConnectionError', ConnectionError),
@@ -89,7 +90,8 @@ class RedirectUrlResolverTest(unittest.TestCase):
         
         if not (exception_type is None or 
                 issubclass(exception_type, Exception)):
-            raise ValueError, '{} is not a subclass of Exception'.format(exception_type)
+            msg = '{} is not a subclass of Exception'.format(exception_type)
+            raise ValueError(msg)
         
         self._response_mocks = self._get_response_mocks(urls)
         
@@ -183,7 +185,7 @@ class UrlsAndLocationsTest(unittest.TestCase):
         
     def _get_tested_instance(self):
         self._set_redirect_urls(self.url_redirects)
-        initial_urls = self.url_redirects.keys()
+        initial_urls = list(self.url_redirects.keys())
         return UrlsAndLocations(initial_urls, self.redirect_resolver_mock)
     
     def test_constructor_for_invalid_url(self):
@@ -201,7 +203,7 @@ class UrlsAndLocationsTest(unittest.TestCase):
         urls_and_locations = self._get_tested_instance()
         
         for i, _ in enumerate(urls_and_locations):
-            if i == len(self.url_redirects.keys()) - 1:
+            if i == len(list(self.url_redirects.keys())) - 1:
                 break
             
         self.redirect_resolver_mock.get_redirect_urls.assert_not_called()
@@ -217,10 +219,11 @@ class UrlsAndLocationsTest(unittest.TestCase):
     def test_iter_returns_no_duplicates(self):
         urls_and_locations = self._get_tested_instance()
         
-        expected_items = set(chain(self.url_redirects.keys(), *self.url_redirects.values()))
+        expected_items = set(chain(list(self.url_redirects.keys()),
+                                   *list(self.url_redirects.values())))
         actual_items = list(urls_and_locations)
             
-        self.assertItemsEqual(expected_items, actual_items)
+        self.assertCountEqual(expected_items, actual_items)
         
     def test_iter_does_not_resolve_redirects_during_second_run(self):
         urls_and_locations = self._get_tested_instance()
@@ -288,17 +291,17 @@ class UrlTesterChainTest(
     
     def _get_expected_items_for_urls(self, urls):
         
-        return [self._get_item(u, i) for u, ids in urls.items() for i in ids]
+        return [self._get_item(u, i) for u, ids in list(urls.items()) for i in ids]
             
     def _set_matching_urls(self, urls):
         
         by_source_id = defaultdict(list)
         
-        for u, ids in urls.items():
+        for u, ids in list(urls.items()):
             for i in ids:
                 by_source_id[i].append(u)
                 
-        for i, urls in by_source_id.items():
+        for i, urls in list(by_source_id.items()):
             self._add_url_tester(i, urls)
             
         shuffle(self.tested_instance.url_testers)
