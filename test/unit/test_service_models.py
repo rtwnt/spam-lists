@@ -373,12 +373,11 @@ class GoogleSafeBrowsingTest(UrlTesterTest, unittest.TestCase):
         self._test_for_unathorized_api_key(function)
         
 def host_collection_host_factory(h):
-            host_object = MagicMock()
-            host_object.__str__.return_value = h
+            host_object = host_list_host_factory(h)
             host_object.is_subdomain.return_value = False
             host_object.__eq__.return_value = False
             
-            test = lambda h2: str(host_object) == str(h2)
+            test = lambda h2: host_object.to_unicode() == h2.to_unicode()
             host_object.__eq__.side_effect = test
             host_object.is_subdomain.side_effect = test
                 
