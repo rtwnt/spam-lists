@@ -94,7 +94,7 @@ class HostListTestMixin(UrlTesterTestMixin):
         
         return function(unsupported_host)
         
-    def test_contains_returns_false_for_unsupported_host(self):
+    def test_contains_for_invalid_host(self):
         actual = self._get_result_for_invalid_host(
                                                              self.tested_instance.__contains__
                                                              )
