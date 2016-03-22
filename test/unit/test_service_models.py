@@ -201,7 +201,7 @@ class DNSBLTest(
                 ):
      
     query_domain_str = 'test.query.domain'
-     
+    host_with_unknown_code = 'hostwithunknowncode.com'
     def setUp(self):
          
         self.classification_map = MagicMock()
@@ -228,33 +228,22 @@ class DNSBLTest(
                                 for h in host_objects]
         self.dns_query_mock.side_effect = create_dns_query_function(expected_query_names)
         
-    def _test_raise_unknown_code_error(self, function, *args, **kwargs):
+    @parameterized.expand([
+                           ('lookup', host_with_unknown_code),
+                           (
+                            'lookup_matching',
+                            ['http://'+host_with_unknown_code]
+                            )
+                           ])
+    def test_code_error_raised_by(self, function_name, tested_value):
+        function = getattr(self.tested_instance, function_name)
+        self._set_matching_hosts([self.host_with_unknown_code])
         self._test_function_does_not_handle(
                                             UnknownCodeError,
                                             self.classification_map.__getitem__,
                                             function,
-                                            *args,
-                                            **kwargs
+                                            tested_value
                                             )
-        
-    def test_lookup_for_unknown_code(self):
-        
-        host = 'hostwithunknowncode.com'
-        self._set_matching_hosts([host])
-        self._test_raise_unknown_code_error(
-                                                               self.tested_instance.lookup,
-                                                               host
-                                                               )
-        
-    def test_lookup_matching_does_not_handle_unknown_code_error(self):
-        
-        url = 'http://hostwithunknowncode.com'
-        self._set_matching_hosts([urlparse(url).hostname])
-        
-        self._test_raise_unknown_code_error(
-                                                               self.tested_instance.lookup_matching,
-                                                               [url]
-                                                               )
 
 
 def create_hp_hosts_get(classification, listed_hosts):
