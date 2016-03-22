@@ -49,7 +49,7 @@ class AcceptValidUrlsTest(ValidationDecoratorTestMixin, unittest.TestCase):
                            ('ipv4_host', ['http://122.34.59.109']),
                            ('ipv6_host', ['http://[2001:db8:abc:123::42]'])
                            ])
-    def test_accept_valid_urls_for_urls_with_valid(self, _, urls):
+    def test_for_urls_with_valid(self, _, urls):
         self._test_wrapper_for_valid(urls)
     
     
