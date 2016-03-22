@@ -165,9 +165,12 @@ class HostListTest(HostListTestMixin, unittest.TestCase):
         self._contains_patcher = patch('spam_lists.service_models.HostList._contains')
         self._contains_mock = self._contains_patcher.start()
         self._contains_mock.side_effect = lambda h: h in self.listed_hosts
-        
-        self._get_match_and_classification_patcher = patch('spam_lists.service_models.HostList._get_match_and_classification')
-        self._get_match_and_classification_mock = self._get_match_and_classification_patcher.start()
+        host_data_getter_name = (
+                                 'spam_lists.service_models.'
+                                 'HostList._get_match_and_classification'
+                                 )
+        self.host_data_getter_patcher = patch(host_data_getter_name)
+        self._get_match_and_classification_mock = self.host_data_getter_patcher.start()
         
         def _get_match_and_classification(host):
             if host in self.listed_hosts:
@@ -178,7 +181,7 @@ class HostListTest(HostListTestMixin, unittest.TestCase):
         
     def tearDown(self):
         self._contains_patcher.stop()
-        self._get_match_and_classification_patcher.stop()
+        self.host_data_getter_patcher.stop()
         
     def _set_matching_hosts(self, matching_hosts):
         
