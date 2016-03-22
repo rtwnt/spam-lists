@@ -349,20 +349,19 @@ class GoogleSafeBrowsingTest(UrlTesterTestMixin, unittest.TestCase):
     def _set_matching_urls(self, urls):
         self._set_up_post_mock(urls)
         
-    def _test_for_unathorized_api_key(self, function):
-        
+    @parameterized.expand([
+                           ('any_match'),
+                           ('lookup_matching')
+                           ])
+    def test_unathorized_query_with(self, function_name):
+        tested_function = getattr(self.tested_instance, function_name)
+        called_function = lambda u: list(tested_function(u))
         self._set_up_post_mock([], error_401_expected=True)
-        
-        self.assertRaises(UnathorizedAPIKeyError, function, self.valid_urls)
-        
-    def test_any_match_for_unathorized_api_key(self):
-        
-        self._test_for_unathorized_api_key(self.tested_instance.any_match)
-        
-    def test_lookup_matching_for_unathorized_api_key(self):
-        
-        function = lambda u: list(self.tested_instance.lookup_matching(u))
-        self._test_for_unathorized_api_key(function)
+        self.assertRaises(
+                          UnathorizedAPIKeyError,
+                          called_function,
+                          self.valid_urls
+                          )
         
 def host_collection_host_factory(host):
     host_object = host_list_host_factory(host)
