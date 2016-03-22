@@ -27,6 +27,23 @@ def get_response_mocks(urls):
     return response_mocks
 
 
+def get_session_resolve_redirects(response_mocks, exception_type):
+    if not (exception_type is None or
+            issubclass(exception_type, Exception)):
+        msg = '{} is not a subclass of Exception'.format(exception_type)
+        raise ValueError(msg)
+        
+    # pylint: disable-msg=unused-argument
+    def resolve_redirects(response, request):
+        for r in response_mocks:
+            yield r
+                
+        if exception_type:
+            raise exception_type
+                
+    return resolve_redirects
+
+
 class RedirectUrlResolverTest(unittest.TestCase):
     
     valid_urls = ['http://first.com', 'http://122.55.33.21',
