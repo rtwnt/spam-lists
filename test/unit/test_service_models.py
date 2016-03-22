@@ -307,6 +307,24 @@ class HpHostsTest(HostListTestMixin, unittest.TestCase):
          
     def _set_matching_hosts(self, hosts):
         self.get_mock.side_effect = create_hp_hosts_get(self.classification, hosts)
+
+def create_gsb_post(expected_401, spam_urls, classification):
+    def post(_, body):
+        response = Mock()
+        if expected_401:
+            response.status_code = 401
+            response.raise_for_status.side_effect = HTTPError
+                
+        else:
+            urls = body.splitlines()[1:]
+            classes = ['ok' if u not in spam_urls else
+                       ','.join(classification) for u in urls]
+            response.text = '\n'.join(classes)
+            code = 200 if spam_urls else 204
+            response.status_code = code
+            
+        return response
+    return post
         
 class GoogleSafeBrowsingTest(UrlTesterTestMixin, unittest.TestCase):
     
@@ -317,43 +335,28 @@ class GoogleSafeBrowsingTest(UrlTesterTestMixin, unittest.TestCase):
     def setUpClass(cls):
         cls.tested_instance = GoogleSafeBrowsing('test_client', '0.1', 'test_key')
         
-    def _set_up_post_mock(self):
-        
-        def post(_, body):
-            response = Mock()
-            if self._expecting_unathorized_api_key_error:
-                response.status_code = 401
-                response.raise_for_status.side_effect = HTTPError
-                
-            else:
-                urls = body.splitlines()[1:]
-                classes = ['ok' if u not in self._spam_urls else 
-                       ','.join(self.classification) for u in urls]
-                response.text = '\n'.join(classes)
-                code = 200 if self._spam_urls else 204
-                response.status_code = code
-            
-            return response
-        
+    def _set_up_post_mock(self, spam_urls, error_401_expected = False):
         self.post_patcher = patch('spam_lists.service_models.post')
         self.mocked_post = self.post_patcher.start()
-        self.mocked_post.side_effect = post
+        side_efect = create_gsb_post(
+                                     error_401_expected,
+                                     spam_urls,
+                                     self.classification
+                                     )
+        self.mocked_post.side_effect = side_efect
         
     def setUp(self):
-        self._spam_urls = []
-        self._expecting_unathorized_api_key_error = False
-        
-        self._set_up_post_mock()
+        self._set_up_post_mock([])
         
     def tearDown(self):
         self.post_patcher.stop()
         
     def _set_matching_urls(self, urls):
-        self._spam_urls = urls
+        self._set_up_post_mock(urls)
         
     def _test_for_unathorized_api_key(self, function):
         
-        self._expecting_unathorized_api_key_error = True
+        self._set_up_post_mock([], error_401_expected=True)
         
         self.assertRaises(UnathorizedAPIKeyError, function, self.valid_urls)
         
