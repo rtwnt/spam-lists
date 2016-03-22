@@ -106,7 +106,7 @@ class HostnameTest(unittest.TestCase):
         
         self.assertFalse(self.hostname_pl.is_subdomain(other))
 
-class IpAddressTest(object):
+class IpAddressTestMixin(object):
     
     @parameterized.expand([
                            ('ipv4', '299.0.0.1'),
@@ -127,13 +127,13 @@ class IpAddressTest(object):
         
         self.assertEqual(expected, ip.relative_domain)
     
-class IPv4AddressTest(IpAddressTest, unittest.TestCase):
+class IPv4AddressTest(IpAddressTestMixin, unittest.TestCase):
     reverse_name_root = reversename.ipv4_reverse_domain
     constructor = IPv4Address
     value_error_type = InvalidIPv4Error
     ip_address = '122.44.55.99'
 
-class IPv6AddressTest(IpAddressTest, unittest.TestCase):
+class IPv6AddressTest(IpAddressTestMixin, unittest.TestCase):
     reverse_name_root = reversename.ipv6_reverse_domain
     constructor = IPv6Address
     value_error_type = InvalidIPv6Error
