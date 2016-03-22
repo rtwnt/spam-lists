@@ -112,7 +112,7 @@ class RedirectUrlResolverTest(unittest.TestCase):
                                                     )
         self.resolve_redirects_mock.side_effect = side_effect
         
-    def _set_last_response_location_header(self, url):
+    def _set_last_location_header(self, url):
         
         all_responses = [self.head_mock.return_value] + self._response_mocks
         all_responses[-1].headers = {'location': url}
@@ -148,7 +148,7 @@ class RedirectUrlResolverTest(unittest.TestCase):
         error_source = 'http://triggered.error.com'
         expected.append(error_source)
         
-        self._set_last_response_location_header(error_source)
+        self._set_last_location_header(error_source)
             
         self._test_get_redirect_urls(expected)
         
@@ -167,7 +167,7 @@ class RedirectUrlResolverTest(unittest.TestCase):
         
         self._set_session_resolve_redirects_side_effects(expected, exception_type)
         
-        self._set_last_response_location_header('http://invalid.url.com')
+        self._set_last_location_header('http://invalid.url.com')
             
         self._test_get_redirect_urls(expected)
 
