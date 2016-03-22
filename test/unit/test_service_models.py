@@ -351,7 +351,8 @@ class GoogleSafeBrowsingTest(UrlTesterTestMixin, unittest.TestCase):
         
     @parameterized.expand([
                            ('any_match'),
-                           ('lookup_matching')
+                           ('lookup_matching'),
+                           ('filter_matching')
                            ])
     def test_unathorized_query_with(self, function_name):
         tested_function = getattr(self.tested_instance, function_name)
