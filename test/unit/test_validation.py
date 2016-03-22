@@ -75,7 +75,7 @@ class AcceptsValidHostTest(ValidationDecoratorTestMixin, unittest.TestCase):
                            ('ipv4', '122.34.59.109'),
                            ('ipv6', '2001:db8:abc:123::42')
                            ])
-    def test_accepts_valid_host_for_valid(self, _, value):
+    def test_for_valid(self, _, value):
         self._test_wrapper_for_valid(value)
     
     @parameterized.expand([
