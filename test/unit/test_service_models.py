@@ -187,11 +187,11 @@ class HostListTest(HostListTestMixin, unittest.TestCase):
 
 def create_dns_query_function(expected_query_names):
     def dns_query(query_name):
-            if query_name in expected_query_names:
-                dns_answer_mock = Mock()
-                dns_answer_mock.to_text.return_value = '121.0.0.1'
-                return [dns_answer_mock]
-            raise NXDOMAIN
+        if query_name in expected_query_names:
+            dns_answer_mock = Mock()
+            dns_answer_mock.to_text.return_value = '121.0.0.1'
+            return [dns_answer_mock]
+        raise NXDOMAIN
     return dns_query
         
 class DNSBLTest(
@@ -369,15 +369,15 @@ class GoogleSafeBrowsingTest(UrlTesterTestMixin, unittest.TestCase):
         self._test_for_unathorized_api_key(function)
         
 def host_collection_host_factory(h):
-            host_object = host_list_host_factory(h)
-            host_object.is_subdomain.return_value = False
-            host_object.__eq__.return_value = False
-            
-            test = lambda h2: host_object.to_unicode() == h2.to_unicode()
-            host_object.__eq__.side_effect = test
-            host_object.is_subdomain.side_effect = test
-                
-            return host_object
+    host_object = host_list_host_factory(h)
+    host_object.is_subdomain.return_value = False
+    host_object.__eq__.return_value = False
+    
+    test = lambda h2: host_object.to_unicode() == h2.to_unicode()
+    host_object.__eq__.side_effect = test
+    host_object.is_subdomain.side_effect = test
+    
+    return host_object
         
 class HostCollectionTest(
                          HostListTestMixin,

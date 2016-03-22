@@ -287,7 +287,7 @@ class GoogleSafeBrowsing(object):
         response = post(self._request_address, request_body)
             
         try:
-                response.raise_for_status()
+            response.raise_for_status()
                 
         except HTTPError as e:
             if response.status_code == 401:
