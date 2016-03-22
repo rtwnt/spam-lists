@@ -87,13 +87,6 @@ class HostListTestMixin(UrlTesterTestMixin):
         
     def _get_expected_items_for_urls(self, urls):
         return self._get_expected_items(get_hosts(urls))
-    
-    def _test_function_does_not_handle_invalid_host_error(self, function, arg):
-        self._test_function_does_not_handle(InvalidHostError,
-                                            self.host_factory_mock,
-                                            function,
-                                            arg
-                                            )
         
     def _get_result_for_invalid_host(self, function):
         unsupported_host = 'unsupported.com'
@@ -407,7 +400,11 @@ class HostCollectionTest(
     def test_add_does_not_handle_value_error(self):
         function = self.tested_instance.add
         
-        self._test_function_does_not_handle_invalid_host_error(function, 'invalidhost.com')
+        self._test_function_does_not_handle(InvalidHostError,
+                                            self.host_factory_mock,
+                                            function,
+                                            'invalidhost.com'
+                                            )
          
     @parameterized.expand(HostListTestMixin.valid_host_input)
     def test_add_for_valid(self, _, value):
