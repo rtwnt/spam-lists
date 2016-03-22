@@ -117,8 +117,8 @@ class HostList(object):
         
         hosts = (urlparse(u).hostname for u in urls)
         
-        for h in hosts:
-            item = self.lookup(h)
+        for val in hosts:
+            item = self.lookup(val)
             if item is not None:
                 yield item
                 
@@ -178,22 +178,22 @@ class DNSBL(HostList):
     
     def _get_match_and_classification(self, host_object):
         
-        answer = self._query(host_object)
+        answers = self._query(host_object)
         
-        if answer is None:
+        if answers is None:
             return None, None
         
         try:
             classification = set()
-            for a in answer:
-                last_octet = a.to_text().split('.')[-1]
+            for answer in answers:
+                last_octet = answer.to_text().split('.')[-1]
                 classification |= self._classification_map[int(last_octet)]
             
             return host_object, classification
         
-        except UnknownCodeError as e:
-            msg = '{}\nSource:{}'.format(str(e), str(self))
-            raise_from(UnknownCodeError(msg), e)
+        except UnknownCodeError as error:
+            msg = '{}\nSource:{}'.format(str(error), str(self))
+            raise_from(UnknownCodeError(msg), error)
         
 class HpHosts(HostList):
     ''' hpHosts client '''
@@ -289,9 +289,9 @@ class GoogleSafeBrowsing(object):
         try:
             response.raise_for_status()
                 
-        except HTTPError as e:
+        except HTTPError as error:
             if response.status_code == 401:
-                raise_from(UnathorizedAPIKeyError('The API key is not authorized'), e)
+                raise_from(UnathorizedAPIKeyError('The API key is not authorized'), error)
             else:
                 raise
             
@@ -399,9 +399,9 @@ class HostCollection(HostList):
     
     def _get_match_and_classification(self, host_object):
         
-        for h in self.hosts:
-            if host_object.is_subdomain(h) or host_object == h:
-                return h, self.classification
+        for val in self.hosts:
+            if host_object.is_subdomain(val) or host_object == val:
+                return val, self.classification
         return None, None
         
     def add(self, host_value):
@@ -412,12 +412,12 @@ class HostCollection(HostList):
         '''
         host_obj = self._host_factory(host_value)
         
-        for h in self.hosts:
-            if host_obj.is_subdomain() or host_obj == h:
+        for listed in self.hosts:
+            if host_obj.is_subdomain() or host_obj == listed:
                 return
             
-            if h.is_subdomain(host_obj):
-                self.hosts.remove(h)
+            if listed.is_subdomain(host_obj):
+                self.hosts.remove(listed)
                 break
 
         self.hosts.add(host_obj)

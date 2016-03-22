@@ -148,9 +148,9 @@ class HostListTestMixin(UrlTesterTestMixin):
 
 
 @lru_cache()
-def host_list_host_factory(h):
+def host_list_host_factory(host):
     host_object = MagicMock()
-    host_object.to_unicode.return_value = h
+    host_object.to_unicode.return_value = host
     return host_object
 
 
@@ -169,9 +169,9 @@ class HostListTest(HostListTestMixin, unittest.TestCase):
         self._get_match_and_classification_patcher = patch('spam_lists.service_models.HostList._get_match_and_classification')
         self._get_match_and_classification_mock = self._get_match_and_classification_patcher.start()
         
-        def _get_match_and_classification(h):
-            if h in self.listed_hosts:
-                return h, self.classification
+        def _get_match_and_classification(host):
+            if host in self.listed_hosts:
+                return host, self.classification
             return None, None
         
         self._get_match_and_classification_mock.side_effect = _get_match_and_classification
@@ -368,8 +368,8 @@ class GoogleSafeBrowsingTest(UrlTesterTestMixin, unittest.TestCase):
         function = lambda u: list(self.tested_instance.lookup_matching(u))
         self._test_for_unathorized_api_key(function)
         
-def host_collection_host_factory(h):
-    host_object = host_list_host_factory(h)
+def host_collection_host_factory(host):
+    host_object = host_list_host_factory(host)
     host_object.is_subdomain.return_value = False
     host_object.__eq__.return_value = False
     

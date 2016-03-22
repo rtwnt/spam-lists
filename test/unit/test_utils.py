@@ -20,9 +20,9 @@ from test.unit.common_definitions import UrlTesterTestBase, TestFunctionDoesNotH
 
 def get_response_mocks(urls):
     response_mocks = []
-    for u in urls:
+    for url in urls:
         response = Mock()
-        response.url = u
+        response.url = url
         response_mocks.append(response)
     return response_mocks
 
@@ -35,8 +35,8 @@ def get_session_resolve_redirects(response_mocks, exception_type):
         
     # pylint: disable-msg=unused-argument
     def resolve_redirects(response, request):
-        for r in response_mocks:
-            yield r
+        for mocked in response_mocks:
+            yield mocked
                 
         if exception_type:
             raise exception_type
@@ -305,9 +305,9 @@ class UrlTesterChainTest(
         
         by_source_id = defaultdict(list)
         
-        for u, ids in list(urls.items()):
+        for url, ids in list(urls.items()):
             for i in ids:
-                by_source_id[i].append(u)
+                by_source_id[i].append(url)
                 
         for i, urls in list(by_source_id.items()):
             self._add_url_tester(i, urls)

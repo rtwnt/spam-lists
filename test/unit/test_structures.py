@@ -122,11 +122,11 @@ class IpAddressTestMixin(object):
         self.assertRaises(self.value_error_type, self.constructor, value)
         
     def test_relative_domain_for_ip(self):
-        ip = self.constructor(self.ip_address)
-        reversed_name = reversename.from_address(str(ip))
+        ip_object = self.constructor(self.ip_address)
+        reversed_name = reversename.from_address(str(ip_object))
         expected = reversed_name.relativize(self.reverse_name_root)
         
-        self.assertEqual(expected, ip.relative_domain)
+        self.assertEqual(expected, ip_object.relative_domain)
     
 class IPv4AddressTest(IpAddressTestMixin, unittest.TestCase):
     reverse_name_root = reversename.ipv4_reverse_domain
@@ -183,8 +183,8 @@ class CreateHostTest(unittest.TestCase):
                            ])
     def test_host_for_invalid(self, _, value):
         
-        for f in self.factories:
-            f.side_effect = InvalidHostError
+        for factory in self.factories:
+            factory.side_effect = InvalidHostError
         
         self.assertRaises(InvalidHostError, create_host, self.factories, value)
 

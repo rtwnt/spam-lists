@@ -74,10 +74,10 @@ class RedirectUrlResolver(object):
                     
             except InvalidURL: pass
                 
-            except (Timeout, ConnectionError, InvalidSchema) as e:
+            except (Timeout, ConnectionError, InvalidSchema) as error:
                 last_url = response.headers['location']
                 
-                if isinstance(e, Timeout) or is_valid_url(last_url):
+                if isinstance(error, Timeout) or is_valid_url(last_url):
                     yield last_url
 
 class UrlTesterChain(object):
@@ -128,10 +128,10 @@ class UrlTesterChain(object):
         urls = set(urls)
         for tester in self.url_testers:
             urls = urls - seen
-            for u in tester.filter_matching(urls):
-                if u not in seen:
-                    seen.add(u)
-                    yield u
+            for url in tester.filter_matching(urls):
+                if url not in seen:
+                    seen.add(url)
+                    yield url
                     
 class UrlsAndLocations(object):
     ''' 
