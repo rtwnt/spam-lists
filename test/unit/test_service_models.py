@@ -17,7 +17,7 @@ from test.unit.common_definitions import UrlTesterTestBase, \
 TestFunctionDoesNotHandleProvider
 
 
-class UrlTesterTest(UrlTesterTestBase):
+class UrlTesterTestMixin(UrlTesterTestBase):
     ''' A class providing pre-generated tests for classes
     having any_match, filter_matching and lookup_matching
     methods '''
@@ -72,7 +72,7 @@ def get_hosts(urls):
     
     return [urlparse(u).hostname for u in urls]
 
-class HostListTestMixin(UrlTesterTest):
+class HostListTestMixin(UrlTesterTestMixin):
     ''' A common test case for all classes that represent
     a host list stored locally or by a remote service '''
     
@@ -314,7 +314,7 @@ class HpHostsTest(HostListTestMixin, unittest.TestCase):
     def _set_matching_hosts(self, hosts):
         self.get_mock.side_effect = create_hp_hosts_get(self.classification, hosts)
         
-class GoogleSafeBrowsingTest(UrlTesterTest, unittest.TestCase):
+class GoogleSafeBrowsingTest(UrlTesterTestMixin, unittest.TestCase):
     
     def _get_expected_items_for_urls(self, urls):
         return self._get_expected_items(urls)
