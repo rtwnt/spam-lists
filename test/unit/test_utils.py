@@ -103,7 +103,7 @@ class RedirectUrlResolverTest(unittest.TestCase):
         
         self.assertFalse(list(url_generator))
         
-    def _set_session_resolve_redirects_side_effects(self, urls, exception_type):
+    def _set_up_resolve_redirects(self, urls, exception_type):
         self._response_mocks = get_response_mocks(urls)
         
         side_effect = get_session_resolve_redirects(
@@ -129,7 +129,7 @@ class RedirectUrlResolverTest(unittest.TestCase):
                            ])
     def test_get_redirect_urls_yields(self, _, expected):
         
-        self._set_session_resolve_redirects_side_effects(expected, None)
+        self._set_up_resolve_redirects(expected, None)
         
         self._test_get_redirect_urls(expected)
         
@@ -143,7 +143,7 @@ class RedirectUrlResolverTest(unittest.TestCase):
                            ])
     def test_get_redirect_urls_until(self, _, expected, exception_type):
         
-        self._set_session_resolve_redirects_side_effects(expected, exception_type)
+        self._set_up_resolve_redirects(expected, exception_type)
         
         error_source = 'http://triggered.error.com'
         expected.append(error_source)
@@ -165,7 +165,7 @@ class RedirectUrlResolverTest(unittest.TestCase):
         is_valid_url = lambda u: u in expected+['http://test.com']
         self.is_valid_url_mock.side_effect = is_valid_url
         
-        self._set_session_resolve_redirects_side_effects(expected, exception_type)
+        self._set_up_resolve_redirects(expected, exception_type)
         
         self._set_last_location_header('http://invalid.url.com')
             
