@@ -18,6 +18,15 @@ from test.compat import unittest, Mock, patch, lru_cache
 from test.unit.common_definitions import UrlTesterTestBase, TestFunctionDoesNotHandleProvider
 
 
+def get_response_mocks(urls):
+    response_mocks = []
+    for u in urls:
+        response = Mock()
+        response.url = u
+        response_mocks.append(response)
+    return response_mocks
+
+
 class RedirectUrlResolverTest(unittest.TestCase):
     
     valid_urls = ['http://first.com', 'http://122.55.33.21',
@@ -74,18 +83,7 @@ class RedirectUrlResolverTest(unittest.TestCase):
         url_generator = self.resolver.get_redirect_urls('http://test.com')
         
         self.assertFalse(list(url_generator))
-            
-    def _get_response_mocks(self, urls):
         
-        response_mocks = []
-        
-        for u in urls:
-            response = Mock()
-            response.url = u
-            response_mocks.append(response)
-            
-        return response_mocks
-    
     def _set_session_resolve_redirects_side_effects(self, urls, exception_type):
         
         if not (exception_type is None or 
@@ -93,7 +91,7 @@ class RedirectUrlResolverTest(unittest.TestCase):
             msg = '{} is not a subclass of Exception'.format(exception_type)
             raise ValueError(msg)
         
-        self._response_mocks = self._get_response_mocks(urls)
+        self._response_mocks = get_response_mocks(urls)
         
         # pylint: disable-msg=unused-argument
         def resolve_redirects(response, request):
