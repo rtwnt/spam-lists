@@ -223,7 +223,7 @@ class UrlsAndLocationsTest(unittest.TestCase):
             
         self.assertCountEqual(expected_items, actual_items)
         
-    def test_iter_does_not_resolve_redirects_during_second_run(self):
+    def test_iter_returns_cached(self):
         urls_and_locations = self._get_tested_instance()
         
         list(urls_and_locations)
