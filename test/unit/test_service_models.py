@@ -100,7 +100,7 @@ class HostListTestMixin(UrlTesterTestMixin):
                                                              )
         self.assertFalse(actual)
         
-    def test_lookup_returns_none_for_unsupported_host(self):
+    def test_lookup_for_invalid_host(self):
         actual = self._get_result_for_invalid_host(
                                                              self.tested_instance.lookup
                                                              )
