@@ -336,8 +336,6 @@ class GoogleSafeBrowsingTest(UrlTesterTestMixin, unittest.TestCase):
         cls.tested_instance = GoogleSafeBrowsing('test_client', '0.1', 'test_key')
         
     def _set_up_post_mock(self, spam_urls, error_401_expected = False):
-        self.post_patcher = patch('spam_lists.service_models.post')
-        self.mocked_post = self.post_patcher.start()
         side_efect = create_gsb_post(
                                      error_401_expected,
                                      spam_urls,
@@ -346,7 +344,8 @@ class GoogleSafeBrowsingTest(UrlTesterTestMixin, unittest.TestCase):
         self.mocked_post.side_effect = side_efect
         
     def setUp(self):
-        self._set_up_post_mock([])
+        self.post_patcher = patch('spam_lists.service_models.post')
+        self.mocked_post = self.post_patcher.start()
         
     def tearDown(self):
         self.post_patcher.stop()
