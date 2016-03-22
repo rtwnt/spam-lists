@@ -397,7 +397,7 @@ class HostCollectionTest(
     def tearDown(self):
         self.host_factory_patcher.stop()
         
-    def test_add_does_not_handle_value_error(self):
+    def test_add_invalid_host(self):
         function = self.tested_instance.add
         
         self._test_function_does_not_handle(InvalidHostError,
