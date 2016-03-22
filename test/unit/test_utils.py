@@ -196,7 +196,7 @@ class UrlsAndLocationsTest(unittest.TestCase):
         initial_urls = list(self.url_redirects.keys())
         return UrlsAndLocations(initial_urls, self.redirect_resolver_mock)
     
-    def test_constructor_for_invalid_url(self):
+    def test_init_for_invalid_url(self):
         invalid_url = 'invalid.url.com'
         self.is_valid_url_mock.side_effect = lambda u: u != invalid_url
 
