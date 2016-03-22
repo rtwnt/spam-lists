@@ -95,20 +95,20 @@ class HostListTestMixin(UrlTesterTestMixin):
                                             arg
                                             )
         
-    def _get_return_value_for_unsupported_host(self, function):
+    def _get_result_for_invalid_host(self, function):
         unsupported_host = 'unsupported.com'
         self.host_factory_mock.side_effect = InvalidHostError
         
         return function(unsupported_host)
         
     def test_contains_returns_false_for_unsupported_host(self):
-        actual = self._get_return_value_for_unsupported_host(
+        actual = self._get_result_for_invalid_host(
                                                              self.tested_instance.__contains__
                                                              )
         self.assertFalse(actual)
         
     def test_lookup_returns_none_for_unsupported_host(self):
-        actual = self._get_return_value_for_unsupported_host(
+        actual = self._get_result_for_invalid_host(
                                                              self.tested_instance.lookup
                                                              )
         self.assertIsNone(actual)
