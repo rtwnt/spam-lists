@@ -112,23 +112,20 @@ class HostListTestMixin(UrlTesterTestMixin):
                                                              self.tested_instance.lookup
                                                              )
         self.assertIsNone(actual)
-        
+    
+    @parameterized.expand([
+                           ('__contains__'),
+                           ('lookup')
+                           ])
     @patch('spam_lists.validation.is_valid_host')
-    def _test_function_raises_invalid_host_error(self, function, is_valid_host_mock):
+    def test_invalid_host_error_is_raised_by(self, function_name, is_valid_host_mock):
+        
+        function = getattr(self.tested_instance, function_name)
         invalid_host = 'invalid.com'
         is_valid_host_mock.side_effect = lambda h: h != invalid_host
         
         with self.assertRaises(InvalidHostError):
             function(invalid_host)
-        
-    @parameterized.expand([
-                           ('__contains__'),
-                           ('lookup')
-                           ])
-    def test_invalid_host_error_is_raised_by(self, function_name):
-        
-        function = getattr(self.tested_instance, function_name)
-        self._test_function_raises_invalid_host_error(function)
         
     @parameterized.expand(valid_host_input)
     def test_contains_for_listed(self, _, value):
