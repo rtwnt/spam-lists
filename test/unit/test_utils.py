@@ -102,23 +102,13 @@ class RedirectUrlResolverTest(unittest.TestCase):
         self.assertFalse(list(url_generator))
         
     def _set_session_resolve_redirects_side_effects(self, urls, exception_type):
-        
-        if not (exception_type is None or 
-                issubclass(exception_type, Exception)):
-            msg = '{} is not a subclass of Exception'.format(exception_type)
-            raise ValueError(msg)
-        
         self._response_mocks = get_response_mocks(urls)
         
-        # pylint: disable-msg=unused-argument
-        def resolve_redirects(response, request):
-            for r in self._response_mocks:
-                yield r
-                
-            if exception_type:
-                raise exception_type
-                
-        self.resolve_redirects_mock.side_effect = resolve_redirects
+        side_effect = get_session_resolve_redirects(
+                                                    self._response_mocks,
+                                                    exception_type
+                                                    )
+        self.resolve_redirects_mock.side_effect = side_effect
         
     def _set_last_response_location_header(self, url):
         
