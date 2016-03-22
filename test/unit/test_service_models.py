@@ -224,7 +224,7 @@ class DNSBLTest(
                                 for h in host_objects]
         self.dns_query_mock.side_effect = create_dns_query_function(expected_query_names)
         
-    def _test_function_does_not_handle_unknown_code_error(self, function, *args, **kwargs):
+    def _test_raise_unknown_code_error(self, function, *args, **kwargs):
         self._test_function_does_not_handle(
                                             UnknownCodeError,
                                             self.classification_map.__getitem__,
@@ -237,7 +237,7 @@ class DNSBLTest(
         
         host = 'hostwithunknowncode.com'
         self._set_matching_hosts([host])
-        self._test_function_does_not_handle_unknown_code_error(
+        self._test_raise_unknown_code_error(
                                                                self.tested_instance.lookup,
                                                                host
                                                                )
@@ -247,7 +247,7 @@ class DNSBLTest(
         url = 'http://hostwithunknowncode.com'
         self._set_matching_hosts([urlparse(url).hostname])
         
-        self._test_function_does_not_handle_unknown_code_error(
+        self._test_raise_unknown_code_error(
                                                                self.tested_instance.lookup_matching,
                                                                [url]
                                                                )
