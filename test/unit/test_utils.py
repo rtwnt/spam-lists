@@ -61,6 +61,8 @@ class RedirectUrlResolverTest(unittest.TestCase):
         self.patcher = patch('spam_lists.utils.is_valid_url')
         self.is_valid_url_mock = self.patcher.start()
         
+        self._response_mocks = []
+        
     def tearDown(self):
         
         self.patcher.stop()
