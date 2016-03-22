@@ -206,7 +206,7 @@ class UrlsAndLocationsTest(unittest.TestCase):
             
         self.redirect_resolver_mock.get_locations.assert_not_called()
         
-    def test_iter_maintains_order_betten_runs(self):
+    def test_iter_has_constant_order(self):
         urls_and_locations = self._get_tested_instance()
         
         first_run_results = list(urls_and_locations)
