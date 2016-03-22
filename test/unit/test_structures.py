@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+#pylint: disable-msg=redefined-builtin
 from builtins import str, range, object
 from dns import reversename
 from nose_parameterized import parameterized

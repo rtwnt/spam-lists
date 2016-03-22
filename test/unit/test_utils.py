@@ -5,6 +5,7 @@ from collections import defaultdict
 from itertools import chain
 from random import shuffle
 
+#pylint: disable-msg=redefined-builtin
 from builtins import next, range
 from nose_parameterized import parameterized
 from requests.exceptions import ConnectionError, InvalidSchema, InvalidURL, \

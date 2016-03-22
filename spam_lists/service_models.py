@@ -6,6 +6,7 @@ for remote and local spam listing services
 '''
 from __future__ import unicode_literals
 
+#pylint: disable-msg=redefined-builtin
 from builtins import zip, map, str, range, object
 from dns import name
 from dns.resolver import NXDOMAIN, query
