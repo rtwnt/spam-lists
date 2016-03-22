@@ -111,7 +111,11 @@ class HostListTestMixin(UrlTesterTestMixin):
                            ('lookup')
                            ])
     @patch('spam_lists.validation.is_valid_host')
-    def test_invalid_host_error_is_raised_by(self, function_name, is_valid_host_mock):
+    def test_invalid_host_query_using(
+                                         self,
+                                         function_name,
+                                         is_valid_host_mock
+                                         ):
         
         function = getattr(self.tested_instance, function_name)
         invalid_host = 'invalid.com'
