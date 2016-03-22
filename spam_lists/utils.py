@@ -31,7 +31,7 @@ class RedirectUrlResolver(object):
         
         self.session = requests_session
         
-    def get_first_response(self, url):
+    def _get_first_response(self, url):
         ''' Get the first response to HEAD request for given url
         
         :param url: a url value
@@ -65,7 +65,7 @@ class RedirectUrlResolver(object):
         :raises ValuError: if the argument is not a valid url
         '''
         
-        response = self.get_first_response(url)
+        response = self._get_first_response(url)
         
         if response:
             try:

@@ -67,22 +67,6 @@ class RedirectUrlResolverTest(unittest.TestCase):
         
         self.patcher.stop()
         
-    def test_get_first_response_for_invalid_url(self):
-        
-        self.is_valid_url_mock.return_value = False
-        
-        self.assertRaises(InvalidURLError, self.resolver.get_first_response, 'http://test.com')
-        
-    @parameterized.expand([
-                           ('ConnectionError', ConnectionError),
-                           ('InvalidSchema', InvalidSchema),
-                           ('Timeout', Timeout)
-                           ])
-    def test_get_first_response_for_url_triggering(self, _, exception_type):
-        
-        self.head_mock.side_effect = exception_type
-        self.assertIsNone(self.resolver.get_first_response('http://test.com'))
-        
     def test_get_redirect_urls_for_invalid_url(self):
         
         self.is_valid_url_mock.return_value = False
