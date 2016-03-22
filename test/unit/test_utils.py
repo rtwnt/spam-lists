@@ -74,19 +74,6 @@ class RedirectUrlResolverTest(unittest.TestCase):
         with self.assertRaises(InvalidURLError):
             next(self.resolver.get_locations('http://test.com'))
         
-    @parameterized.expand([
-                           ('ConnectionError', ConnectionError),
-                           ('InvalidSchema', InvalidSchema),
-                           ('Timeout', Timeout)
-                           ])
-    def test_locations_for_first_url_triggering(self, _, exception_type):
-        
-        self.head_mock.side_effect = exception_type
-        
-        url_generator = self.resolver.get_locations('http://test.com')
-        
-        self.assertFalse(list(url_generator))
-        
     def _set_up_resolve_redirects(self, urls, exception_type):
         self._response_mocks = get_response_mocks(urls)
         
@@ -101,7 +88,7 @@ class RedirectUrlResolverTest(unittest.TestCase):
         all_responses = [self.head_mock.return_value] + self._response_mocks
         all_responses[-1].headers = {'location': url}
     
-    def _test_get_redirect_urls(self, expected):
+    def _test_get_locations(self, expected):
         
         url_generator = self.resolver.get_locations('http://test.com')
         
@@ -115,45 +102,64 @@ class RedirectUrlResolverTest(unittest.TestCase):
         
         self._set_up_resolve_redirects(expected, None)
         
-        self._test_get_redirect_urls(expected)
+        self._test_get_locations(expected)
         
     @parameterized.expand([
-                           ('Timeout', [], Timeout),
-                           ('Timeout', valid_urls, Timeout),
-                           ('ConnectionError', [], ConnectionError),
-                           ('ConnectionError', valid_urls, ConnectionError),
-                           ('InvalidSchema', [], InvalidSchema),
-                           ('InvalidSchema', valid_urls, InvalidSchema),
+                           ('initial_url_casuing_timeout', [], Timeout),
+                           ('last_url_casuing_timeout', valid_urls, Timeout),
+                           ('initial_invalid_url', [], InvalidURL, False),
+                           ('last_invalid_url', valid_urls, InvalidURL, False),
+                           (
+                            'initial_url_causing_connection_error',
+                            [],
+                            ConnectionError
+                            ),
+                           (
+                            'last_url_causing_connection_error',
+                            valid_urls, ConnectionError
+                            ),
+                           (
+                            'initial_invalid_url_causing_connection_error',
+                            [],
+                            ConnectionError,
+                            False
+                            ),
+                           (
+                            'last_invalid_url_causing_connection_error',
+                            valid_urls,
+                            ConnectionError,
+                            False
+                            ),
+                           ('initial_invalid_schema', [], InvalidSchema),
+                           ('last_invalid_schema', valid_urls, InvalidSchema),
+                           (
+                            'initial_invalid_url_with_invalid_schema',
+                            [],
+                            InvalidSchema,
+                            False
+                            ),
+                           (
+                            'last_invalid_url_with_invalid_schema',
+                            valid_urls,
+                            InvalidSchema,
+                            False
+                            )
                            ])
-    def test_get_locations_until(self, _, expected, exception_type):
-        
+    def test_get_locations_for(self, _, locations,
+                               exception_type, triggered_by_valid_url = True):
+        expected = list(locations)
         self._set_up_resolve_redirects(expected, exception_type)
         
         error_source = 'http://triggered.error.com'
-        expected.append(error_source)
+        if triggered_by_valid_url:
+            expected += [error_source]
+        else:
+            is_valid_url = lambda u: u in expected+['http://test.com']
+            self.is_valid_url_mock.side_effect = is_valid_url
         
         self._set_last_location_header(error_source)
-            
-        self._test_get_redirect_urls(expected)
         
-    @parameterized.expand([
-                           ('InvalidURL', [], InvalidURL),
-                           ('InvalidURL', valid_urls, InvalidURL),
-                           ('ConnectionError', [], ConnectionError),
-                           ('ConnectionError', valid_urls, ConnectionError),
-                           ('InvalidSchema', [], InvalidSchema),
-                           ('InvalidSchema', valid_urls, InvalidSchema),
-                           ])
-    def test_get_locations_until_invalid_url_triggers(self, _, expected, exception_type):
-        
-        is_valid_url = lambda u: u in expected+['http://test.com']
-        self.is_valid_url_mock.side_effect = is_valid_url
-        
-        self._set_up_resolve_redirects(expected, exception_type)
-        
-        self._set_last_location_header('http://invalid.url.com')
-            
-        self._test_get_redirect_urls(expected)
+        self._test_get_locations(expected)
 
 
 class UrlsAndLocationsTest(unittest.TestCase):
