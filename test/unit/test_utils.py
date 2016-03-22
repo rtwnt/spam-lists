@@ -85,7 +85,7 @@ class RedirectUrlResolverTest(unittest.TestCase):
             
         return response_mocks
     
-    def _set_session_resolve_redirects_side_effects(self, urls, exception_type=None):
+    def _set_session_resolve_redirects_side_effects(self, urls, exception_type):
         
         if not (exception_type is None or 
                 issubclass(exception_type, Exception)):
@@ -120,7 +120,7 @@ class RedirectUrlResolverTest(unittest.TestCase):
                            ])
     def test_get_redirect_urls_yields(self, _, expected):
         
-        self._set_session_resolve_redirects_side_effects(expected)
+        self._set_session_resolve_redirects_side_effects(expected, None)
         
         self._test_get_redirect_urls(expected)
         
