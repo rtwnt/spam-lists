@@ -12,7 +12,7 @@ from spam_lists.validation import accepts_valid_urls, is_valid_url, accepts_vali
 from test.compat import Mock, patch, lru_cache
 
 
-class ValidationDecoratorTest(object):
+class ValidationDecoratorTestMixin(object):
     
     def setUp(self):
         self.validity_tester_patcher = patch(self.validity_tester)
@@ -38,7 +38,7 @@ class ValidationDecoratorTest(object):
         self.assertRaises(self.exception_type, self.decorated_function, self.obj, value)
         self.function.assert_not_called()
 
-class AcceptValidUrlsTest(ValidationDecoratorTest, unittest.TestCase):
+class AcceptValidUrlsTest(ValidationDecoratorTestMixin, unittest.TestCase):
     exception_type = InvalidURLError
     decorator = staticmethod(accepts_valid_urls)
     validity_tester = 'spam_lists.validation.is_valid_url'
@@ -64,7 +64,7 @@ class AcceptValidUrlsTest(ValidationDecoratorTest, unittest.TestCase):
     def test_accept_valid_urls_for_urls_with(self, _, urls):
         self._test_wrapper_for_invalid(urls)
         
-class AcceptsValidHostTest(ValidationDecoratorTest, unittest.TestCase):
+class AcceptsValidHostTest(ValidationDecoratorTestMixin, unittest.TestCase):
     exception_type = InvalidHostError
     decorator = staticmethod(accepts_valid_host)
     validity_tester = 'spam_lists.validation.is_valid_host'
