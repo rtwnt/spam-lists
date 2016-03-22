@@ -197,7 +197,7 @@ class UrlsAndLocationsTest(unittest.TestCase):
         side_effect = lambda u: redirect_locations_per_url.get(u, [])
         self.redirect_resolver_mock.get_locations.side_effect = side_effect
         
-    def test_iter_returns_initial_urls_before_resolving_redirects(self):
+    def test_iter_starts_with_input(self):
         urls_and_locations = self._get_tested_instance()
         
         for i, _ in enumerate(urls_and_locations):
