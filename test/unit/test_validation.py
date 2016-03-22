@@ -97,29 +97,52 @@ class IsValidUrlTest(unittest.TestCase):
                            ('ftp_scheme', 'ftp://ftp.test.com'),
                            ('numeric_hostname', 'http://999.com'),
                            ('final_slash', 'https://google.com/'),
-                           ('path_query_and_fragment', 'https://test.domain.com/path/element?var=1&var_2=3#fragment'),
+                           (
+                            'path_query_and_fragment',
+                            'https://test.domain.com/path/element?var=1&var_2=3#fragment'
+                            ),
                            ('query', 'http://test.domain.com?var_1=1&var_2=2'),
                            ('path', 'http://test.domain.com/path'),
-                           ('path_and_fragment', 'http://test.domain.com/path#fragment'),
-                           ('query_and_fragment', 'http://test.domain.com?var_1=1&var_2=2#fragment'),
+                           (
+                            'path_and_fragment',
+                            'http://test.domain.com/path#fragment'
+                            ),
+                           (
+                            'query_and_fragment',
+                            'http://test.domain.com?var_1=1&var_2=2#fragment'
+                            ),
                            ('port', 'https://test.domain.com:123'),
-                           ('authentication', 'https://abc:def@test.domain.com'),
+                           (
+                            'authentication',
+                            'https://abc:def@test.domain.com'
+                            ),
                            ('ipv4', 'http://255.0.0.255'),
-                           ('ipv6', 'http://[2001:db8:abc:125::45]')
+                           ('ipv6', 'http://[2001:db8:abc:125::45]'),
+                           ('no_schema', 'test.url.com', False),
+                           ('invalid_ipv4', 'http://266.0.0.266', False),
+                           ('invalid_ipv6', 'http://127.0.0.1.1', False),
+                           (
+                            'invalid_port',
+                            'http://test.domain.com:aaa',
+                            False
+                            ),
+                           (
+                            'no_top_level_domain',
+                            'https://testdomaincom',
+                            False
+                            ),
+                           (
+                            'invalid_hostname',
+                            'http://-invalid.domain.com',
+                            False
+                            )
                            ])
-    def test_is_valid_url_for_url_with(self, _, url):
-        self.assertTrue(is_valid_url(url))
-        
-    @parameterized.expand([
-                           ('no_schema', 'test.url.com'),
-                           ('invalid_ipv4', 'http://266.0.0.266'),
-                           ('invalid_ipv6', 'http://127.0.0.1.1'),
-                           ('invalid_port', 'http://test.domain.com:aaa'),
-                           ('no_top_level_domain', 'https://testdomaincom'),
-                           ('invalid_hostname', 'http://-invalid.domain.com')
-                           ])
-    def test_is_valid_url_for_invalid_url_with(self, _, url):
-        self.assertFalse(is_valid_url(url))
+    def test_for_url_with(self, _, url, expected = True):
+        actual = is_valid_url(url)
+        if expected:
+            self.assertTrue(actual)
+        else:
+            self.assertFalse(actual)
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
