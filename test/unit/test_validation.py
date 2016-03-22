@@ -85,7 +85,7 @@ class AcceptsValidHostTest(ValidationDecoratorTestMixin, unittest.TestCase):
                            ('ipv6', '2001:db8:abcef:123::42'),
                            ('ipv6', '2001:db8:abch:123::42')
                            ])
-    def test_accepts_valid_host_for_invalid(self, _, value):
+    def test_for_invalid(self, _, value):
         self._test_wrapper_for_invalid(value)
 
           
