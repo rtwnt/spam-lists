@@ -283,16 +283,13 @@ class HpHostsTest(HostListTestMixin, unittest.TestCase):
          
         cls.tested_instance = HpHosts('spambl_test_suite')
         
-    def _set_up_get_mock(self):
-        self.get_patcher = patch('spam_lists.service_models.get')
-        self.get_mock = self.get_patcher.start()
-        self.get_mock.side_effect = create_hp_hosts_get(self.classification, [])
-        
     def setUp(self):
          
         self.listed_hosts = []
         
-        self._set_up_get_mock()
+        self.get_patcher = patch('spam_lists.service_models.get')
+        self.get_mock = self.get_patcher.start()
+        self.get_mock.side_effect = create_hp_hosts_get(self.classification, [])
         
         self.host_factory_mock = Mock()
         
