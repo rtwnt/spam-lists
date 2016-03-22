@@ -94,6 +94,7 @@ class RedirectUrlResolverTest(unittest.TestCase):
         
         self._response_mocks = self._get_response_mocks(urls)
         
+        # pylint: disable-msg=unused-argument
         def resolve_redirects(response, request):
             for r in self._response_mocks:
                 yield r
