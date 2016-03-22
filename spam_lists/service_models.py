@@ -327,7 +327,7 @@ class GoogleSafeBrowsing(object):
         
         return any(self._query(urls))
     
-    def _get_classification_per_matching(self, urls):
+    def _get_match_and_classification(self, urls):
         ''' Get classification for all matching urls
         
         :param urls: a sequence of urls to test
@@ -350,7 +350,7 @@ class GoogleSafeBrowsing(object):
         :raises InvalidURLError: if there are any invalid urls in the sequence
         '''
         
-        for url, _class in self._get_classification_per_matching(urls):
+        for url, _class in self._get_match_and_classification(urls):
             classification = set(_class.split(','))
             yield AddressListItem(url, self, classification)
                     
@@ -363,7 +363,7 @@ class GoogleSafeBrowsing(object):
         :raises InvalidURLError: if there are any invalid urls in the sequence
         '''
         
-        for url, _ in self._get_classification_per_matching(urls):
+        for url, _ in self._get_match_and_classification(urls):
             yield url
     
 
