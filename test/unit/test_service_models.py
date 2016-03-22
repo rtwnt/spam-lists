@@ -170,14 +170,14 @@ class HostListTest(HostListTestMixin, unittest.TestCase):
                                  'HostList._get_match_and_classification'
                                  )
         self.host_data_getter_patcher = patch(host_data_getter_name)
-        self._get_match_and_classification_mock = self.host_data_getter_patcher.start()
+        self.host_data_getter_mock = self.host_data_getter_patcher.start()
         
         def _get_match_and_classification(host):
             if host in self.listed_hosts:
                 return host, self.classification
             return None, None
         
-        self._get_match_and_classification_mock.side_effect = _get_match_and_classification
+        self.host_data_getter_mock.side_effect = _get_match_and_classification
         
     def tearDown(self):
         self._contains_patcher.stop()
