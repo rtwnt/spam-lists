@@ -237,7 +237,7 @@ class DNSBLTest(
                                             **kwargs
                                             )
         
-    def test_lookup_does_not_handle_unknown_code_error(self):
+    def test_lookup_for_unknown_code(self):
         
         host = 'hostwithunknowncode.com'
         self._set_matching_hosts([host])
