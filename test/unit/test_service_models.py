@@ -72,7 +72,7 @@ def get_hosts(urls):
     
     return [urlparse(u).hostname for u in urls]
 
-class HostListTestBase(UrlTesterTest):
+class HostListTestMixin(UrlTesterTest):
     ''' A common test case for all classes that represent
     a host list stored locally or by a remote service '''
     
@@ -157,7 +157,7 @@ def host_list_host_factory(h):
     return host_object
 
 
-class HostListTest(HostListTestBase, unittest.TestCase):
+class HostListTest(HostListTestMixin, unittest.TestCase):
     
     def setUp(self):
         self.listed_hosts = []
@@ -198,7 +198,7 @@ def create_dns_query_function(expected_query_names):
     return dns_query
         
 class DNSBLTest(
-                HostListTestBase,
+                HostListTestMixin,
                 TestFunctionDoesNotHandleProvider,
                 unittest.TestCase
                 ):
@@ -277,7 +277,7 @@ def create_hp_hosts_get(classification, listed_hosts):
         return response
     return hp_hosts_get
 
-class HpHostsTest(HostListTestBase, unittest.TestCase):
+class HpHostsTest(HostListTestMixin, unittest.TestCase):
     
     valid_ipv6 = '2001:ddd:ccc:111::33'
     
@@ -384,7 +384,7 @@ def host_collection_host_factory(h):
             return host_object
         
 class HostCollectionTest(
-                         HostListTestBase,
+                         HostListTestMixin,
                          TestFunctionDoesNotHandleProvider,
                          unittest.TestCase
                          ):
@@ -410,7 +410,7 @@ class HostCollectionTest(
         
         self._test_function_does_not_handle_invalid_host_error(function, 'invalidhost.com')
          
-    @parameterized.expand(HostListTestBase.valid_host_input)
+    @parameterized.expand(HostListTestMixin.valid_host_input)
     def test_add_for_valid(self, _, value):
          
         self.tested_instance.add(value)
