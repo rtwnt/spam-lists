@@ -76,11 +76,13 @@ class SumClassificationCodeMapTest(
 
 
 class HostnameTest(unittest.TestCase):
-    
-    hostname_pl = Hostname('hostname.pl')
-    
-    subdomain_hostname_pl = Hostname('subdomain.hostname.pl')
-    
+    superdomain_str = 'superdomain.com'
+    domain_str = 'domain.'+superdomain_str
+    subdomain_str = 'subdomain.'+domain_str
+    superdomain = Hostname(superdomain_str)
+    domain = Hostname(domain_str)
+    subdomain = Hostname(subdomain_str)
+    unrelated_domain = Hostname('other.com')
     @parameterized.expand([
                            ('hostname', '-e'),
                            ('hostname', '/e'),
@@ -91,21 +93,19 @@ class HostnameTest(unittest.TestCase):
         self.assertRaises(InvalidHostnameError, Hostname, value)
         
     @parameterized.expand([
-                           ('the_same_domain', Hostname('subdomain.hostname.pl')),
-                           ('a_superdomain', hostname_pl)
-                           ])
-    def test_is_subdomain_returns_true_for(self, _, other):
-        
-        self.assertTrue(self.subdomain_hostname_pl.is_subdomain(other))
-        
-    @parameterized.expand([
-                       ('unrelated_domain', Hostname('other.com')),
-                       ('a_subdomain', subdomain_hostname_pl),
-                       ('non_hostname_object', '123.4.5.11')
+                       ('unrelated_domain', unrelated_domain, False),
+                       ('a_subdomain', subdomain, False),
+                       ('non_hostname_object', '123.4.5.11', False),
+                       ('the_same_domain', domain, True),
+                       ('a_superdomain', superdomain, True)
                        ])
-    def test_is_subdomain_returns_false_for(self, _, other):
+    def test_is_subdomain_for(self, _, other, expected):
         
-        self.assertFalse(self.hostname_pl.is_subdomain(other))
+        actual = self.domain.is_subdomain(other)
+        if expected:
+            self.assertTrue(actual)
+        else:
+            self.assertFalse(actual)
 
 class IpAddressTestMixin(object):
     
