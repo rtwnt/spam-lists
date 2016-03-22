@@ -53,7 +53,7 @@ class RedirectUrlResolver(object):
         except (ConnectionError, InvalidSchema, Timeout):
             return None
         
-    def get_redirect_urls(self, url):
+    def get_locations(self, url):
         ''' Get valid location header values from
         responses for given url
         
@@ -144,7 +144,7 @@ class UrlsAndLocations(object):
         ''' Constructor
         
         :param urls: a sequence of urls
-        :param redirect resolver: an object that has get_redirect_urls method
+        :param redirect resolver: an object that has get_locations method
         :raises InvalidURLError: if the urls argument contains an invalid url
         '''
         
@@ -179,7 +179,7 @@ class UrlsAndLocations(object):
         was not cached before
         '''
         for url in self._initial_urls:
-            for redirect_url in self._redirect_resolver.get_redirect_urls(url):
+            for redirect_url in self._redirect_resolver.get_locations(url):
                 if redirect_url not in self._cached_urls:
                     self._cached_urls.append(redirect_url)
                     yield redirect_url

@@ -67,23 +67,23 @@ class RedirectUrlResolverTest(unittest.TestCase):
         
         self.patcher.stop()
         
-    def test_get_redirect_urls_for_invalid_url(self):
+    def test_get_locations_for_invalid(self):
         
         self.is_valid_url_mock.return_value = False
         
         with self.assertRaises(InvalidURLError):
-            next(self.resolver.get_redirect_urls('http://test.com'))
+            next(self.resolver.get_locations('http://test.com'))
         
     @parameterized.expand([
                            ('ConnectionError', ConnectionError),
                            ('InvalidSchema', InvalidSchema),
                            ('Timeout', Timeout)
                            ])
-    def test_get_redirect_urls_for_first_url_triggering(self, _, exception_type):
+    def test_locations_for_first_url_triggering(self, _, exception_type):
         
         self.head_mock.side_effect = exception_type
         
-        url_generator = self.resolver.get_redirect_urls('http://test.com')
+        url_generator = self.resolver.get_locations('http://test.com')
         
         self.assertFalse(list(url_generator))
         
@@ -103,7 +103,7 @@ class RedirectUrlResolverTest(unittest.TestCase):
     
     def _test_get_redirect_urls(self, expected):
         
-        url_generator = self.resolver.get_redirect_urls('http://test.com')
+        url_generator = self.resolver.get_locations('http://test.com')
         
         self.assertEqual(expected, list(url_generator))
         
@@ -111,7 +111,7 @@ class RedirectUrlResolverTest(unittest.TestCase):
                            ('no_url', []),
                            ('urls', valid_urls)
                            ])
-    def test_get_redirect_urls_yields(self, _, expected):
+    def test_get_locations_yields(self, _, expected):
         
         self._set_up_resolve_redirects(expected, None)
         
@@ -125,7 +125,7 @@ class RedirectUrlResolverTest(unittest.TestCase):
                            ('InvalidSchema', [], InvalidSchema),
                            ('InvalidSchema', valid_urls, InvalidSchema),
                            ])
-    def test_get_redirect_urls_until(self, _, expected, exception_type):
+    def test_get_locations_until(self, _, expected, exception_type):
         
         self._set_up_resolve_redirects(expected, exception_type)
         
@@ -144,7 +144,7 @@ class RedirectUrlResolverTest(unittest.TestCase):
                            ('InvalidSchema', [], InvalidSchema),
                            ('InvalidSchema', valid_urls, InvalidSchema),
                            ])
-    def test_get_redirect_urls_until_invalid_url_triggers(self, _, expected, exception_type):
+    def test_get_locations_until_invalid_url_triggers(self, _, expected, exception_type):
         
         is_valid_url = lambda u: u in expected+['http://test.com']
         self.is_valid_url_mock.side_effect = is_valid_url
@@ -189,7 +189,7 @@ class UrlsAndLocationsTest(unittest.TestCase):
     def _set_redirect_urls(self, redirect_locations_per_url):
         
         side_effect = lambda u: redirect_locations_per_url.get(u, [])
-        self.redirect_resolver_mock.get_redirect_urls.side_effect = side_effect
+        self.redirect_resolver_mock.get_locations.side_effect = side_effect
         
     def test_iter_returns_initial_urls_before_resolving_redirects(self):
         urls_and_locations = self._get_tested_instance()
@@ -198,7 +198,7 @@ class UrlsAndLocationsTest(unittest.TestCase):
             if i == len(list(self.url_redirects.keys())) - 1:
                 break
             
-        self.redirect_resolver_mock.get_redirect_urls.assert_not_called()
+        self.redirect_resolver_mock.get_locations.assert_not_called()
         
     def test_iter_maintains_order_betten_runs(self):
         urls_and_locations = self._get_tested_instance()
@@ -221,10 +221,10 @@ class UrlsAndLocationsTest(unittest.TestCase):
         urls_and_locations = self._get_tested_instance()
         
         list(urls_and_locations)
-        self.redirect_resolver_mock.get_redirect_urls.reset_mock()
+        self.redirect_resolver_mock.get_locations.reset_mock()
         
         list(urls_and_locations)
-        self.redirect_resolver_mock.get_redirect_urls.assert_not_called()
+        self.redirect_resolver_mock.get_locations.assert_not_called()
         
         
 @lru_cache()
