@@ -12,14 +12,14 @@ SimpleClassificationCodeMap, SumClassificationCodeMap, create_host
 from test.compat import unittest, Mock
 
 
-class BaseClassificationCodeResolverTest(object):
+class ClassificationCodeMapTestMixin(object):
     
     def setUp(self):
         self.code_item_class = {}
         self.classification_code_map = self.factory(self.code_item_class)
         
 class SimpleClassificationCodeMapTest(
-                                           BaseClassificationCodeResolverTest,
+                                           ClassificationCodeMapTestMixin,
                                            unittest.TestCase
                                            ):
     
@@ -40,7 +40,7 @@ class SimpleClassificationCodeMapTest(
         self.assertRaises(UnknownCodeError, self.classification_code_map.__getitem__, 4)
             
 class SumClassificationCodeMapTest(
-                                        BaseClassificationCodeResolverTest,
+                                        ClassificationCodeMapTestMixin,
                                         unittest.TestCase
                                         ):
     
