@@ -41,7 +41,7 @@ class UrlTesterTestMixin(UrlTesterTestBase):
                            ('filter_matching')
                            ])
     @patch('spam_lists.validation.is_valid_url')
-    def test_invalid_url_error_is_raised_by(self, function_name, is_valid_url_mock):
+    def test_query_for_invalid_url_with(self, function_name, is_valid_url_mock):
         invalid_url = 'http://invalid.url.com'
         is_valid_url_mock.side_effect = lambda u: u != invalid_url
         
