@@ -38,7 +38,11 @@ class SimpleClassificationCodeMapTest(
             
     def test_getitem_for_invalid_key(self):
         
-        self.assertRaises(UnknownCodeError, self.classification_code_map.__getitem__, 4)
+        self.assertRaises(
+                          UnknownCodeError,
+                          self.classification_code_map.__getitem__,
+                          4
+                          )
             
 class SumClassificationCodeMapTest(
                                         ClassificationCodeMapTestMixin,
@@ -72,7 +76,11 @@ class SumClassificationCodeMapTest(
         
         self._set_code_item_class({2: 'Class: 2', 4: 'Class:4'})
         
-        self.assertRaises(UnknownCodeError, self.classification_code_map.__getitem__, sum(keys))
+        self.assertRaises(
+                          UnknownCodeError,
+                          self.classification_code_map.__getitem__,
+                          sum(keys)
+                          )
 
 
 class HostnameTest(unittest.TestCase):

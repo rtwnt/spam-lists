@@ -13,9 +13,11 @@ Timeout
 
 from spam_lists.exceptions import InvalidURLError, UnknownCodeError
 from spam_lists.structures import AddressListItem
-from spam_lists.utils import RedirectUrlResolver, UrlsAndLocations, UrlTesterChain
+from spam_lists.utils import RedirectUrlResolver, UrlsAndLocations, \
+UrlTesterChain
 from test.compat import unittest, Mock, patch, lru_cache
-from test.unit.common_definitions import UrlTesterTestBase, TestFunctionDoesNotHandleProvider
+from test.unit.common_definitions import UrlTesterTestBase, \
+TestFunctionDoesNotHandleProvider
 
 
 def get_response_mocks(urls):
@@ -167,9 +169,19 @@ class UrlsAndLocationsTest(unittest.TestCase):
     valid_urls = ['http://first.com', 'http://122.55.33.21',
     'http://[2001:db8:abc:123::42]']
     url_redirects = {
-                     'http://url1.com': ('http://redirect1.com', 'http://redirect2.com'),
-                     'http://88.66.55.22': ['http://abc.com', 'https://def.com'],
-                     'http://host.com': ['http://88.66.55.22', 'http://abc.com', 'https://def.com']
+                     'http://url1.com': [
+                                         'http://redirect1.com',
+                                         'http://redirect2.com'
+                                         ],
+                     'http://88.66.55.22': [
+                                            'http://abc.com',
+                                            'https://def.com'
+                                            ],
+                     'http://host.com': [
+                                         'http://88.66.55.22',
+                                         'http://abc.com',
+                                         'https://def.com'
+                                         ]
                      }
     
     def setUp(self):
@@ -190,7 +202,11 @@ class UrlsAndLocationsTest(unittest.TestCase):
         invalid_url = 'invalid.url.com'
         self.is_valid_url_mock.side_effect = lambda u: u != invalid_url
 
-        self.assertRaises(InvalidURLError, UrlsAndLocations, self.valid_urls+[invalid_url])
+        self.assertRaises(
+                          InvalidURLError,
+                          UrlsAndLocations,
+                          self.valid_urls+[invalid_url]
+                          )
         
     def _set_redirect_urls(self, redirect_locations_per_url):
         
@@ -247,10 +263,16 @@ class UrlTesterChainTest(
     classification = set(['TEST'])
     
     url_to_source_id ={
-                       'http://55.44.21.12': ['source_1', 'source_2'],
+                       'http://55.44.21.12': [
+                                              'source_1',
+                                              'source_2'
+                                              ],
                        'http://test.com': ['source_3'],
                        'https://abc.com': ['source_1'],
-                       'http://[2001:ddd:ccc:111::22]': ['source_1', 'source_2'],
+                       'http://[2001:ddd:ccc:111::22]': [
+                                                         'source_1',
+                                                         'source_2'
+                                                         ],
                        'http://[2001:abc:111:22::33]': ['source_3']
                        }
     
@@ -289,7 +311,8 @@ class UrlTesterChainTest(
     
     def _get_expected_items_for_urls(self, urls):
         
-        return [self._get_item(u, i) for u, ids in list(urls.items()) for i in ids]
+        return [self._get_item(u, i) for u, ids
+                in list(urls.items()) for i in ids]
             
     def _set_matching_urls(self, urls):
         
@@ -325,12 +348,36 @@ class UrlTesterChainTest(
         self._test_filter_matching_for(matching_urls)
         
     @parameterized.expand([
-                           ('any_match_does_not_handle_value_error', 'any_match', ValueError),
-                           ('any_match_does_not_handle_unknown_code_error', 'any_match', UnknownCodeError),
-                           ('lookup_matching_does_not_handle_value_error', 'lookup_matching', ValueError),
-                           ('lookup_matching_does_not_handle_unknown_code_error', 'lookup_matching', UnknownCodeError),
-                           ('filter_matching_does_not_handle_value_error', 'filter_matching', ValueError),
-                           ('filter_matching_does_not_handle_unknown_code_error', 'filter_matching', UnknownCodeError)
+                           (
+                            'any_match_raises_value_error',
+                            'any_match',
+                            ValueError
+                            ),
+                           (
+                            'any_match_raises_unknown_code_error',
+                            'any_match',
+                            UnknownCodeError
+                            ),
+                           (
+                            'lookup_matching_raises_value_error',
+                            'lookup_matching',
+                            ValueError
+                            ),
+                           (
+                            'lookup_matching_raises_unknown_code_error',
+                            'lookup_matching',
+                            UnknownCodeError
+                            ),
+                           (
+                            'filter_matching_raises_value_error',
+                            'filter_matching',
+                            ValueError
+                            ),
+                           (
+                            'filter_matching_raises_unknown_code_error',
+                            'filter_matching',
+                            UnknownCodeError
+                            )
                            ])
     def test_(self, _, function_name, error_type):
         

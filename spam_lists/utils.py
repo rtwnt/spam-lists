@@ -11,7 +11,8 @@ from itertools import chain
 
 from builtins import object
 from requests import Session
-from requests.exceptions import ConnectionError, InvalidSchema, InvalidURL, Timeout
+from requests.exceptions import ConnectionError, InvalidSchema, InvalidURL, \
+Timeout
 
 from .exceptions import InvalidURLError
 from .validation import accepts_valid_urls, is_valid_url
@@ -69,7 +70,11 @@ class RedirectUrlResolver(object):
         
         if response:
             try:
-                for response in self.session.resolve_redirects(response, response.request):
+                generator = self.session.resolve_redirects(
+                                                           response,
+                                                           response.request
+                                                           )
+                for response in generator:
                     yield response.url
                     
             except InvalidURL: pass
@@ -89,8 +94,9 @@ class UrlTesterChain(object):
         '''
         Constructor
         
-        :param url_testers: a list of objects having any_match(urls) and lookup_matching(urls)
-        methods
+        :param url_testers: a list of objects having any_match(urls)
+         and lookup_matching(urls) 
+         methods
         '''
         
         self.url_testers = list(url_testers)

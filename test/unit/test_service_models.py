@@ -32,7 +32,10 @@ class UrlTesterTestMixin(UrlTesterTestBase):
     
     valid_url_list_input = [
                              ('no_matching_url', []),
-                             ('two_urls', ['http://55.44.33.21', 'https://abc.com'])
+                             ('two_urls', [
+                                           'http://55.44.33.21',
+                                           'https://abc.com'
+                                           ])
                              ]+valid_url_input
                              
     @parameterized.expand([
@@ -95,14 +98,16 @@ class HostListTestMixin(UrlTesterTestMixin):
         return function(unsupported_host)
         
     def test_contains_for_invalid_host(self):
+        function = self.tested_instance.__contains__
         actual = self._get_result_for_invalid_host(
-                                                             self.tested_instance.__contains__
+                                                             function
                                                              )
         self.assertFalse(actual)
         
     def test_lookup_for_invalid_host(self):
+        function = self.tested_instance.lookup
         actual = self._get_result_for_invalid_host(
-                                                             self.tested_instance.lookup
+                                                             function
                                                              )
         self.assertIsNone(actual)
     
@@ -159,7 +164,10 @@ class HostListTest(HostListTestMixin, unittest.TestCase):
         self.host_factory_mock.side_effect = host_list_host_factory
         self.tested_instance = HostList(self.host_factory_mock)
         
-        self._contains_patcher = patch('spam_lists.service_models.HostList._contains')
+        self._contains_patcher = patch(
+                                       'spam_lists.service_models.'
+                                       'HostList._contains'
+                                       )
         self._contains_mock = self._contains_patcher.start()
         self._contains_mock.side_effect = lambda h: h in self.listed_hosts
         host_data_getter_name = (
@@ -182,7 +190,8 @@ class HostListTest(HostListTestMixin, unittest.TestCase):
         
     def _set_matching_hosts(self, matching_hosts):
         
-        self.listed_hosts = [self.host_factory_mock(mh) for mh in matching_hosts]
+        self.listed_hosts = [self.host_factory_mock(mh) 
+                             for mh in matching_hosts]
 
 
 def create_dns_query_function(expected_query_names):
@@ -210,8 +219,12 @@ class DNSBLTest(
         self.host_factory_mock = Mock()
         self.host_factory_mock.side_effect = host_list_host_factory
          
-        self.tested_instance = DNSBL('test_service', self.query_domain_str, 
-                                   self.classification_map, self.host_factory_mock)
+        self.tested_instance = DNSBL(
+                                     'test_service',
+                                     self.query_domain_str,
+                                     self.classification_map,
+                                     self.host_factory_mock
+                                     )
          
         self.dns_query_patcher = patch('spam_lists.service_models.query')
         self.dns_query_mock = self.dns_query_patcher.start()
@@ -226,7 +239,8 @@ class DNSBLTest(
         host_objects = [self.host_factory_mock(h) for h in hosts]
         expected_query_names = [h.relative_domain.derelativize() 
                                 for h in host_objects]
-        self.dns_query_mock.side_effect = create_dns_query_function(expected_query_names)
+        side_effect = create_dns_query_function(expected_query_names)
+        self.dns_query_mock.side_effect = side_effect
         
     @parameterized.expand([
                            ('lookup', host_with_unknown_code),
@@ -295,7 +309,10 @@ class HpHostsTest(HostListTestMixin, unittest.TestCase):
         self.is_valid_url_patcher.stop()
          
     def _set_matching_hosts(self, hosts):
-        self.get_mock.side_effect = create_hp_hosts_get(self.classification, hosts)
+        side_effect = create_hp_hosts_get(
+                                          self.classification, hosts
+                                          )
+        self.get_mock.side_effect = side_effect
 
 def create_gsb_post(expected_401, spam_urls, classification):
     def post(_, body):
@@ -322,7 +339,11 @@ class GoogleSafeBrowsingTest(UrlTesterTestMixin, unittest.TestCase):
     
     @classmethod
     def setUpClass(cls):
-        cls.tested_instance = GoogleSafeBrowsing('test_client', '0.1', 'test_key')
+        cls.tested_instance = GoogleSafeBrowsing(
+                                                 'test_client',
+                                                 '0.1',
+                                                 'test_key'
+                                                 )
         
     def _set_up_post_mock(self, spam_urls, error_401_expected = False):
         side_efect = create_gsb_post(
@@ -377,11 +398,16 @@ class HostCollectionTest(
     valid_urls = ['http://test.com', 'http://127.33.22.11']
     
     def setUp(self):
-         
-        self.host_factory_patcher = patch('spam_lists.service_models.hostname_or_ip')
+        self.host_factory_patcher = patch(
+                                          'spam_lists.service_models.'
+                                          'hostname_or_ip'
+                                          )
         self.host_factory_mock = self.host_factory_patcher.start()
-         
-        self.host_factory_mock.side_effect = lru_cache()(host_collection_host_factory)
+        
+        side_effect = lru_cache()(
+                                  host_collection_host_factory
+                                  )
+        self.host_factory_mock.side_effect = side_effect
          
         self.classification = set(['test_classification'])
         self.tested_instance = HostCollection('test_host_collection',
@@ -404,7 +430,8 @@ class HostCollectionTest(
          
         self.tested_instance.add(value)
          
-        in_host_collection = self.host_factory_mock(value) in self.tested_instance.hosts
+        in_host_collection = (self.host_factory_mock(value)
+                              in self.tested_instance.hosts)
          
         self.assertTrue(in_host_collection)
          

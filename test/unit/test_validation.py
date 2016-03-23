@@ -9,7 +9,8 @@ from builtins import object
 from nose_parameterized import parameterized
 
 from spam_lists.exceptions import InvalidURLError, InvalidHostError
-from spam_lists.validation import accepts_valid_urls, is_valid_url, accepts_valid_host
+from spam_lists.validation import accepts_valid_urls, is_valid_url, \
+accepts_valid_host
 from test.compat import Mock, patch, lru_cache
 
 
@@ -36,7 +37,12 @@ class ValidationDecoratorTestMixin(object):
     def _test_wrapper_for_invalid(self, value):
         self.validity_tester_mock.return_value = False
         
-        self.assertRaises(self.exception_type, self.decorated_function, self.obj, value)
+        self.assertRaises(
+                          self.exception_type,
+                          self.decorated_function,
+                          self.obj,
+                          value
+                          )
         self.function.assert_not_called()
 
 class AcceptValidUrlsTest(ValidationDecoratorTestMixin, unittest.TestCase):
@@ -59,7 +65,9 @@ class AcceptValidUrlsTest(ValidationDecoratorTestMixin, unittest.TestCase):
                            ('no_schema', ['hostname.com']),
                            ('invalid_ipv4', ['http://999.999.999.999']),
                            ('invalid_ipv4', ['http://127.0.0.0.1']),
-                           ('invalid_ipv6', ['http://[2001:db8:abcef:123::42]']),
+                           ('invalid_ipv6', [
+                                             'http://[2001:db8:abcef:123::42]'
+                                             ]),
                            ('invalid_ipv6', ['http://[2001:db8:abch:123::42]'])
                            ])
     def test_for_urls_with(self, _, urls):
@@ -99,7 +107,10 @@ class IsValidUrlTest(unittest.TestCase):
                            ('final_slash', 'https://google.com/'),
                            (
                             'path_query_and_fragment',
-                            'https://test.domain.com/path/element?var=1&var_2=3#fragment'
+                            (
+                             'https://test.domain.com/path/element'
+                             '?var=1&var_2=3#fragment'
+                             )
                             ),
                            ('query', 'http://test.domain.com?var_1=1&var_2=2'),
                            ('path', 'http://test.domain.com/path'),

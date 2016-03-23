@@ -15,7 +15,8 @@ from future.utils import raise_from
 from requests import get, post
 from requests.exceptions import HTTPError
 
-from .exceptions import UnathorizedAPIKeyError, UnknownCodeError, InvalidHostError
+from .exceptions import UnathorizedAPIKeyError, UnknownCodeError, \
+InvalidHostError
 from .structures import AddressListItem, hostname_or_ip, non_ipv6_host
 from .validation import accepts_valid_urls, accepts_valid_host
 
@@ -87,7 +88,10 @@ class HostList(object):
         except InvalidHostError:
             return None
         
-        host_item, classification = self._get_match_and_classification(host_object)
+        result = self._get_match_and_classification(
+                                                    host_object
+                                                    )
+        host_item, classification = result
         
         if host_item is not None:
             return AddressListItem(host_item.to_unicode(), self, classification)
@@ -135,14 +139,23 @@ class HostList(object):
     
 class DNSBL(HostList):
     ''' Represents a DNSBL service '''
-    def __init__(self, identifier, query_suffix, classification_map, host_factory):
+    def __init__(
+                 self,
+                 identifier,
+                 query_suffix,
+                 classification_map,
+                 host_factory
+                 ):
         ''' Create new DNSBL object
         
-        :param identifier: a value designating DNSBL service provider: its name or url address.
+        :param identifier: a value designating DNSBL service provider: 
+        its name or url address.
         :param query_suffix: a suffix added to DNSBL query address
-        :param classification_map: item classes associated with DNSBL query return codes
-        :param host_factory: a callable object that returns an object representing host and providing
-        method for getting a relative domain pertaining to it.
+        :param classification_map: item classes associated with 
+        DNSBL query return codes
+        :param host_factory: a callable object that returns an object
+         representing host and providing method for getting a relative
+         domain pertaining to it.
         '''
         
         self._identifier = identifier
@@ -156,9 +169,10 @@ class DNSBL(HostList):
     def _query(self, host_object):
         ''' Query DNSBL service for given value
         
-        :param host_object: an object representing host, created by _host_factory
-        :returns: an instance of dns.resolver.Answer for given value, if it is listed. Otherwise,
-        it returns None
+        :param host_object: an object representing host,
+         created by _host_factory
+        :returns: an instance of dns.resolver.Answer for
+         given value, if it is listed. Otherwise, it returns None
         '''
         host_to_query = host_object.relative_domain
         query_name = host_to_query.derelativize(self._query_suffix)
@@ -216,11 +230,13 @@ class HpHosts(HostList):
         ''' Query the client for data of given host
         
         :param host_object: an object representing a host value
-        :param classification: if True: hpHosts is queried also for classification for given host, if listed
-        :returns: content of response to GET request to hpHosts for data on the given host
+        :param classification: if True: hpHosts is queried also
+         for classification for given host, if listed
+        :returns: content of response to GET request to hpHosts
+         for data on the given host
         '''
-        
-        url = 'http://verify.hosts-file.net/?v={}&s={}'.format(self.app_id, host_object.to_unicode())
+        template = 'http://verify.hosts-file.net/?v={}&s={}'
+        url = template.format(self.app_id, host_object.to_unicode())
         url = url + '&class=true' if classification else url
         
         return get(url).text
@@ -267,8 +283,16 @@ class GoogleSafeBrowsing(object):
         ''' Get address of POST request to the service '''
         
         if not self._request_address_val:
-            tpl = 'https://sb-ssl.google.com/safebrowsing/api/lookup?client={0}&key={1}&appver={2}&pver={3}'
-            self._request_address_val = tpl.format(self.client_name, self.api_key, self.app_version, self.protocol_version)
+            template = (
+                        'https://sb-ssl.google.com/safebrowsing/api/lookup'
+                        '?client={0}&key={1}&appver={2}&pver={3}'
+                        )
+            self._request_address_val = template.format(
+                                                        self.client_name,
+                                                        self.api_key,
+                                                        self.app_version,
+                                                        self.protocol_version
+                                                        )
             
         return self._request_address_val
     
@@ -291,7 +315,8 @@ class GoogleSafeBrowsing(object):
                 
         except HTTPError as error:
             if response.status_code == 401:
-                raise_from(UnathorizedAPIKeyError('The API key is not authorized'), error)
+                msg = 'The API key is not authorized'
+                raise_from(UnathorizedAPIKeyError(msg), error)
             else:
                 raise
             
@@ -301,9 +326,10 @@ class GoogleSafeBrowsing(object):
         ''' Test urls for being listed by the service
         
         :param urls: a sequence of urls  to be tested
-        :returns: a tuple containing chunk of urls and a response pertaining to them
-        if the code of response was 200, which means at least one of the queried URLs 
-        is matched in either the phishing, malware, or unwanted software lists.
+        :returns: a tuple containing chunk of urls and a response pertaining
+          to them if the code of response was 200, which means at least one
+          of the queried URLs is matched in either the phishing, malware,
+           or unwanted software lists.
         '''
         
         urls = list(set(urls))
@@ -408,7 +434,8 @@ class HostCollection(HostList):
         ''' Add the given value to collection
         
         :param host: an ip address or a hostname
-        :raises InvalidHostError: raised when the given value is not a valid ip address nor a hostname
+        :raises InvalidHostError: raised when the given value
+        is not a valid ip address nor a hostname
         '''
         host_obj = self._host_factory(host_value)
         
