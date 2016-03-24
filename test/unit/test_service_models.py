@@ -402,8 +402,6 @@ class HostCollectionTest(
                                   host_collection_host_factory
                                   )
         self.host_factory_mock.side_effect = side_effect
-         
-        self.classification = set(['test_classification'])
         self.tested_instance = HostCollection('test_host_collection',
                                               self.classification)
          
