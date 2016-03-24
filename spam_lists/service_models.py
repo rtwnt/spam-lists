@@ -243,7 +243,7 @@ class HpHosts(HostList):
     
     def _contains(self, host_object):
         
-        return not (self._NOT_LISTED in self._query(host_object))
+        return not self._NOT_LISTED in self._query(host_object)
     
     def _get_match_and_classification(self, host_object):
         
