@@ -299,8 +299,21 @@ class DNSBLTest(
 
 
 def create_hp_hosts_get(classification, listed_hosts):
+    ''' Get a function to replace get function used by HpHosts
+    
+    :param classification: a classification for given hosts
+    :param listed_hosts: listed hosts for generating responses
+    :returns: a function providing side effects of Mock instance
+    for the get function
+    '''
     class_str = ','.join(classification)
     def hp_hosts_get(url):
+        ''' Get mock representing response object for GET request
+        
+        :param url: a request address
+        :returns: a Mock instance representing response object expected
+        by HpHosts
+        '''
         query_string = urlparse(url).query
         query_data = parse_qs(query_string)
         
@@ -360,7 +373,22 @@ class HpHostsTest(HostListTestMixin, unittest.TestCase):
         self.get_mock.side_effect = side_effect
 
 def create_gsb_post(expected_401, spam_urls, classification):
+    ''' Get mock for post function used by GoogleSafeBrowsing
+    
+    :param expected_401: if True, the code of response mock returned
+    by the returned function will be 401
+    :param spam_urls: a list of urls to be recognized as spam
+    :param classification: a classification used for spam urls
+    :returns: mocked implementation of post function
+    '''
     def post(_, body):
+        ''' Get mock of a response to a POST query to GSB lookup API
+        
+        :param body: a request body
+        :returns: a Mock instance representing the response. Properties
+        of the object depend on external values provided by the creator
+        of the method: expected_401, spam_urls and classification
+        ''' 
         response = Mock()
         if expected_401:
             response.status_code = 401

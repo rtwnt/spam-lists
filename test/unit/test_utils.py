@@ -21,6 +21,12 @@ TestFunctionDoesNotHandleProvider
 
 
 def get_response_mocks(urls):
+    ''' Get mocks representing responses to redirected request
+    
+    :param urls: response urls
+    :returns: a list of instances of Mock representing responses
+     returned by requests.Session.resolve_redirects
+    '''
     response_mocks = []
     for url in urls:
         response = Mock()
@@ -30,6 +36,13 @@ def get_response_mocks(urls):
 
 
 def get_session_resolve_redirects(response_mocks, exception_type):
+    ''' Get a mock for requests.Session.resolve_redirects
+    
+    :param response_mocks: a list of mocks representing responses
+     yielded by the mocked function
+    :param exception_type: if is not None: represents
+    a type of exception expected to be raised by the mocked function
+    '''
     if not (exception_type is None or
             issubclass(exception_type, Exception)):
         msg = '{} is not a subclass of Exception'.format(exception_type)
@@ -164,6 +177,17 @@ class RedirectUrlResolverTest(unittest.TestCase):
                            ])
     def test_get_locations_for(self, _, locations,
                                exception_type, triggered_by_valid_url = True):
+        ''' The get_locations method is expected to yield all
+         valid urls appearing as url addresses and location headers in
+         response histories for given urls
+         
+        :param locations: urls of expected responses
+        :param exception_type: a type of exception to be raised while
+        getting a response to the last location header value
+        :param triggered_by_valid_url: if True, the value of the last
+        location header - the one that tiggered an exception - is
+        a valid url, and therefore it is also expected to be yielded
+        '''
         expected = list(locations)
         self._set_up_resolve_redirects(expected, exception_type)
         
@@ -314,7 +338,12 @@ class UrlTesterChainTest(
         self.tested_instance = UrlTesterChain(*url_testers)
     
     def _add_url_tester(self, source_id, matching_urls):
+        ''' Add a preconfigured url tester mock to the tested instance
         
+        :param source_id: an identifier for a mocked url tester
+        :param matching_urls: a list of urls expected to be matched by
+        a service represented by the mocked url tester
+        '''
         tester = get_url_tester_mock(source_id)
         any_match = lambda u: not set(u).isdisjoint(set(matching_urls))
         tester.any_match.side_effect = any_match
@@ -340,7 +369,17 @@ class UrlTesterChainTest(
                 in list(urls.items()) for i in ids]
             
     def _set_matching_urls(self, urls):
+        ''' Set urls expected to be matched during a test
         
+        The method groups given urls by their source ids: identifiers
+         of services expected to report urls associated with them as
+         matching. Then, mocks representing url testers are added
+         to the tested instance of UrlTesterChain. They are shuffled
+         to ensure some of mocked services reporting a match
+         will be queried before some that do not.
+        
+        :param urls: a dictionary containing
+        '''
         by_source_id = defaultdict(list)
         
         for url, ids in list(urls.items()):

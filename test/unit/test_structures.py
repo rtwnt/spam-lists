@@ -37,7 +37,10 @@ class SimpleClassificationCodeMapTest(
     factory = SimpleClassificationCodeMap
         
     def test_getitem_for_valid_key(self):
-        
+        ''' 
+        The classification map is expected to return a value
+         associated with a valid key
+         '''
         key = 4
         self.code_item_class.update({key: 'TestClass'})
         
@@ -208,7 +211,10 @@ class CreateHostTest(unittest.TestCase):
         self.assertEqual(actual, expected)
         
     def test_host_for_hostname(self):
-        
+        ''' 
+        The function is expected to return an object
+        returned by a host factory for given hostname
+        '''
         for i, factory in enumerate(self.factories):
             if i != 1:
                 factory.side_effect = InvalidHostError
