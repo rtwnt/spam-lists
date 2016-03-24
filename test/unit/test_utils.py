@@ -40,7 +40,7 @@ def get_session_resolve_redirects(response_mocks, exception_type):
         for mocked in response_mocks:
             yield mocked
                 
-        if exception_type:
+        if exception_type is not None:
             raise exception_type
                 
     return resolve_redirects
