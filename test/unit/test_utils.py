@@ -47,10 +47,25 @@ def get_session_resolve_redirects(response_mocks, exception_type):
 
 
 class RedirectUrlResolverTest(unittest.TestCase):
+    ''' Tests for RedirectUrlResolver class
     
+    :var valid_urls: a list of strings representing valid urls used
+     in tests
+    :var head_mock: a mocked implementation of head function
+    used by the tested class to perform HEAD requests
+    :var resolve_redirects_mock: a mock for
+    requests.Session.resolve_redirects function. A function returned
+     by get_session_resolve_redirects is used as its implementation.
+    :var resolver: an instance of RedirectUrlResolver to be tested
+    :var patcher: an object used to patch is_valid_url function
+    :var is_valid_url_mock: a mocked implementation of
+     the is_valid_url function
+     :var _response_mocks: a list of mock objects representing
+      response objects returned by requests.Session.resolve_redirects.
+      get_response_mocks function is used to populate it for given test
+    '''
     valid_urls = ['http://first.com', 'http://122.55.33.21',
     'http://[2001:db8:abc:123::42]']
-    
     def setUp(self):
         
         session_mock = Mock()
@@ -165,7 +180,9 @@ class RedirectUrlResolverTest(unittest.TestCase):
 
 
 class UrlsAndLocationsTest(unittest.TestCase):
+    ''' Tests for UrlsAndLocations class
     
+    '''
     valid_urls = ['http://first.com', 'http://122.55.33.21',
     'http://[2001:db8:abc:123::42]']
     url_redirects = {
@@ -260,6 +277,14 @@ class UrlTesterChainTest(
                          TestFunctionDoesNotHandleProvider,
                          unittest.TestCase
                          ):
+    ''' Tests for UrlTesterChain class
+    
+    This class uses get_url_tester_mock function to populate list of
+    url testers used by the tested instance
+    
+    :var classification: a set of classifications used in tests
+    :var tested_instance: an instance of tested class
+    '''
     classification = set(['TEST'])
     
     url_to_source_id ={

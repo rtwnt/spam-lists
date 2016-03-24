@@ -157,7 +157,25 @@ def host_list_host_factory(host):
 
 
 class HostListTest(HostListTestMixin, unittest.TestCase):
+    ''' Tests for HostList class
     
+    HostList does not provide implementation of some methods it uses.
+    These methods are ought to be implemented by its subclasses. Here,
+    we mock these methods so that HostList can be tested.
+    
+    :var listed_hosts: a list of all host values assumed to be listed for
+    a given test
+    :var host_factory_mock: a mocked implementation of host factory
+    used by tested instance. Uses host_list_host_factory as its implementation
+    :var tested_instance: an instance of tested class
+    :var _contains_patcher: a patcher for HostList._contains method
+    :var _contains_mock: a mock for HostList._contains method.
+    :var host_data_getter_patcher: a patcher for 
+    HostList._get_match_and_classification method
+    :var host_data_getter_mock: a mock for 
+    HostList._get_match_and_classification method. Uses
+     host_list_host_factory as its implementation.
+    '''
     def setUp(self):
         self.listed_hosts = []
         self.host_factory_mock = Mock()
@@ -208,7 +226,27 @@ class DNSBLTest(
                 TestFunctionDoesNotHandleProvider,
                 unittest.TestCase
                 ):
-     
+    ''' Tests for DNSBL class
+    
+    This test case adds additional test method to the ones inherited
+    from HostListTestMixin: test_code_error_raised_by, which
+    tests methods using return code of a DNSBL service (DNSBL.lookup
+    and DNSBL.lookup_matching) for their behaviour for cases of an
+    unknown integer code being returned.
+    
+    :var query_domain_str: a string used as a suffix for DNS queries
+    to a service
+    :var host_with_unknown_code: a host value used by the additional
+    test method (test_code_error_raised_by)
+    :var classification_map: a mocked instance of an object
+    representing a classification map used by tested instance
+    :var host_factory_mock: a mocked implementation of host factory
+    used by tested instance. Uses host_list_host_factory as its implementation
+    :var tested_instance: an instance of tested class
+    :var dns_query_patcher: an object used for patching query function
+     used by DNSBL instance.
+    :var dns_query_mock: a mocked implementation of the query function
+    '''
     query_domain_str = 'test.query.domain'
     host_with_unknown_code = 'hostwithunknowncode.com'
     def setUp(self):
@@ -278,7 +316,20 @@ def create_hp_hosts_get(classification, listed_hosts):
     return hp_hosts_get
 
 class HpHostsTest(HostListTestMixin, unittest.TestCase):
+    ''' Tests for HpHosts class
     
+    :var listed_hosts: a list of host values assumed to be listed
+    for tests
+    :var get_patcher: an object used for patching get function used
+     by HpHosts instance.
+    :var tested_instance: an instance of tested class
+    :var get_mock: a mocked implementation of the get function. Uses
+    a function returned by create_hp_hosts_get for given classification
+    and list of hosts
+    :var host_factory_mock: a mocked implementation of
+     host factory used by tested instance. Uses host_list_host_factory
+      as its implementation
+    '''
     @classmethod
     def setUpClass(cls):
          
@@ -327,7 +378,21 @@ def create_gsb_post(expected_401, spam_urls, classification):
     return post
         
 class GoogleSafeBrowsingTest(UrlTesterTestMixin, unittest.TestCase):
+    ''' Tests for GoogleSafeBrowsing class
     
+    This class adds an additional test method to the ones provided
+    by UrlTesterTestMixin: test_unathorized_query_with. This method
+    is used to test methods of GoogleSafeBrowsing class for expected
+    behaviour while calling Google Safe Browsing lookup API with
+    an unathorized API key
+    
+    :var tested_instance: an instance of tested class
+    :var post_patcher: an object used for patching post function used
+    by GoogleSafeBrowsing instance
+    :var mocked_post: a mocked implementation of the post function
+    for the tested instance. Uses a function returned by
+     create_gsb_post function as its implementation.
+    '''
     def _get_expected_items_for_urls(self, urls):
         return self._get_expected_items(urls)
     
@@ -388,7 +453,25 @@ class HostCollectionTest(
                          TestFunctionDoesNotHandleProvider,
                          unittest.TestCase
                          ):
-     
+    ''' Tests for HostCollection class
+    
+    This class adds the following test methods to the ones provided by
+     HostListTestMixin:
+     * test_add_invalid_host
+     * test_add_for_valid
+    :var host_factory_patcher: an object used for patching the host
+    factory used by HostCollection instances.
+    
+    The host factory may be used by the HostCollection constructor
+     (although its not used in this case), so I chose patching instead
+      of injecting a mock of a host factory instance after creating
+       a HostCollection instance
+    
+    :var host_factory_mock: a mocked implementation of
+     host factory used by tested instance. Uses
+      host_collection_host_factory as its implementation
+    :var tested_instance: an instance of tested class
+    '''
     valid_urls = ['http://test.com', 'http://127.33.22.11']
     
     def setUp(self):

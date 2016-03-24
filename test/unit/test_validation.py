@@ -15,7 +15,28 @@ from test.compat import Mock, patch, lru_cache
 
 
 class ValidationDecoratorTestMixin(object):
+    ''' Provides tests for decorators and wrappers responsible for
+     testing validity of arguments of decorated methods
     
+    :var validity_tester_patcher: an object used for patching
+     a function responsible for testing validity of arguments of
+     a decorated function
+    :var validity_tester_mock: a mocked implementation for
+     the validity tester
+    :var obj: a mock representing object having the method decorated
+     by the decorator 
+    :var function: a mock representing function to be decorated
+    :var decorated_function: a result of applying decorator to
+     the function
+     
+     Additionally, the test cases using this mixin are expected to have
+     the following attributes:
+     
+    :var exception_type:
+    :var decorator:
+    :var validity_tester: a fully qualified name of a function used by
+     the tested wrapper as argument validator
+    '''
     def setUp(self):
         self.validity_tester_patcher = patch(self.validity_tester)
         self.validity_tester_mock = self.validity_tester_patcher.start()
@@ -46,6 +67,7 @@ class ValidationDecoratorTestMixin(object):
         self.function.assert_not_called()
 
 class AcceptValidUrlsTest(ValidationDecoratorTestMixin, unittest.TestCase):
+    ''' Tests for accepts_valid_urls decorator '''
     exception_type = InvalidURLError
     decorator = staticmethod(accepts_valid_urls)
     validity_tester = 'spam_lists.validation.is_valid_url'
@@ -74,6 +96,7 @@ class AcceptValidUrlsTest(ValidationDecoratorTestMixin, unittest.TestCase):
         self._test_wrapper_for_invalid(urls)
         
 class AcceptsValidHostTest(ValidationDecoratorTestMixin, unittest.TestCase):
+    ''' Tests for accepts_valid_host decorator '''
     exception_type = InvalidHostError
     decorator = staticmethod(accepts_valid_host)
     validity_tester = 'spam_lists.validation.is_valid_host'
@@ -98,7 +121,7 @@ class AcceptsValidHostTest(ValidationDecoratorTestMixin, unittest.TestCase):
 
           
 class IsValidUrlTest(unittest.TestCase):
-    
+    ''' Tests for is_valid_url function '''
     @parameterized.expand([
                            ('http_scheme', 'http://test.url.com'),
                            ('https_scheme', 'https://google.com'),

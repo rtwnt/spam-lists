@@ -14,7 +14,18 @@ from test.compat import unittest, Mock
 
 
 class ClassificationCodeMapTestMixin(object):
+    ''' A base class for tests for classification code map classes
     
+    Classification code map classes are classes storing relationships
+     between return codes of a DNSBL service and classifications
+      associated with them. They are used by DNSBL class instances.
+      
+    :var code_item_class: a dictionary storing all code-class relationships
+    used for the tests. It is used as an argument for costructor of the
+    tested instance and for checking test results
+    :var classification_code_map: an instance of tested class
+    :var factory: a constructor of the tested instance
+    '''
     def setUp(self):
         self.code_item_class = {}
         self.classification_code_map = self.factory(self.code_item_class)
@@ -23,7 +34,6 @@ class SimpleClassificationCodeMapTest(
                                            ClassificationCodeMapTestMixin,
                                            unittest.TestCase
                                            ):
-    
     factory = SimpleClassificationCodeMap
         
     def test_getitem_for_valid_key(self):
@@ -84,6 +94,22 @@ class SumClassificationCodeMapTest(
 
 
 class HostnameTest(unittest.TestCase):
+    ''' Tests for Hostname class
+    
+    :var superdomain_str: a string value representing a parent of
+     a domain used to create tested instance
+    :var domain_str: a string value used as an argument to
+    constructor when creating tested instance
+    :var subdomain_str: a string value representing a child domain
+    to the one used to create tested instance
+    :var superdomain: a Hostname instance representing a parent
+    of the tested instance
+    :var domain: a Hostname instance to be tested
+    :var subdomain: a Hostname instance representing a child
+    of the tested instance
+    :var unrelated_domain: a Hostname instance representing
+    a domain unrelated to the one represented by tested instance
+    '''
     superdomain_str = 'superdomain.com'
     domain_str = 'domain.'+superdomain_str
     subdomain_str = 'subdomain.'+domain_str
@@ -116,7 +142,18 @@ class HostnameTest(unittest.TestCase):
             self.assertFalse(actual)
 
 class IpAddressTestMixin(object):
+    ''' A class providing tests for subclasses of IPAddress
     
+    The classes using this mixin are expected to have
+     the following attributes:
+    :var constructor: a constructor of an IPAddress subclass instance
+    :var value_error_type: a type of a ValueError raised by
+     the constructor when provided with an invalid value
+    :var reverse_name_root: a root of a reverse domain representing
+    ip address created with the constructor
+    :var ip_address: a string value of ip address passed to
+     the constructor
+    '''
     @parameterized.expand([
                            ('ipv4', '299.0.0.1'),
                            ('ipv4', '99.22.33.1.23'),
@@ -150,7 +187,11 @@ class IPv6AddressTest(IpAddressTestMixin, unittest.TestCase):
 
         
 class CreateHostTest(unittest.TestCase):
+    ''' Tests for create_host function
     
+    :var factories: a list of mocks representing factories used by
+    the function during tests
+    '''
     def setUp(self):
         self.factories = [Mock() for _ in range(5)]
         

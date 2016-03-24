@@ -19,7 +19,15 @@ from .validation import accepts_valid_urls, is_valid_url
 
 
 class RedirectUrlResolver(object):
+    ''' A class used for getting all redirect urls for
+    given url
     
+    The urls include:
+    * url addresses of all responses acquired for a HEAD request in its
+     response history
+    * value of location header for the last response, if it is
+    a valid url but we still couldn't get a response for it
+    '''
     def __init__(self, requests_session = Session()):
         '''
         Constructor
