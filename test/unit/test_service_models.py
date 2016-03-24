@@ -299,12 +299,8 @@ class HpHostsTest(HostListTestMixin, unittest.TestCase):
          
         self.host_factory_mock.side_effect = host_list_host_factory
          
-        self.is_valid_url_patcher = patch('spam_lists.validation.is_valid_url')
-        self.is_valid_url_mock = self.is_valid_url_patcher.start()
-         
     def tearDown(self):
         self.get_patcher.stop()
-        self.is_valid_url_patcher.stop()
          
     def _set_matching_hosts(self, hosts):
         side_effect = create_hp_hosts_get(
