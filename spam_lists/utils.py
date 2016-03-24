@@ -85,7 +85,8 @@ class RedirectUrlResolver(object):
                 for response in generator:
                     yield response.url
                     
-            except InvalidURL: pass
+            except InvalidURL:
+                pass
                 
             except (Timeout, ConnectionError, InvalidSchema) as error:
                 last_url = response.headers['location']
