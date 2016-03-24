@@ -13,6 +13,7 @@ SimpleClassificationCodeMap, SumClassificationCodeMap, create_host
 from test.compat import unittest, Mock
 
 
+#pylint: disable-msg=too-few-public-methods
 class ClassificationCodeMapTestMixin(object):
     ''' A base class for tests for classification code map classes
     
