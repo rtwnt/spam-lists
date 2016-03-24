@@ -398,9 +398,7 @@ class HostCollectionTest(
                                           )
         self.host_factory_mock = self.host_factory_patcher.start()
         
-        side_effect = lru_cache()(
-                                  host_collection_host_factory
-                                  )
+        side_effect = host_collection_host_factory
         self.host_factory_mock.side_effect = side_effect
         self.tested_instance = HostCollection('test_host_collection',
                                               self.classification)
