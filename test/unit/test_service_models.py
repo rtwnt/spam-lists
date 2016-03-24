@@ -279,8 +279,6 @@ def create_hp_hosts_get(classification, listed_hosts):
 
 class HpHostsTest(HostListTestMixin, unittest.TestCase):
     
-    valid_ipv6 = '2001:ddd:ccc:111::33'
-    
     @classmethod
     def setUpClass(cls):
          
