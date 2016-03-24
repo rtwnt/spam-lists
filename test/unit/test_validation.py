@@ -11,7 +11,7 @@ from nose_parameterized import parameterized
 from spam_lists.exceptions import InvalidURLError, InvalidHostError
 from spam_lists.validation import accepts_valid_urls, is_valid_url, \
 accepts_valid_host
-from test.compat import Mock, patch, lru_cache
+from test.compat import Mock, patch
 
 
 class ValidationDecoratorTestMixin(object):
@@ -118,6 +118,12 @@ class AcceptsValidHostTest(ValidationDecoratorTestMixin, unittest.TestCase):
                            ])
     def test_for_invalid(self, _, value):
         self._test_wrapper_for_invalid(value)
+
+
+def get_url_tester_mock(identifier):
+    source = Mock()
+    source.identifier = identifier
+    return source
 
           
 class IsValidUrlTest(unittest.TestCase):
