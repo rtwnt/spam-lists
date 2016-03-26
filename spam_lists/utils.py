@@ -65,62 +65,40 @@ class RedirectUrlResolver(object):
         * head(url) (for HEAD request)
         * resolve_redirects(response, request)
         '''
-        
         self.session = requests_session
-        
-    def _get_first_response(self, url):
-        ''' Get the first response to HEAD request for given url
-        
-        :param url: a url value
-        :returns: If no exception was raised, it returns 
-        an object representing the first response in the response history 
-        for given url.
-        
-        Otherwise, None is returned.
-        
-        :raises InvalidURLError: if the parameter is not a valid url value
-        '''
-        
-        if not is_valid_url(url):
-            raise InvalidURLError('{} is not a valid url'.format(url))
-        
-        try:
-            return self.session.head(url)
-        
-        except (ConnectionError, InvalidSchema, Timeout):
-            return None
-        
+
     def get_locations(self, url):
         ''' Get valid location header values from
         responses for given url
         
-        :param url: a url value
-        :returns: valid redirection addresses. If a request
-        for an address fails, and the address is still a valid url string, 
-        it's included as the last yielded value. If it's not, the previous value
-        is the last one.
+        :param url: a url address. If a HEAD request sent to it
+        fails because the address has invalid schema, times out
+        or there is a connection error, the generator yields nothing
+        :returns: valid redirection addresses. If a request for
+        a redirection address fails, and the address is still a valid
+        url string, it's included as the last yielded value. If it's
+        not, the previous value is the last one.
         :raises ValuError: if the argument is not a valid url
         '''
-        
-        response = self._get_first_response(url)
-        
-        if response:
-            try:
-                generator = self.session.resolve_redirects(
-                                                           response,
-                                                           response.request
-                                                           )
-                for response in generator:
-                    yield response.url
-                    
-            except InvalidURL:
-                pass
-                
-            except (Timeout, ConnectionError, InvalidSchema) as error:
-                last_url = response.headers['location']
-                
-                if isinstance(error, Timeout) or is_valid_url(last_url):
-                    yield last_url
+        if not is_valid_url(url):
+            raise InvalidURLError('{} is not a valid url'.format(url))
+        try:
+            response = self.session.head(url)
+        except (ConnectionError, InvalidSchema, Timeout):
+            raise StopIteration
+        try:
+            generator = self.session.resolve_redirects(
+                                                       response,
+                                                       response.request
+                                                       )
+            for response in generator:
+                yield response.url
+        except InvalidURL:
+            pass
+        except (ConnectionError, InvalidSchema, Timeout) as error:
+            last_url = response.headers['location']
+            if isinstance(error, Timeout) or is_valid_url(last_url):
+                yield last_url
 
 class UrlTesterChain(object):
     '''
