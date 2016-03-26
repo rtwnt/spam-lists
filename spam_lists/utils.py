@@ -18,6 +18,34 @@ from .exceptions import InvalidURLError
 from .validation import accepts_valid_urls, is_valid_url
 
 
+class CachedIterable(object):
+    '''
+    An iterable returning items from an iterator
+    and caching them for future runs
+    
+    Items are returned in fixed order.
+    '''
+    def __init__(self, iterator, initial_cache=None):
+        ''' Constructor
+        
+        :param iterator: an iterator, wrom which items
+         will be returned and cached
+        :param initial_cache: values added to cache before
+         the first run
+        '''
+        if initial_cache is None:
+            initial_cache = []
+        self._cache = list(initial_cache)
+        self._iterator = iterator
+
+    def __iter__(self):
+        for i in self._cache:
+            yield i
+        for i in self._iterator:
+            self._cache.append(i)
+            yield i
+
+
 class RedirectUrlResolver(object):
     ''' A class used for getting all redirect urls for
     given url
@@ -199,3 +227,4 @@ class UrlsAndLocations(object):
                     self._cached_urls.append(redirect_url)
                     yield redirect_url
         self._all_resolved = True
+

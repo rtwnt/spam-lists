@@ -14,8 +14,8 @@ Timeout
 from spam_lists.exceptions import InvalidURLError, UnknownCodeError
 from spam_lists.structures import AddressListItem
 from spam_lists.utils import RedirectUrlResolver, UrlsAndLocations, \
-UrlTesterChain
-from test.compat import unittest, Mock, patch, lru_cache
+UrlTesterChain, CachedIterable
+from test.compat import unittest, Mock, patch, lru_cache, MagicMock
 from test.unit.common_definitions import UrlTesterTestBase, \
 TestFunctionDoesNotHandleProvider
 
@@ -456,6 +456,31 @@ class UrlTesterChainTest(
                                                 ['http://triggeringerror.com']
                                                 )
 
+
+class CachedIterableTest(unittest.TestCase):
+    ''' Tests for CachedIterable class
+    
+    :var iterator_mock: a mock object representing iterator injected
+    into the tested instance
+    :var cache: a list of values set as initial cache for tested instance
+    :var tested_instance: an instance of CachedIterable to be tested
+    '''
+    def setUp(self):
+        self.iterator_mock = MagicMock()
+        self.cache = range(3)
+        self.tested_instance = CachedIterable(self.iterator_mock, self.cache)
+        
+    def test_cached_returned_first(self):
+        for x in self.tested_instance:
+            if x == self.cache[-1]:
+                break
+        self.iterator_mock.__iter__.assert_not_called()
+    
+    def test_fixed_order(self):
+        self.iterator_mock.__iter__.return_value = range(4, 10)
+        first_run_result = list(self.tested_instance)[:9]
+        second_run_result = list(self.tested_instance)[:9]
+        self.assertSequenceEqual(first_run_result, second_run_result)
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
