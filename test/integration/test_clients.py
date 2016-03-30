@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 
 import os.path
 
+#pylint: disable=redefined-builtin
 from builtins import object
 import tldextract
 from validators import ipv6
