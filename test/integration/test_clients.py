@@ -53,7 +53,7 @@ class UrlTesterClientTestMixin(object):
         actual = self.tested_client.any_match(self.urls_with_listed)
         self.assertTrue(actual)
         
-    def test_filter_matching_for_not_listed(self):
+    def test_filter_matching_not_listed(self):
         generator = self.tested_client.filter_matching(
                                                        self.urls_without_listed
                                                        )
@@ -65,7 +65,7 @@ class UrlTesterClientTestMixin(object):
         actual = list(self.tested_client.filter_matching(self.urls_with_listed))
         self.assertCountEqual(expected, actual)
         
-    def test_lookup_matching_for_not_listed(self):
+    def test_lookup_matching_not_listed(self):
         generator = self.tested_client.lookup_matching(
                                                        self.urls_without_listed
                                                        )
