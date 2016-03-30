@@ -158,11 +158,6 @@ class SpamhausDBLTest(HostListClientTestMixin, unittest.TestCase):
                                         )
 
 
-expected_surbl_classification = get_classification(
-                                                   surbl_multi_classification,
-                                                   [2, 126]
-                                                   )
-
 class SURBLTest(HostListClientTestMixin):
     tested_client = surbl_multi
     classification = get_classification(
