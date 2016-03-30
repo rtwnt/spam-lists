@@ -41,7 +41,10 @@ class UrlTesterClientTestMixin(object):
         self.assertTrue(actual)
         
     def test_filter_matching_for_not_listed(self):
-        actual = list(self.tested_client.filter_matching(self.urls_without_listed))
+        generator = self.tested_client.filter_matching(
+                                                       self.urls_without_listed
+                                                       )
+        actual = list(generator)
         self.assertCountEqual([], actual)
         
     def test_filter_matching_for_listed(self):
@@ -50,7 +53,10 @@ class UrlTesterClientTestMixin(object):
         self.assertCountEqual(expected, actual)
         
     def test_lookup_matching_for_not_listed(self):
-        actual = list(self.tested_client.lookup_matching(self.urls_without_listed))
+        generator = self.tested_client.lookup_matching(
+                                                       self.urls_without_listed
+                                                       )
+        actual = list(generator)
         self.assertCountEqual([], actual)
         
     def test_lookup_matching_for_listed(self):
@@ -65,9 +71,10 @@ class HostListClientTestMixin(UrlTesterClientTestMixin):
         cls.listed_url = url_from_host(cls.listed)
         cls.not_listed_url = url_from_host(cls.not_listed)
         cls.urls_with_listed = cls.not_listed_url, cls.listed_url
-        cls.urls_without_listed = cls.not_listed_url, url_from_host(
-                                                                    cls.not_listed_2
-                                                                    )
+        cls.urls_without_listed = (
+                                   cls.not_listed_url,
+                                   url_from_host(cls.not_listed_2)
+                                   )
         
         cls.listed_item = AddressListItem(
                                   ip_or_registered_domain(cls.listed),
