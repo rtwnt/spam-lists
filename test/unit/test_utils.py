@@ -31,27 +31,6 @@ def get_response_mock(url):
     return response
 
 
-def get_session_resolve_redirects(response_urls, final_exceptions):
-    ''' Get a mock for requests.Session.resolve_redirects
-    
-    :param response_urls: a dictionary containing url addresses of
-    responses to urls specified as its keys
-    :param final_exceptions: a dictionary containing types of
-    exceptions raised by requesting final addresses of response urls of
-    url addresses specified as keys
-    '''
-    # pylint: disable-msg=unused-argument
-    def resolve_redirects(response, request):
-        history = response_urls.get(response.url, [])
-        exception_type = final_exceptions.get(response.url, None)
-        for value in history:
-            if isinstance(value, str):
-                yield get_response_mock(value)
-        if exception_type is not None:
-            raise exception_type
-    return resolve_redirects
-
-
 class HeadSideEffects(dict):
     def __call__(self, url):
         return self.get(url)
