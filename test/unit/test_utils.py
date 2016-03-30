@@ -13,7 +13,7 @@ Timeout
 from spam_lists.exceptions import InvalidURLError, UnknownCodeError
 from spam_lists.structures import AddressListItem
 from spam_lists.utils import RedirectUrlResolver, UrlTesterChain, \
-CachedIterable
+CachedIterable, GeneralizedUrlTester
 from test.compat import unittest, Mock, patch, lru_cache, MagicMock
 from test.unit.common_definitions import UrlTesterTestBase, \
 TestFunctionDoesNotHandleProvider
@@ -473,6 +473,93 @@ class CachedIterableTest(unittest.TestCase):
         first_run_result = list(self.tested_instance)[:9]
         second_run_result = list(self.tested_instance)[:9]
         self.assertSequenceEqual(first_run_result, second_run_result)
+
+
+class GeneralizedUrlTesterTest(unittest.TestCase):
+    ''' Tests for GeneralizedUrlTester class
+
+    :var no_resolution_setup: a parameter setup for test methods
+    requiring no explicit parameter to use (or not use)
+    redirect resolution in tested calls. Contains names of
+    method of tested instance to be called
+    :var common_setup: a parameter setup for test methods
+    testing calls with and without redirect resolution, depending
+    on value of a parameter, with False assumed as default.
+    Contains names of method of tested instance to be called.
+    :var test_urls: a list of urls passed as argument to methods of
+    tested_instance
+    :var tested_instance: instance of GeneralizedUrlTester to be
+    tested.
+    :var whitelist_mock: an object representing an instance of
+    whitelist used by tested_instance
+    :var url_tester_mock: an object representing a url tester instance
+    to be used by tested instance
+    :var resolver_mock: an object representing an instance of
+    redirect resolver to be used by tested instance
+    '''
+    test_urls = ['http:abc.com', 'http://def.com', 'http://xyz.com']
+    no_resolution_setup = [
+                            ['any_match'],
+                            ['filter_matching'],
+                            ['lookup_matching'],
+                            ]
+    common_setup = [
+                         ['any_match', True],
+                         ['filter_matching', True],
+                         ['lookup_matching', True]
+                         ] + no_resolution_setup
+
+    def setUp(self):
+        self.whitelist_mock = Mock()
+        self.whitelist_mock.filter_matching.return_value = MagicMock()
+        self.resolver_mock = Mock()
+        self.resolver_mock.get_urls_and_locations.return_value = MagicMock()
+        self.url_tester_mock = Mock()
+        self.tested_instance = GeneralizedUrlTester(
+                                                    self.url_tester_mock,
+                                                    self.whitelist_mock,
+                                                    self.resolver_mock
+                                                    )
+
+    def _call_for(self, function_name, resolve_redirects):
+        function = getattr(self.tested_instance, function_name)
+        return function(self.test_urls, resolve_redirects)
+
+    @parameterized.expand(common_setup)
+    def test_whitelist_used_with(self, function_name, resolve_redirects=False):
+        self._call_for(function_name, resolve_redirects)
+        urls_and_locations = self.test_urls
+        if resolve_redirects:
+            urls_and_locations = self.resolver_mock.get_urls_and_locations()
+        whitelist_method = self.whitelist_mock.filter_matching
+        whitelist_method.assert_called_once_with(
+                                                   urls_and_locations
+                                                   )
+
+    @parameterized.expand(no_resolution_setup)
+    def test_resolution_with(self, function_name):
+        ''' Redirect resolution must be performed during all calls
+        that receive resolve_redirects=True as argument '''
+        self._call_for(function_name, True)
+        resolver_function = self.resolver_mock.get_urls_and_locations
+        resolver_function.assert_called_once_with(self.test_urls)
+
+    @parameterized.expand(no_resolution_setup)
+    def test_no_resolution_with(self, function_name):
+        ''' Redirect resolution must not be performed during all calls
+        that receive resolve_redirects=True as argument '''
+        self._call_for(function_name, False)
+        self.resolver_mock.assert_not_called()
+
+    @parameterized.expand(common_setup)
+    def test_url_tester_results_for(self, function_name,
+                                    resolve_redirects = False):
+        ''' Each method must return result of a method of url_tester
+        called during its execution'''
+        url_tester_function = getattr(self.url_tester_mock, function_name)
+        expected = url_tester_function()
+        actual = self._call_for(function_name, resolve_redirects)
+        self.assertEqual(expected, actual)
 
 
 if __name__ == "__main__":

@@ -173,3 +173,93 @@ class UrlTesterChain(object):
                     seen.add(url)
                     yield url
 
+
+class GeneralizedUrlTester(object):
+    ''' A url tester using redirect resolution, whitelist and another url tester
+
+    :var url_tester: an object with any_match, filter_matching and
+    lookup_matching methods
+    :var whitelist: an object with a filter_matching method, used for
+    filtering urls to be tested against the url_tester
+    :var redirect_resolver: an object used for getting valid location
+    header values to test them with the other url values.
+    '''
+    def __init__(self, url_tester, whitelist=None,
+                 redirect_resolver=RedirectUrlResolver()):
+        ''' Constructor
+
+        :param url_tester: an object with any_match, filter_matching
+        and lookup_matching methods that can be used for testing urls
+        :var whitelist: an object with a filter_matching method, used
+        for filtering urls to be tested against the url_tester
+        :var redirect_resolver: an object used for getting valid
+        location header values to test them with the other url values.
+        '''
+        self.url_tester = url_tester
+        self.whitelist = whitelist
+        self.redirect_resolver = redirect_resolver
+
+    def _get_results_for(self, function, urls, resolve_redirects):
+        ''' Get results of given function for given arguments
+
+        :param function: a function to be called
+        :param urls: an iterable containing initial url values
+        :param resolve_redirects: a boolean value. If True, all valid
+        redirect location values will be resolved for given urls and
+        tested with them
+        '''
+        urls_to_test = urls
+        if resolve_redirects:
+            urls_to_test = self.redirect_resolver.get_urls_and_locations(urls)
+        if self.whitelist is not None:
+            generator = self.whitelist.filter_matching(urls_to_test)
+            urls_to_test = list(set(urls_to_test) - set(generator))
+        return function(urls_to_test)
+
+    def any_match(self, urls, resolve_redirects=True):
+        ''' Check if any of given urls is a match
+
+        :param urls: an iterable containing initial url values
+        :param resolve_redirects: a boolean value. If True, all valid
+        redirect location values will be resolved for given urls and
+        tested with them
+        :returns: True if any of the urls is a match
+        '''
+        return self._get_results_for(
+                                     self.url_tester.any_match,
+                                     urls,
+                                     resolve_redirects
+                                     )
+
+    def filter_matching(self, urls, resolve_redirects=True):
+        ''' Get those of given ruls that match listing criteria
+        (hosts, whole urls, etc.)
+
+        :param urls: an iterable containing initial url values
+        :param resolve_redirects: a boolean value. If True, all valid
+        redirect location values will be resolved for given urls and
+        tested with them
+        :returns: matching urls
+        '''
+        return self._get_results_for(
+                                     self.url_tester.filter_matching,
+                                     urls,
+                                     resolve_redirects
+                                     )
+
+    def lookup_matching(self, urls, resolve_redirects=True):
+        '''Get objects representing match criteria
+        (hosts, whole urls, etc) for given urls
+
+        :param urls: an iterable containing initial url values
+        :param resolve_redirects: a boolean value. If True, all valid
+        redirect location values will be resolved for given urls and
+        tested with them
+        :returns: items representing match criteria
+        '''
+        return self._get_results_for(
+                                     self.url_tester.lookup_matching,
+                                     urls,
+                                     resolve_redirects
+                                     )
+
