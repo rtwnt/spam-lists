@@ -59,7 +59,7 @@ class UrlTesterClientTestMixin(object):
         self.assertCountEqual(expected, actual)
 
 
-class HostListClientTest(UrlTesterClientTestMixin):
+class HostListClientTestMixin(UrlTesterClientTestMixin):
     @classmethod
     def setUpClass(cls):
         cls.listed_url = url_from_host(cls.listed)
@@ -99,7 +99,7 @@ reason_to_skip = (
 
 
 @unittest.skip(reason_to_skip)
-class SpamhausZenTest(HostListClientTest, unittest.TestCase):
+class SpamhausZenTest(HostListClientTestMixin, unittest.TestCase):
     tested_client = spamhaus_zen
     listed = '127.0.0.2'
     not_listed = '127.0.0.1'
@@ -111,7 +111,7 @@ class SpamhausZenTest(HostListClientTest, unittest.TestCase):
     
 
 @unittest.skip(reason_to_skip)
-class SpamhausDBLTest(HostListClientTest, unittest.TestCase):
+class SpamhausDBLTest(HostListClientTestMixin, unittest.TestCase):
     tested_client = spamhaus_dbl
     listed = 'dbltest.com'
     not_listed = 'example.com'
@@ -127,7 +127,7 @@ expected_surbl_classification = get_expected_classification(
                                                             [2, 126]
                                                             )
 
-class SURBLTest(HostListClientTest):
+class SURBLTest(HostListClientTestMixin):
     tested_client = surbl_multi
     classification = get_expected_classification(
                                                  surbl_multi_classification,
@@ -147,7 +147,7 @@ class SURBLMultiDomainTest(SURBLTest, unittest.TestCase):
 hp_hosts = HpHosts('spam-lists-test-suite')
 
 
-class HpHostsIPTest(HostListClientTest, unittest.TestCase):
+class HpHostsIPTest(HostListClientTestMixin, unittest.TestCase):
     listed = '174.36.207.146'
     not_listed = '64.233.160.0'
     not_listed_2 = '2001:ddd:ccc:123::55'
@@ -155,7 +155,7 @@ class HpHostsIPTest(HostListClientTest, unittest.TestCase):
     classification = set()
 
 
-class HpHostsDomainTest(HostListClientTest, unittest.TestCase):
+class HpHostsDomainTest(HostListClientTestMixin, unittest.TestCase):
     listed = 'ecardmountain.com'
     not_listed = 'google.com'
     not_listed_2 = 'microsoft.com'
