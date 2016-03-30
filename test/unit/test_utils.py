@@ -159,6 +159,15 @@ class RedirectUrlResolverTest(unittest.TestCase):
         self._test_get_locations(history[0], expected)
         
     @parameterized.expand([
+                           [ConnectionError],
+                           [InvalidSchema],
+                           [Timeout],
+                           ])
+    def test_get_locations_arg_raising(self, exception_type):
+        self.head_mock.side_effect = exception_type
+        self._test_get_locations('http://error_source', [])
+        
+    @parameterized.expand([
                            (
                             'initial_url_causing_timeout',
                             no_redirect_url_chain,
