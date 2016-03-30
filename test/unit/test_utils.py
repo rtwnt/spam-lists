@@ -574,8 +574,8 @@ class CachedIterableTest(unittest.TestCase):
         self.tested_instance = CachedIterable(self.iterator_mock, self.cache)
         
     def test_cached_returned_first(self):
-        for x in self.tested_instance:
-            if x == self.cache[-1]:
+        for i in self.tested_instance:
+            if i == self.cache[-1]:
                 break
         self.iterator_mock.__iter__.assert_not_called()
     

@@ -113,10 +113,10 @@ class RedirectUrlResolver(object):
         '''
         seen = set(urls)
         for i in urls:
-            for x in self.get_locations(i):
-                if x not in seen:
-                    seen.add(x)
-                    yield x
+            for k in self.get_locations(i):
+                if k not in seen:
+                    seen.add(k)
+                    yield k
                 
     def get_urls_and_locations(self, urls):
         ''' Get urls and their redirection addresses
