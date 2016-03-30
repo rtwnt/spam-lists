@@ -17,15 +17,14 @@ from .validation import is_valid_url
 
 
 class CachedIterable(object):
-    '''
-    An iterable returning items from an iterator
+    '''An iterable returning items from an iterator
     and caching them for future runs
-    
+
     Items are returned in fixed order.
     '''
     def __init__(self, iterator, initial_cache=None):
         ''' Constructor
-        
+
         :param iterator: an iterator, wrom which items
          will be returned and cached
         :param initial_cache: values added to cache before
@@ -47,7 +46,7 @@ class CachedIterable(object):
 class RedirectUrlResolver(object):
     ''' A class used for getting all redirect urls for
     given url
-    
+
     The urls include:
     * url addresses of all responses acquired for a HEAD request in its
      response history
@@ -57,7 +56,7 @@ class RedirectUrlResolver(object):
     def __init__(self, requests_session = Session()):
         '''
         Constructor
-        
+
         :param requests_session: a session object implementing
         methods:
         * head(url) (for HEAD request)
@@ -68,7 +67,7 @@ class RedirectUrlResolver(object):
     def get_locations(self, url):
         ''' Get valid location header values from
         responses for given url
-        
+
         :param url: a url address. If a HEAD request sent to it
         fails because the address has invalid schema, times out
         or there is a connection error, the generator yields nothing
@@ -100,11 +99,11 @@ class RedirectUrlResolver(object):
 
     def get_new_locations(self, urls):
         ''' Get valid location header values for all given urls
-        
+
         The returned values are new, that is: they do not repeat any
         value contained in the original input. Only unique values
         are yielded.
-        
+
         :param urls: a list of url addresses
         :returns: valid location header values from responses
         to the urls
@@ -115,10 +114,10 @@ class RedirectUrlResolver(object):
                 if k not in seen:
                     seen.add(k)
                     yield k
-                
+
     def get_urls_and_locations(self, urls):
         ''' Get urls and their redirection addresses
-        
+
         :param urls: a list of url addresses
         :returns: an instance of CachedIterable containing given urls
         and valid location header values of their responses
@@ -129,47 +128,38 @@ class RedirectUrlResolver(object):
 
 
 class UrlTesterChain(object):
-    '''
-    A url tester using a sequence of other url testers
-    '''
-    
+    '''A url tester using a sequence of other url testers'''
     def __init__(self, *url_testers):
-        '''
-        Constructor
-        
+        '''Constructor
+
         :param url_testers: a list of objects having any_match(urls)
-         and lookup_matching(urls) 
-         methods
+        and lookup_matching(urls) methods
         '''
-        
         self.url_testers = list(url_testers)
-        
+
     def any_match(self, urls):
         ''' Check if any of given urls is a match
-        
+
         :param urls: a sequence of urls to be tested
         :returns: True if any of the urls is a match
         '''
-        
         return any(t.any_match(urls) for t in self.url_testers)
-    
+
     def lookup_matching(self, urls):
-        '''
-        Get objects representing match criteria (hosts, whole urls, etc) for
-        given urls
-        
+        '''Get objects representing match criteria
+        (hosts, whole urls, etc) for given urls
+
         :param urls: an iterable containing urls
         :returns: items representing match criteria
         '''
-        
         for tester in self.url_testers:
             for item in tester.lookup_matching(urls):
                 yield item
-                
+
     def filter_matching(self, urls):
-        ''' Get those of given ruls that match listing criteria 
+        ''' Get those of given ruls that match listing criteria
         (hosts, whole urls, etc.)
-        
+
         :param urls: an iterable containing urls
         :returns: matching urls
         '''

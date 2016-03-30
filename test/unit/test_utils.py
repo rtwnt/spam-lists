@@ -21,7 +21,7 @@ TestFunctionDoesNotHandleProvider
 
 def get_response_mock(url):
     ''' Get mock representing response to a request
-    
+
     :param url: response url
     :returns: an instance of mock representing a response
     '''
@@ -37,9 +37,9 @@ class HeadSideEffects(dict):
 
 class ResolveRedirectsSideEffects(object):
     '''' Provides side effects for redirect resolution
-    
+
     The side effects include both response object mocks and exceptions.
-    
+
     :var redirect_responses: a dictionary mapping response mocks
     to objects representing response arguments of
     the requests.Session.resolve_redirects method.
@@ -47,11 +47,10 @@ class ResolveRedirectsSideEffects(object):
     objects representing response arguments of the resolve_redirects
     method
     '''
-    
     def __init__(self):
         self.responses = {}
         self.exceptions = {}
-    
+
     def __call__(self, response, request):
         yielded = self.responses.get(response, [])
         exception_type = self.exceptions.get(response)
@@ -64,7 +63,7 @@ class ResolveRedirectsSideEffects(object):
 #pylint: disable=too-many-public-methods
 class RedirectUrlResolverTest(unittest.TestCase):
     ''' Tests for RedirectUrlResolver class
-    
+
     :var valid_urls: a list of strings representing valid urls used
      in tests
     :var head_mock: a mocked implementation of head function
@@ -87,41 +86,33 @@ class RedirectUrlResolverTest(unittest.TestCase):
                  'http://122.55.33.21',
                  'http://[2001:db8:abc:123::42]'
                  ]
-    
     no_redirect_url_chain = [
                        'http://noredirects.com'
                        ]
-    
+
     def setUp(self):
-        
         session_mock = Mock()
-        
         self.head_mock = session_mock.head
         self.head_mock.side_effect = HeadSideEffects()
         self.resolve_redirects_mock = session_mock.resolve_redirects
         self.redirect_results = ResolveRedirectsSideEffects()
         self.resolve_redirects_mock.side_effect = self.redirect_results
-        
         self.resolver = RedirectUrlResolver(session_mock)
-        
         self.patcher = patch('spam_lists.utils.is_valid_url')
         self.is_valid_url_mock = self.patcher.start()
-        
+
     def tearDown(self):
-        
         self.patcher.stop()
-        
+
     def test_get_locations_for_invalid(self):
-        
         self.is_valid_url_mock.return_value = False
-        
         with self.assertRaises(InvalidURLError):
             next(self.resolver.get_locations('http://test.com'))
-    
+
     def _set_up_side_effects(self, url_histories, exceptions=None,
                           last_location=''):
         ''' Prepare mocks for their calls to have expected side effects
-        
+
         :param url_histories: a sequence containing sequences of
         url addresses of all responses to a request to a redirecting url
         :param exceptions: a dictionary mapping initial urls of
@@ -140,14 +131,12 @@ class RedirectUrlResolverTest(unittest.TestCase):
             if exceptions is None:
                 exceptions = {}
             exception_type = exceptions.get(history[0])
-            self.redirect_results.exceptions[first_response] = exception_type   
-    
+            self.redirect_results.exceptions[first_response] = exception_type
+
     def _test_get_locations(self, argument, expected):
-        
         url_generator = self.resolver.get_locations(argument)
-        
         self.assertEqual(expected, list(url_generator))
-        
+
     @parameterized.expand([
                            ('no_url', no_redirect_url_chain),
                            ('urls', redirect_url_chain)
@@ -155,9 +144,8 @@ class RedirectUrlResolverTest(unittest.TestCase):
     def test_get_locations_yields(self, _, history):
         expected = history[1:]
         self._set_up_side_effects([history])
-        
         self._test_get_locations(history[0], expected)
-        
+
     @parameterized.expand([
                            [ConnectionError],
                            [InvalidSchema],
@@ -166,7 +154,7 @@ class RedirectUrlResolverTest(unittest.TestCase):
     def test_get_locations_arg_raising(self, exception_type):
         self.head_mock.side_effect = exception_type
         self._test_get_locations('http://error_source', [])
-        
+
     @parameterized.expand([
                            (
                             'initial_url_causing_timeout',
@@ -265,7 +253,7 @@ class RedirectUrlResolverTest(unittest.TestCase):
         expected = list(set(redirects) - set(input_data))
         actual = list(self.resolver.get_new_locations(input_data))
         self.assertCountEqual(expected, actual)
-        
+
     def test_get_new_locations(self):
         ''' The method is expected to yield only new urls,
         that is urls that were not part of the original input '''
@@ -304,8 +292,8 @@ class RedirectUrlResolverTest(unittest.TestCase):
         cached_iterable_mock.return_value = expected
         actual = self.resolver.get_urls_and_locations(['http://test.com'])
         self.assertEqual(expected, actual)
-        
-        
+
+
 @lru_cache()
 def get_url_tester_mock(identifier):
     source = Mock()
@@ -320,15 +308,14 @@ class UrlTesterChainTest(
                          unittest.TestCase
                          ):
     ''' Tests for UrlTesterChain class
-    
+
     This class uses get_url_tester_mock function to populate list of
     url testers used by the tested instance
-    
+
     :var classification: a set of classifications used in tests
     :var tested_instance: an instance of tested class
     '''
     classification = set(['TEST'])
-    
     url_to_source_id ={
                        'http://55.44.21.12': [
                                               'source_1',
@@ -342,22 +329,20 @@ class UrlTesterChainTest(
                                                          ],
                        'http://[2001:abc:111:22::33]': ['source_3']
                        }
-    
+
     def setUp(self):
         url_testers = []
-        
         for _ in range(3):
             tester = Mock()
             tester.any_match.return_value = False
             tester.lookup_matching.return_value = []
             tester.filter_matching.return_value = []
             url_testers.append(tester)
-        
         self.tested_instance = UrlTesterChain(*url_testers)
-    
+
     def _add_url_tester(self, source_id, matching_urls):
         ''' Add a preconfigured url tester mock to the tested instance
-        
+
         :param source_id: an identifier for a mocked url tester
         :param matching_urls: a list of urls expected to be matched by
         a service represented by the mocked url tester
@@ -365,70 +350,60 @@ class UrlTesterChainTest(
         tester = get_url_tester_mock(source_id)
         any_match = lambda u: not set(u).isdisjoint(set(matching_urls))
         tester.any_match.side_effect = any_match
-        
         tester.filter_matching.return_value = list(matching_urls)
-        
         url_items = [self._get_item(u, source_id) for u in matching_urls]
         tester.lookup_matching.return_value = url_items
-        
         if not tester in self.tested_instance.url_testers:
             self.tested_instance.url_testers.append(tester)
-    
+
     def _get_item(self, url, source_id):
         return AddressListItem(
                                url,
                                get_url_tester_mock(source_id),
                                self.classification
                                )
-    
+
     def _get_expected_items_for_urls(self, urls):
-        
         return [self._get_item(u, i) for u, ids
                 in list(urls.items()) for i in ids]
-            
+
     def _set_matching_urls(self, urls):
         ''' Set urls expected to be matched during a test
-        
+
         The method groups given urls by their source ids: identifiers
          of services expected to report urls associated with them as
          matching. Then, mocks representing url testers are added
          to the tested instance of UrlTesterChain. They are shuffled
          to ensure some of mocked services reporting a match
          will be queried before some that do not.
-        
+
         :param urls: a dictionary containing
         '''
         by_source_id = defaultdict(list)
-        
         for url, ids in list(urls.items()):
             for i in ids:
                 by_source_id[i].append(url)
-                
         for i, urls in list(by_source_id.items()):
             self._add_url_tester(i, urls)
-            
         shuffle(self.tested_instance.url_testers)
-    
+
     def test_any_match_expecting_true(self):
-        
         self._test_any_match_returns_true_for(self.url_to_source_id)
-        
+
     @parameterized.expand([
                              ('no_matching_url', {}),
                              ('matching_urls', url_to_source_id)
                              ])
     def test_lookup_matching_for(self, _, matching_urls):
-        
         self._test_lookup_matching_for(matching_urls)
-        
+
     @parameterized.expand([
                              ('no_matching_url', {}),
                              ('matching_urls', url_to_source_id)
                              ])
     def test_filter_matching_for(self, _, matching_urls):
-        
         self._test_filter_matching_for(matching_urls)
-        
+
     @parameterized.expand([
                            (
                             'any_match_raises_value_error',
@@ -462,9 +437,7 @@ class UrlTesterChainTest(
                             )
                            ])
     def test_(self, _, function_name, error_type):
-        
         function = getattr(self.tested_instance, function_name)
-        
         for tester in reversed(self.tested_instance.url_testers):
             error_source = getattr(tester, function_name)
             self._test_function_does_not_handle(
@@ -478,7 +451,7 @@ class UrlTesterChainTest(
 #pylint: disable=too-many-public-methods
 class CachedIterableTest(unittest.TestCase):
     ''' Tests for CachedIterable class
-    
+
     :var iterator_mock: a mock object representing iterator injected
     into the tested instance
     :var cache: a list of values set as initial cache for tested instance
@@ -488,18 +461,19 @@ class CachedIterableTest(unittest.TestCase):
         self.iterator_mock = MagicMock()
         self.cache = range(3)
         self.tested_instance = CachedIterable(self.iterator_mock, self.cache)
-        
+
     def test_cached_returned_first(self):
         for i in self.tested_instance:
             if i == self.cache[-1]:
                 break
         self.iterator_mock.__iter__.assert_not_called()
-    
+
     def test_fixed_order(self):
         self.iterator_mock.__iter__.return_value = range(4, 10)
         first_run_result = list(self.tested_instance)[:9]
         second_run_result = list(self.tested_instance)[:9]
         self.assertSequenceEqual(first_run_result, second_run_result)
+
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']

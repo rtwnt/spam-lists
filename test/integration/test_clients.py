@@ -29,12 +29,12 @@ def url_from_host(host):
 
 def get_classification(classification, return_codes):
     return set(v for k, v in list(classification.items()) if k in return_codes)
-    
+
 
 class UrlTesterClientTestMixin(object):
     '''  A class containing integration test methods for
     url tester clients
-    
+
     :var tested_client: an instance of client to be tested
     :var urls_without_listed: urls without values listed by the service
     to be queried
@@ -47,31 +47,31 @@ class UrlTesterClientTestMixin(object):
     '''
     def test_any_match_for_not_listed(self):
         actual = self.tested_client.any_match(self.urls_without_listed)
-        self.assertFalse(actual)    
-    
+        self.assertFalse(actual)
+
     def test_any_match_for_listed(self):
         actual = self.tested_client.any_match(self.urls_with_listed)
         self.assertTrue(actual)
-        
+
     def test_filter_matching_not_listed(self):
         generator = self.tested_client.filter_matching(
                                                        self.urls_without_listed
                                                        )
         actual = list(generator)
         self.assertCountEqual([], actual)
-        
+
     def test_filter_matching_for_listed(self):
         expected = [self.listed_url]
         actual = list(self.tested_client.filter_matching(self.urls_with_listed))
         self.assertCountEqual(expected, actual)
-        
+
     def test_lookup_matching_not_listed(self):
         generator = self.tested_client.lookup_matching(
                                                        self.urls_without_listed
                                                        )
         actual = list(generator)
         self.assertCountEqual([], actual)
-        
+
     def test_lookup_matching_for_listed(self):
         expected = [self.listed_item]
         actual = list(self.tested_client.lookup_matching(self.urls_with_listed))
@@ -81,7 +81,7 @@ class UrlTesterClientTestMixin(object):
 class HostListClientTestMixin(UrlTesterClientTestMixin):
     '''  A class containing integration test methods for
     host list clients
-    
+
     :var listed: an item listed by a service to be queried
     :var not_listed: an item not listed by a service to be queried
     :var tested_client: an instance of client to be tested
@@ -94,7 +94,6 @@ class HostListClientTestMixin(UrlTesterClientTestMixin):
     :var listed_item: an instance of AddressListItem representing
     an item listed by the service to be queried
     '''
-    
     @classmethod
     def setUpClass(cls):
         cls.listed_url = url_from_host(cls.listed)
@@ -104,28 +103,28 @@ class HostListClientTestMixin(UrlTesterClientTestMixin):
                                    cls.not_listed_url,
                                    url_from_host(cls.not_listed_2)
                                    )
-        
         cls.listed_item = AddressListItem(
                                   ip_or_registered_domain(cls.listed),
                                   cls.tested_client,
                                   cls.classification
                                   )
-    
+
     def test__contains__for_not_listed(self):
         actual = self.not_listed in self.tested_client
         self.assertFalse(actual)
-        
+
     def test_contains_for_listed(self):
         actual = self.listed in self.tested_client
         self.assertTrue(actual)
-        
+
     def test_lookup_for_not_listed(self):
         actual = self.tested_client.lookup(self.not_listed)
         self.assertIsNone(actual)
-        
+
     def test_lookup_for_listed(self):
         actual = self.tested_client.lookup(self.listed)
         self.assertEqual(self.listed_item, actual)
+
 
 REASON_TO_SKIP = (
                   'These tests are expected to fail frequently for users of'
@@ -145,7 +144,8 @@ class SpamhausZenTest(HostListClientTestMixin, unittest.TestCase):
                                                  SPAMHAUS_ZEN_CLASSIFICATION,
                                                  [2, 4, 10]
                                                  )
-    
+
+
 #pylint: disable=too-many-public-methods
 #@unittest.skip(REASON_TO_SKIP)
 class SpamhausDBLTest(HostListClientTestMixin, unittest.TestCase):
@@ -179,7 +179,7 @@ class SURBLMultiDomainTest(SURBLTest, unittest.TestCase):
     listed = 'surbl-org-permanent-test-point.com'
     not_listed = 'test.com'
     not_listed_2 = 'google.com'
-    
+
 HP_HOSTS = HpHosts('spam-lists-test-suite')
 
 
@@ -197,17 +197,18 @@ class HpHostsDomainTest(HostListClientTestMixin, unittest.TestCase):
     not_listed_2 = 'microsoft.com'
     tested_client = HP_HOSTS
     classification = set(['EMD'])
-    
+
+
 GSB_API_KEY_FILE = os.path.join(
-                                os.path.dirname(__file__), 
+                                os.path.dirname(__file__),
                                 'google_safe_browsing_api_key.txt'
                                 )
 try:
     with open(GSB_API_KEY_FILE, 'r') as key_file:
         SAFE_BROWSING_API_KEY = key_file.readline().rstrip()
-        
 except IOError:
     SAFE_BROWSING_API_KEY = None
+
 
 REASON_TO_SKIP_GSB_TEST = (
                            'No api key provided. Provide the key in'
@@ -223,7 +224,7 @@ class GoogleSafeBrowsingTest(UrlTesterClientTestMixin, unittest.TestCase):
     not_listed_url_2 = 'https://github.com/'
     urls_with_listed = not_listed_url, listed_url
     urls_without_listed = not_listed_url, not_listed_url_2
-    
+
     @classmethod
     def setUpClass(cls):
         cls.tested_client = GoogleSafeBrowsing(
@@ -231,13 +232,11 @@ class GoogleSafeBrowsingTest(UrlTesterClientTestMixin, unittest.TestCase):
                                        '0.5',
                                        SAFE_BROWSING_API_KEY
                                        )
-        
         cls.listed_item = AddressListItem(
                                     cls.listed_url,
                                     cls.tested_client,
                                     set(['malware'])
                                     )
-    
 
 
 if __name__ == "__main__":

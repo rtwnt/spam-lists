@@ -17,21 +17,21 @@ from test.compat import Mock, patch
 class ValidationDecoratorTestMixin(object):
     ''' Provides tests for decorators and wrappers responsible for
      testing validity of arguments of decorated methods
-    
+
     :var validity_tester_patcher: an object used for patching
      a function responsible for testing validity of arguments of
      a decorated function
     :var validity_tester_mock: a mocked implementation for
      the validity tester
     :var obj: a mock representing object having the method decorated
-     by the decorator 
+     by the decorator
     :var function: a mock representing function to be decorated
     :var decorated_function: a result of applying decorator to
      the function
-     
+
      Additionally, the test cases using this mixin are expected to have
      the following attributes:
-     
+
     :var exception_type:
     :var decorator:
     :var validity_tester: a fully qualified name of a function used by
@@ -40,24 +40,21 @@ class ValidationDecoratorTestMixin(object):
     def setUp(self):
         self.validity_tester_patcher = patch(self.validity_tester)
         self.validity_tester_mock = self.validity_tester_patcher.start()
-        
         function = Mock()
         function.__name__ = str('function')
-        
         self.obj = Mock()
         self.function = function
         self.decorated_function = self.decorator(self.function)
-    
+
     def tearDown(self):
         self.validity_tester_patcher.stop()
-    
+
     def _test_wrapper_for_valid(self, value):
         self.decorated_function(self.obj, value)
         self.function.assert_called_once_with(self.obj, value)
-    
+
     def _test_wrapper_for_invalid(self, value):
         self.validity_tester_mock.return_value = False
-        
         self.assertRaises(
                           self.exception_type,
                           self.decorated_function,
@@ -73,7 +70,7 @@ class AcceptValidUrlsTest(ValidationDecoratorTestMixin, unittest.TestCase):
     exception_type = InvalidURLError
     decorator = staticmethod(accepts_valid_urls)
     validity_tester = 'spam_lists.validation.is_valid_url'
-    
+
     @parameterized.expand([
                            ('hostname', ['https://valid.com']),
                            ('ipv4_host', ['http://122.34.59.109']),
@@ -81,8 +78,7 @@ class AcceptValidUrlsTest(ValidationDecoratorTestMixin, unittest.TestCase):
                            ])
     def test_for_urls_with_valid(self, _, urls):
         self._test_wrapper_for_valid(urls)
-    
-    
+
     @parameterized.expand([
                            ('invalid_hostname', ['http://-abc.com']),
                            ('invalid_schema', ['abc://hostname.com']),
@@ -104,7 +100,7 @@ class AcceptsValidHostTest(ValidationDecoratorTestMixin, unittest.TestCase):
     exception_type = InvalidHostError
     decorator = staticmethod(accepts_valid_host)
     validity_tester = 'spam_lists.validation.is_valid_host'
-    
+
     @parameterized.expand([
                            ('hostname', 'valid.com'),
                            ('ipv4', '122.34.59.109'),
@@ -112,7 +108,7 @@ class AcceptsValidHostTest(ValidationDecoratorTestMixin, unittest.TestCase):
                            ])
     def test_for_valid(self, _, value):
         self._test_wrapper_for_valid(value)
-    
+
     @parameterized.expand([
                            ('hostname', '-abc.com'),
                            ('ipv4', '999.999.999.999'),
