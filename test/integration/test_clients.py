@@ -32,6 +32,19 @@ def get_classification(classification, return_codes):
     
 
 class UrlTesterClientTestMixin(object):
+    '''  A class containing integration test methods for
+    url tester clients
+    
+    :var tested_client: an instance of client to be tested
+    :var urls_without_listed: urls without values listed by the service
+    to be queried
+    :var urls_with_listed: urls with values listed by the service
+    to be queried
+    :var listed_url: a url listed (or: with a host listed) by the service
+    to be queried
+    :var listed_item: an instance of AddressListItem representing
+    an item listed by the service to be queried
+    '''
     def test_any_match_for_not_listed(self):
         actual = self.tested_client.any_match(self.urls_without_listed)
         self.assertFalse(actual)    
@@ -66,6 +79,22 @@ class UrlTesterClientTestMixin(object):
 
 
 class HostListClientTestMixin(UrlTesterClientTestMixin):
+    '''  A class containing integration test methods for
+    host list clients
+    
+    :var listed: an item listed by a service to be queried
+    :var not_listed: an item not listed by a service to be queried
+    :var tested_client: an instance of client to be tested
+    :var urls_without_listed: urls without values listed by the service
+    to be queried
+    :var urls_with_listed: urls with values listed by the service
+    to be queried
+    :var listed_url: a url listed (or: with a host listed) by the service
+    to be queried
+    :var listed_item: an instance of AddressListItem representing
+    an item listed by the service to be queried
+    '''
+    
     @classmethod
     def setUpClass(cls):
         cls.listed_url = url_from_host(cls.listed)
