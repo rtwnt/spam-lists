@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 
 import unittest
 
-#pylint: disable-msg=redefined-builtin
+#pylint: disable=redefined-builtin
 from builtins import object
 from nose_parameterized import parameterized
 

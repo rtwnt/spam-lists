@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-#pylint: disable-msg=redefined-builtin
+#pylint: disable=redefined-builtin
 from builtins import str, range, object
 from dns import reversename
 from nose_parameterized import parameterized
@@ -13,7 +13,7 @@ SimpleClassificationCodeMap, SumClassificationCodeMap, create_host
 from test.compat import unittest, Mock
 
 
-#pylint: disable-msg=too-few-public-methods
+#pylint: disable=too-few-public-methods
 class ClassificationCodeMapTestMixin(object):
     ''' A base class for tests for classification code map classes
     
