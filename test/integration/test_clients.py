@@ -31,7 +31,7 @@ def get_expected_classification(classification, return_codes):
     return set(v for k, v in list(classification.items()) if k in return_codes)
     
 
-class UrlTesterClientTest(object):
+class UrlTesterClientTestMixin(object):
     def test_any_match_for_not_listed(self):
         actual = self.tested_client.any_match(self.urls_without_listed)
         self.assertFalse(actual)    
@@ -59,7 +59,7 @@ class UrlTesterClientTest(object):
         self.assertCountEqual(expected, actual)
 
 
-class HostListClientTest(UrlTesterClientTest):
+class HostListClientTest(UrlTesterClientTestMixin):
     @classmethod
     def setUpClass(cls):
         cls.listed_url = url_from_host(cls.listed)
@@ -179,7 +179,7 @@ reason_to_skip_gsb_test = (
                            )
 
 @unittest.skipIf(not safe_browsing_api_key, reason_to_skip_gsb_test)
-class GoogleSafeBrowsingTest(UrlTesterClientTest, unittest.TestCase):
+class GoogleSafeBrowsingTest(UrlTesterClientTestMixin, unittest.TestCase):
     listed_url = 'http://www.gumblar.cn/'
     not_listed_url = 'http://www.google.com/'
     not_listed_url_2 = 'https://github.com/'
