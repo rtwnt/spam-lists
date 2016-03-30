@@ -20,44 +20,68 @@ from test.unit.common_definitions import UrlTesterTestBase, \
 TestFunctionDoesNotHandleProvider
 
 
-def get_response_mocks(urls):
-    ''' Get mocks representing responses to redirected request
+def get_response_mock(url):
+    ''' Get mock representing response to a request
     
-    :param urls: response urls
-    :returns: a list of instances of Mock representing responses
-     returned by requests.Session.resolve_redirects
+    :param url: response url
+    :returns: an instance of mock representing a response
     '''
-    response_mocks = []
-    for url in urls:
-        response = Mock()
-        response.url = url
-        response_mocks.append(response)
-    return response_mocks
+    response = Mock()
+    response.url = url
+    return response
 
 
-def get_session_resolve_redirects(response_mocks, exception_type):
+def get_session_resolve_redirects(response_urls, final_exceptions):
     ''' Get a mock for requests.Session.resolve_redirects
     
-    :param response_mocks: a list of mocks representing responses
-     yielded by the mocked function
-    :param exception_type: if is not None: represents
-    a type of exception expected to be raised by the mocked function
+    :param response_urls: a dictionary containing url addresses of
+    responses to urls specified as its keys
+    :param final_exceptions: a dictionary containing types of
+    exceptions raised by requesting final addresses of response urls of
+    url addresses specified as keys
     '''
-    if not (exception_type is None or
-            issubclass(exception_type, Exception)):
-        msg = '{} is not a subclass of Exception'.format(exception_type)
-        raise ValueError(msg)
-        
     # pylint: disable-msg=unused-argument
     def resolve_redirects(response, request):
-        for mocked in response_mocks:
-            yield mocked
-                
+        history = response_urls.get(response.url, [])
+        exception_type = final_exceptions.get(response.url, None)
+        for value in history:
+            if isinstance(value, str):
+                yield get_response_mock(value)
         if exception_type is not None:
             raise exception_type
-                
     return resolve_redirects
 
+
+class HeadSideEffects(dict):
+    def __call__(self, url):
+        return self.get(url)
+
+
+class ResolveRedirectsSideEffects(object):
+    '''' Provides side effects for redirect resolution
+    
+    The side effects include both response object mocks and exceptions.
+    
+    :var redirect_responses: a dictionary mapping response mocks
+    to objects representing response arguments of
+    the requests.Session.resolve_redirects method.
+    :var exceptions: a dictionary mapping exception types to
+    objects representing response arguments of the resolve_redirects
+    method
+    '''
+    
+    def __init__(self):
+        self.responses = {}
+        self.exceptions = {}
+    
+    def __call__(self, response, request):
+        yielded = self.responses.get(response, [])
+        exception_type = self.exceptions.get(response)
+        for i in yielded:
+            yield i
+        if exception_type is not None:
+            raise exception_type
+        
 
 class RedirectUrlResolverTest(unittest.TestCase):
     ''' Tests for RedirectUrlResolver class
@@ -65,33 +89,44 @@ class RedirectUrlResolverTest(unittest.TestCase):
     :var valid_urls: a list of strings representing valid urls used
      in tests
     :var head_mock: a mocked implementation of head function
-    used by the tested class to perform HEAD requests
+    used by the tested class to perform HEAD requests. Uses an instance
+    of HeadSideEffects as its implementation
     :var resolve_redirects_mock: a mock for
-    requests.Session.resolve_redirects function. A function returned
-     by get_session_resolve_redirects is used as its implementation.
+    requests.Session.resolve_redirects function. An instance of
+    ResolveRedirectsSideEffects is used as its implementation
+    :var redirect_results: points to an instance of
+    ResolveRedirectsSideEffects used as a replacement implementation
+    for requests.Session.resolve_redirects
     :var resolver: an instance of RedirectUrlResolver to be tested
     :var patcher: an object used to patch is_valid_url function
     :var is_valid_url_mock: a mocked implementation of
      the is_valid_url function
-     :var _response_mocks: a list of mock objects representing
-      response objects returned by requests.Session.resolve_redirects.
-      get_response_mocks function is used to populate it for given test
     '''
-    valid_urls = ['http://first.com', 'http://122.55.33.21',
-    'http://[2001:db8:abc:123::42]']
+    redirect_url_chain = [
+                 'http://test.com',
+                 'http://first.com',
+                 'http://122.55.33.21',
+                 'http://[2001:db8:abc:123::42]'
+                 ]
+    
+    no_redirect_url_chain = [
+                       'http://noredirects.com'
+                       ]
+    
     def setUp(self):
         
         session_mock = Mock()
         
         self.head_mock = session_mock.head
+        self.head_mock.side_effect = HeadSideEffects()
         self.resolve_redirects_mock = session_mock.resolve_redirects
+        self.redirect_results = ResolveRedirectsSideEffects()
+        self.resolve_redirects_mock.side_effect = self.redirect_results
         
         self.resolver = RedirectUrlResolver(session_mock)
         
         self.patcher = patch('spam_lists.utils.is_valid_url')
         self.is_valid_url_mock = self.patcher.start()
-        
-        self._response_mocks = []
         
     def tearDown(self):
         
@@ -103,104 +138,137 @@ class RedirectUrlResolverTest(unittest.TestCase):
         
         with self.assertRaises(InvalidURLError):
             next(self.resolver.get_locations('http://test.com'))
-        
-    def _set_up_resolve_redirects(self, urls, exception_type):
-        self._response_mocks = get_response_mocks(urls)
-        
-        side_effect = get_session_resolve_redirects(
-                                                    self._response_mocks,
-                                                    exception_type
-                                                    )
-        self.resolve_redirects_mock.side_effect = side_effect
-        
-    def _set_last_location_header(self, url):
-        
-        all_responses = [self.head_mock.return_value] + self._response_mocks
-        all_responses[-1].headers = {'location': url}
     
-    def _test_get_locations(self, expected):
+    def _set_up_side_effects(self, url_histories, exceptions=None,
+                          last_location=''):
+        ''' Prepare mocks for their calls to have expected side effects
         
-        url_generator = self.resolver.get_locations('http://test.com')
+        :param url_histories: a sequence containing sequences of
+        url addresses of all responses to a request to a redirecting url
+        :param exceptions: a dictionary mapping initial urls of
+        redirection chains to exceptions raised when attempting to
+        get response to a request to final location
+        :param last_location: a value for location response header,
+        specifying the location of the last request, if it couldn't be
+        completed
+        '''
+        for history in url_histories:
+            response_mocks = [get_response_mock(u) for u in history]
+            response_mocks[-1].headers = {'location':last_location}
+            first_response = response_mocks.pop(0)
+            self.head_mock.side_effect[history[0]] = first_response
+            self.redirect_results.responses[first_response] = response_mocks
+            if exceptions is None:
+                exceptions = {}
+            exception_type = exceptions.get(history[0])
+            self.redirect_results.exceptions[first_response] = exception_type   
+    
+    def _test_get_locations(self, argument, expected):
+        
+        url_generator = self.resolver.get_locations(argument)
         
         self.assertEqual(expected, list(url_generator))
         
     @parameterized.expand([
-                           ('no_url', []),
-                           ('urls', valid_urls)
+                           ('no_url', no_redirect_url_chain),
+                           ('urls', redirect_url_chain)
                            ])
-    def test_get_locations_yields(self, _, expected):
+    def test_get_locations_yields(self, _, history):
+        expected = history[1:]
+        self._set_up_side_effects([history])
         
-        self._set_up_resolve_redirects(expected, None)
-        
-        self._test_get_locations(expected)
+        self._test_get_locations(history[0], expected)
         
     @parameterized.expand([
-                           ('initial_url_casuing_timeout', [], Timeout),
-                           ('last_url_casuing_timeout', valid_urls, Timeout),
-                           ('initial_invalid_url', [], InvalidURL, False),
-                           ('last_invalid_url', valid_urls, InvalidURL, False),
+                           (
+                            'initial_url_causing_timeout',
+                            no_redirect_url_chain,
+                            Timeout
+                            ),
+                           (
+                            'last_url_casuing_timeout',
+                            redirect_url_chain,
+                            Timeout
+                            ),
+                           (
+                            'initial_invalid_url',
+                            no_redirect_url_chain,
+                            InvalidURL,
+                            False
+                            ),
+                           (
+                            'last_invalid_url',
+                            redirect_url_chain,
+                            InvalidURL,
+                            False
+                            ),
                            (
                             'initial_url_causing_connection_error',
-                            [],
+                            no_redirect_url_chain,
                             ConnectionError
                             ),
                            (
                             'last_url_causing_connection_error',
-                            valid_urls, ConnectionError
+                            redirect_url_chain, ConnectionError
                             ),
                            (
                             'initial_invalid_url_causing_connection_error',
-                            [],
+                            no_redirect_url_chain,
                             ConnectionError,
                             False
                             ),
                            (
                             'last_invalid_url_causing_connection_error',
-                            valid_urls,
+                            redirect_url_chain,
                             ConnectionError,
                             False
                             ),
-                           ('initial_invalid_schema', [], InvalidSchema),
-                           ('last_invalid_schema', valid_urls, InvalidSchema),
+                           (
+                            'initial_invalid_schema',
+                            no_redirect_url_chain,
+                            InvalidSchema
+                            ),
+                           (
+                            'last_invalid_schema',
+                            redirect_url_chain,
+                            InvalidSchema
+                            ),
                            (
                             'initial_invalid_url_with_invalid_schema',
-                            [],
+                            no_redirect_url_chain,
                             InvalidSchema,
                             False
                             ),
                            (
                             'last_invalid_url_with_invalid_schema',
-                            valid_urls,
+                            redirect_url_chain,
                             InvalidSchema,
                             False
                             )
                            ])
-    def test_get_locations_for(self, _, locations,
+    def test_get_locations_for(self, _, history,
                                exception_type, triggered_by_valid_url = True):
         ''' The get_locations method is expected to yield all
          valid urls appearing as url addresses and location headers in
          response histories for given urls
-         
-        :param locations: urls of expected responses
+
+        :param history: url addresses of all responses in redirection chain
         :param exception_type: a type of exception to be raised while
         getting a response to the last location header value
         :param triggered_by_valid_url: if True, the value of the last
         location header - the one that tiggered an exception - is
         a valid url, and therefore it is also expected to be yielded
         '''
-        expected = list(locations)
-        self._set_up_resolve_redirects(expected, exception_type)
-        
+        expected = history[1:]
+        exceptions = {history[0]: exception_type}
         error_source = 'http://triggered.error.com'
+        self._set_up_side_effects([history], exceptions, error_source)
         if triggered_by_valid_url:
             expected += [error_source]
         else:
-            is_valid_url = lambda u: u in expected+['http://test.com']
+            is_valid_url = lambda u: u in history
             self.is_valid_url_mock.side_effect = is_valid_url
-        
-        self._set_last_location_header(error_source)
-        
-        self._test_get_locations(expected)
+        self._test_get_locations(history[0], expected)
 
 
 class UrlsAndLocationsTest(unittest.TestCase):
