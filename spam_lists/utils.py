@@ -7,15 +7,13 @@ composite spam url checkers.
 
 from __future__ import unicode_literals
 
-from itertools import chain
-
 from builtins import object
 from requests import Session
 from requests.exceptions import ConnectionError, InvalidSchema, InvalidURL, \
 Timeout
 
 from .exceptions import InvalidURLError
-from .validation import accepts_valid_urls, is_valid_url
+from .validation import is_valid_url
 
 
 class CachedIterable(object):
@@ -183,56 +181,4 @@ class UrlTesterChain(object):
                 if url not in seen:
                     seen.add(url)
                     yield url
-                    
-class UrlsAndLocations(object):
-    ''' 
-    An iterable returning given urls and
-    their redirect urls
-    '''
-    
-    @accepts_valid_urls
-    def __init__(self, urls, redirect_resolver=RedirectUrlResolver()):
-        ''' Constructor
-        
-        :param urls: a sequence of urls
-        :param redirect resolver: an object that has get_locations method
-        :raises InvalidURLError: if the urls argument contains an invalid url
-        '''
-        
-        self._redirect_resolver = redirect_resolver
-        self._all_resolved = False
-        
-        self._initial_urls = set(urls)
-        self._cached_urls = list(self._initial_urls)
-        
-    def __iter__(self):
-        ''' Get iterator that returns all urls acquired so far (initial urls
-        provided when creating the instance + redirect urls).
-        
-        If the url resolution was not completed, the methods
-        performs further resolution when necessary
-        '''
-        
-        if self._all_resolved:
-            return iter(self._cached_urls)
-        
-        return chain(self._cached_urls, self._get_redirect_urls())
-    
-    def _get_redirect_urls(self):
-        '''
-        Get redirect urls for all initial urls
-        
-        Each value yielded by the function is cached, so it
-        can be reused in next loop.
-        
-        :returns: redirect url value returned
-        by _redirect_resolver for given initial url, if it
-        was not cached before
-        '''
-        for url in self._initial_urls:
-            for redirect_url in self._redirect_resolver.get_locations(url):
-                if redirect_url not in self._cached_urls:
-                    self._cached_urls.append(redirect_url)
-                    yield redirect_url
-        self._all_resolved = True
 

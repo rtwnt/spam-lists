@@ -2,7 +2,6 @@
 from __future__ import unicode_literals
 
 from collections import defaultdict
-from itertools import chain
 from random import shuffle
 
 #pylint: disable-msg=redefined-builtin
@@ -13,8 +12,8 @@ Timeout
 
 from spam_lists.exceptions import InvalidURLError, UnknownCodeError
 from spam_lists.structures import AddressListItem
-from spam_lists.utils import RedirectUrlResolver, UrlsAndLocations, \
-UrlTesterChain, CachedIterable
+from spam_lists.utils import RedirectUrlResolver, UrlTesterChain, \
+CachedIterable
 from test.compat import unittest, Mock, patch, lru_cache, MagicMock
 from test.unit.common_definitions import UrlTesterTestBase, \
 TestFunctionDoesNotHandleProvider
@@ -304,93 +303,6 @@ class RedirectUrlResolverTest(unittest.TestCase):
         cached_iterable_mock.return_value = expected
         actual = self.resolver.get_urls_and_locations(['http://test.com'])
         self.assertEqual(expected, actual)
-
-
-class UrlsAndLocationsTest(unittest.TestCase):
-    ''' Tests for UrlsAndLocations class
-    
-    '''
-    valid_urls = ['http://first.com', 'http://122.55.33.21',
-    'http://[2001:db8:abc:123::42]']
-    url_redirects = {
-                     'http://url1.com': [
-                                         'http://redirect1.com',
-                                         'http://redirect2.com'
-                                         ],
-                     'http://88.66.55.22': [
-                                            'http://abc.com',
-                                            'https://def.com'
-                                            ],
-                     'http://host.com': [
-                                         'http://88.66.55.22',
-                                         'http://abc.com',
-                                         'https://def.com'
-                                         ]
-                     }
-    
-    def setUp(self):
-        self.is_valid_url_patcher = patch('spam_lists.utils.is_valid_url')
-        self.is_valid_url_mock = self.is_valid_url_patcher.start()
-        self.redirect_resolver_mock = Mock()
-        
-    def tearDown(self):
-        
-        self.is_valid_url_patcher.stop()
-        
-    def _get_tested_instance(self):
-        self._set_redirect_urls(self.url_redirects)
-        initial_urls = list(self.url_redirects.keys())
-        return UrlsAndLocations(initial_urls, self.redirect_resolver_mock)
-    
-    def test_init_for_invalid_url(self):
-        invalid_url = 'invalid.url.com'
-        self.is_valid_url_mock.side_effect = lambda u: u != invalid_url
-
-        self.assertRaises(
-                          InvalidURLError,
-                          UrlsAndLocations,
-                          self.valid_urls+[invalid_url]
-                          )
-        
-    def _set_redirect_urls(self, redirect_locations_per_url):
-        
-        side_effect = lambda u: redirect_locations_per_url.get(u, [])
-        self.redirect_resolver_mock.get_locations.side_effect = side_effect
-        
-    def test_iter_starts_with_input(self):
-        urls_and_locations = self._get_tested_instance()
-        
-        for i, _ in enumerate(urls_and_locations):
-            if i == len(list(self.url_redirects.keys())) - 1:
-                break
-            
-        self.redirect_resolver_mock.get_locations.assert_not_called()
-        
-    def test_iter_has_constant_order(self):
-        urls_and_locations = self._get_tested_instance()
-        
-        first_run_results = list(urls_and_locations)
-        second_run_results = list(urls_and_locations)
-        
-        self.assertSequenceEqual(first_run_results, second_run_results)
-        
-    def test_iter_returns_no_duplicates(self):
-        urls_and_locations = self._get_tested_instance()
-        
-        expected_items = set(chain(list(self.url_redirects.keys()),
-                                   *list(self.url_redirects.values())))
-        actual_items = list(urls_and_locations)
-            
-        self.assertCountEqual(expected_items, actual_items)
-        
-    def test_iter_returns_cached(self):
-        urls_and_locations = self._get_tested_instance()
-        
-        list(urls_and_locations)
-        self.redirect_resolver_mock.get_locations.reset_mock()
-        
-        list(urls_and_locations)
-        self.redirect_resolver_mock.get_locations.assert_not_called()
         
         
 @lru_cache()
