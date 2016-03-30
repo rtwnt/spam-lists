@@ -535,7 +535,39 @@ class HostCollectionTest(
                               in self.tested_instance.hosts)
          
         self.assertTrue(in_host_collection)
-         
+        
+    def test_add_for_subdomain(self):
+        ''' A subdomain to a domain already listed in the collection
+        is expected to be ignored when added to the collection '''
+        initial_hosts = [Mock()]
+        self.tested_instance.hosts = set(initial_hosts)
+        self.host_factory_mock.side_effect = lambda h: Mock()
+        self.tested_instance.add('subdomain.domain.com')
+        self.assertCountEqual(initial_hosts, self.tested_instance.hosts)
+
+    def test_add_for_the_same_value(self):
+        '''A value being added to the collection is being ignored if it
+        already exists in the collection '''
+        host_obj = Mock()
+        host_obj.is_subdomain.return_value = False
+        initial_hosts = [host_obj]
+        self.tested_instance.hosts = set(initial_hosts)
+        self.host_factory_mock.side_effect = lambda h: host_obj
+        self.tested_instance.add('domain.com')
+        self.assertCountEqual(initial_hosts, self.tested_instance.hosts)
+
+    def test_add_a_superdomain(self):
+        ''' A superdomain of a domain listed in the collection
+        is expected to replace its subdomain when added '''
+        initial_hosts = [Mock()]
+        self.tested_instance.hosts = set(initial_hosts)
+        superdomain = Mock()
+        superdomain.is_subdomain.return_value = False
+        self.host_factory_mock.side_effect = lambda h: superdomain
+        self.tested_instance.add('domain.com')
+        expected = [superdomain]
+        self.assertCountEqual(expected, self.tested_instance.hosts)
+
     def _set_matching_hosts(self, hosts):
         self.tested_instance.hosts = [self.host_factory_mock(h) for h in hosts]
         
