@@ -155,7 +155,7 @@ def host_list_host_factory(host):
     host_object.to_unicode.return_value = host
     return host_object
 
-
+#pylint: disable=too-many-public-methods
 class HostListTest(HostListTestMixin, unittest.TestCase):
     ''' Tests for HostList class
     
@@ -404,7 +404,9 @@ def create_gsb_post(expected_401, spam_urls, classification):
             
         return response
     return post
-        
+
+
+#pylint: disable=too-many-public-methods
 class GoogleSafeBrowsingTest(UrlTesterTestMixin, unittest.TestCase):
     ''' Tests for GoogleSafeBrowsing class
     

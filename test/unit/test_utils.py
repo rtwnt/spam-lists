@@ -59,8 +59,9 @@ class ResolveRedirectsSideEffects(object):
             yield i
         if exception_type is not None:
             raise exception_type
-        
 
+
+#pylint: disable=too-many-public-methods
 class RedirectUrlResolverTest(unittest.TestCase):
     ''' Tests for RedirectUrlResolver class
     
@@ -311,6 +312,8 @@ def get_url_tester_mock(identifier):
     source.identifier = identifier
     return source
 
+
+#pylint: disable=too-many-public-methods
 class UrlTesterChainTest(
                          UrlTesterTestBase,
                          TestFunctionDoesNotHandleProvider,
@@ -472,6 +475,7 @@ class UrlTesterChainTest(
                                                 )
 
 
+#pylint: disable=too-many-public-methods
 class CachedIterableTest(unittest.TestCase):
     ''' Tests for CachedIterable class
     

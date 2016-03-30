@@ -134,6 +134,7 @@ REASON_TO_SKIP = (
                   )
 
 
+#pylint: disable=too-many-public-methods
 #@unittest.skip(REASON_TO_SKIP)
 class SpamhausZenTest(HostListClientTestMixin, unittest.TestCase):
     tested_client = SPAMHAUS_ZEN
@@ -145,7 +146,7 @@ class SpamhausZenTest(HostListClientTestMixin, unittest.TestCase):
                                                  [2, 4, 10]
                                                  )
     
-
+#pylint: disable=too-many-public-methods
 #@unittest.skip(REASON_TO_SKIP)
 class SpamhausDBLTest(HostListClientTestMixin, unittest.TestCase):
     tested_client = SPAMHAUS_DBL
@@ -165,11 +166,15 @@ class SURBLTest(HostListClientTestMixin):
                                         [2, 4, 8, 16, 32, 64]
                                         )
 
+
+#pylint: disable=too-many-public-methods
 class SURBLMultiIPTest(SURBLTest, unittest.TestCase):
     listed = '127.0.0.2'
     not_listed = '127.0.0.1'
     not_listed_2 = '8.8.8.8'
-    
+
+
+#pylint: disable=too-many-public-methods
 class SURBLMultiDomainTest(SURBLTest, unittest.TestCase):
     listed = 'surbl-org-permanent-test-point.com'
     not_listed = 'test.com'
@@ -209,6 +214,8 @@ REASON_TO_SKIP_GSB_TEST = (
                            ' file: {}'.format(GSB_API_KEY_FILE)
                            )
 
+
+#pylint: disable=too-many-public-methods
 @unittest.skipIf(not SAFE_BROWSING_API_KEY, REASON_TO_SKIP_GSB_TEST)
 class GoogleSafeBrowsingTest(UrlTesterClientTestMixin, unittest.TestCase):
     listed_url = 'http://www.gumblar.cn/'

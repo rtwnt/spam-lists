@@ -66,6 +66,8 @@ class ValidationDecoratorTestMixin(object):
                           )
         self.function.assert_not_called()
 
+
+#pylint: disable=too-many-public-methods
 class AcceptValidUrlsTest(ValidationDecoratorTestMixin, unittest.TestCase):
     ''' Tests for accepts_valid_urls decorator '''
     exception_type = InvalidURLError
@@ -94,7 +96,9 @@ class AcceptValidUrlsTest(ValidationDecoratorTestMixin, unittest.TestCase):
                            ])
     def test_for_urls_with(self, _, urls):
         self._test_wrapper_for_invalid(urls)
-        
+
+
+#pylint: disable=too-many-public-methods
 class AcceptsValidHostTest(ValidationDecoratorTestMixin, unittest.TestCase):
     ''' Tests for accepts_valid_host decorator '''
     exception_type = InvalidHostError
@@ -120,12 +124,7 @@ class AcceptsValidHostTest(ValidationDecoratorTestMixin, unittest.TestCase):
         self._test_wrapper_for_invalid(value)
 
 
-def get_url_tester_mock(identifier):
-    source = Mock()
-    source.identifier = identifier
-    return source
-
-          
+#pylint: disable=too-many-public-methods
 class IsValidUrlTest(unittest.TestCase):
     ''' Tests for is_valid_url function '''
     @parameterized.expand([

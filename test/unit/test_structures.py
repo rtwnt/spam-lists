@@ -30,7 +30,8 @@ class ClassificationCodeMapTestMixin(object):
     def setUp(self):
         self.code_item_class = {}
         self.classification_code_map = self.factory(self.code_item_class)
-        
+
+#pylint: disable=too-many-public-methods
 class SimpleClassificationCodeMapTest(
                                            ClassificationCodeMapTestMixin,
                                            unittest.TestCase
