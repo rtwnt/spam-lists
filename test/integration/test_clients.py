@@ -8,9 +8,9 @@ from builtins import object
 import tldextract
 from validators import ipv6
 
-from spam_lists.clients import spamhaus_zen, spamhaus_zen_classification, \
-spamhaus_dbl, spamhaus_dbl_classification, surbl_multi, \
-surbl_multi_classification
+from spam_lists.clients import SPAMHAUS_ZEN, SPAMHAUS_ZEN_CLASSIFICATION, \
+SPAMHAUS_DBL, SPAMHAUS_DBL_CLASSIFICATION, SURBL_MULTI, \
+SURBL_MULTI_CLASSIFICATION
 from spam_lists.service_models import HpHosts, GoogleSafeBrowsing
 from spam_lists.structures import AddressListItem
 from test.compat import unittest
@@ -127,41 +127,41 @@ class HostListClientTestMixin(UrlTesterClientTestMixin):
         actual = self.tested_client.lookup(self.listed)
         self.assertEqual(self.listed_item, actual)
 
-reason_to_skip = (
+REASON_TO_SKIP = (
                   'These tests are expected to fail frequently for users of'
                   ' public DNS resolvers:'
                   ' https://www.spamhaus.org/faq/section/DNSBL%20Usage#261'
                   )
 
 
-@unittest.skip(reason_to_skip)
+#@unittest.skip(REASON_TO_SKIP)
 class SpamhausZenTest(HostListClientTestMixin, unittest.TestCase):
-    tested_client = spamhaus_zen
+    tested_client = SPAMHAUS_ZEN
     listed = '127.0.0.2'
     not_listed = '127.0.0.1'
     not_listed_2 = '8.8.8.8'
     classification = get_classification(
-                                                 spamhaus_zen_classification,
+                                                 SPAMHAUS_ZEN_CLASSIFICATION,
                                                  [2, 4, 10]
                                                  )
     
 
-@unittest.skip(reason_to_skip)
+#@unittest.skip(REASON_TO_SKIP)
 class SpamhausDBLTest(HostListClientTestMixin, unittest.TestCase):
-    tested_client = spamhaus_dbl
+    tested_client = SPAMHAUS_DBL
     listed = 'dbltest.com'
     not_listed = 'example.com'
     not_listed_2 = 'google.com'
     classification = get_classification(
-                                        spamhaus_dbl_classification,
+                                        SPAMHAUS_DBL_CLASSIFICATION,
                                         [2]
                                         )
 
 
 class SURBLTest(HostListClientTestMixin):
-    tested_client = surbl_multi
+    tested_client = SURBL_MULTI
     classification = get_classification(
-                                        surbl_multi_classification,
+                                        SURBL_MULTI_CLASSIFICATION,
                                         [2, 4, 8, 16, 32, 64]
                                         )
 
@@ -175,14 +175,14 @@ class SURBLMultiDomainTest(SURBLTest, unittest.TestCase):
     not_listed = 'test.com'
     not_listed_2 = 'google.com'
     
-hp_hosts = HpHosts('spam-lists-test-suite')
+HP_HOSTS = HpHosts('spam-lists-test-suite')
 
 
 class HpHostsIPTest(HostListClientTestMixin, unittest.TestCase):
     listed = '174.36.207.146'
     not_listed = '64.233.160.0'
     not_listed_2 = '2001:ddd:ccc:123::55'
-    tested_client = hp_hosts
+    tested_client = HP_HOSTS
     classification = set()
 
 
@@ -190,26 +190,26 @@ class HpHostsDomainTest(HostListClientTestMixin, unittest.TestCase):
     listed = 'ecardmountain.com'
     not_listed = 'google.com'
     not_listed_2 = 'microsoft.com'
-    tested_client = hp_hosts
+    tested_client = HP_HOSTS
     classification = set(['EMD'])
     
-gsb_api_key_file = os.path.join(
+GSB_API_KEY_FILE = os.path.join(
                                 os.path.dirname(__file__), 
                                 'google_safe_browsing_api_key.txt'
                                 )
 try:
-    with open(gsb_api_key_file, 'r') as key_file:
-        safe_browsing_api_key = key_file.readline().rstrip()
+    with open(GSB_API_KEY_FILE, 'r') as key_file:
+        SAFE_BROWSING_API_KEY = key_file.readline().rstrip()
         
 except IOError:
-    safe_browsing_api_key = None
+    SAFE_BROWSING_API_KEY = None
 
-reason_to_skip_gsb_test = (
+REASON_TO_SKIP_GSB_TEST = (
                            'No api key provided. Provide the key in'
-                           ' file: {}'.format(gsb_api_key_file)
+                           ' file: {}'.format(GSB_API_KEY_FILE)
                            )
 
-@unittest.skipIf(not safe_browsing_api_key, reason_to_skip_gsb_test)
+@unittest.skipIf(not SAFE_BROWSING_API_KEY, REASON_TO_SKIP_GSB_TEST)
 class GoogleSafeBrowsingTest(UrlTesterClientTestMixin, unittest.TestCase):
     listed_url = 'http://www.gumblar.cn/'
     not_listed_url = 'http://www.google.com/'
@@ -222,7 +222,7 @@ class GoogleSafeBrowsingTest(UrlTesterClientTestMixin, unittest.TestCase):
         cls.tested_client = GoogleSafeBrowsing(
                                        'spam-lists-test-suite',
                                        '0.5',
-                                       safe_browsing_api_key
+                                       SAFE_BROWSING_API_KEY
                                        )
         
         cls.listed_item = AddressListItem(

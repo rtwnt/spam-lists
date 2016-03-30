@@ -12,16 +12,16 @@ from .structures import SimpleClassificationCodeMap, ip_address, \
 registered_domain, registered_domain_or_ip, SumClassificationCodeMap
 
 
-spamhaus_xbl_classification = (
+SPAMHAUS_XBL_CLASSIFICATION = (
                                'CBL (3rd party exploits such as proxies,'
                                ' trojans, etc.)'
                                )
-spamhaus_pbl_classification = (
+SPAMHAUS_PBL_CLASSIFICATION = (
                                'End-user Non-MTA IP addresses set by ISP'
                                ' outbound mail policy'
                                )
 
-spamhaus_zen_classification = {
+SPAMHAUS_ZEN_CLASSIFICATION = {
                                2: (
                                    'Direct UBE sources, spam operations'
                                     ' & spam services'
@@ -30,23 +30,23 @@ spamhaus_zen_classification = {
                                    'Direct snowshoe spam sources detected'
                                    ' via automation'
                                    ),
-                               4: spamhaus_xbl_classification,
-                               5: spamhaus_xbl_classification,
-                               6: spamhaus_xbl_classification,
-                               7: spamhaus_xbl_classification,
-                               10: spamhaus_pbl_classification,
-                               11: spamhaus_pbl_classification
+                               4: SPAMHAUS_XBL_CLASSIFICATION,
+                               5: SPAMHAUS_XBL_CLASSIFICATION,
+                               6: SPAMHAUS_XBL_CLASSIFICATION,
+                               7: SPAMHAUS_XBL_CLASSIFICATION,
+                               10: SPAMHAUS_PBL_CLASSIFICATION,
+                               11: SPAMHAUS_PBL_CLASSIFICATION
                                }
 
-spamhaus_zen = DNSBL(
+SPAMHAUS_ZEN = DNSBL(
                      'spamhaus_zen',
                      'zen.spamhaus.org',
-                     SimpleClassificationCodeMap(spamhaus_zen_classification),
+                     SimpleClassificationCodeMap(SPAMHAUS_ZEN_CLASSIFICATION),
                      ip_address
                      )
 
 
-spamhaus_dbl_classification = {
+SPAMHAUS_DBL_CLASSIFICATION = {
                                2: 'spam domain',
                                4: 'phishing domain',
                                5: 'malware domain',
@@ -58,14 +58,14 @@ spamhaus_dbl_classification = {
                                106: 'abused legit botnet C&C',
                                }
 
-spamhaus_dbl = DNSBL(
+SPAMHAUS_DBL = DNSBL(
                      'spamhaus_dbl',
                      'dbl.spamhaus.org',
-                     SimpleClassificationCodeMap(spamhaus_dbl_classification),
+                     SimpleClassificationCodeMap(SPAMHAUS_DBL_CLASSIFICATION),
                      registered_domain
                      )
 
-surbl_multi_classification = {
+SURBL_MULTI_CLASSIFICATION = {
                               2: 'deprecated (previously SpamCop web sites)',
                               4: 'listed on WS (will migrate to ABUSE'
                               ' on 1 May 2016)',
@@ -79,9 +79,9 @@ surbl_multi_classification = {
                               128: 'Cracked sites'
                               }
 
-surbl_multi = DNSBL(
+SURBL_MULTI = DNSBL(
                     'surbl_multi',
                     'multi.surbl.org',
-                    SumClassificationCodeMap(surbl_multi_classification),
+                    SumClassificationCodeMap(SURBL_MULTI_CLASSIFICATION),
                     registered_domain_or_ip
                     )
