@@ -27,7 +27,7 @@ def url_from_host(host):
     return 'http://'+host
 
 
-def get_expected_classification(classification, return_codes):
+def get_classification(classification, return_codes):
     return set(v for k, v in list(classification.items()) if k in return_codes)
     
 
@@ -111,7 +111,7 @@ class SpamhausZenTest(HostListClientTestMixin, unittest.TestCase):
     listed = '127.0.0.2'
     not_listed = '127.0.0.1'
     not_listed_2 = '8.8.8.8'
-    classification = get_expected_classification(
+    classification = get_classification(
                                                  spamhaus_zen_classification,
                                                  [2, 4, 10]
                                                  )
@@ -123,23 +123,23 @@ class SpamhausDBLTest(HostListClientTestMixin, unittest.TestCase):
     listed = 'dbltest.com'
     not_listed = 'example.com'
     not_listed_2 = 'google.com'
-    classification = get_expected_classification(
-                                                 spamhaus_dbl_classification,
-                                                 [2]
-                                                 )
+    classification = get_classification(
+                                        spamhaus_dbl_classification,
+                                        [2]
+                                        )
 
 
-expected_surbl_classification = get_expected_classification(
-                                                            surbl_multi_classification,
-                                                            [2, 126]
-                                                            )
+expected_surbl_classification = get_classification(
+                                                   surbl_multi_classification,
+                                                   [2, 126]
+                                                   )
 
 class SURBLTest(HostListClientTestMixin):
     tested_client = surbl_multi
-    classification = get_expected_classification(
-                                                 surbl_multi_classification,
-                                                 [2, 4, 8, 16, 32, 64]
-                                                 )
+    classification = get_classification(
+                                        surbl_multi_classification,
+                                        [2, 4, 8, 16, 32, 64]
+                                        )
 
 class SURBLMultiIPTest(SURBLTest, unittest.TestCase):
     listed = '127.0.0.2'
