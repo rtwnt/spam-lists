@@ -258,6 +258,43 @@ class RedirectUrlResolverTest(unittest.TestCase):
             self.is_valid_url_mock.side_effect = is_valid_url
         self._test_get_locations(history[0], expected)
 
+    def _test_get_new_locations(self, histories):
+        self._set_up_side_effects(histories)
+        input_data = [h[0] for h in histories]
+        redirects = [u for h in histories for u in h[1:]]
+        expected = list(set(redirects) - set(input_data))
+        actual = list(self.resolver.get_new_locations(input_data))
+        self.assertCountEqual(expected, actual)
+        
+    def test_get_new_locations(self):
+        ''' The method is expected to yield only new urls,
+        that is urls that were not part of the original input '''
+        no_redirects = 'http://noredirects.com'
+        histories = [
+                     [no_redirects],
+                     ['http://abc.com', no_redirects],
+                     [
+                      'http://first.com',
+                      'http://second.com',
+                      'http://third.com'
+                      ]
+                     ]
+        self._test_get_new_locations(histories)
+
+    def test_get_new_unique_locations(self):
+        ''' The generator returned by get_new_locations is expected
+        to yield no urls that it yielded previously '''
+        duplicated_part = [
+                           'http://first.com',
+                           'http://second.com',
+                           'http://third.com'
+                           ]
+        histories = [
+                     duplicated_part,
+                     ['http://abc.com'] + duplicated_part
+                     ]
+        self._test_get_new_locations(histories)
+
 
 class UrlsAndLocationsTest(unittest.TestCase):
     ''' Tests for UrlsAndLocations class

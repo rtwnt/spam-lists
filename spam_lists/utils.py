@@ -100,6 +100,25 @@ class RedirectUrlResolver(object):
             if isinstance(error, Timeout) or is_valid_url(last_url):
                 yield last_url
 
+    def get_new_locations(self, urls):
+        ''' Get valid location header values for all given urls
+        
+        The returned values are new, that is: they do not repeat any
+        value contained in the original input. Only unique values
+        are yielded.
+        
+        :param urls: a list of url addresses
+        :returns: valid location header values from responses
+        to the urls
+        '''
+        seen = set(urls)
+        for i in urls:
+            for x in self.get_locations(i):
+                if x not in seen:
+                    seen.add(x)
+                    yield x
+
+
 class UrlTesterChain(object):
     '''
     A url tester using a sequence of other url testers
