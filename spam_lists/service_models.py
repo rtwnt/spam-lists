@@ -440,7 +440,7 @@ class HostCollection(HostList):
         host_obj = self._host_factory(host_value)
         
         for listed in self.hosts:
-            if host_obj.is_subdomain() or host_obj == listed:
+            if host_obj.is_subdomain(listed) or host_obj == listed:
                 return
             
             if listed.is_subdomain(host_obj):
