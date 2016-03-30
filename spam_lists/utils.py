@@ -117,6 +117,17 @@ class RedirectUrlResolver(object):
                 if x not in seen:
                     seen.add(x)
                     yield x
+                
+    def get_urls_and_locations(self, urls):
+        ''' Get urls and their redirection addresses
+        
+        :param urls: a list of url addresses
+        :returns: an instance of CachedIterable containing given urls
+        and valid location header values of their responses
+        '''
+        location_generator = self.get_new_locations(urls)
+        initial_cache = list(set(urls))
+        return CachedIterable(location_generator, initial_cache)
 
 
 class UrlTesterChain(object):

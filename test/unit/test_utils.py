@@ -295,6 +295,16 @@ class RedirectUrlResolverTest(unittest.TestCase):
                      ]
         self._test_get_new_locations(histories)
 
+    @patch('spam_lists.utils.CachedIterable')
+    def test_get_urls_and_locations(self, cached_iterable_mock):
+        ''' The method get_urls_and_locations is expected to return
+        an instance of CachedIterable.
+        '''
+        expected = Mock()
+        cached_iterable_mock.return_value = expected
+        actual = self.resolver.get_urls_and_locations(['http://test.com'])
+        self.assertEqual(expected, actual)
+
 
 class UrlsAndLocationsTest(unittest.TestCase):
     ''' Tests for UrlsAndLocations class
