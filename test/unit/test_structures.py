@@ -34,9 +34,9 @@ class ClassificationCodeMapTestMixin(object):
 
 #pylint: disable=too-many-public-methods
 class SimpleClassificationCodeMapTest(
-                                           ClassificationCodeMapTestMixin,
-                                           unittest.TestCase
-                                           ):
+                                      ClassificationCodeMapTestMixin,
+                                      unittest.TestCase
+                                      ):
     factory = SimpleClassificationCodeMap
 
     def test_getitem_for_valid_key(self):
@@ -57,9 +57,9 @@ class SimpleClassificationCodeMapTest(
 
 
 class SumClassificationCodeMapTest(
-                                        ClassificationCodeMapTestMixin,
-                                        unittest.TestCase
-                                        ):
+                                   ClassificationCodeMapTestMixin,
+                                   unittest.TestCase
+                                   ):
     factory = SumClassificationCodeMap
 
     def _set_code_item_class(self, code_class):
