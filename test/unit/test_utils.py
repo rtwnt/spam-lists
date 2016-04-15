@@ -353,7 +353,7 @@ class UrlTesterChainTest(
         tester.filter_matching.return_value = list(matching_urls)
         url_items = [self._get_item(u, source_id) for u in matching_urls]
         tester.lookup_matching.return_value = url_items
-        if not tester in self.tested_instance.url_testers:
+        if tester not in self.tested_instance.url_testers:
             self.tested_instance.url_testers.append(tester)
 
     def _get_item(self, url, source_id):

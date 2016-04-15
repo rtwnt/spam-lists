@@ -221,7 +221,7 @@ class HpHosts(HostList):
         return get(url).text
 
     def _contains(self, host_object):
-        return not self._NOT_LISTED in self._query(host_object)
+        return self._NOT_LISTED not in self._query(host_object)
 
     def _get_match_and_classification(self, host_object):
         data = self._query(host_object, True)
