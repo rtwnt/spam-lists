@@ -152,7 +152,7 @@ class IPAddress(object):
         '''
         return name_from_ip(str(self)).relativize(self.reverse_domain)
 
-    def is_subdomain(self, other):
+    def is_subdomain(self, _):
         ''' Check if this object is a subdomain of the other
 
         :param other: another host
