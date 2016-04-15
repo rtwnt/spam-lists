@@ -44,8 +44,8 @@ def is_valid_url(value):
     return (match and is_valid_host(host_str))
 
 
-def accepts_valid_host(f):
-    @functools.wraps(f)
+def accepts_valid_host(func):
+    @functools.wraps(func)
     def wrapper(obj, value, *args, **kwargs):
         ''' Run the function and return its return value
         if the value is host - otherwise raise InvalidHostError
@@ -56,12 +56,12 @@ def accepts_valid_host(f):
         '''
         if not is_valid_host(value):
             raise InvalidHostError
-        return f(obj, value, *args, **kwargs)
+        return func(obj, value, *args, **kwargs)
     return wrapper
 
 
-def accepts_valid_urls(f):
-    @functools.wraps(f)
+def accepts_valid_urls(func):
+    @functools.wraps(func)
     def wrapper(obj, urls, *args, **kwargs):
         '''Run the function and return its return value
          if all given urls are valid - otherwise raise InvalidURLError
@@ -75,5 +75,5 @@ def accepts_valid_urls(f):
             msg_tpl = 'The values: {} are not valid urls'
             msg = msg_tpl.format(','.join(invalid_urls))
             raise InvalidURLError(msg)
-        return f(obj, urls, *args, **kwargs)
+        return func(obj, urls, *args, **kwargs)
     return wrapper
