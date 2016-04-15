@@ -242,7 +242,9 @@ class RedirectUrlResolverTest(unittest.TestCase):
         if triggered_by_valid_url:
             expected += [error_source]
         else:
-            is_valid_url = lambda u: u in history
+
+            def is_valid_url(url):
+                return url in history
             self.is_valid_url_mock.side_effect = is_valid_url
         self._test_get_locations(history[0], expected)
 
@@ -348,7 +350,9 @@ class UrlTesterChainTest(
         a service represented by the mocked url tester
         '''
         tester = get_url_tester_mock(source_id)
-        any_match = lambda u: not set(u).isdisjoint(set(matching_urls))
+
+        def any_match(url):
+            return not set(url).isdisjoint(set(matching_urls))
         tester.any_match.side_effect = any_match
         tester.filter_matching.return_value = list(matching_urls)
         url_items = [self._get_item(u, source_id) for u in matching_urls]

@@ -65,9 +65,13 @@ class UrlTesterTestMixin(UrlTesterTestBaseMixin):
         self._test_filter_matching_for(matching_urls)
 
     def _get_expected_items(self, values):
-        item = lambda i: AddressListItem(i, self.tested_instance,
-                                         self.classification)
-        return [item(v) for v in values]
+        def get_item(item):
+            return AddressListItem(
+                                   item,
+                                   self.tested_instance,
+                                   self.classification
+                                   )
+        return [get_item(v) for v in values]
 
 
 def get_hosts(urls):
@@ -444,7 +448,9 @@ class GoogleSafeBrowsingTest(UrlTesterTestMixin, unittest.TestCase):
                            ])
     def test_unathorized_query_with(self, function_name):
         tested_function = getattr(self.tested_instance, function_name)
-        called_function = lambda u: list(tested_function(u))
+
+        def called_function(urls):
+            return list(tested_function(urls))
         self._set_up_post_mock([], error_401_expected=True)
         self.assertRaises(
                           UnathorizedAPIKeyError,
@@ -457,7 +463,9 @@ def host_collection_host_factory(host):
     host_object = host_list_host_factory(host)
     host_object.is_subdomain.return_value = False
     host_object.__eq__.return_value = False
-    test = lambda h2: host_object.to_unicode() == h2.to_unicode()
+
+    def test(other):
+        return host_object.to_unicode() == other.to_unicode()
     host_object.__eq__.side_effect = test
     host_object.is_subdomain.side_effect = test
     return host_object

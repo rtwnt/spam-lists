@@ -127,7 +127,8 @@ class HostList(object):
         :returns: a list containing matching urls
         :raises InvalidURLError: if there are any invalid urls in the sequence
         '''
-        is_match = lambda u: urlparse(u).hostname in self
+        def is_match(url):
+            return urlparse(url).hostname in self
         return (u for u in urls if is_match(u))
 
 
@@ -372,7 +373,8 @@ class HostCollection(HostList):
         super(HostCollection, self).__init__(hostname_or_ip)
 
     def _contains(self, host_object):
-        test = lambda u: host_object.is_subdomain(u) or host_object == u
+        def test(host):
+            return host_object.is_subdomain(host) or host_object == host
         return any(map(test, self.hosts))
 
     def _get_match_and_classification(self, host_object):
