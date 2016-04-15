@@ -255,7 +255,7 @@ def hostname_or_ip(value):
     return create_host(factories, value)
 
 
-tld_extractor = tldextract.TLDExtract()
+TLD_EXTRACTOR = tldextract.TLDExtract()
 
 
 def registered_domain(value):
@@ -266,7 +266,7 @@ def registered_domain(value):
     :returns: a Hostname instance representing registered domain
     :raises InvalidHostnameError: if the value is not a valid hostname
     '''
-    registered_domain_string = tld_extractor(value).registered_domain
+    registered_domain_string = TLD_EXTRACTOR(value).registered_domain
     return Hostname(registered_domain_string)
 
 def registered_domain_or_ip(value):
