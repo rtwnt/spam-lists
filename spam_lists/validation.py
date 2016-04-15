@@ -67,6 +67,12 @@ def accepts_valid_host(func):
 
 
 def accepts_valid_urls(func):
+    ''' Return a wrapper that runs given method only for arguments
+    that are valid url values
+
+    :param func: a method to be wrapped
+    :returns: a wrapper that adds argument validation
+    '''
     @functools.wraps(func)
     def wrapper(obj, urls, *args, **kwargs):
         '''Run the function and return its return value
