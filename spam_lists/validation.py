@@ -25,7 +25,7 @@ def is_valid_host(value):
     host_validators = validators.ipv4, validators.ipv6, validators.domain
     return any(f(value) for f in host_validators)
 
-url_regex = re.compile(r'^[a-z0-9\.\-\+]*://' #scheme
+URL_REGEX = re.compile(r'^[a-z0-9\.\-\+]*://' #scheme
                        r'(?:\S+(?::\S*)?@)?' #authentication
                        r'(?:[^/:]+|\[[0-9a-f:\.]+\])' # host
                        r'(?::\d{2,5})?' # port
@@ -39,7 +39,7 @@ def is_valid_url(value):
     :param value: a value to test
     :returns: True if the value is valid url string
     '''
-    match = url_regex.match(value)
+    match = URL_REGEX.match(value)
     host_str = urlparse(value).hostname
     return (match and is_valid_host(host_str))
 
