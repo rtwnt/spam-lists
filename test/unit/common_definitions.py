@@ -74,4 +74,3 @@ class TestFunctionDoesNotHandleMixin(object):
             result = function(*args, **kwargs)
             if isinstance(result, GeneratorType):
                 list(result)
-

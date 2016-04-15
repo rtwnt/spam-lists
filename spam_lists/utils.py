@@ -256,4 +256,3 @@ class GeneralizedUrlTester(object):
                                      urls,
                                      resolve_redirects
                                      )
-
