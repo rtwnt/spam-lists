@@ -41,7 +41,7 @@ def is_valid_url(value):
     '''
     match = URL_REGEX.match(value)
     host_str = urlparse(value).hostname
-    return (match and is_valid_host(host_str))
+    return match and is_valid_host(host_str)
 
 
 def accepts_valid_host(func):
