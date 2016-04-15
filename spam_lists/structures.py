@@ -113,7 +113,7 @@ class SumClassificationCodeMap(BaseClassificationCodeMap):
         of the sum is not present in the instance
         '''
         classifications = []
-        for code in self._get_codes(code):
+        for code in get_powers_of_2(code):
             _class = self._get_single_class(code)
             classifications.append(_class)
         return set(classifications)
