@@ -388,7 +388,7 @@ class UrlTesterChainTest(
         shuffle(self.tested_instance.url_testers)
 
     def test_any_match_expecting_true(self):
-        self._test_any_match_returns_true_for(self.url_to_source_id)
+        self._test_any_match_for(self.url_to_source_id)
 
     @parameterized.expand([
                              ('no_matching_url', {}),

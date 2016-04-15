@@ -19,7 +19,7 @@ class UrlTesterTestBaseMixin(object):
     valid_urls = ['http://test.com', 'http://127.33.22.11',
                   'https://[2001:ddd:ccc:123::55]']
 
-    def _test_any_match_returns_true_for(self, matching_urls):
+    def _test_any_match_for(self, matching_urls):
         self._set_matching_urls(matching_urls)
         self.assertTrue(self.tested_instance.any_match(
                                                        self.valid_urls +

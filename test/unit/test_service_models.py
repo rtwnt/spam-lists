@@ -54,7 +54,7 @@ class UrlTesterTestMixin(UrlTesterTestBaseMixin):
 
     @parameterized.expand(valid_url_input)
     def test_any_match_returns_true_for(self, _, matching_urls):
-        self._test_any_match_returns_true_for(matching_urls)
+        self._test_any_match_for(matching_urls)
 
     @parameterized.expand(valid_url_list_input)
     def test_lookup_matching_for(self, _, matching_urls):
