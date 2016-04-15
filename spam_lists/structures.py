@@ -142,6 +142,12 @@ class Hostname(name.Name):
 
 
 class IPAddress(object):
+    ''' A class of objects representing IP address values.
+
+    The instances are used as values tested by clients of
+    IP-address-listing services or as items stored by objects
+    representing such IP address lists.
+    '''
     reverse_domain = None
     @property
     def relative_domain(self):
