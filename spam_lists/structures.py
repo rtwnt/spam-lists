@@ -88,21 +88,6 @@ class SumClassificationCodeMap(BaseClassificationCodeMap):
     of both the same codes as stored in the instance and integers
     that can be represented as a sum of different indexes stored in
     the instance'''
-    def _get_codes(self, code):
-        ''' Get codes from given index
-
-        The valid codes are different powers of 2. This method transforms
-        given integer to a binary string. A reversed value limited to digits
-        of binary number is extracted from it, and each of its characters
-        is enumerated. If it's not 0, it represents one of the powers
-        of 2 whose sums result in index
-
-        :param code: an integer that is supposed to represent a sum
-        of indexes mapping to classes
-        :returns a list of powers of 2 whose sum is equal to index
-        '''
-        return (2**y for y, x in enumerate(bin(code)[:1:-1]) if int(x))
-
     def __getitem__(self, code):
         ''' Get classification for given code
 
