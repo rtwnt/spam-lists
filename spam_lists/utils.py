@@ -175,14 +175,8 @@ class UrlTesterChain(object):
 
 
 class GeneralizedUrlTester(object):
-    ''' A url tester using redirect resolution, whitelist and another url tester
-
-    :var url_tester: an object with any_match, filter_matching and
-    lookup_matching methods
-    :var whitelist: an object with a filter_matching method, used for
-    filtering urls to be tested against the url_tester
-    :var redirect_resolver: an object used for getting valid location
-    header values to test them with the other url values.
+    ''' A url tester using redirect resolution, whitelist
+    and another url tester
     '''
     def __init__(self, url_tester, whitelist=None,
                  redirect_resolver=RedirectUrlResolver()):
