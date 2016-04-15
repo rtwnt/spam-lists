@@ -216,8 +216,8 @@ def create_host(factories, value):
     for func in factories:
         try:
             return  func(value)
-        except InvalidHostError as e:
-            data.append(str(e))
+        except InvalidHostError as ex:
+            data.append(str(ex))
     msg_tpl = "Failed to create a host object for '{}', \
     raising the following errors in the process:"+"\n".join(data)
     raise InvalidHostError(msg_tpl.format(value))
