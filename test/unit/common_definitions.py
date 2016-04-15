@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 
 from types import GeneratorType
 
+#pylint: disable=redefined-builtin
 from builtins import object
 
 

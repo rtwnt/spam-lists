@@ -11,6 +11,7 @@ from __future__ import unicode_literals
 from collections import namedtuple
 import ipaddress
 
+#pylint: disable=redefined-builtin
 from builtins import str, object
 from dns import name
 from dns.reversename import ipv4_reverse_domain, ipv6_reverse_domain, \
