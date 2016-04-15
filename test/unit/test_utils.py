@@ -8,15 +8,15 @@ from random import shuffle
 from builtins import next, range
 from nose_parameterized import parameterized
 from requests.exceptions import ConnectionError, InvalidSchema, InvalidURL, \
-Timeout
+    Timeout
 
 from spam_lists.exceptions import InvalidURLError, UnknownCodeError
 from spam_lists.structures import AddressListItem
 from spam_lists.utils import RedirectUrlResolver, UrlTesterChain, \
-CachedIterable, GeneralizedUrlTester
+    CachedIterable, GeneralizedUrlTester
 from test.compat import unittest, Mock, patch, lru_cache, MagicMock
 from test.unit.common_definitions import UrlTesterTestBaseMixin, \
-TestFunctionDoesNotHandleMixin
+    TestFunctionDoesNotHandleMixin
 
 
 def get_response_mock(url):
@@ -110,7 +110,7 @@ class RedirectUrlResolverTest(unittest.TestCase):
             next(self.resolver.get_locations('http://test.com'))
 
     def _set_up_side_effects(self, url_histories, exceptions=None,
-                          last_location=''):
+                             last_location=''):
         ''' Prepare mocks for their calls to have expected side effects
 
         :param url_histories: a sequence containing sequences of

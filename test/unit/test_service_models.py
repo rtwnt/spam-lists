@@ -8,13 +8,13 @@ from nose_parameterized import parameterized
 from requests.exceptions import HTTPError
 
 from spam_lists.exceptions import UnathorizedAPIKeyError, UnknownCodeError, \
-InvalidURLError, InvalidHostError
+    InvalidURLError, InvalidHostError
 from spam_lists.service_models import DNSBL, GoogleSafeBrowsing, \
-HostCollection, HostList, HpHosts
+    HostCollection, HostList, HpHosts
 from spam_lists.structures import AddressListItem
 from test.compat import unittest, Mock, MagicMock, patch, lru_cache
 from test.unit.common_definitions import UrlTesterTestBaseMixin, \
-TestFunctionDoesNotHandleMixin
+    TestFunctionDoesNotHandleMixin
 
 
 class UrlTesterTestMixin(UrlTesterTestBaseMixin):
@@ -66,7 +66,7 @@ class UrlTesterTestMixin(UrlTesterTestBaseMixin):
 
     def _get_expected_items(self, values):
         item = lambda i: AddressListItem(i, self.tested_instance,
-                                             self.classification)
+                                         self.classification)
         return [item(v) for v in values]
 
 

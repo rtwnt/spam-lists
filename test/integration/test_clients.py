@@ -10,8 +10,8 @@ import tldextract
 from validators import ipv6
 
 from spam_lists.clients import SPAMHAUS_ZEN, SPAMHAUS_ZEN_CLASSIFICATION, \
-SPAMHAUS_DBL, SPAMHAUS_DBL_CLASSIFICATION, SURBL_MULTI, \
-SURBL_MULTI_CLASSIFICATION
+    SPAMHAUS_DBL, SPAMHAUS_DBL_CLASSIFICATION, SURBL_MULTI, \
+    SURBL_MULTI_CLASSIFICATION
 from spam_lists.service_models import HpHosts, GoogleSafeBrowsing
 from spam_lists.structures import AddressListItem
 from test.compat import unittest

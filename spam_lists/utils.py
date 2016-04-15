@@ -11,7 +11,7 @@ from __future__ import unicode_literals
 from builtins import object
 from requests import Session
 from requests.exceptions import ConnectionError, InvalidSchema, InvalidURL, \
-Timeout
+    Timeout
 
 from .exceptions import InvalidURLError
 from .validation import is_valid_url

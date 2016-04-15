@@ -9,7 +9,7 @@ from __future__ import unicode_literals
 
 from .service_models import DNSBL
 from .structures import SimpleClassificationCodeMap, ip_address, \
-registered_domain, registered_domain_or_ip, SumClassificationCodeMap
+    registered_domain, registered_domain_or_ip, SumClassificationCodeMap
 
 
 SPAMHAUS_XBL_CLASSIFICATION = (
@@ -24,8 +24,8 @@ SPAMHAUS_PBL_CLASSIFICATION = (
 SPAMHAUS_ZEN_CLASSIFICATION = {
                                2: (
                                    'Direct UBE sources, spam operations'
-                                    ' & spam services'
-                                    ),
+                                   ' & spam services'
+                                   ),
                                3: (
                                    'Direct snowshoe spam sources detected'
                                    ' via automation'

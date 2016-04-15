@@ -15,13 +15,13 @@ import ipaddress
 from builtins import str, object
 from dns import name
 from dns.reversename import ipv4_reverse_domain, ipv6_reverse_domain, \
-from_address as name_from_ip
+    from_address as name_from_ip
 from future.utils import raise_with_traceback
 import tldextract
 import validators
 
 from .exceptions import InvalidHostError, InvalidHostnameError, \
-InvalidIPv4Error, InvalidIPv6Error, UnknownCodeError
+    InvalidIPv4Error, InvalidIPv6Error, UnknownCodeError
 
 
 class BaseClassificationCodeMap(object):

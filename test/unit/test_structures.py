@@ -7,9 +7,9 @@ from dns import reversename
 from nose_parameterized import parameterized
 
 from spam_lists.exceptions import InvalidHostError, InvalidHostnameError, \
-InvalidIPv4Error, InvalidIPv6Error, UnknownCodeError
+    InvalidIPv4Error, InvalidIPv6Error, UnknownCodeError
 from spam_lists.structures import Hostname, IPv4Address, IPv6Address, \
-SimpleClassificationCodeMap, SumClassificationCodeMap, create_host
+    SimpleClassificationCodeMap, SumClassificationCodeMap, create_host
 from test.compat import unittest, Mock
 
 
