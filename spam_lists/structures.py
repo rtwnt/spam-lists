@@ -11,7 +11,7 @@ from __future__ import unicode_literals
 from collections import namedtuple
 import ipaddress
 
-#pylint: disable=redefined-builtin
+# pylint: disable=redefined-builtin
 from builtins import str, object
 from dns import name
 from dns.reversename import ipv4_reverse_domain, ipv6_reverse_domain, \
@@ -164,7 +164,7 @@ class IPAddress(object):
         '''
         return name_from_ip(str(self)).relativize(self.reverse_domain)
 
-    #pylint: disable=no-self-use
+    # pylint: disable=no-self-use
     def is_subdomain(self, _):
         ''' Check if this object is a subdomain of the other
 

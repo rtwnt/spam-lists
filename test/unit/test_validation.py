@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 
 import unittest
 
-#pylint: disable=redefined-builtin
+# pylint: disable=redefined-builtin
 from builtins import object
 from nose_parameterized import parameterized
 
@@ -64,7 +64,7 @@ class ValidationDecoratorTestMixin(object):
         self.function.assert_not_called()
 
 
-#pylint: disable=too-many-public-methods
+# pylint: disable=too-many-public-methods
 class AcceptValidUrlsTest(ValidationDecoratorTestMixin, unittest.TestCase):
     ''' Tests for accepts_valid_urls decorator '''
     exception_type = InvalidURLError
@@ -94,7 +94,7 @@ class AcceptValidUrlsTest(ValidationDecoratorTestMixin, unittest.TestCase):
         self._test_wrapper_for_invalid(urls)
 
 
-#pylint: disable=too-many-public-methods
+# pylint: disable=too-many-public-methods
 class AcceptsValidHostTest(ValidationDecoratorTestMixin, unittest.TestCase):
     ''' Tests for accepts_valid_host decorator '''
     exception_type = InvalidHostError
@@ -120,7 +120,7 @@ class AcceptsValidHostTest(ValidationDecoratorTestMixin, unittest.TestCase):
         self._test_wrapper_for_invalid(value)
 
 
-#pylint: disable=too-many-public-methods
+# pylint: disable=too-many-public-methods
 class IsValidUrlTest(unittest.TestCase):
     ''' Tests for is_valid_url function '''
     @parameterized.expand([
@@ -180,5 +180,5 @@ class IsValidUrlTest(unittest.TestCase):
             self.assertFalse(actual)
 
 if __name__ == "__main__":
-    #import sys;sys.argv = ['', 'Test.testName']
+    # import sys;sys.argv = ['', 'Test.testName']
     unittest.main()

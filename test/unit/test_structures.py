@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-#pylint: disable=redefined-builtin
+# pylint: disable=redefined-builtin
 from builtins import str, range, object
 from dns import reversename
 from nose_parameterized import parameterized
@@ -13,7 +13,7 @@ from spam_lists.structures import Hostname, IPv4Address, IPv6Address, \
 from test.compat import unittest, Mock
 
 
-#pylint: disable=too-few-public-methods
+# pylint: disable=too-few-public-methods
 class ClassificationCodeMapTestMixin(object):
     ''' A base class for tests for classification code map classes
 
@@ -32,7 +32,7 @@ class ClassificationCodeMapTestMixin(object):
         self.classification_code_map = self.factory(self.code_item_class)
 
 
-#pylint: disable=too-many-public-methods
+# pylint: disable=too-many-public-methods
 class SimpleClassificationCodeMapTest(
                                       ClassificationCodeMapTestMixin,
                                       unittest.TestCase
@@ -179,7 +179,7 @@ class IPv6AddressTest(IpAddressTestMixin, unittest.TestCase):
     reverse_name_root = reversename.ipv6_reverse_domain
     constructor = IPv6Address
     value_error_type = InvalidIPv6Error
-    ip_address ='fe80::0202:b3ff:fe1e:8329'
+    ip_address = 'fe80::0202:b3ff:fe1e:8329'
 
 
 class CreateHostTest(unittest.TestCase):
@@ -228,5 +228,5 @@ class CreateHostTest(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    #import sys;sys.argv = ['', 'Test.testName']
+    # import sys;sys.argv = ['', 'Test.testName']
     unittest.main()

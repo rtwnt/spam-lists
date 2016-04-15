@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 from collections import defaultdict
 from random import shuffle
 
-#pylint: disable=redefined-builtin
+# pylint: disable=redefined-builtin
 from builtins import next, range
 from nose_parameterized import parameterized
 from requests.exceptions import ConnectionError, InvalidSchema, InvalidURL, \
@@ -60,7 +60,7 @@ class ResolveRedirectsSideEffects(object):
             raise exception_type
 
 
-#pylint: disable=too-many-public-methods
+# pylint: disable=too-many-public-methods
 class RedirectUrlResolverTest(unittest.TestCase):
     ''' Tests for RedirectUrlResolver class
 
@@ -301,7 +301,7 @@ def get_url_tester_mock(identifier):
     return source
 
 
-#pylint: disable=too-many-public-methods
+# pylint: disable=too-many-public-methods
 class UrlTesterChainTest(
                          UrlTesterTestBaseMixin,
                          TestFunctionDoesNotHandleMixin,
@@ -448,7 +448,7 @@ class UrlTesterChainTest(
                                                 )
 
 
-#pylint: disable=too-many-public-methods
+# pylint: disable=too-many-public-methods
 class CachedIterableTest(unittest.TestCase):
     ''' Tests for CachedIterable class
 
@@ -563,5 +563,5 @@ class GeneralizedUrlTesterTest(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    #import sys;sys.argv = ['', 'Test.testName']
+    # import sys;sys.argv = ['', 'Test.testName']
     unittest.main()

@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 
 import os.path
 
-#pylint: disable=redefined-builtin
+# pylint: disable=redefined-builtin
 from builtins import object
 import tldextract
 from validators import ipv6
@@ -136,8 +136,8 @@ REASON_TO_SKIP = (
                   )
 
 
-#pylint: disable=too-many-public-methods
-#@unittest.skip(REASON_TO_SKIP)
+# pylint: disable=too-many-public-methods
+# @unittest.skip(REASON_TO_SKIP)
 class SpamhausZenTest(HostListClientTestMixin, unittest.TestCase):
     tested_client = SPAMHAUS_ZEN
     listed = '127.0.0.2'
@@ -149,8 +149,8 @@ class SpamhausZenTest(HostListClientTestMixin, unittest.TestCase):
                                                  )
 
 
-#pylint: disable=too-many-public-methods
-#@unittest.skip(REASON_TO_SKIP)
+# pylint: disable=too-many-public-methods
+# @unittest.skip(REASON_TO_SKIP)
 class SpamhausDBLTest(HostListClientTestMixin, unittest.TestCase):
     tested_client = SPAMHAUS_DBL
     listed = 'dbltest.com'
@@ -170,14 +170,14 @@ class SURBLTest(HostListClientTestMixin):
                                         )
 
 
-#pylint: disable=too-many-public-methods
+# pylint: disable=too-many-public-methods
 class SURBLMultiIPTest(SURBLTest, unittest.TestCase):
     listed = '127.0.0.2'
     not_listed = '127.0.0.1'
     not_listed_2 = '8.8.8.8'
 
 
-#pylint: disable=too-many-public-methods
+# pylint: disable=too-many-public-methods
 class SURBLMultiDomainTest(SURBLTest, unittest.TestCase):
     listed = 'surbl-org-permanent-test-point.com'
     not_listed = 'test.com'
@@ -219,7 +219,7 @@ REASON_TO_SKIP_GSB_TEST = (
                            )
 
 
-#pylint: disable=too-many-public-methods
+# pylint: disable=too-many-public-methods
 @unittest.skipIf(not SAFE_BROWSING_API_KEY, REASON_TO_SKIP_GSB_TEST)
 class GoogleSafeBrowsingTest(UrlTesterClientTestMixin, unittest.TestCase):
     listed_url = 'http://www.gumblar.cn/'
@@ -243,5 +243,5 @@ class GoogleSafeBrowsingTest(UrlTesterClientTestMixin, unittest.TestCase):
 
 
 if __name__ == "__main__":
-    #import sys;sys.argv = ['', 'Test.testName']
+    # import sys;sys.argv = ['', 'Test.testName']
     unittest.main()

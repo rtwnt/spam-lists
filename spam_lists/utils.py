@@ -7,7 +7,7 @@ composite spam url checkers.
 
 from __future__ import unicode_literals
 
-#pylint: disable=redefined-builtin
+# pylint: disable=redefined-builtin
 from builtins import object
 from requests import Session
 from requests.exceptions import ConnectionError, InvalidSchema, InvalidURL, \

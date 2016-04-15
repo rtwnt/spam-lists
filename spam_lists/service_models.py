@@ -6,7 +6,7 @@ for remote and local spam listing services
 '''
 from __future__ import unicode_literals
 
-#pylint: disable=redefined-builtin
+# pylint: disable=redefined-builtin
 from builtins import zip, map, str, range, object
 from dns import name
 from dns.resolver import NXDOMAIN, query
@@ -206,7 +206,7 @@ class HpHosts(HostList):
         self.app_id = client_name
         super(HpHosts, self).__init__(non_ipv6_host)
 
-    def _query(self, host_object, classification = False):
+    def _query(self, host_object, classification=False):
         ''' Query the client for data of given host
 
         :param host_object: an object representing a host value
