@@ -54,7 +54,7 @@ class RedirectUrlResolver(object):
     * value of location header for the last response, if it is
     a valid url but we still couldn't get a response for it
     '''
-    def __init__(self, requests_session = Session()):
+    def __init__(self, requests_session=Session()):
         '''
         Constructor
 

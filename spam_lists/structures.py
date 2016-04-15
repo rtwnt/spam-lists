@@ -119,7 +119,7 @@ class Hostname(name.Name):
         :param value: a string representing a hostname
         :raises InvalidHostnameError: if value parameter is not a valid domain
         '''
-        value  = str(value)
+        value = str(value)
         if not validators.domain(value):
             msg = "'{}' is not a valid hostname".format(value)
             raise_with_traceback(InvalidHostnameError(msg))

@@ -172,7 +172,7 @@ class IsValidUrlTest(unittest.TestCase):
                             False
                             )
                            ])
-    def test_for_url_with(self, _, url, expected = True):
+    def test_for_url_with(self, _, url, expected=True):
         actual = is_valid_url(url)
         if expected:
             self.assertTrue(actual)

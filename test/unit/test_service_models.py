@@ -419,7 +419,7 @@ class GoogleSafeBrowsingTest(UrlTesterTestMixin, unittest.TestCase):
                                                  'test_key'
                                                  )
 
-    def _set_up_post_mock(self, spam_urls, error_401_expected = False):
+    def _set_up_post_mock(self, spam_urls, error_401_expected=False):
         side_efect = create_gsb_post(
                                      error_401_expected,
                                      spam_urls,

@@ -124,7 +124,7 @@ class RedirectUrlResolverTest(unittest.TestCase):
         '''
         for history in url_histories:
             response_mocks = [get_response_mock(u) for u in history]
-            response_mocks[-1].headers = {'location':last_location}
+            response_mocks[-1].headers = {'location': last_location}
             first_response = response_mocks.pop(0)
             self.head_mock.side_effect[history[0]] = first_response
             self.redirect_results.responses[first_response] = response_mocks
@@ -223,7 +223,7 @@ class RedirectUrlResolverTest(unittest.TestCase):
                             )
                            ])
     def test_get_locations_for(self, _, history,
-                               exception_type, triggered_by_valid_url = True):
+                               exception_type, triggered_by_valid_url=True):
         ''' The get_locations method is expected to yield all
          valid urls appearing as url addresses and location headers in
          response histories for given urls
@@ -316,7 +316,7 @@ class UrlTesterChainTest(
     :var tested_instance: an instance of tested class
     '''
     classification = set(['TEST'])
-    url_to_source_id ={
+    url_to_source_id = {
                        'http://55.44.21.12': [
                                               'source_1',
                                               'source_2'
@@ -553,7 +553,7 @@ class GeneralizedUrlTesterTest(unittest.TestCase):
 
     @parameterized.expand(common_setup)
     def test_url_tester_results_for(self, function_name,
-                                    resolve_redirects = False):
+                                    resolve_redirects=False):
         ''' Each method must return result of a method of url_tester
         called during its execution'''
         url_tester_function = getattr(self.url_tester_mock, function_name)
