@@ -87,7 +87,11 @@ class HostList(object):
                                                     )
         host_item, classification = result
         if host_item is not None:
-            return AddressListItem(host_item.to_unicode(), self, classification)
+            return AddressListItem(
+                                   host_item.to_unicode(),
+                                   self,
+                                   classification
+                                   )
         return None
 
     @accepts_valid_urls

@@ -41,7 +41,11 @@ class UrlTesterTestMixin(UrlTesterTestBaseMixin):
                            ('filter_matching')
                            ])
     @patch('spam_lists.validation.is_valid_url')
-    def test_query_for_invalid_url_with(self, function_name, is_valid_url_mock):
+    def test_query_for_invalid_url_with(
+                                        self,
+                                        function_name,
+                                        is_valid_url_mock
+                                        ):
         invalid_url = 'http://invalid.url.com'
         is_valid_url_mock.side_effect = lambda u: u != invalid_url
         function = getattr(self.tested_instance, function_name)
@@ -274,9 +278,10 @@ class DNSBLTest(
     def test_code_error_raised_by(self, function_name, tested_value):
         function = getattr(self.tested_instance, function_name)
         self._set_matching_hosts([self.host_with_unknown_code])
+        error_source = self.classification_map.__getitem__
         self._test_function_does_not_handle(
                                             UnknownCodeError,
-                                            self.classification_map.__getitem__,
+                                            error_source,
                                             function,
                                             tested_value
                                             )
@@ -334,7 +339,10 @@ class HpHostsTest(HostListTestMixin, unittest.TestCase):
         self.listed_hosts = []
         self.get_patcher = patch('spam_lists.service_models.get')
         self.get_mock = self.get_patcher.start()
-        self.get_mock.side_effect = create_hp_hosts_get(self.classification, [])
+        self.get_mock.side_effect = create_hp_hosts_get(
+                                                        self.classification,
+                                                        []
+                                                        )
         self.host_factory_mock = Mock()
         self.tested_instance = HpHosts('spambl_test_suite')
         self.tested_instance._host_factory = self.host_factory_mock

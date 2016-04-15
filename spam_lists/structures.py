@@ -200,9 +200,10 @@ def create_host(factories, value):
         (Hostname, IPv4Address, IPv6Address) for valid arguments
         :param value: a value to be passed as argument to factories
         :returns: an object representing value, created by one of the factories.
-        It's a return value of the first factory that could create it for the given argument
-        :raises InvalidHostError: if the value is not a valid input for any factory used
-        by this function
+        It's a return value of the first factory that could create it
+        for the given argument
+        :raises InvalidHostError: if the value is not a valid input
+        for any factory used by this function
         '''
         data = [value]
         for f in factories:
@@ -210,8 +211,8 @@ def create_host(factories, value):
                 return  f(value)
             except InvalidHostError as e:
                 data.append(str(e))
-        msg_tpl = "Failed to create a host object for '{}', raising the following\
-         errors in the process:"+"\n".join(data)
+        msg_tpl = "Failed to create a host object for '{}', \
+        raising the following errors in the process:"+"\n".join(data)
         raise InvalidHostError(msg_tpl.format(value))
 
 def ip_address(value):

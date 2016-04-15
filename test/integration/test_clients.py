@@ -63,7 +63,8 @@ class UrlTesterClientTestMixin(object):
 
     def test_filter_matching_for_listed(self):
         expected = [self.listed_url]
-        actual = list(self.tested_client.filter_matching(self.urls_with_listed))
+        filter_matching = self.tested_client.filter_matching
+        actual = list(filter_matching(self.urls_with_listed))
         self.assertCountEqual(expected, actual)
 
     def test_lookup_matching_not_listed(self):
@@ -75,7 +76,8 @@ class UrlTesterClientTestMixin(object):
 
     def test_lookup_matching_for_listed(self):
         expected = [self.listed_item]
-        actual = list(self.tested_client.lookup_matching(self.urls_with_listed))
+        lookup_matching = self.tested_client.lookup_matching
+        actual = list(lookup_matching(self.urls_with_listed))
         self.assertCountEqual(expected, actual)
 
 

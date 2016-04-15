@@ -70,7 +70,8 @@ def accepts_valid_urls(f):
         '''
         invalid_urls = [u for u in urls if not is_valid_url(u)]
         if invalid_urls:
-            msg = 'The values: {} are not valid urls'.format(','.join(invalid_urls))
+            msg_tpl = 'The values: {} are not valid urls'
+            msg = msg_tpl.format(','.join(invalid_urls))
             raise InvalidURLError(msg)
         return f(obj, urls, *args, **kwargs)
     return wrapper
