@@ -102,6 +102,12 @@ class SumClassificationCodeMap(BaseClassificationCodeMap):
         return set(classifications)
 
 class Hostname(name.Name):
+    ''' A class of objects representing hostname values.
+
+    The instances are used as values tested by clients of
+    hostname-listing services or as items stored by objects
+    representing such host lists.
+    '''
     def __init__(self, value):
         ''' Create a new instance of Hostname
 
