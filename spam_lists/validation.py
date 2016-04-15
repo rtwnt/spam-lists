@@ -18,7 +18,7 @@ from .exceptions import InvalidURLError, InvalidHostError
 
 def is_valid_host(value):
     ''' Check if given value is valid host string
-    
+
     :param value: a value to test
     :returns: True if the value is valid host string
     '''
@@ -34,14 +34,12 @@ url_regex = re.compile(r'^[a-z0-9\.\-\+]*://' #scheme
 
 def is_valid_url(value):
     ''' Check if given value is valid url string
-    
+
     :param value: a value to test
     :returns: True if the value is valid url string
     '''
-    
     match = url_regex.match(value)
     host_str = urlparse(value).hostname
-    
     return (match and is_valid_host(host_str))
 
 
@@ -57,9 +55,7 @@ def accepts_valid_host(f):
         '''
         if not is_valid_host(value):
             raise InvalidHostError
-        
         return f(obj, value, *args, **kwargs)
-    
     return wrapper
 
 def accepts_valid_urls(f):
@@ -76,7 +72,5 @@ def accepts_valid_urls(f):
         if invalid_urls:
             msg = 'The values: {} are not valid urls'.format(','.join(invalid_urls))
             raise InvalidURLError(msg)
-        
         return f(obj, urls, *args, **kwargs)
-    
     return wrapper
