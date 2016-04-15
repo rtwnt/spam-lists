@@ -9,7 +9,7 @@ from types import GeneratorType
 from builtins import object
 
 
-class UrlTesterTestBase(object):
+class UrlTesterTestBaseMixin(object):
     ''' A class providing basic methods for performing tests for classes
     having any_match, filter_matching and lookup_matching methods
 

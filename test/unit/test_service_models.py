@@ -13,11 +13,11 @@ from spam_lists.service_models import DNSBL, GoogleSafeBrowsing, \
 HostCollection, HostList, HpHosts
 from spam_lists.structures import AddressListItem
 from test.compat import unittest, Mock, MagicMock, patch, lru_cache
-from test.unit.common_definitions import UrlTesterTestBase, \
+from test.unit.common_definitions import UrlTesterTestBaseMixin, \
 TestFunctionDoesNotHandleMixin
 
 
-class UrlTesterTestMixin(UrlTesterTestBase):
+class UrlTesterTestMixin(UrlTesterTestBaseMixin):
     ''' A class providing pre-generated tests for classes
     having any_match, filter_matching and lookup_matching
     methods '''
