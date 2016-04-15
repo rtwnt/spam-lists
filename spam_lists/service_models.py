@@ -130,6 +130,7 @@ class HostList(object):
         is_match = lambda u: urlparse(u).hostname in self
         return (u for u in urls if is_match(u))
 
+
 class DNSBL(HostList):
     ''' Represents a DNSBL service '''
     def __init__(
@@ -196,6 +197,7 @@ class HpHosts(HostList):
     ''' hpHosts client '''
     identifier = ' http://www.hosts-file.net/'
     _NOT_LISTED = 'Not Listed'
+
     def __init__(self, client_name):
         '''Constructor
 
@@ -234,6 +236,7 @@ class GoogleSafeBrowsing(object):
     ''' Google Safe Browsing lookup API client '''
     protocol_version = '3.1'
     max_urls_per_request = 500
+
     def __init__(self, client_name, app_version, api_key):
         ''' Create new instance
 

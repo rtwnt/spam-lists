@@ -52,6 +52,7 @@ class BaseClassificationCodeMap(object):
     def __getitem__(self, code):
         raise NotImplementedError
 
+
 class SimpleClassificationCodeMap(BaseClassificationCodeMap):
     ''' A classification map recognizing only
     code values that are stored as indexes of taxonomical units '''
@@ -83,6 +84,7 @@ def get_powers_of_2(_sum):
     '''
     return [2**y for y, x in enumerate(bin(_sum)[:1:-1]) if int(x)]
 
+
 class SumClassificationCodeMap(BaseClassificationCodeMap):
     ''' A classification map that recognizes indexes in form
     of both the same codes as stored in the instance and integers
@@ -102,6 +104,7 @@ class SumClassificationCodeMap(BaseClassificationCodeMap):
             _class = self._get_single_class(code)
             classifications.append(_class)
         return set(classifications)
+
 
 class Hostname(name.Name):
     ''' A class of objects representing hostname values.
@@ -151,6 +154,7 @@ class IPAddress(object):
     representing such IP address lists.
     '''
     reverse_domain = None
+
     @property
     def relative_domain(self):
         ''' Get a relative domain name representing the ip address
@@ -176,8 +180,10 @@ class IPAddress(object):
         '''
         return str(self)
 
+
 class IPv4Address(ipaddress.IPv4Address, IPAddress):
     reverse_domain = ipv4_reverse_domain
+
     def __init__(self, value):
         ''' Constructor
 
@@ -194,6 +200,7 @@ class IPv4Address(ipaddress.IPv4Address, IPAddress):
 
 class IPv6Address(ipaddress.IPv6Address, IPAddress):
     reverse_domain = ipv6_reverse_domain
+
     def __init__(self, value):
         ''' Constructor
 
@@ -231,6 +238,7 @@ def create_host(factories, value):
     raising the following errors in the process:"+"\n".join(data)
     raise InvalidHostError(msg_tpl.format(value))
 
+
 def ip_address(value):
     ''' Create an ip address object
 
@@ -241,6 +249,7 @@ def ip_address(value):
     '''
     factories = IPv4Address, IPv6Address
     return create_host(factories, value)
+
 
 def hostname_or_ip(value):
     ''' Create a hostname or ip address object
@@ -269,6 +278,7 @@ def registered_domain(value):
     registered_domain_string = TLD_EXTRACTOR(value).registered_domain
     return Hostname(registered_domain_string)
 
+
 def registered_domain_or_ip(value):
     ''' Get host object representing a registered domain or an ip address
 
@@ -279,6 +289,7 @@ def registered_domain_or_ip(value):
     '''
     factories = IPv4Address, IPv6Address, registered_domain
     return create_host(factories, value)
+
 
 def non_ipv6_host(value):
     ''' Create host object representing a registered domain or an IPv4 address

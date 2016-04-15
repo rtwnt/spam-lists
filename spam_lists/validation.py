@@ -32,6 +32,7 @@ url_regex = re.compile(r'^[a-z0-9\.\-\+]*://' #scheme
                        r'(?:[/?#][^\s]*)?' # path, query or fragment
                        r'$', re.IGNORECASE)
 
+
 def is_valid_url(value):
     ''' Check if given value is valid url string
 
@@ -57,6 +58,7 @@ def accepts_valid_host(f):
             raise InvalidHostError
         return f(obj, value, *args, **kwargs)
     return wrapper
+
 
 def accepts_valid_urls(f):
     @functools.wraps(f)

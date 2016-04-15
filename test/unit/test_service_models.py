@@ -189,6 +189,7 @@ class HostListTest(HostListTestMixin, unittest.TestCase):
                                  )
         self.host_data_getter_patcher = patch(host_data_getter_name)
         self.host_data_getter_mock = self.host_data_getter_patcher.start()
+
         def _get_match_and_classification(host):
             if host in self.listed_hosts:
                 return host, self.classification
