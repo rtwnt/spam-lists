@@ -184,9 +184,9 @@ class GeneralizedUrlTester(object):
 
         :param url_tester: an object with any_match, filter_matching
         and lookup_matching methods that can be used for testing urls
-        :var whitelist: an object with a filter_matching method, used
+        :param whitelist: an object with a filter_matching method, used
         for filtering urls to be tested against the url_tester
-        :var redirect_resolver: an object used for getting valid
+        :param redirect_resolver: an object used for getting valid
         location header values to test them with the other url values.
         '''
         self.url_tester = url_tester
