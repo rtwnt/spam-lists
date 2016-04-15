@@ -14,7 +14,7 @@ HostCollection, HostList, HpHosts
 from spam_lists.structures import AddressListItem
 from test.compat import unittest, Mock, MagicMock, patch, lru_cache
 from test.unit.common_definitions import UrlTesterTestBase, \
-TestFunctionDoesNotHandleProvider
+TestFunctionDoesNotHandleMixin
 
 
 class UrlTesterTestMixin(UrlTesterTestBase):
@@ -212,7 +212,7 @@ def create_dns_query_function(expected_query_names):
 
 class DNSBLTest(
                 HostListTestMixin,
-                TestFunctionDoesNotHandleProvider,
+                TestFunctionDoesNotHandleMixin,
                 unittest.TestCase
                 ):
     ''' Tests for DNSBL class
@@ -456,7 +456,7 @@ def host_collection_host_factory(host):
 
 class HostCollectionTest(
                          HostListTestMixin,
-                         TestFunctionDoesNotHandleProvider,
+                         TestFunctionDoesNotHandleMixin,
                          unittest.TestCase
                          ):
     ''' Tests for HostCollection class

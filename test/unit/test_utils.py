@@ -16,7 +16,7 @@ from spam_lists.utils import RedirectUrlResolver, UrlTesterChain, \
 CachedIterable, GeneralizedUrlTester
 from test.compat import unittest, Mock, patch, lru_cache, MagicMock
 from test.unit.common_definitions import UrlTesterTestBase, \
-TestFunctionDoesNotHandleProvider
+TestFunctionDoesNotHandleMixin
 
 
 def get_response_mock(url):
@@ -304,7 +304,7 @@ def get_url_tester_mock(identifier):
 #pylint: disable=too-many-public-methods
 class UrlTesterChainTest(
                          UrlTesterTestBase,
-                         TestFunctionDoesNotHandleProvider,
+                         TestFunctionDoesNotHandleMixin,
                          unittest.TestCase
                          ):
     ''' Tests for UrlTesterChain class

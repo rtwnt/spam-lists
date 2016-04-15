@@ -41,7 +41,7 @@ class UrlTesterTestBase(object):
         self._test_any_match_returns_false(self.valid_urls)
 
 
-class TestFunctionDoesNotHandleProvider(object):
+class TestFunctionDoesNotHandleMixin(object):
 
     def _test_function_does_not_handle(self, exception_type, exception_origin,
                                        function, *args, **kwargs):
