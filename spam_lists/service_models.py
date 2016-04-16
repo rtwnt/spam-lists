@@ -17,8 +17,7 @@ from requests.exceptions import HTTPError
 
 from .exceptions import UnathorizedAPIKeyError, UnknownCodeError, \
     InvalidHostError
-from .structures import AddressListItem, hostname_or_ip, non_ipv6_host, \
-    get_powers_of_2
+from .structures import AddressListItem, hostname_or_ip, non_ipv6_host
 from .validation import accepts_valid_urls, accepts_valid_host
 
 
@@ -198,6 +197,23 @@ class DNSBL(HostList):
             msg_tpl = "The code '{}' has no corresponding classification value"
             msg = msg_tpl.format(ex.args[0])
             raise_from(UnknownCodeError(msg), ex)
+
+
+def get_powers_of_2(_sum):
+    ''' Get powers of with a given sum
+
+    This function transforms given integer to a binary string.
+    A reversed value limited to digits of binary number is extracted
+    from it, and each of its characters is enumerated.
+
+    Each digit is tested for not being 0. If the test passes, the index
+    associated with the digit is used as an exponent to get the next
+    value in the sequence to be returned.
+
+    :param _sum: a sum of all elements of the sequence to be returned
+    :returns: a list of powers of two whose sum is given
+    '''
+    return [2**y for y, x in enumerate(bin(_sum)[:1:-1]) if int(x)]
 
 
 class BitmaskingDNSBL(DNSBL):
