@@ -194,6 +194,15 @@ class DNSBL(HostList):
             raise_from(UnknownCodeError(msg), error)
 
 
+class TwoToTheNSumDNSBL(DNSBL):
+    ''' A class representing DNSBL services mapping listed items to
+    sums of classification codes
+
+    Each classification code is a power of two.
+
+    '''
+
+
 class HpHosts(HostList):
     ''' hpHosts client '''
     identifier = ' http://www.hosts-file.net/'
