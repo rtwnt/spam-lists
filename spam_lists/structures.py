@@ -21,51 +21,7 @@ import tldextract
 import validators
 
 from .exceptions import InvalidHostError, InvalidHostnameError, \
-    InvalidIPv4Error, InvalidIPv6Error, UnknownCodeError
-
-
-class BaseClassificationCodeMap(object):
-    ''' A class responsible for providing classification
-    for given return code '''
-    def __init__(self, classification):
-        ''' Create new instance
-
-        :param classification: a dictionary mapping integer codes
-        to taxonomical units
-        '''
-        self._classification = classification
-
-    def _get_single_class(self, index):
-        ''' Get one taxonimical unit from the classification
-
-        :param index: a value to which a classification may be assigned
-        :return: a taxonomical unit assigned to the code
-        :raises UnknownCodeException: when there is no taxonomical unit
-        for given code in the instance
-        '''
-        _class = self._classification.get(index)
-        if _class is None:
-            msg = 'The classification code {} was not recognized'.format(index)
-            raise UnknownCodeError(msg)
-        return _class
-
-    def __getitem__(self, code):
-        raise NotImplementedError
-
-
-class SimpleClassificationCodeMap(BaseClassificationCodeMap):
-    ''' A classification map recognizing only
-    code values that are stored as indexes of taxonomical units '''
-    def __getitem__(self, code):
-        ''' Get classification for given code
-
-        :param code: a value to which a taxonomical unit may be assigned
-        :return: a set containing taxonomical unit assigned to the code,
-        if it exists
-        :raises UnknownCodeError: when there is no classification
-        for given code
-        '''
-        return set([self._get_single_class(code)])
+    InvalidIPv4Error, InvalidIPv6Error
 
 
 def get_powers_of_2(_sum):
@@ -83,27 +39,6 @@ def get_powers_of_2(_sum):
     :returns: a list of powers of two whose sum is given
     '''
     return [2**y for y, x in enumerate(bin(_sum)[:1:-1]) if int(x)]
-
-
-class SumClassificationCodeMap(BaseClassificationCodeMap):
-    ''' A classification map that recognizes indexes in form
-    of both the same codes as stored in the instance and integers
-    that can be represented as a sum of different indexes stored in
-    the instance'''
-    def __getitem__(self, code):
-        ''' Get classification for given code
-
-        :param index: an integer that is supposed to represent a sum
-        of indexes mapping to classes
-        :returns: a set containing taxonomical units
-        :raises: UnknownCodeError, if the code or one of the elements
-        of the sum is not present in the instance
-        '''
-        classifications = []
-        for code in get_powers_of_2(code):
-            _class = self._get_single_class(code)
-            classifications.append(_class)
-        return set(classifications)
 
 
 class Hostname(name.Name):

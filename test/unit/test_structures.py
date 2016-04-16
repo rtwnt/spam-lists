@@ -7,86 +7,10 @@ from dns import reversename
 from nose_parameterized import parameterized
 
 from spam_lists.exceptions import InvalidHostError, InvalidHostnameError, \
-    InvalidIPv4Error, InvalidIPv6Error, UnknownCodeError
+    InvalidIPv4Error, InvalidIPv6Error
 from spam_lists.structures import Hostname, IPv4Address, IPv6Address, \
-    SimpleClassificationCodeMap, SumClassificationCodeMap, create_host
+    create_host
 from test.compat import unittest, Mock
-
-
-# pylint: disable=too-few-public-methods
-class ClassificationCodeMapTestMixin(object):
-    ''' A base class for tests for classification code map classes
-
-    Classification code map classes are classes storing relationships
-    between return codes of a DNSBL service and classifications
-    associated with them. They are used by DNSBL class instances.
-
-    :var code_item_class: a dictionary storing all code-class relationships
-    used for the tests. It is used as an argument for costructor of the
-    tested instance and for checking test results
-    :var classification_code_map: an instance of tested class
-    :var factory: a constructor of the tested instance
-    '''
-    def setUp(self):
-        self.code_item_class = {}
-        self.classification_code_map = self.factory(self.code_item_class)
-
-
-# pylint: disable=too-many-public-methods
-class SimpleClassificationCodeMapTest(
-                                      ClassificationCodeMapTestMixin,
-                                      unittest.TestCase
-                                      ):
-    factory = SimpleClassificationCodeMap
-
-    def test_getitem_for_valid_key(self):
-        '''The classification map is expected to return a value
-        associated with a valid key'''
-        key = 4
-        self.code_item_class.update({key: 'TestClass'})
-        expected = set([self.code_item_class[key]])
-        actual = self.classification_code_map[key]
-        self.assertEqual(expected, actual)
-
-    def test_getitem_for_invalid_key(self):
-        self.assertRaises(
-                          UnknownCodeError,
-                          self.classification_code_map.__getitem__,
-                          4
-                          )
-
-
-class SumClassificationCodeMapTest(
-                                   ClassificationCodeMapTestMixin,
-                                   unittest.TestCase
-                                   ):
-    factory = SumClassificationCodeMap
-
-    def _set_code_item_class(self, code_class):
-        self.code_item_class.update(code_class)
-
-    @parameterized.expand([
-                           ('simple_valid_key', [2]),
-                           ('sum_of_keys', [2, 4, 8])
-                           ])
-    def test_getitem_for(self, _, keys):
-        classes = {k: 'Class #{}'.format(k) for k in keys}
-        self._set_code_item_class(classes)
-        expected = set(classes.values())
-        actual = self.classification_code_map[sum(keys)]
-        self.assertCountEqual(expected, actual)
-
-    @parameterized.expand([
-                           ('key', [16]),
-                           ('sum_of_keys', [2, 4, 16])
-                           ])
-    def test_getitem_for_invalid(self, _, keys):
-        self._set_code_item_class({2: 'Class: 2', 4: 'Class:4'})
-        self.assertRaises(
-                          UnknownCodeError,
-                          self.classification_code_map.__getitem__,
-                          sum(keys)
-                          )
 
 
 class HostnameTest(unittest.TestCase):
