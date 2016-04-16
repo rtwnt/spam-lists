@@ -17,7 +17,8 @@ from requests.exceptions import HTTPError
 
 from .exceptions import UnathorizedAPIKeyError, UnknownCodeError, \
     InvalidHostError
-from .structures import AddressListItem, hostname_or_ip, non_ipv6_host
+from .structures import AddressListItem, hostname_or_ip, non_ipv6_host, \
+    get_powers_of_2
 from .validation import accepts_valid_urls, accepts_valid_host
 
 
@@ -179,6 +180,9 @@ class DNSBL(HostList):
     def _contains(self, host_object):
         return bool(self._query(host_object))
 
+    def _get_classification(self, code):
+        return [self._classification_map[code]]
+
     def _get_match_and_classification(self, host_object):
         answers = self._query(host_object)
         if answers is None:
@@ -201,6 +205,10 @@ class TwoToTheNSumDNSBL(DNSBL):
     Each classification code is a power of two.
 
     '''
+    def _get_classification(self, code):
+        codes = get_powers_of_2(code)
+        return [cl for c in codes for cl
+                in DNSBL._get_classification(self, c)]
 
 
 class HpHosts(HostList):
