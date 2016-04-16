@@ -155,8 +155,8 @@ def host_list_host_factory(host):
     return host_object
 
 
-# pylint: disable=too-many-public-methods
 class HostListTest(HostListTestMixin, unittest.TestCase):
+    # pylint: disable=too-many-public-methods
     ''' Tests for HostList class
 
     HostList does not provide implementation of some methods it uses.
@@ -404,8 +404,8 @@ def create_gsb_post(expected_401, spam_urls, classification):
     return post
 
 
-# pylint: disable=too-many-public-methods
 class GoogleSafeBrowsingTest(UrlTesterTestMixin, unittest.TestCase):
+    # pylint: disable=too-many-public-methods
     ''' Tests for GoogleSafeBrowsing class
 
     This class adds an additional test method to the ones provided

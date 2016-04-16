@@ -4,8 +4,7 @@ from __future__ import unicode_literals
 
 import unittest
 
-# pylint: disable=redefined-builtin
-from builtins import object
+from builtins import object  # pylint: disable=redefined-builtin
 from nose_parameterized import parameterized
 
 from spam_lists.exceptions import InvalidURLError, InvalidHostError
@@ -64,8 +63,8 @@ class ValidationDecoratorTestMixin(object):
         self.function.assert_not_called()
 
 
-# pylint: disable=too-many-public-methods
 class AcceptValidUrlsTest(ValidationDecoratorTestMixin, unittest.TestCase):
+    # pylint: disable=too-many-public-methods
     ''' Tests for accepts_valid_urls decorator '''
     exception_type = InvalidURLError
     decorator = staticmethod(accepts_valid_urls)
@@ -94,8 +93,8 @@ class AcceptValidUrlsTest(ValidationDecoratorTestMixin, unittest.TestCase):
         self._test_wrapper_for_invalid(urls)
 
 
-# pylint: disable=too-many-public-methods
 class AcceptsValidHostTest(ValidationDecoratorTestMixin, unittest.TestCase):
+    # pylint: disable=too-many-public-methods
     ''' Tests for accepts_valid_host decorator '''
     exception_type = InvalidHostError
     decorator = staticmethod(accepts_valid_host)
@@ -120,8 +119,8 @@ class AcceptsValidHostTest(ValidationDecoratorTestMixin, unittest.TestCase):
         self._test_wrapper_for_invalid(value)
 
 
-# pylint: disable=too-many-public-methods
 class IsValidUrlTest(unittest.TestCase):
+    # pylint: disable=too-many-public-methods
     ''' Tests for is_valid_url function '''
     @parameterized.expand([
                            ('http_scheme', 'http://test.url.com'),

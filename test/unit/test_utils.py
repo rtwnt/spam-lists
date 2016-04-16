@@ -4,8 +4,7 @@ from __future__ import unicode_literals
 from collections import defaultdict
 from random import shuffle
 
-# pylint: disable=redefined-builtin
-from builtins import next, range
+from builtins import next, range  # pylint: disable=redefined-builtin
 from nose_parameterized import parameterized
 from requests.exceptions import ConnectionError, InvalidSchema, InvalidURL, \
     Timeout
@@ -60,8 +59,8 @@ class ResolveRedirectsSideEffects(object):
             raise exception_type
 
 
-# pylint: disable=too-many-public-methods
 class RedirectUrlResolverTest(unittest.TestCase):
+    # pylint: disable=too-many-public-methods
     ''' Tests for RedirectUrlResolver class
 
     :var valid_urls: a list of strings representing valid urls used
@@ -303,12 +302,12 @@ def get_url_tester_mock(identifier):
     return source
 
 
-# pylint: disable=too-many-public-methods
 class UrlTesterChainTest(
                          UrlTesterTestBaseMixin,
                          TestFunctionDoesNotHandleMixin,
                          unittest.TestCase
                          ):
+    # pylint: disable=too-many-public-methods
     ''' Tests for UrlTesterChain class
 
     This class uses get_url_tester_mock function to populate list of
@@ -452,8 +451,8 @@ class UrlTesterChainTest(
                                                 )
 
 
-# pylint: disable=too-many-public-methods
 class CachedIterableTest(unittest.TestCase):
+    # pylint: disable=too-many-public-methods
     ''' Tests for CachedIterable class
 
     :var iterator_mock: a mock object representing iterator injected

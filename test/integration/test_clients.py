@@ -4,8 +4,7 @@ from __future__ import unicode_literals
 
 import os.path
 
-# pylint: disable=redefined-builtin
-from builtins import object
+from builtins import object  # pylint: disable=redefined-builtin
 import tldextract
 from validators import ipv6
 
@@ -136,9 +135,9 @@ REASON_TO_SKIP = (
                   )
 
 
-# pylint: disable=too-many-public-methods
 # @unittest.skip(REASON_TO_SKIP)
 class SpamhausZenTest(HostListClientTestMixin, unittest.TestCase):
+    # pylint: disable=too-many-public-methods
     tested_client = SPAMHAUS_ZEN
     listed = '127.0.0.2'
     not_listed = '127.0.0.1'
@@ -149,9 +148,9 @@ class SpamhausZenTest(HostListClientTestMixin, unittest.TestCase):
                                                  )
 
 
-# pylint: disable=too-many-public-methods
 # @unittest.skip(REASON_TO_SKIP)
 class SpamhausDBLTest(HostListClientTestMixin, unittest.TestCase):
+    # pylint: disable=too-many-public-methods
     tested_client = SPAMHAUS_DBL
     listed = 'dbltest.com'
     not_listed = 'example.com'
@@ -170,15 +169,15 @@ class SURBLTest(HostListClientTestMixin):
                                         )
 
 
-# pylint: disable=too-many-public-methods
 class SURBLMultiIPTest(SURBLTest, unittest.TestCase):
+    # pylint: disable=too-many-public-methods
     listed = '127.0.0.2'
     not_listed = '127.0.0.1'
     not_listed_2 = '8.8.8.8'
 
 
-# pylint: disable=too-many-public-methods
 class SURBLMultiDomainTest(SURBLTest, unittest.TestCase):
+    # pylint: disable=too-many-public-methods
     listed = 'surbl-org-permanent-test-point.com'
     not_listed = 'test.com'
     not_listed_2 = 'google.com'
@@ -221,9 +220,9 @@ REASON_TO_SKIP_GSB_TEST = (
                            )
 
 
-# pylint: disable=too-many-public-methods
 @unittest.skipIf(not SAFE_BROWSING_API_KEY, REASON_TO_SKIP_GSB_TEST)
 class GoogleSafeBrowsingTest(UrlTesterClientTestMixin, unittest.TestCase):
+    # pylint: disable=too-many-public-methods
     listed_url = 'http://www.gumblar.cn/'
     not_listed_url = 'http://www.google.com/'
     not_listed_url_2 = 'https://github.com/'

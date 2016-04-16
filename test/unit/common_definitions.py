@@ -6,8 +6,7 @@ from __future__ import unicode_literals
 
 from types import GeneratorType
 
-# pylint: disable=redefined-builtin
-from builtins import object
+from builtins import object  # pylint: disable=redefined-builtin
 
 
 class UrlTesterTestBaseMixin(object):
