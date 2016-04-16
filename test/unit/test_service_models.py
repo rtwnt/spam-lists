@@ -209,16 +209,6 @@ class HostListTest(HostListTestMixin, unittest.TestCase):
                              for mh in matching_hosts]
 
 
-def create_dns_query_function(expected_query_names):
-    def dns_query(query_name):
-        if query_name in expected_query_names:
-            dns_answer_mock = Mock()
-            dns_answer_mock.to_text.return_value = '121.0.0.1'
-            return [dns_answer_mock]
-        raise NXDOMAIN
-    return dns_query
-
-
 class DNSQuerySideEffects(object):
     def __init__(self, expected_query_names, last_octet=2):
         self.expected_query_names = expected_query_names
