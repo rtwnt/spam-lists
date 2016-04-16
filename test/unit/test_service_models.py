@@ -291,10 +291,12 @@ class DNSBLTestMixin(HostListTestMixin):
 
 
 class DNSBLTest(DNSBLTestMixin, unittest.TestCase):
+    # pylint: disable=too-many-public-methods
     dnsbl_factory = DNSBL
 
 
 class BitmaskingDNSBLTest(DNSBLTestMixin, unittest.TestCase):
+    # pylint: disable=too-many-public-methods
     dnsbl_factory = BitmaskingDNSBL
 
 
@@ -328,6 +330,7 @@ def create_hp_hosts_get(classification, listed_hosts):
 
 
 class HpHostsTest(HostListTestMixin, unittest.TestCase):
+    # pylint: disable=too-many-public-methods
     ''' Tests for HpHosts class
 
     :var listed_hosts: a list of host values assumed to be listed
@@ -482,6 +485,7 @@ class HostCollectionTest(
                          TestFunctionDoesNotHandleMixin,
                          unittest.TestCase
                          ):
+    # pylint: disable=too-many-public-methods
     ''' Tests for HostCollection class
 
     This class adds the following test methods to the ones provided by

@@ -14,6 +14,7 @@ from test.compat import unittest, Mock
 
 
 class HostnameTest(unittest.TestCase):
+    # pylint: disable=too-many-public-methods
     ''' Tests for Hostname class
 
     :var superdomain_str: a string value representing a parent of
@@ -93,6 +94,7 @@ class IpAddressTestMixin(object):
 
 
 class IPv4AddressTest(IpAddressTestMixin, unittest.TestCase):
+    # pylint: disable=too-many-public-methods
     reverse_name_root = reversename.ipv4_reverse_domain
     constructor = IPv4Address
     value_error_type = InvalidIPv4Error
@@ -100,6 +102,7 @@ class IPv4AddressTest(IpAddressTestMixin, unittest.TestCase):
 
 
 class IPv6AddressTest(IpAddressTestMixin, unittest.TestCase):
+    # pylint: disable=too-many-public-methods
     reverse_name_root = reversename.ipv6_reverse_domain
     constructor = IPv6Address
     value_error_type = InvalidIPv6Error
@@ -107,6 +110,7 @@ class IPv6AddressTest(IpAddressTestMixin, unittest.TestCase):
 
 
 class CreateHostTest(unittest.TestCase):
+    # pylint: disable=too-many-public-methods
     ''' Tests for create_host function
 
     :var factories: a list of mocks representing factories used by

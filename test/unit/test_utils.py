@@ -480,6 +480,7 @@ class CachedIterableTest(unittest.TestCase):
 
 
 class GeneralizedUrlTesterTest(unittest.TestCase):
+    # pylint: disable=too-many-public-methods
     ''' Tests for GeneralizedUrlTester class
 
     :var no_resolution_setup: a parameter setup for test methods

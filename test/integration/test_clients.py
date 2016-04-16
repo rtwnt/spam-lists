@@ -187,6 +187,7 @@ HP_HOSTS = HpHosts('spam-lists-test-suite')
 
 
 class HpHostsIPTest(HostListClientTestMixin, unittest.TestCase):
+    # pylint: disable=too-many-public-methods
     listed = '174.36.207.146'
     not_listed = '64.233.160.0'
     not_listed_2 = '2001:ddd:ccc:123::55'
@@ -195,6 +196,7 @@ class HpHostsIPTest(HostListClientTestMixin, unittest.TestCase):
 
 
 class HpHostsDomainTest(HostListClientTestMixin, unittest.TestCase):
+    # pylint: disable=too-many-public-methods
     listed = 'ecardmountain.com'
     not_listed = 'google.com'
     not_listed_2 = 'microsoft.com'
