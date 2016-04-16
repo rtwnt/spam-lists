@@ -233,7 +233,7 @@ class DNSQuerySideEffects(object):
         raise NXDOMAIN
 
 
-class DNSBLTest(HostListTestMixin, unittest.TestCase):
+class DNSBLTestMixin(HostListTestMixin):
     ''' Tests for DNSBL class
 
     This test case adds additional test method to the ones inherited
@@ -248,6 +248,7 @@ class DNSBLTest(HostListTestMixin, unittest.TestCase):
     test method (test_code_error_raised_by)
     :var host_factory_mock: a mocked implementation of host factory
     used by tested instance. Uses host_list_host_factory as its implementation
+    :var dnsbl_factory: constructor of instance of tested class
     :var tested_instance: an instance of tested class
     :var dns_query_patcher: an object used for patching query function
      used by DNSBL instance.
@@ -262,12 +263,12 @@ class DNSBLTest(HostListTestMixin, unittest.TestCase):
         classification_map = {}
         for i, k in enumerate(self.classification, 1):
             classification_map[2**i] = k
-        self.tested_instance = DNSBL(
-                                     'test_service',
-                                     self.query_domain_str,
-                                     classification_map,
-                                     self.host_factory_mock
-                                     )
+        self.tested_instance = self.dnsbl_factory(
+                                                  'test_service',
+                                                  self.query_domain_str,
+                                                  classification_map,
+                                                  self.host_factory_mock
+                                                  )
         self.dns_query_patcher = patch('spam_lists.service_models.query')
         self.dns_query_mock = self.dns_query_patcher.start()
         self.dns_query_mock.side_effect = DNSQuerySideEffects([])
@@ -297,6 +298,10 @@ class DNSBLTest(HostListTestMixin, unittest.TestCase):
             return list(func(hosts))
 
         self.assertRaises(UnknownCodeError, function, tested_value)
+
+
+class DNSBLTest(DNSBLTestMixin, unittest.TestCase):
+    dnsbl_factory = DNSBL
 
 
 
