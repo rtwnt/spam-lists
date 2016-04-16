@@ -10,7 +10,7 @@ from requests.exceptions import HTTPError
 from spam_lists.exceptions import UnathorizedAPIKeyError, UnknownCodeError, \
     InvalidURLError, InvalidHostError
 from spam_lists.service_models import DNSBL, GoogleSafeBrowsing, \
-    HostCollection, HostList, HpHosts, TwoToTheNSumDNSBL
+    HostCollection, HostList, HpHosts, BitmaskingDNSBL
 from spam_lists.structures import AddressListItem
 from test.compat import unittest, Mock, MagicMock, patch, lru_cache
 from test.unit.common_definitions import UrlTesterTestBaseMixin, \
@@ -294,8 +294,8 @@ class DNSBLTest(DNSBLTestMixin, unittest.TestCase):
     dnsbl_factory = DNSBL
 
 
-class TwoToTheNSumDNSBLTest(DNSBLTestMixin, unittest.TestCase):
-    dnsbl_factory = TwoToTheNSumDNSBL
+class BitmaskingDNSBLTest(DNSBLTestMixin, unittest.TestCase):
+    dnsbl_factory = BitmaskingDNSBL
 
 
 def create_hp_hosts_get(classification, listed_hosts):

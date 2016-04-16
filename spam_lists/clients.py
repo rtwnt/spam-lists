@@ -7,7 +7,7 @@ API codes, application identifiers or custom data sets.
 '''
 from __future__ import unicode_literals
 
-from .service_models import DNSBL, TwoToTheNSumDNSBL
+from .service_models import DNSBL, BitmaskingDNSBL
 from .structures import ip_address, registered_domain, registered_domain_or_ip
 
 
@@ -78,7 +78,7 @@ SURBL_MULTI_CLASSIFICATION = {
                               128: 'Cracked sites'
                               }
 
-SURBL_MULTI = TwoToTheNSumDNSBL(
+SURBL_MULTI = BitmaskingDNSBL(
                     'surbl_multi',
                     'multi.surbl.org',
                     SURBL_MULTI_CLASSIFICATION,

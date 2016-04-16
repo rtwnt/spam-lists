@@ -200,7 +200,7 @@ class DNSBL(HostList):
             raise_from(UnknownCodeError(msg), ex)
 
 
-class TwoToTheNSumDNSBL(DNSBL):
+class BitmaskingDNSBL(DNSBL):
     ''' A class representing DNSBL services mapping listed items to
     sums of classification codes
 
