@@ -8,8 +8,7 @@ API codes, application identifiers or custom data sets.
 from __future__ import unicode_literals
 
 from .service_models import DNSBL, TwoToTheNSumDNSBL
-from .structures import SimpleClassificationCodeMap, ip_address, \
-    registered_domain, registered_domain_or_ip, SumClassificationCodeMap
+from .structures import ip_address, registered_domain, registered_domain_or_ip
 
 
 SPAMHAUS_XBL_CLASSIFICATION = (
@@ -41,7 +40,7 @@ SPAMHAUS_ZEN_CLASSIFICATION = {
 SPAMHAUS_ZEN = DNSBL(
                      'spamhaus_zen',
                      'zen.spamhaus.org',
-                     SimpleClassificationCodeMap(SPAMHAUS_ZEN_CLASSIFICATION),
+                     SPAMHAUS_ZEN_CLASSIFICATION,
                      ip_address
                      )
 
@@ -61,7 +60,7 @@ SPAMHAUS_DBL_CLASSIFICATION = {
 SPAMHAUS_DBL = DNSBL(
                      'spamhaus_dbl',
                      'dbl.spamhaus.org',
-                     SimpleClassificationCodeMap(SPAMHAUS_DBL_CLASSIFICATION),
+                     SPAMHAUS_DBL_CLASSIFICATION,
                      registered_domain
                      )
 
@@ -82,6 +81,6 @@ SURBL_MULTI_CLASSIFICATION = {
 SURBL_MULTI = TwoToTheNSumDNSBL(
                     'surbl_multi',
                     'multi.surbl.org',
-                    SumClassificationCodeMap(SURBL_MULTI_CLASSIFICATION),
+                    SURBL_MULTI_CLASSIFICATION,
                     registered_domain_or_ip
                     )

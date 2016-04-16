@@ -233,11 +233,7 @@ class DNSQuerySideEffects(object):
         raise NXDOMAIN
 
 
-class DNSBLTest(
-                HostListTestMixin,
-                TestFunctionDoesNotHandleMixin,
-                unittest.TestCase
-                ):
+class DNSBLTest(HostListTestMixin, unittest.TestCase):
     ''' Tests for DNSBL class
 
     This test case adds additional test method to the ones inherited
@@ -250,8 +246,6 @@ class DNSBLTest(
     to a service
     :var host_with_unknown_code: a host value used by the additional
     test method (test_code_error_raised_by)
-    :var classification_map: a mocked instance of an object
-    representing a classification map used by tested instance
     :var host_factory_mock: a mocked implementation of host factory
     used by tested instance. Uses host_list_host_factory as its implementation
     :var tested_instance: an instance of tested class
@@ -263,29 +257,29 @@ class DNSBLTest(
     host_with_unknown_code = 'hostwithunknowncode.com'
 
     def setUp(self):
-        self.classification_map = MagicMock()
-        self.classification_map.__getitem__.return_value = self.classification
         self.host_factory_mock = Mock()
         self.host_factory_mock.side_effect = host_list_host_factory
+        classification_map = {}
+        for i, k in enumerate(self.classification, 1):
+            classification_map[2**i] = k
         self.tested_instance = DNSBL(
                                      'test_service',
                                      self.query_domain_str,
-                                     self.classification_map,
+                                     classification_map,
                                      self.host_factory_mock
                                      )
         self.dns_query_patcher = patch('spam_lists.service_models.query')
         self.dns_query_mock = self.dns_query_patcher.start()
-        self.dns_query_mock.side_effect = create_dns_query_function([])
+        self.dns_query_mock.side_effect = DNSQuerySideEffects([])
 
     def tearDown(self):
         self.dns_query_patcher.stop()
 
     def _set_matching_hosts(self, hosts):
         host_objects = [self.host_factory_mock(h) for h in hosts]
-        expected_query_names = [h.relative_domain.derelativize()
-                                for h in host_objects]
-        side_effect = create_dns_query_function(expected_query_names)
-        self.dns_query_mock.side_effect = side_effect
+        query_names = [h.relative_domain.derelativize()
+                       for h in host_objects]
+        self.dns_query_mock.side_effect.expected_query_names = query_names
 
     @parameterized.expand([
                            ('lookup', host_with_unknown_code),
@@ -295,15 +289,16 @@ class DNSBLTest(
                             )
                            ])
     def test_code_error_raised_by(self, function_name, tested_value):
-        function = getattr(self.tested_instance, function_name)
         self._set_matching_hosts([self.host_with_unknown_code])
-        error_source = self.classification_map.__getitem__
-        self._test_function_does_not_handle(
-                                            UnknownCodeError,
-                                            error_source,
-                                            function,
-                                            tested_value
-                                            )
+        self.dns_query_mock.side_effect.last_octet = 14
+
+        def function(hosts):
+            func = getattr(self.tested_instance, function_name)
+            return list(func(hosts))
+
+        self.assertRaises(UnknownCodeError, function, tested_value)
+
+
 
 
 def create_hp_hosts_get(classification, listed_hosts):

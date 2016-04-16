@@ -191,11 +191,13 @@ class DNSBL(HostList):
             classification = set()
             for answer in answers:
                 last_octet = answer.to_text().split('.')[-1]
-                classification |= self._classification_map[int(last_octet)]
+                classes = self._get_classification(int(last_octet))
+                classification.update(classes)
             return host_object, classification
-        except UnknownCodeError as error:
-            msg = '{}\nSource:{}'.format(str(error), str(self))
-            raise_from(UnknownCodeError(msg), error)
+        except KeyError as ex:
+            msg_tpl = "The code '{}' has no corresponding classification value"
+            msg = msg_tpl.format(ex.args[0])
+            raise_from(UnknownCodeError(msg), ex)
 
 
 class TwoToTheNSumDNSBL(DNSBL):
