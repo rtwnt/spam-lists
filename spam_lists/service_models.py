@@ -179,7 +179,7 @@ class DNSBL(HostList):
     def _contains(self, host_object):
         return bool(self._query(host_object))
 
-    def _get_classification(self, code):
+    def _get_entry_classification(self, code):
         return [self._classification_map[code]]
 
     def _get_match_and_classification(self, host_object):
@@ -190,7 +190,7 @@ class DNSBL(HostList):
             classification = set()
             for answer in answers:
                 last_octet = answer.to_text().split('.')[-1]
-                classes = self._get_classification(int(last_octet))
+                classes = self._get_entry_classification(int(last_octet))
                 classification.update(classes)
             return host_object, classification
         except KeyError as ex:
@@ -223,10 +223,10 @@ class BitmaskingDNSBL(DNSBL):
     Each classification code is a power of two.
 
     '''
-    def _get_classification(self, code):
+    def _get_entry_classification(self, code):
         codes = get_powers_of_2(code)
         return [cl for c in codes for cl
-                in DNSBL._get_classification(self, c)]
+                in DNSBL._get_entry_classification(self, c)]
 
 
 class HpHosts(HostList):
