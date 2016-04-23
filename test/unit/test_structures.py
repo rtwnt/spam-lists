@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+'''
+This module contains unit tests for functions and classes provided by
+spam_lists.structures module
+'''
 from __future__ import unicode_literals
 
 # pylint: disable=redefined-builtin

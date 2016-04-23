@@ -1,5 +1,11 @@
 # -*- coding: utf-8 -*-
+'''
+This module contains integration tests for supported
+third party services
 
+The purpose of the tests is to signal changes in the services that
+require changes in the implementation of their clients.
+'''
 from __future__ import unicode_literals
 
 import os.path
