@@ -20,8 +20,8 @@ if PY3:
     from functools import lru_cache # @NoMove @UnusedImport @UnresolvedImport
 
 class Py2TestCase(unittest.TestCase):
-        def assertCountEqual(self, expected_sequence, actual_sequence):
-            return assertCountEqual(self, expected_sequence, actual_sequence)
+    def assertCountEqual(self, expected_sequence, actual_sequence):
+        return assertCountEqual(self, expected_sequence, actual_sequence)
         
 if PY2:
     unittest.TestCase = Py2TestCase
