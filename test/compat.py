@@ -25,8 +25,8 @@ from six import assertCountEqual, PY2
 
 
 class Py2TestCase(unittest.TestCase):
-    def assertCountEqual(self, expected_sequence, actual_sequence):
-        return assertCountEqual(self, expected_sequence, actual_sequence)
+    def assertCountEqual(self, expected_sequence, actual_sequence, msg=None):
+        return assertCountEqual(self, expected_sequence, actual_sequence, msg)
 
 
 if PY2:
