@@ -5,6 +5,7 @@
 
 #virtualenv
 env/
+.venv
 
 #private data for integration tests
 test/integration/google_safe_browsing_api_key.txt
