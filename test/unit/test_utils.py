@@ -80,14 +80,12 @@ class RedirectUrlResolverTest(unittest.TestCase):
      the is_valid_url function
     '''
     redirect_url_chain = [
-                 'http://test.com',
-                 'http://first.com',
-                 'http://122.55.33.21',
-                 'http://[2001:db8:abc:123::42]'
-                 ]
-    no_redirect_url_chain = [
-                       'http://noredirects.com'
-                       ]
+        'http://test.com',
+        'http://first.com',
+        'http://122.55.33.21',
+        'http://[2001:db8:abc:123::42]'
+    ]
+    no_redirect_url_chain = ['http://noredirects.com']
 
     def setUp(self):
         session_mock = Mock()
@@ -137,90 +135,59 @@ class RedirectUrlResolverTest(unittest.TestCase):
         self.assertEqual(expected, list(url_generator))
 
     @parameterized.expand([
-                           ('no_url', no_redirect_url_chain),
-                           ('urls', redirect_url_chain)
-                           ])
+        ('no_url', no_redirect_url_chain),
+        ('urls', redirect_url_chain)
+    ])
     def test_get_locations_yields(self, _, history):
         expected = history[1:]
         self._set_up_side_effects([history])
         self._test_get_locations(history[0], expected)
 
     @parameterized.expand([
-                           [ConnectionError],
-                           [InvalidSchema],
-                           [Timeout],
-                           ])
+        [ConnectionError],
+        [InvalidSchema],
+        [Timeout],
+    ])
     def test_get_locations_arg_raising(self, exception_type):
         self.head_mock.side_effect = exception_type
         self._test_get_locations('http://error_source', [])
 
     @parameterized.expand([
-                           (
-                            'initial_url_causing_timeout',
-                            no_redirect_url_chain,
-                            Timeout
-                            ),
-                           (
-                            'last_url_casuing_timeout',
-                            redirect_url_chain,
-                            Timeout
-                            ),
-                           (
-                            'initial_invalid_url',
-                            no_redirect_url_chain,
-                            InvalidURL,
-                            False
-                            ),
-                           (
-                            'last_invalid_url',
-                            redirect_url_chain,
-                            InvalidURL,
-                            False
-                            ),
-                           (
-                            'initial_url_causing_connection_error',
-                            no_redirect_url_chain,
-                            ConnectionError
-                            ),
-                           (
-                            'last_url_causing_connection_error',
-                            redirect_url_chain, ConnectionError
-                            ),
-                           (
-                            'initial_invalid_url_causing_connection_error',
-                            no_redirect_url_chain,
-                            ConnectionError,
-                            False
-                            ),
-                           (
-                            'last_invalid_url_causing_connection_error',
-                            redirect_url_chain,
-                            ConnectionError,
-                            False
-                            ),
-                           (
-                            'initial_invalid_schema',
-                            no_redirect_url_chain,
-                            InvalidSchema
-                            ),
-                           (
-                            'last_invalid_schema',
-                            redirect_url_chain,
-                            InvalidSchema
-                            ),
-                           (
-                            'initial_invalid_url_with_invalid_schema',
-                            no_redirect_url_chain,
-                            InvalidSchema,
-                            False
-                            ),
-                           (
-                            'last_invalid_url_with_invalid_schema',
-                            redirect_url_chain,
-                            InvalidSchema,
-                            False
-                            )
-                           ])
+        ('initial_url_causing_timeout', no_redirect_url_chain, Timeout),
+        ('last_url_casuing_timeout', redirect_url_chain, Timeout),
+        ('initial_invalid_url', no_redirect_url_chain, InvalidURL, False),
+        ('last_invalid_url', redirect_url_chain, InvalidURL, False),
+        (
+            'initial_url_causing_connection_error',
+            no_redirect_url_chain, ConnectionError
+        ),
+        (
+            'last_url_causing_connection_error',
+            redirect_url_chain, ConnectionError
+        ),
+        (
+            'initial_invalid_url_causing_connection_error',
+            no_redirect_url_chain, ConnectionError,
+            False
+        ),
+        (
+            'last_invalid_url_causing_connection_error',
+            redirect_url_chain, ConnectionError,
+            False
+        ),
+        ('initial_invalid_schema', no_redirect_url_chain, InvalidSchema),
+        ('last_invalid_schema', redirect_url_chain, InvalidSchema),
+        (
+            'initial_invalid_url_with_invalid_schema',
+            no_redirect_url_chain, InvalidSchema,
+            False
+        ),
+        (
+            'last_invalid_url_with_invalid_schema',
+            redirect_url_chain, InvalidSchema,
+            False
+        )
+    ])
     def test_get_locations_for(self, _, history,
                                exception_type, triggered_by_valid_url=True):
         ''' The get_locations method is expected to yield all
@@ -260,28 +227,28 @@ class RedirectUrlResolverTest(unittest.TestCase):
         that is urls that were not part of the original input '''
         no_redirects = 'http://noredirects.com'
         histories = [
-                     [no_redirects],
-                     ['http://abc.com', no_redirects],
-                     [
-                      'http://first.com',
-                      'http://second.com',
-                      'http://third.com'
-                      ]
-                     ]
+            [no_redirects],
+            ['http://abc.com', no_redirects],
+            [
+                'http://first.com',
+                'http://second.com',
+                'http://third.com'
+            ]
+        ]
         self._test_get_new_locations(histories)
 
     def test_get_new_unique_locations(self):
         ''' The generator returned by get_new_locations is expected
         to yield no urls that it yielded previously '''
         duplicated_part = [
-                           'http://first.com',
-                           'http://second.com',
-                           'http://third.com'
-                           ]
+            'http://first.com',
+            'http://second.com',
+            'http://third.com'
+        ]
         histories = [
-                     duplicated_part,
-                     ['http://abc.com'] + duplicated_part
-                     ]
+            duplicated_part,
+            ['http://abc.com'] + duplicated_part
+        ]
         self._test_get_new_locations(histories)
 
     @patch('spam_lists.utils.CachedIterable')
@@ -303,10 +270,10 @@ def get_url_tester_mock(identifier):
 
 
 class UrlTesterChainTest(
-                         UrlTesterTestBaseMixin,
-                         TestFunctionDoesNotHandleMixin,
-                         unittest.TestCase
-                         ):
+        UrlTesterTestBaseMixin,
+        TestFunctionDoesNotHandleMixin,
+        unittest.TestCase
+):
     # pylint: disable=too-many-public-methods
     ''' Tests for UrlTesterChain class
 
@@ -318,18 +285,12 @@ class UrlTesterChainTest(
     '''
     classification = set(['TEST'])
     url_to_source_id = {
-                       'http://55.44.21.12': [
-                                              'source_1',
-                                              'source_2'
-                                              ],
-                       'http://test.com': ['source_3'],
-                       'https://abc.com': ['source_1'],
-                       'http://[2001:ddd:ccc:111::22]': [
-                                                         'source_1',
-                                                         'source_2'
-                                                         ],
-                       'http://[2001:abc:111:22::33]': ['source_3']
-                       }
+        'http://55.44.21.12': ['source_1', 'source_2'],
+        'http://test.com': ['source_3'],
+        'https://abc.com': ['source_1'],
+        'http://[2001:ddd:ccc:111::22]': ['source_1', 'source_2'],
+        'http://[2001:abc:111:22::33]': ['source_3']
+    }
 
     def setUp(self):
         url_testers = []
@@ -361,10 +322,10 @@ class UrlTesterChainTest(
 
     def _get_item(self, url, source_id):
         return AddressListItem(
-                               url,
-                               get_url_tester_mock(source_id),
-                               self.classification
-                               )
+            url,
+            get_url_tester_mock(source_id),
+            self.classification
+        )
 
     def _get_expected_items_for_urls(self, urls):
         return [self._get_item(u, i) for u, ids
@@ -394,61 +355,49 @@ class UrlTesterChainTest(
         self._test_any_match_for(self.url_to_source_id)
 
     @parameterized.expand([
-                             ('no_matching_url', {}),
-                             ('matching_urls', url_to_source_id)
-                             ])
+        ('no_matching_url', {}),
+        ('matching_urls', url_to_source_id)
+    ])
     def test_lookup_matching_for(self, _, matching_urls):
         self._test_lookup_matching_for(matching_urls)
 
     @parameterized.expand([
-                             ('no_matching_url', {}),
-                             ('matching_urls', url_to_source_id)
-                             ])
+        ('no_matching_url', {}),
+        ('matching_urls', url_to_source_id)
+    ])
     def test_filter_matching_for(self, _, matching_urls):
         self._test_filter_matching_for(matching_urls)
 
     @parameterized.expand([
-                           (
-                            'any_match_raises_value_error',
-                            'any_match',
-                            ValueError
-                            ),
-                           (
-                            'any_match_raises_unknown_code_error',
-                            'any_match',
-                            UnknownCodeError
-                            ),
-                           (
-                            'lookup_matching_raises_value_error',
-                            'lookup_matching',
-                            ValueError
-                            ),
-                           (
-                            'lookup_matching_raises_unknown_code_error',
-                            'lookup_matching',
-                            UnknownCodeError
-                            ),
-                           (
-                            'filter_matching_raises_value_error',
-                            'filter_matching',
-                            ValueError
-                            ),
-                           (
-                            'filter_matching_raises_unknown_code_error',
-                            'filter_matching',
-                            UnknownCodeError
-                            )
-                           ])
+        ('any_match_raises_value_error', 'any_match', ValueError),
+        ('any_match_raises_unknown_code_error', 'any_match', UnknownCodeError),
+        ('lookup_matching_raises_value_error', 'lookup_matching', ValueError),
+        (
+            'lookup_matching_raises_unknown_code_error',
+            'lookup_matching',
+            UnknownCodeError
+        ),
+        (
+            'filter_matching_raises_value_error',
+            'filter_matching',
+            ValueError
+        ),
+        (
+            'filter_matching_raises_unknown_code_error',
+            'filter_matching',
+            UnknownCodeError
+        )
+    ])
     def test_(self, _, function_name, error_type):
         function = getattr(self.tested_instance, function_name)
         for tester in reversed(self.tested_instance.url_testers):
             error_source = getattr(tester, function_name)
             self._test_function_does_not_handle(
-                                                error_type,
-                                                error_source,
-                                                function,
-                                                ['http://triggeringerror.com']
-                                                )
+                error_type,
+                error_source,
+                function,
+                ['http://triggeringerror.com']
+            )
 
 
 class CachedIterableTest(unittest.TestCase):
@@ -503,15 +452,15 @@ class GeneralizedUrlTesterTest(unittest.TestCase):
     '''
     test_urls = ['http:abc.com', 'http://def.com', 'http://xyz.com']
     no_resolution_setup = [
-                            ['any_match'],
-                            ['filter_matching'],
-                            ['lookup_matching'],
-                            ]
+        ['any_match'],
+        ['filter_matching'],
+        ['lookup_matching'],
+    ]
     common_setup = [
-                         ['any_match', True],
-                         ['filter_matching', True],
-                         ['lookup_matching', True]
-                         ] + no_resolution_setup
+        ['any_match', True],
+        ['filter_matching', True],
+        ['lookup_matching', True]
+    ] + no_resolution_setup
 
     def setUp(self):
         self.whitelist_mock = Mock()
@@ -520,10 +469,10 @@ class GeneralizedUrlTesterTest(unittest.TestCase):
         self.resolver_mock.get_urls_and_locations.return_value = MagicMock()
         self.url_tester_mock = Mock()
         self.tested_instance = GeneralizedUrlTester(
-                                                    self.url_tester_mock,
-                                                    self.whitelist_mock,
-                                                    self.resolver_mock
-                                                    )
+            self.url_tester_mock,
+            self.whitelist_mock,
+            self.resolver_mock
+        )
 
     def _call_for(self, function_name, resolve_redirects):
         function = getattr(self.tested_instance, function_name)
@@ -537,8 +486,8 @@ class GeneralizedUrlTesterTest(unittest.TestCase):
             urls_and_locations = self.resolver_mock.get_urls_and_locations()
         whitelist_method = self.whitelist_mock.filter_matching
         whitelist_method.assert_called_once_with(
-                                                   urls_and_locations
-                                                   )
+            urls_and_locations
+        )
 
     @parameterized.expand(no_resolution_setup)
     def test_resolution_with(self, function_name):

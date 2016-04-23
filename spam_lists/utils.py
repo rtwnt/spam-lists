@@ -85,9 +85,9 @@ class RedirectUrlResolver(object):
             raise StopIteration
         try:
             generator = self.session.resolve_redirects(
-                                                       response,
-                                                       response.request
-                                                       )
+                response,
+                response.request
+            )
             for response in generator:
                 yield response.url
         except InvalidURL:
@@ -219,10 +219,10 @@ class GeneralizedUrlTester(object):
         :returns: True if any of the urls is a match
         '''
         return self._get_results_for(
-                                     self.url_tester.any_match,
-                                     urls,
-                                     resolve_redirects
-                                     )
+            self.url_tester.any_match,
+            urls,
+            resolve_redirects
+        )
 
     def filter_matching(self, urls, resolve_redirects=True):
         ''' Get those of given ruls that match listing criteria
@@ -235,10 +235,10 @@ class GeneralizedUrlTester(object):
         :returns: matching urls
         '''
         return self._get_results_for(
-                                     self.url_tester.filter_matching,
-                                     urls,
-                                     resolve_redirects
-                                     )
+            self.url_tester.filter_matching,
+            urls,
+            resolve_redirects
+        )
 
     def lookup_matching(self, urls, resolve_redirects=True):
         '''Get objects representing match criteria
@@ -251,7 +251,7 @@ class GeneralizedUrlTester(object):
         :returns: items representing match criteria
         '''
         return self._get_results_for(
-                                     self.url_tester.lookup_matching,
-                                     urls,
-                                     resolve_redirects
-                                     )
+            self.url_tester.lookup_matching,
+            urls,
+            resolve_redirects
+        )

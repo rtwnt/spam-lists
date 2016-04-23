@@ -20,10 +20,11 @@ class UrlTesterTestBaseMixin(object):
 
     def _test_any_match_for(self, matching_urls):
         self._set_matching_urls(matching_urls)
-        self.assertTrue(self.tested_instance.any_match(
-                                                       self.valid_urls +
-                                                       list(matching_urls))
-                        )
+        self.assertTrue(
+            self.tested_instance.any_match(
+                self.valid_urls + list(matching_urls)
+            )
+        )
 
     def _test_any_match_returns_false(self, not_matching_urls):
         self.assertFalse(self.tested_instance.any_match(not_matching_urls))
@@ -31,19 +32,21 @@ class UrlTesterTestBaseMixin(object):
     def _test_lookup_matching_for(self, matching_urls):
         self._set_matching_urls(matching_urls)
         expected = self._get_expected_items_for_urls(matching_urls)
-        actual = list(self.tested_instance.lookup_matching(
-                                                           self.valid_urls +
-                                                           list(matching_urls))
-                      )
+        actual = list(
+            self.tested_instance.lookup_matching(
+                self.valid_urls + list(matching_urls)
+            )
+        )
 
         self.assertCountEqual(expected, actual)
 
     def _test_filter_matching_for(self, matching_urls):
         self._set_matching_urls(matching_urls)
-        actual = list(self.tested_instance.filter_matching(
-                                                           self.valid_urls +
-                                                           list(matching_urls))
-                      )
+        actual = list(
+            self.tested_instance.filter_matching(
+                self.valid_urls + list(matching_urls)
+            )
+        )
 
         self.assertCountEqual(matching_urls, actual)
 

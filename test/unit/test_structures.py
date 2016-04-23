@@ -40,20 +40,20 @@ class HostnameTest(unittest.TestCase):
     unrelated_domain = Hostname('other.com')
 
     @parameterized.expand([
-                           ('hostname', '-e'),
-                           ('hostname', '/e'),
-                           ('argument', 123)
-                           ])
+        ('hostname', '-e'),
+        ('hostname', '/e'),
+        ('argument', 123)
+    ])
     def test_constructor_for_invalid(self, _, value):
         self.assertRaises(InvalidHostnameError, Hostname, value)
 
     @parameterized.expand([
-                       ('unrelated_domain', unrelated_domain, False),
-                       ('a_subdomain', subdomain, False),
-                       ('non_hostname_object', '123.4.5.11', False),
-                       ('the_same_domain', domain, True),
-                       ('a_superdomain', superdomain, True)
-                       ])
+        ('unrelated_domain', unrelated_domain, False),
+        ('a_subdomain', subdomain, False),
+        ('non_hostname_object', '123.4.5.11', False),
+        ('the_same_domain', domain, True),
+        ('a_superdomain', superdomain, True)
+    ])
     def test_is_subdomain_for(self, _, other, expected):
         actual = self.domain.is_subdomain(other)
         if expected:
@@ -76,13 +76,13 @@ class IpAddressTestMixin(object):
      the constructor
     '''
     @parameterized.expand([
-                           ('ipv4', '299.0.0.1'),
-                           ('ipv4', '99.22.33.1.23'),
-                           ('ipv6', '2001:db8:abc:125::4h'),
-                           ('ipv6', '2001:db8:abcef:125::43'),
-                           ('hostname', 'abc.def.gh'),
-                           ('non_unicode_ipv4', '299.0.0.1')
-                           ])
+        ('ipv4', '299.0.0.1'),
+        ('ipv4', '99.22.33.1.23'),
+        ('ipv6', '2001:db8:abc:125::4h'),
+        ('ipv6', '2001:db8:abcef:125::43'),
+        ('hostname', 'abc.def.gh'),
+        ('non_unicode_ipv4', '299.0.0.1')
+    ])
     def test_constructor_for_invalid(self, _, value):
         self.assertRaises(self.value_error_type, self.constructor, value)
 
@@ -120,9 +120,9 @@ class CreateHostTest(unittest.TestCase):
         self.factories = [Mock() for _ in range(5)]
 
     @parameterized.expand([
-                           ('v4',  '127.0.0.1'),
-                           ('v6', '2001:db8:abc:125::45'),
-                           ])
+        ('v4', '127.0.0.1'),
+        ('v6', '2001:db8:abc:125::45'),
+    ])
     def test_host_for_ip(self, _, value):
         ip_address = self.factories[0]
         expected = ip_address(value)
@@ -142,13 +142,13 @@ class CreateHostTest(unittest.TestCase):
         self.assertEqual(expected, actual)
 
     @parameterized.expand([
-                           ('ipv4', '299.0.0.1'),
-                           ('ipv4', '99.22.33.1.23'),
-                           ('ipv6', '2001:db8:abc:125::4h'),
-                           ('ipv6', '2001:db8:abcef:125::43'),
-                           ('hostname', '-e'),
-                           ('hostname', '/e')
-                           ])
+        ('ipv4', '299.0.0.1'),
+        ('ipv4', '99.22.33.1.23'),
+        ('ipv6', '2001:db8:abc:125::4h'),
+        ('ipv6', '2001:db8:abcef:125::43'),
+        ('hostname', '-e'),
+        ('hostname', '/e')
+    ])
     def test_host_for_invalid(self, _, value):
         for factory in self.factories:
             factory.side_effect = InvalidHostError

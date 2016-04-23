@@ -23,29 +23,29 @@ class UrlTesterTestMixin(UrlTesterTestBaseMixin):
     methods '''
     classification = set(['TEST'])
     valid_url_input = [
-                           ('ipv4_url', ['http://55.44.33.21']),
-                           ('hostname_url', ['https://abc.com']),
-                           ('ipv6_url', ['http://[2001:ddd:ccc:111::33]'])
-                           ]
+        ('ipv4_url', ['http://55.44.33.21']),
+        ('hostname_url', ['https://abc.com']),
+        ('ipv6_url', ['http://[2001:ddd:ccc:111::33]'])
+    ]
     valid_url_list_input = [
-                             ('no_matching_url', []),
-                             ('two_urls', [
-                                           'http://55.44.33.21',
-                                           'https://abc.com'
-                                           ])
-                             ]+valid_url_input
+        ('no_matching_url', []),
+        ('two_urls', [
+            'http://55.44.33.21',
+            'https://abc.com'
+        ])
+    ]+valid_url_input
 
     @parameterized.expand([
-                           ('any_match'),
-                           ('lookup_matching'),
-                           ('filter_matching')
-                           ])
+        ('any_match'),
+        ('lookup_matching'),
+        ('filter_matching')
+    ])
     @patch('spam_lists.validation.is_valid_url')
     def test_query_for_invalid_url_with(
-                                        self,
-                                        function_name,
-                                        is_valid_url_mock
-                                        ):
+            self,
+            function_name,
+            is_valid_url_mock
+    ):
         invalid_url = 'http://invalid.url.com'
         is_valid_url_mock.side_effect = lambda u: u != invalid_url
         function = getattr(self.tested_instance, function_name)
@@ -67,10 +67,10 @@ class UrlTesterTestMixin(UrlTesterTestBaseMixin):
     def _get_expected_items(self, values):
         def get_item(item):
             return AddressListItem(
-                                   item,
-                                   self.tested_instance,
-                                   self.classification
-                                   )
+                item,
+                self.tested_instance,
+                self.classification
+            )
         return [get_item(v) for v in values]
 
 
@@ -82,10 +82,10 @@ class HostListTestMixin(UrlTesterTestMixin):
     ''' A common test case for all classes that represent
     a host list stored locally or by a remote service '''
     valid_host_input = [
-                        ('ipv4', '255.0.120.1'),
-                        ('hostname', 'test.pl'),
-                        ('ipv6', '2001:ddd:ccc:111::33')
-                        ]
+        ('ipv4', '255.0.120.1'),
+        ('hostname', 'test.pl'),
+        ('ipv6', '2001:ddd:ccc:111::33')
+    ]
 
     def _set_matching_urls(self, urls):
         self._set_matching_hosts(get_hosts(urls))
@@ -100,28 +100,24 @@ class HostListTestMixin(UrlTesterTestMixin):
 
     def test_contains_for_invalid_host(self):
         function = self.tested_instance.__contains__
-        actual = self._get_result_for_invalid_host(
-                                                             function
-                                                             )
+        actual = self._get_result_for_invalid_host(function)
         self.assertFalse(actual)
 
     def test_lookup_for_invalid_host(self):
         function = self.tested_instance.lookup
-        actual = self._get_result_for_invalid_host(
-                                                             function
-                                                             )
+        actual = self._get_result_for_invalid_host(function)
         self.assertIsNone(actual)
 
     @parameterized.expand([
-                           ('__contains__'),
-                           ('lookup')
-                           ])
+        ('__contains__'),
+        ('lookup')
+    ])
     @patch('spam_lists.validation.is_valid_host')
     def test_invalid_host_query_using(
-                                         self,
-                                         function_name,
-                                         is_valid_host_mock
-                                         ):
+            self,
+            function_name,
+            is_valid_host_mock
+    ):
         function = getattr(self.tested_instance, function_name)
         invalid_host = 'invalid.com'
         is_valid_host_mock.side_effect = lambda h: h != invalid_host
@@ -182,15 +178,13 @@ class HostListTest(HostListTestMixin, unittest.TestCase):
         self.host_factory_mock.side_effect = host_list_host_factory
         self.tested_instance = HostList(self.host_factory_mock)
         self._contains_patcher = patch(
-                                       'spam_lists.service_models.'
-                                       'HostList._contains'
-                                       )
+            'spam_lists.service_models.HostList._contains'
+        )
         self._contains_mock = self._contains_patcher.start()
         self._contains_mock.side_effect = lambda h: h in self.listed_hosts
         host_data_getter_name = (
-                                 'spam_lists.service_models.'
-                                 'HostList._get_match_and_classification'
-                                 )
+            'spam_lists.service_models.HostList._get_match_and_classification'
+        )
         self.host_data_getter_patcher = patch(host_data_getter_name)
         self.host_data_getter_mock = self.host_data_getter_patcher.start()
 
@@ -254,11 +248,11 @@ class DNSBLTestMixin(HostListTestMixin):
         for i, k in enumerate(self.classification, 1):
             classification_map[2**i] = k
         self.tested_instance = self.dnsbl_factory(
-                                                  'test_service',
-                                                  self.query_domain_str,
-                                                  classification_map,
-                                                  self.host_factory_mock
-                                                  )
+            'test_service',
+            self.query_domain_str,
+            classification_map,
+            self.host_factory_mock
+        )
         self.dns_query_patcher = patch('spam_lists.service_models.query')
         self.dns_query_mock = self.dns_query_patcher.start()
         self.dns_query_mock.side_effect = DNSQuerySideEffects([])
@@ -273,12 +267,12 @@ class DNSBLTestMixin(HostListTestMixin):
         self.dns_query_mock.side_effect.expected_query_names = query_names
 
     @parameterized.expand([
-                           ('lookup', host_with_unknown_code),
-                           (
-                            'lookup_matching',
-                            ['http://'+host_with_unknown_code]
-                            )
-                           ])
+        ('lookup', host_with_unknown_code),
+        (
+            'lookup_matching',
+            ['http://'+host_with_unknown_code]
+        )
+    ])
     def test_code_error_raised_by(self, function_name, tested_value):
         self._set_matching_hosts([self.host_with_unknown_code])
         self.dns_query_mock.side_effect.last_octet = 14
@@ -354,9 +348,9 @@ class HpHostsTest(HostListTestMixin, unittest.TestCase):
         self.get_patcher = patch('spam_lists.service_models.get')
         self.get_mock = self.get_patcher.start()
         self.get_mock.side_effect = create_hp_hosts_get(
-                                                        self.classification,
-                                                        []
-                                                        )
+            self.classification,
+            []
+        )
         self.host_factory_mock = Mock()
         self.tested_instance = HpHosts('spambl_test_suite')
         self.tested_instance._host_factory = self.host_factory_mock
@@ -367,8 +361,9 @@ class HpHostsTest(HostListTestMixin, unittest.TestCase):
 
     def _set_matching_hosts(self, hosts):
         side_effect = create_hp_hosts_get(
-                                          self.classification, hosts
-                                          )
+            self.classification,
+            hosts
+        )
         self.get_mock.side_effect = side_effect
 
 
@@ -427,17 +422,17 @@ class GoogleSafeBrowsingTest(UrlTesterTestMixin, unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.tested_instance = GoogleSafeBrowsing(
-                                                 'test_client',
-                                                 '0.1',
-                                                 'test_key'
-                                                 )
+            'test_client',
+            '0.1',
+            'test_key'
+        )
 
     def _set_up_post_mock(self, spam_urls, error_401_expected=False):
         side_efect = create_gsb_post(
-                                     error_401_expected,
-                                     spam_urls,
-                                     self.classification
-                                     )
+            error_401_expected,
+            spam_urls,
+            self.classification
+        )
         self.mocked_post.side_effect = side_efect
 
     def setUp(self):
@@ -451,10 +446,10 @@ class GoogleSafeBrowsingTest(UrlTesterTestMixin, unittest.TestCase):
         self._set_up_post_mock(urls)
 
     @parameterized.expand([
-                           ('any_match'),
-                           ('lookup_matching'),
-                           ('filter_matching')
-                           ])
+        ('any_match'),
+        ('lookup_matching'),
+        ('filter_matching')
+    ])
     def test_unathorized_query_with(self, function_name):
         tested_function = getattr(self.tested_instance, function_name)
 
@@ -462,10 +457,10 @@ class GoogleSafeBrowsingTest(UrlTesterTestMixin, unittest.TestCase):
             return list(tested_function(urls))
         self._set_up_post_mock([], error_401_expected=True)
         self.assertRaises(
-                          UnathorizedAPIKeyError,
-                          called_function,
-                          self.valid_urls
-                          )
+            UnathorizedAPIKeyError,
+            called_function,
+            self.valid_urls
+        )
 
 
 def host_collection_host_factory(host):
@@ -481,10 +476,10 @@ def host_collection_host_factory(host):
 
 
 class HostCollectionTest(
-                         HostListTestMixin,
-                         TestFunctionDoesNotHandleMixin,
-                         unittest.TestCase
-                         ):
+        HostListTestMixin,
+        TestFunctionDoesNotHandleMixin,
+        unittest.TestCase
+):
     # pylint: disable=too-many-public-methods
     ''' Tests for HostCollection class
 
@@ -509,9 +504,8 @@ class HostCollectionTest(
 
     def setUp(self):
         self.host_factory_patcher = patch(
-                                          'spam_lists.service_models.'
-                                          'hostname_or_ip'
-                                          )
+            'spam_lists.service_models.hostname_or_ip'
+        )
         self.host_factory_mock = self.host_factory_patcher.start()
         side_effect = host_collection_host_factory
         self.host_factory_mock.side_effect = side_effect
@@ -523,17 +517,20 @@ class HostCollectionTest(
 
     def test_add_invalid_host(self):
         function = self.tested_instance.add
-        self._test_function_does_not_handle(InvalidHostError,
-                                            self.host_factory_mock,
-                                            function,
-                                            'invalidhost.com'
-                                            )
+        self._test_function_does_not_handle(
+            InvalidHostError,
+            self.host_factory_mock,
+            function,
+            'invalidhost.com'
+        )
 
     @parameterized.expand(HostListTestMixin.valid_host_input)
     def test_add_for_valid(self, _, value):
         self.tested_instance.add(value)
-        in_host_collection = (self.host_factory_mock(value)
-                              in self.tested_instance.hosts)
+        in_host_collection = (
+            self.host_factory_mock(value)
+            in self.tested_instance.hosts
+        )
         self.assertTrue(in_host_collection)
 
     def test_add_for_subdomain(self):

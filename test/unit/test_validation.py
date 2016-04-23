@@ -55,11 +55,11 @@ class ValidationDecoratorTestMixin(object):
     def _test_wrapper_for_invalid(self, value):
         self.validity_tester_mock.return_value = False
         self.assertRaises(
-                          self.exception_type,
-                          self.decorated_function,
-                          self.obj,
-                          value
-                          )
+            self.exception_type,
+            self.decorated_function,
+            self.obj,
+            value
+        )
         self.function.assert_not_called()
 
 
@@ -71,24 +71,21 @@ class AcceptValidUrlsTest(ValidationDecoratorTestMixin, unittest.TestCase):
     validity_tester = 'spam_lists.validation.is_valid_url'
 
     @parameterized.expand([
-                           ('hostname', ['https://valid.com']),
-                           ('ipv4_host', ['http://122.34.59.109']),
-                           ('ipv6_host', ['http://[2001:db8:abc:123::42]'])
-                           ])
+        ('hostname', ['https://valid.com']),
+        ('ipv4_host', ['http://122.34.59.109']),
+        ('ipv6_host', ['http://[2001:db8:abc:123::42]'])
+    ])
     def test_for_urls_with_valid(self, _, urls):
         self._test_wrapper_for_valid(urls)
 
     @parameterized.expand([
-                           ('invalid_hostname', ['http://-abc.com']),
-                           ('invalid_schema', ['abc://hostname.com']),
-                           ('no_schema', ['hostname.com']),
-                           ('invalid_ipv4', ['http://999.999.999.999']),
-                           ('invalid_ipv4', ['http://127.0.0.0.1']),
-                           ('invalid_ipv6', [
-                                             'http://[2001:db8:abcef:123::42]'
-                                             ]),
-                           ('invalid_ipv6', ['http://[2001:db8:abch:123::42]'])
-                           ])
+        ('invalid_hostname', ['http://-abc.com']),
+        ('invalid_schema', ['abc://hostname.com']),
+        ('no_schema', ['hostname.com']),
+        ('invalid_ipv4', ['http://999.999.999.999']),
+        ('invalid_ipv4', ['http://127.0.0.0.1']),
+        ('invalid_ipv6', ['http://[2001:db8:abcef:123::42]']),
+        ('invalid_ipv6', ['http://[2001:db8:abch:123::42]'])])
     def test_for_urls_with(self, _, urls):
         self._test_wrapper_for_invalid(urls)
 
@@ -101,20 +98,20 @@ class AcceptsValidHostTest(ValidationDecoratorTestMixin, unittest.TestCase):
     validity_tester = 'spam_lists.validation.is_valid_host'
 
     @parameterized.expand([
-                           ('hostname', 'valid.com'),
-                           ('ipv4', '122.34.59.109'),
-                           ('ipv6', '2001:db8:abc:123::42')
-                           ])
+        ('hostname', 'valid.com'),
+        ('ipv4', '122.34.59.109'),
+        ('ipv6', '2001:db8:abc:123::42')
+    ])
     def test_for_valid(self, _, value):
         self._test_wrapper_for_valid(value)
 
     @parameterized.expand([
-                           ('hostname', '-abc.com'),
-                           ('ipv4', '999.999.999.999'),
-                           ('ipv4', '127.0.0.0.1'),
-                           ('ipv6', '2001:db8:abcef:123::42'),
-                           ('ipv6', '2001:db8:abch:123::42')
-                           ])
+        ('hostname', '-abc.com'),
+        ('ipv4', '999.999.999.999'),
+        ('ipv4', '127.0.0.0.1'),
+        ('ipv6', '2001:db8:abcef:123::42'),
+        ('ipv6', '2001:db8:abch:123::42')
+    ])
     def test_for_invalid(self, _, value):
         self._test_wrapper_for_invalid(value)
 
@@ -123,54 +120,33 @@ class IsValidUrlTest(unittest.TestCase):
     # pylint: disable=too-many-public-methods
     ''' Tests for is_valid_url function '''
     @parameterized.expand([
-                           ('http_scheme', 'http://test.url.com'),
-                           ('https_scheme', 'https://google.com'),
-                           ('ftp_scheme', 'ftp://ftp.test.com'),
-                           ('numeric_hostname', 'http://999.com'),
-                           ('final_slash', 'https://google.com/'),
-                           (
-                            'path_query_and_fragment',
-                            (
-                             'https://test.domain.com/path/element'
-                             '?var=1&var_2=3#fragment'
-                             )
-                            ),
-                           ('query', 'http://test.domain.com?var_1=1&var_2=2'),
-                           ('path', 'http://test.domain.com/path'),
-                           (
-                            'path_and_fragment',
-                            'http://test.domain.com/path#fragment'
-                            ),
-                           (
-                            'query_and_fragment',
-                            'http://test.domain.com?var_1=1&var_2=2#fragment'
-                            ),
-                           ('port', 'https://test.domain.com:123'),
-                           (
-                            'authentication',
-                            'https://abc:def@test.domain.com'
-                            ),
-                           ('ipv4', 'http://255.0.0.255'),
-                           ('ipv6', 'http://[2001:db8:abc:125::45]'),
-                           ('no_schema', 'test.url.com', False),
-                           ('invalid_ipv4', 'http://266.0.0.266', False),
-                           ('invalid_ipv6', 'http://127.0.0.1.1', False),
-                           (
-                            'invalid_port',
-                            'http://test.domain.com:aaa',
-                            False
-                            ),
-                           (
-                            'no_top_level_domain',
-                            'https://testdomaincom',
-                            False
-                            ),
-                           (
-                            'invalid_hostname',
-                            'http://-invalid.domain.com',
-                            False
-                            )
-                           ])
+        ('http_scheme', 'http://test.url.com'),
+        ('https_scheme', 'https://google.com'),
+        ('ftp_scheme', 'ftp://ftp.test.com'),
+        ('numeric_hostname', 'http://999.com'),
+        ('final_slash', 'https://google.com/'),
+        ('path_query_and_fragment', (
+            'https://test.domain.com/path/element'
+            '?var=1&var_2=3#fragment'
+        )),
+        ('query', 'http://test.domain.com?var_1=1&var_2=2'),
+        ('path', 'http://test.domain.com/path'),
+        ('path_and_fragment', 'http://test.domain.com/path#fragment'),
+        (
+            'query_and_fragment',
+            'http://test.domain.com?var_1=1&var_2=2#fragment'
+        ),
+        ('port', 'https://test.domain.com:123'),
+        ('authentication', 'https://abc:def@test.domain.com'),
+        ('ipv4', 'http://255.0.0.255'),
+        ('ipv6', 'http://[2001:db8:abc:125::45]'),
+        ('no_schema', 'test.url.com', False),
+        ('invalid_ipv4', 'http://266.0.0.266', False),
+        ('invalid_ipv6', 'http://127.0.0.1.1', False),
+        ('invalid_port', 'http://test.domain.com:aaa', False),
+        ('no_top_level_domain', 'https://testdomaincom', False),
+        ('invalid_hostname', 'http://-invalid.domain.com', False)
+    ])
     def test_for_url_with(self, _, url, expected=True):
         actual = is_valid_url(url)
         if expected:

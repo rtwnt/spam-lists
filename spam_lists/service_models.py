@@ -83,15 +83,15 @@ class HostList(object):
         except InvalidHostError:
             return None
         result = self._get_match_and_classification(
-                                                    host_object
-                                                    )
+            host_object
+        )
         host_item, classification = result
         if host_item is not None:
             return AddressListItem(
-                                   host_item.to_unicode(),
-                                   self,
-                                   classification
-                                   )
+                host_item.to_unicode(),
+                self,
+                classification
+            )
         return None
 
     @accepts_valid_urls
@@ -135,12 +135,11 @@ class HostList(object):
 class DNSBL(HostList):
     ''' Represents a DNSBL service '''
     def __init__(
-                 self,
-                 identifier,
-                 query_suffix,
-                 classification_map,
-                 host_factory
-                 ):
+            self,
+            identifier,
+            query_suffix,
+            classification_map,
+            host_factory):
         ''' Create new DNSBL object
 
         :param identifier: a value designating DNSBL service provider:
@@ -291,15 +290,15 @@ class GoogleSafeBrowsing(object):
         ''' Get address of POST request to the service '''
         if not self._request_address_val:
             template = (
-                        'https://sb-ssl.google.com/safebrowsing/api/lookup'
-                        '?client={0}&key={1}&appver={2}&pver={3}'
-                        )
+                'https://sb-ssl.google.com/safebrowsing/api/lookup'
+                '?client={0}&key={1}&appver={2}&pver={3}'
+            )
             self._request_address_val = template.format(
-                                                        self.client_name,
-                                                        self.api_key,
-                                                        self.app_version,
-                                                        self.protocol_version
-                                                        )
+                self.client_name,
+                self.api_key,
+                self.app_version,
+                self.protocol_version
+            )
         return self._request_address_val
 
     def _query_once(self, urls):
