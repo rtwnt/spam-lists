@@ -530,11 +530,7 @@ class HostCollectionTest(
     @parameterized.expand(HostListTestMixin.valid_host_input)
     def test_add_for_valid(self, _, value):
         self.tested_instance.add(value)
-        in_host_collection = (
-            self.host_factory_mock(value)
-            in self.tested_instance.hosts
-        )
-        self.assertTrue(in_host_collection)
+        self.assertTrue(value in self.tested_instance.hosts)
 
     def test_add_for_subdomain(self):
         ''' A subdomain to a domain already listed in the collection
@@ -548,28 +544,43 @@ class HostCollectionTest(
     def test_add_for_the_same_value(self):
         '''A value being added to the collection is being ignored if it
         already exists in the collection '''
-        host_obj = Mock()
-        host_obj.is_subdomain.return_value = False
-        initial_hosts = [host_obj]
+        value = 'domain.com'
+        value_obj = Mock()
+        initial_hosts = ['host.com', value]
         self.tested_instance.hosts = set(initial_hosts)
-        self.host_factory_mock.side_effect = lambda h: host_obj
-        self.tested_instance.add('domain.com')
+
+        def host_factory(host_value):
+            host = Mock() if host_value == value else value_obj
+            host.is_subdomain.return_value = False
+            return host
+
+        self.host_factory_mock.side_effect = host_factory
+        self.tested_instance.add(value)
         self.assertCountEqual(initial_hosts, self.tested_instance.hosts)
 
     def test_add_a_superdomain(self):
         ''' A superdomain of a domain listed in the collection
         is expected to replace its subdomain when added '''
-        initial_hosts = [Mock()]
+        superdomain = 'domain.com'
+        subdomain = 'sub.domain.com'
+
+        initial_hosts = set(['host1.com', subdomain])
         self.tested_instance.hosts = set(initial_hosts)
-        superdomain = Mock()
-        superdomain.is_subdomain.return_value = False
-        self.host_factory_mock.side_effect = lambda h: superdomain
-        self.tested_instance.add('domain.com')
-        expected = [superdomain]
-        self.assertCountEqual(expected, self.tested_instance.hosts)
+
+        def host_factory(host_value):
+            host = Mock()
+            is_subdomain = True if host_value == subdomain else False
+            host.is_subdomain.return_value = is_subdomain
+            return host
+
+        self.host_factory_mock.side_effect = host_factory
+        self.tested_instance.add(superdomain)
+        initial_hosts.remove(subdomain)
+        initial_hosts.add(superdomain)
+        self.assertCountEqual(initial_hosts, self.tested_instance.hosts)
 
     def _set_matching_hosts(self, hosts):
-        self.tested_instance.hosts = [self.host_factory_mock(h) for h in hosts]
+        self.tested_instance.hosts = hosts
 
 
 if __name__ == "__main__":
