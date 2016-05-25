@@ -406,6 +406,11 @@ class HostCollection(HostList):
             self.add(host_value)
         super(HostCollection, self).__init__(hostname_or_ip)
 
+    @property
+    def _host_objects(self):
+        for h in self.hosts:
+            yield self._host_factory(h)
+
     def _contains(self, host_object):
         def test(host):
             return host_object.is_subdomain(host) or host_object == host
