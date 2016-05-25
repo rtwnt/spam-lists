@@ -62,6 +62,8 @@ class Hostname(name.Name):
         except AttributeError:
             return False
 
+    is_match = is_subdomain
+
 
 class IPAddress(object):
     ''' A class of objects representing IP address values.
@@ -96,6 +98,9 @@ class IPAddress(object):
         :returns: the ip value as unicode string
         '''
         return str(self)
+
+    def is_match(self, other):
+        return self == other
 
 
 class IPv4Address(ipaddress.IPv4Address, IPAddress):
