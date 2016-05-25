@@ -486,10 +486,6 @@ class HostCollectionTest(
     # pylint: disable=too-many-public-methods
     ''' Tests for HostCollection class
 
-    This class adds the following test methods to the ones provided by
-     HostListTestMixin:
-     * test_add_invalid_host
-     * test_add_for_valid
     :var host_factory_patcher: an object used for patching the host
     factory used by HostCollection instances.
 
