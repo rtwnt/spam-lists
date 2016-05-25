@@ -473,7 +473,7 @@ def host_collection_host_factory(host):
 
     def test(other):
         return host_object.to_unicode() == other.to_unicode()
-    host_object.__eq__.side_effect = test
+    host_object.is_match.side_effect = test
     host_object.is_subdomain.side_effect = test
     return host_object
 
@@ -551,6 +551,7 @@ class HostCollectionTest(
 
         def host_factory(host_value):
             host = Mock() if host_value == value else value_obj
+            host.is_match.return_value = False
             host.is_subdomain.return_value = False
             return host
 
@@ -571,6 +572,7 @@ class HostCollectionTest(
             host = Mock()
             is_subdomain = True if host_value == subdomain else False
             host.is_subdomain.return_value = is_subdomain
+            host.is_match.return_value = False
             return host
 
         self.host_factory_mock.side_effect = host_factory

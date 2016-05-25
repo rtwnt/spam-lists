@@ -413,12 +413,12 @@ class HostCollection(HostList):
 
     def _contains(self, host_object):
         def test(host):
-            return host_object.is_subdomain(host) or host_object == host
+            return host_object.is_match(host)
         return any(map(test, self._host_objects))
 
     def _get_match_and_classification(self, host_object):
         for val in self._host_objects:
-            if host_object.is_subdomain(val) or host_object == val:
+            if host_object.is_match(val):
                 return val, self.classification
         return None, None
 
@@ -432,7 +432,7 @@ class HostCollection(HostList):
         host_obj = self._host_factory(host_value)
         hosts = set(self.hosts)
         for listed_obj, listed in ((self._host_factory(h), h) for h in hosts):
-            if host_obj.is_subdomain(listed_obj) or host_obj == listed_obj:
+            if host_obj.is_match(listed_obj):
                 return
             elif listed_obj.is_subdomain(host_obj):
                 self.hosts.remove(listed)
