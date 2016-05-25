@@ -11,3 +11,6 @@ env/
 test/integration/google_safe_browsing_api_key.txt
 
 *.pyc
+
+#development documentation, notes, etc.
+.doc
