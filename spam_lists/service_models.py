@@ -415,6 +415,11 @@ class HostCollection(HostList):
             return host_object.is_match(host)
         return any(map(test, self._host_objects))
 
+    def _get_match(self, host_object):
+        for val in self._host_objects:
+            if host_object.is_match(val):
+                return val
+
     def _get_match_and_classification(self, host_object):
         for val in self._host_objects:
             if host_object.is_match(val):
