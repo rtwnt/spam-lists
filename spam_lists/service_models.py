@@ -7,7 +7,7 @@ for remote and local spam listing services
 from __future__ import unicode_literals
 
 # pylint: disable=redefined-builtin
-from builtins import zip, map, str, range, object
+from builtins import zip, str, range, object
 from dns import name
 from dns.resolver import NXDOMAIN, query
 from future.moves.urllib.parse import urlparse
@@ -411,9 +411,8 @@ class HostCollection(HostList):
             yield self._host_factory(h)
 
     def _contains(self, host_object):
-        def test(host):
-            return host_object.is_match(host)
-        return any(map(test, self._host_objects))
+        match = self._get_match(host_object)
+        return match is not None
 
     def _get_match(self, host_object):
         for val in self._host_objects:
