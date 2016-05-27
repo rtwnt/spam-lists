@@ -420,10 +420,9 @@ class HostCollection(HostList):
                 return val
 
     def _get_match_and_classification(self, host_object):
-        for val in self._host_objects:
-            if host_object.is_match(val):
-                return val, self.classification
-        return None, None
+        match = self._get_match(host_object)
+        _class = None if match is None else self.classification
+        return match, _class
 
     def add(self, host_value):
         ''' Add the given value to collection
