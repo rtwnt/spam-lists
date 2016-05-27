@@ -391,19 +391,18 @@ class HostCollection(HostList):
 
     May be used as a local whitelist or blacklist.
     '''
-    def __init__(self, identifier, classification, hosts=()):
+    def __init__(self, identifier, classification, hosts=None):
         ''' Create new instance
 
         :param identifier: an identifier of this instance of host collection
         :param classification: a list or tuple containing strings representing
         types of items, assigned to each element of the collection
-        :param hosts: a sequence of ip adresses and hostnames
+        :param hosts: an object storing ip adresses and hostnames. It
+        must be iterable and have .add and .remove methods.
         '''
         self.identifier = identifier
         self.classification = set(classification)
-        self.hosts = set()
-        for host_value in hosts:
-            self.add(host_value)
+        self.hosts = hosts if hosts is not None else set()
         super(HostCollection, self).__init__(hostname_or_ip)
 
     @property
