@@ -10,18 +10,14 @@ from __future__ import unicode_literals
 import unittest
 
 try:
-    from functools import lru_cache  # @NoMove
-except ImportError:
-    # pylint: disable=import-error
-    from cachetools.func import lru_cache  # @NoMove @UnusedImport
-
-try:
     from unittest.mock import Mock, MagicMock, patch  # @NoMove
 except ImportError:
     # pylint: disable=import-error
     from mock import Mock, MagicMock, patch  # @NoMove @UnusedImport
 
 from six import assertCountEqual, PY2
+
+from spam_lists.compat import lru_cache  # @NoMove @UnusedImport
 
 
 class Py2TestCase(unittest.TestCase):
