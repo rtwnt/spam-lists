@@ -405,11 +405,6 @@ class HostCollection(HostList):
         self.hosts = hosts if hosts is not None else []
         super(HostCollection, self).__init__(hostname_or_ip)
 
-    @property
-    def _host_objects(self):
-        for h in self.hosts:
-            yield self._host_factory(h)
-
     def __getitem__(self, index):
         return self._host_factory(self.hosts[index])
 
