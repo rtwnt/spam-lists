@@ -442,7 +442,7 @@ class HostCollection(HostList):
         It is assumed that, during execution of this method,
         the value to be added is not currently listed.
         '''
-        for i, listed_obj in enumerate(self._host_objects):
+        for i, listed_obj in enumerate(self):
             if listed_obj.is_subdomain(host_obj):
                 self.hosts.pop(i)
         self.hosts.append(host_obj.to_unicode())
