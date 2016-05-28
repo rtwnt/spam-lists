@@ -410,6 +410,9 @@ class HostCollection(HostList):
         for h in self.hosts:
             yield self._host_factory(h)
 
+    def __getitem__(self, index):
+        return self._host_factory(self.hosts[index])
+
     def _contains(self, host_object):
         match = self._get_match(host_object)
         return match is not None
