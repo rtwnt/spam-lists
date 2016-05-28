@@ -442,6 +442,37 @@ class HostCollection(HostList):
                 self.hosts.pop(i)
         self.hosts.append(host_obj.to_unicode())
 
+
+class BaseHostCollection(HostList):
+    ''' Base class for containers storing ip addresses
+    and domain names
+    '''
+    def __init__(self, identifier, classification, hosts=None):
+        ''' Create new instance
+
+        :param identifier: an identifier of this instance of host collection
+        :param classification: a list or tuple containing strings representing
+        types of items, assigned to each element of the collection
+        :param hosts: an object storing ip adresses and hostnames. It
+        must be iterable and have .add and .remove methods.
+        '''
+        self.identifier = identifier
+        self.classification = set(classification)
+        self.hosts = hosts if hosts is not None else []
+        super(BaseHostCollection, self).__init__(hostname_or_ip)
+
+    def __getitem__(self, index):
+        return self._host_factory(self.hosts[index])
+
+    def _contains(self, host_object):
+        match = self._get_match(host_object)
+        return match is not None
+
+    def _get_match_and_classification(self, host_object):
+        match = self._get_match(host_object)
+        _class = None if match is None else self.classification
+        return match, _class
+
     def add(self, host_value):
         ''' Add the given value to collection
 
