@@ -418,7 +418,7 @@ class HostCollection(HostList):
         return match is not None
 
     def _get_match(self, host_object):
-        for val in self._host_objects:
+        for val in self:
             if host_object.is_match(val):
                 return val
 
