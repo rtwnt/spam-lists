@@ -424,6 +424,26 @@ class HostCollection(HostList):
         _class = None if match is None else self.classification
         return match, _class
 
+    def _add_new(self, host_obj):
+        ''' Add a new host to the collection
+
+        A new host is defined as a value not currently listed
+        (in case of both hostnames and ip) or not currently
+        covered by another value (in case of hostnames, which
+        could be covered by their parent domain).
+
+        Before a new hostname can be added, all its subdomains
+        already present in the collection must be removed.
+
+        :param host_obj: an object representing value to be added.
+        It is assumed that, during execution of this method,
+        the value to be added is not currently listed.
+        '''
+        for i, listed_obj in enumerate(self._host_objects):
+            if listed_obj.is_subdomain(host_obj):
+                self.hosts.pop(i)
+        self.hosts.append(host_obj.to_unicode())
+
     def add(self, host_value):
         ''' Add the given value to collection
 
