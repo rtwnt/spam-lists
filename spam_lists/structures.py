@@ -46,7 +46,7 @@ class CachedFactoryMixin(object):
         return cls(*args, **kwargs)
 
 
-class Hostname(name.Name):
+class Hostname(CachedFactoryMixin, name.Name):
     ''' A class of objects representing hostname values.
 
     The instances are used as values tested by clients of
