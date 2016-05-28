@@ -21,6 +21,29 @@ import validators
 
 from .exceptions import InvalidHostError, InvalidHostnameError, \
     InvalidIPv4Error, InvalidIPv6Error
+from .compat import lru_cache
+
+
+class CachedFactoryMixin(object):
+    ''' A class adding a constructor class method with
+    cached results to classes that extend it
+    '''
+    @classmethod
+    @lru_cache()
+    def create(cls, *args, **kwargs):
+        ''' Create an instance of the class using __init__
+
+        This method serves as a way to have a cached constructor
+        while avoiding problems with inheritance resulting
+        from applying lru_cache() decorator to class definitions.
+
+        :param *args: positional arguments expected by
+        the __init__ method
+        :param **kwargs: keyword arguments expected by
+        the __init__ method
+        :returns: an instance of the class
+        '''
+        return cls(*args, **kwargs)
 
 
 class Hostname(name.Name):
