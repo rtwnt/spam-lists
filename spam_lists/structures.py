@@ -88,7 +88,7 @@ class Hostname(CachedFactoryMixin, name.Name):
     is_match = is_subdomain
 
 
-class IPAddress(object):
+class IPAddress(CachedFactoryMixin, object):
     ''' A class of objects representing IP address values.
 
     The instances are used as values tested by clients of
