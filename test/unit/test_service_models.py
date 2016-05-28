@@ -529,9 +529,8 @@ class HostCollectionTest(
     def test_add_for_subdomain(self):
         ''' A subdomain to a domain already listed in the collection
         is expected to be ignored when added to the collection '''
-        initial_hosts = [Mock()]
+        initial_hosts = ['domain.com']
         self.tested_instance.hosts = set(initial_hosts)
-        self.host_factory_mock.side_effect = lambda h: Mock()
         self.tested_instance.add('subdomain.domain.com')
         self.assertCountEqual(initial_hosts, self.tested_instance.hosts)
 
@@ -539,17 +538,8 @@ class HostCollectionTest(
         '''A value being added to the collection is being ignored if it
         already exists in the collection '''
         value = 'domain.com'
-        value_obj = Mock()
         initial_hosts = ['host.com', value]
         self.tested_instance.hosts = set(initial_hosts)
-
-        def host_factory(host_value):
-            host = Mock() if host_value == value else value_obj
-            host.is_match.return_value = False
-            host.is_subdomain.return_value = False
-            return host
-
-        self.host_factory_mock.side_effect = host_factory
         self.tested_instance.add(value)
         self.assertCountEqual(initial_hosts, self.tested_instance.hosts)
 
@@ -561,15 +551,6 @@ class HostCollectionTest(
 
         initial_hosts = set(['host1.com', subdomain])
         self.tested_instance.hosts = set(initial_hosts)
-
-        def host_factory(host_value):
-            host = Mock()
-            is_subdomain = True if host_value == subdomain else False
-            host.is_subdomain.return_value = is_subdomain
-            host.is_match.return_value = False
-            return host
-
-        self.host_factory_mock.side_effect = host_factory
         self.tested_instance.add(superdomain)
         initial_hosts.remove(subdomain)
         initial_hosts.add(superdomain)
