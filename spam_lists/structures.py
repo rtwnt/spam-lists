@@ -201,7 +201,7 @@ def ip_address(value):
     :raises InvalidHostError: if the value is not a valid IPv4 or
     IPv6 value
     '''
-    factories = IPv4Address, IPv6Address
+    factories = ip_v4, ip_v6
     return create_host(factories, value)
 
 
@@ -214,7 +214,7 @@ def hostname_or_ip(value):
     :raises InvalidHostError: if the value is not a valid hostname or
     ip address
     '''
-    factories = IPv4Address, IPv6Address, Hostname
+    factories = ip_v4, ip_v6, hostname
     return create_host(factories, value)
 
 
@@ -230,7 +230,7 @@ def registered_domain(value):
     :raises InvalidHostnameError: if the value is not a valid hostname
     '''
     registered_domain_string = TLD_EXTRACTOR(value).registered_domain
-    return Hostname(registered_domain_string)
+    return hostname(registered_domain_string)
 
 
 def registered_domain_or_ip(value):
@@ -241,7 +241,7 @@ def registered_domain_or_ip(value):
     given hostname, or an ip address
     :raises InvalidHostError: if value is not a valid host
     '''
-    factories = IPv4Address, IPv6Address, registered_domain
+    factories = ip_v4, ip_v6, registered_domain
     return create_host(factories, value)
 
 
@@ -253,7 +253,7 @@ def non_ipv6_host(value):
     given hostname, or an IPv4 address
     :raises InvalidHostError: if value is not a valid hostname or IPv4 address
     '''
-    factories = IPv4Address, registered_domain
+    factories = ip_v4, registered_domain
     return create_host(factories, value)
 
 AddressListItem = namedtuple('AddressListItem', 'value source classification')
