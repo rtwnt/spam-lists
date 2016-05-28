@@ -402,7 +402,7 @@ class HostCollection(HostList):
         '''
         self.identifier = identifier
         self.classification = set(classification)
-        self.hosts = hosts if hosts is not None else set()
+        self.hosts = hosts if hosts is not None else []
         super(HostCollection, self).__init__(hostname_or_ip)
 
     @property
@@ -432,10 +432,9 @@ class HostCollection(HostList):
         is not a valid ip address nor a hostname
         '''
         host_obj = self._host_factory(host_value)
-        hosts = set(self.hosts)
-        for listed_obj, listed in ((self._host_factory(h), h) for h in hosts):
+        for i, listed_obj in enumerate(self._host_objects):
             if host_obj.is_match(listed_obj):
                 return
             elif listed_obj.is_subdomain(host_obj):
-                self.hosts.remove(listed)
-        self.hosts.add(host_value)
+                self.hosts.pop(i)
+        self.hosts.append(host_value)

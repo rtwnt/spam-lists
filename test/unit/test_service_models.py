@@ -530,7 +530,7 @@ class HostCollectionTest(
         ''' A subdomain to a domain already listed in the collection
         is expected to be ignored when added to the collection '''
         initial_hosts = ['domain.com']
-        self.tested_instance.hosts = set(initial_hosts)
+        self.tested_instance.hosts = list(initial_hosts)
         self.tested_instance.add('subdomain.domain.com')
         self.assertCountEqual(initial_hosts, self.tested_instance.hosts)
 
@@ -539,7 +539,7 @@ class HostCollectionTest(
         already exists in the collection '''
         value = 'domain.com'
         initial_hosts = ['host.com', value]
-        self.tested_instance.hosts = set(initial_hosts)
+        self.tested_instance.hosts = list(initial_hosts)
         self.tested_instance.add(value)
         self.assertCountEqual(initial_hosts, self.tested_instance.hosts)
 
@@ -548,12 +548,11 @@ class HostCollectionTest(
         is expected to replace its subdomain when added '''
         superdomain = 'domain.com'
         subdomain = 'sub.domain.com'
-
-        initial_hosts = set(['host1.com', subdomain])
-        self.tested_instance.hosts = set(initial_hosts)
+        initial_hosts = ['host1.com', subdomain]
+        self.tested_instance.hosts = list(initial_hosts)
         self.tested_instance.add(superdomain)
         initial_hosts.remove(subdomain)
-        initial_hosts.add(superdomain)
+        initial_hosts.append(superdomain)
         self.assertCountEqual(initial_hosts, self.tested_instance.hosts)
 
     def _set_matching_hosts(self, hosts):
