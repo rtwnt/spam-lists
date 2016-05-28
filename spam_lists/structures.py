@@ -88,6 +88,9 @@ class Hostname(CachedFactoryMixin, name.Name):
     is_match = is_subdomain
 
 
+hostname = Hostname.create
+
+
 class IPAddress(CachedFactoryMixin, object):
     ''' A class of objects representing IP address values.
 
@@ -143,6 +146,9 @@ class IPv4Address(ipaddress.IPv4Address, IPAddress):
             raise_with_traceback(InvalidIPv4Error(msg))
 
 
+ip_v4 = IPv4Address.create
+
+
 class IPv6Address(ipaddress.IPv6Address, IPAddress):
     reverse_domain = ipv6_reverse_domain
 
@@ -158,6 +164,9 @@ class IPv6Address(ipaddress.IPv6Address, IPAddress):
         except ValueError:
             msg = '{} is not a valid IPv6 address'.format(value)
             raise_with_traceback(InvalidIPv6Error(msg))
+
+
+ip_v6 = IPv6Address.create
 
 
 def create_host(factories, value):
