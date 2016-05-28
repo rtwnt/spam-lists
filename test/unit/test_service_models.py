@@ -468,11 +468,9 @@ class GoogleSafeBrowsingTest(UrlTesterTestMixin, unittest.TestCase):
 
 def host_collection_host_factory(host):
     host_object = host_list_host_factory(host)
-    host_object.is_subdomain.return_value = False
-    host_object.__eq__.return_value = False
 
     def test(other):
-        return host_object.to_unicode() == other.to_unicode()
+        return other.to_unicode() in host_object.to_unicode()
     host_object.is_match.side_effect = test
     host_object.is_subdomain.side_effect = test
     return host_object
