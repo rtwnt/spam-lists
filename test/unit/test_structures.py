@@ -14,7 +14,7 @@ from spam_lists.exceptions import InvalidHostError, InvalidHostnameError, \
     InvalidIPv4Error, InvalidIPv6Error
 from spam_lists.structures import Hostname, IPv4Address, IPv6Address, \
     create_host
-from test.compat import unittest, Mock
+from test.compat import unittest, Mock, patch
 
 
 class HostnameTest(unittest.TestCase):
@@ -79,6 +79,14 @@ class IpAddressTestMixin(object):
     :var ip_address: a string value of ip address passed to
      the constructor
     '''
+    def setUp(self):
+        self.comparison_patcher = patch(self.comparison_method)
+        self.comparison_mock = self.comparison_patcher.start()
+        self.tested_instance = self.constructor(self.ip_address)
+
+    def tearDown(self):
+        self.comparison_patcher.stop()
+
     @parameterized.expand([
         ('ipv4', '299.0.0.1'),
         ('ipv4', '99.22.33.1.23'),
@@ -91,10 +99,27 @@ class IpAddressTestMixin(object):
         self.assertRaises(self.value_error_type, self.constructor, value)
 
     def test_relative_domain_for_ip(self):
-        ip_object = self.constructor(self.ip_address)
-        reversed_name = reversename.from_address(str(ip_object))
+        reversed_name = reversename.from_address(str(self.tested_instance))
         expected = reversed_name.relativize(self.reverse_name_root)
-        self.assertEqual(expected, ip_object.relative_domain)
+        self.assertEqual(expected, self.tested_instance.relative_domain)
+
+    def test_lt_for_smaller_value(self):
+        smaller_ip = Mock()
+        self.comparison_mock.return_value = False
+        self.assertFalse(self.tested_instance < smaller_ip)
+
+    def test_lt_for_larger_value(self):
+        larger_ip = Mock()
+        self.comparison_mock.return_value = True
+        self.assertTrue(self.tested_instance < larger_ip)
+
+    def test_lt_for_ip_of_different_version(self):
+        different_version_ip = Mock()
+        self.comparison_mock.side_effect = TypeError
+        self.assertEqual(
+            NotImplemented,
+            self.tested_instance.__lt__(different_version_ip)
+        )
 
 
 class IPv4AddressTest(IpAddressTestMixin, unittest.TestCase):
@@ -103,6 +128,7 @@ class IPv4AddressTest(IpAddressTestMixin, unittest.TestCase):
     constructor = IPv4Address
     value_error_type = InvalidIPv4Error
     ip_address = '122.44.55.99'
+    comparison_method = 'spam_lists.structures.ipaddress.IPv4Address.__lt__'
 
 
 class IPv6AddressTest(IpAddressTestMixin, unittest.TestCase):
@@ -111,6 +137,7 @@ class IPv6AddressTest(IpAddressTestMixin, unittest.TestCase):
     constructor = IPv6Address
     value_error_type = InvalidIPv6Error
     ip_address = 'fe80::0202:b3ff:fe1e:8329'
+    comparison_method = 'spam_lists.structures.ipaddress.IPv6Address.__lt__'
 
 
 class CreateHostTest(unittest.TestCase):

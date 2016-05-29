@@ -142,6 +142,24 @@ class IPAddress(CachedFactoryMixin, object):
     def is_match(self, other):
         return self == other
 
+    def __lt__(self, other):
+        ''' Check if the other is smaller
+
+        This method is necessary for sorting and search
+        algorithms using bisect_right. It handles TypeError
+        raised by __lt__ method of parent class (intended
+        to be ipaddress.IPv4Address or ipaddress.IPv6Address)
+        by returning NotImplemented
+
+        :param other: a value to be compared
+        :returns: result of comparison as implemented in base
+        classes, or NotImplemented
+        '''
+        try:
+            return super(IPAddress, self).__lt__(other)
+        except TypeError:
+            return NotImplemented
+
 
 class IPv4Address(IPAddress, ipaddress.IPv4Address):
     reverse_domain = ipv4_reverse_domain
