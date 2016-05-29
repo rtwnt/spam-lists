@@ -100,6 +100,20 @@ class IPAddress(CachedFactoryMixin, object):
     '''
     reverse_domain = None
 
+    def __init__(self, value):
+        ''' Constructor
+
+        :param value: a valid ip address for this class
+        :raises self.invalid_ip_error_type: if the value is not valid
+        for this class
+        '''
+        try:
+            super(IPAddress, self).__init__(value)
+        except ValueError:
+            msg_tpl = '{} is not a valid ip address for {}'
+            msg = msg_tpl.format(value, self.__class__)
+            raise_with_traceback(self.invalid_ip_error_type(msg))
+
     @property
     def relative_domain(self):
         ''' Get a relative domain name representing the ip address
@@ -129,41 +143,17 @@ class IPAddress(CachedFactoryMixin, object):
         return self == other
 
 
-class IPv4Address(ipaddress.IPv4Address, IPAddress):
+class IPv4Address(IPAddress, ipaddress.IPv4Address):
     reverse_domain = ipv4_reverse_domain
-
-    def __init__(self, value):
-        ''' Constructor
-
-        :param value: a valid IPv4 address
-        :raises InvalidIPv4Error: if the value was not a valid IPv4 address,
-        or if it was a bytes string instead of unicode
-        '''
-        try:
-            super(IPv4Address, self).__init__(value)
-        except ValueError:
-            msg = '{} is not a valid IPv4 address'.format(value)
-            raise_with_traceback(InvalidIPv4Error(msg))
+    invalid_ip_error_type = InvalidIPv4Error
 
 
 ip_v4 = IPv4Address.create
 
 
-class IPv6Address(ipaddress.IPv6Address, IPAddress):
+class IPv6Address(IPAddress, ipaddress.IPv6Address):
     reverse_domain = ipv6_reverse_domain
-
-    def __init__(self, value):
-        ''' Constructor
-
-        :param value: a valid IPv6 address
-        :raises InvalidIPv6Error: if the value was not a valid IPv6 address,
-        or if it was a bytes string instead of unicode
-        '''
-        try:
-            super(IPv6Address, self).__init__(value)
-        except ValueError:
-            msg = '{} is not a valid IPv6 address'.format(value)
-            raise_with_traceback(InvalidIPv6Error(msg))
+    invalid_ip_error_type = InvalidIPv6Error
 
 
 ip_v6 = IPv6Address.create
