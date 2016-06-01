@@ -93,7 +93,7 @@ class Hostname(CachedFactoryMixin):
 hostname = Hostname.create
 
 
-class IPAddress(CachedFactoryMixin, object):
+class IPAddress(CachedFactoryMixin):
     ''' A class of objects representing IP address values.
 
     The instances are used as values tested by clients of
@@ -106,11 +106,11 @@ class IPAddress(CachedFactoryMixin, object):
         ''' Constructor
 
         :param value: a valid ip address for this class
-        :raises self.invalid_ip_error_type: if the value is not valid
-        for this class
+        :raises self.invalid_ip_error_type: if the value is not
+        a valid ip address for this class
         '''
         try:
-            super(IPAddress, self).__init__(value)
+            self.value = self.factory(value)
         except ValueError:
             msg_tpl = '{} is not a valid ip address for {}'
             msg = msg_tpl.format(value, self.__class__)
@@ -123,7 +123,8 @@ class IPAddress(CachedFactoryMixin, object):
         :returns: the reverse pointer relative to the common root
         depending on the version of ip address represented by this object
         '''
-        return name_from_ip(str(self)).relativize(self.reverse_domain)
+
+        return name_from_ip(str(self.value)).relativize(self.reverse_domain)
 
     def is_subdomain(self, _):
         # pylint: disable=no-self-use
@@ -139,7 +140,7 @@ class IPAddress(CachedFactoryMixin, object):
 
         :returns: the ip value as unicode string
         '''
-        return str(self)
+        return str(self.value)
 
     def is_match(self, other):
         return self == other
@@ -158,12 +159,13 @@ class IPAddress(CachedFactoryMixin, object):
         classes, or NotImplemented
         '''
         try:
-            return super(IPAddress, self).__lt__(other)
+            return self.value < other
         except TypeError:
             return NotImplemented
 
 
-class IPv4Address(IPAddress, ipaddress.IPv4Address):
+class IPv4Address(IPAddress):
+    factory = ipaddress.IPv4Address
     reverse_domain = ipv4_reverse_domain
     invalid_ip_error_type = InvalidIPv4Error
 
@@ -171,7 +173,8 @@ class IPv4Address(IPAddress, ipaddress.IPv4Address):
 ip_v4 = IPv4Address.create
 
 
-class IPv6Address(IPAddress, ipaddress.IPv6Address):
+class IPv6Address(IPAddress):
+    factory = ipaddress.IPv6Address
     reverse_domain = ipv6_reverse_domain
     invalid_ip_error_type = InvalidIPv6Error
 

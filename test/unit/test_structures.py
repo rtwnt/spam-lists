@@ -7,14 +7,12 @@ from __future__ import unicode_literals
 
 # pylint: disable=redefined-builtin
 from builtins import str, range, object
-from dns import reversename
 from nose_parameterized import parameterized
 
-from spam_lists.exceptions import InvalidHostError, InvalidHostnameError, \
-    InvalidIPv4Error, InvalidIPv6Error
-from spam_lists.structures import Hostname, IPv4Address, IPv6Address, \
-    create_host
-from test.compat import unittest, Mock, patch
+from spam_lists.exceptions import InvalidHostError, InvalidHostnameError
+from spam_lists.structures import Hostname, create_host, IPv4Address, \
+    IPv6Address
+from test.compat import unittest, Mock, patch, MagicMock
 
 
 class HostnameTest(unittest.TestCase):
@@ -66,78 +64,78 @@ class HostnameTest(unittest.TestCase):
             self.assertFalse(actual)
 
 
-class IpAddressTestMixin(object):
+class IPAddressTestMixin(object):
     ''' A class providing tests for subclasses of IPAddress
 
-    The classes using this mixin are expected to have
-     the following attributes:
-    :var constructor: a constructor of an IPAddress subclass instance
-    :var value_error_type: a type of a ValueError raised by
-     the constructor when provided with an invalid value
-    :var reverse_name_root: a root of a reverse domain representing
-    ip address created with the constructor
-    :var ip_address: a string value of ip address passed to
-     the constructor
+    :var class_to_test: a subclass of IPAddress to be tested
     '''
     def setUp(self):
-        self.comparison_patcher = patch(self.comparison_method)
-        self.comparison_mock = self.comparison_patcher.start()
-        self.tested_instance = self.constructor(self.ip_address)
+        self.value_constructor_patcher = patch.object(
+            self.class_to_test,
+            'factory',
+            Mock()
+        )
+        self.value_constructor_mock = self.value_constructor_patcher.start()
+
+        self.name_from_ip_patcher = patch('spam_lists.structures.name_from_ip')
+        self.name_from_ip_mock = self.name_from_ip_patcher.start()
+
+        self.tested_instance = self.class_to_test(Mock())
+        self.tested_instance.value = MagicMock()
 
     def tearDown(self):
-        self.comparison_patcher.stop()
+        self.value_constructor_patcher.stop()
+        self.name_from_ip_patcher.stop()
 
-    @parameterized.expand([
-        ('ipv4', '299.0.0.1'),
-        ('ipv4', '99.22.33.1.23'),
-        ('ipv6', '2001:db8:abc:125::4h'),
-        ('ipv6', '2001:db8:abcef:125::43'),
-        ('hostname', 'abc.def.gh'),
-        ('non_unicode_ipv4', '299.0.0.1')
-    ])
-    def test_constructor_for_invalid(self, _, value):
-        self.assertRaises(self.value_error_type, self.constructor, value)
+    def test_constructor_for_invalid_argument(self):
+        self.value_constructor_mock.side_effect = ValueError
+        self.assertRaises(
+            self.class_to_test.invalid_ip_error_type,
+            self.class_to_test,
+            Mock()
+        )
 
-    def test_relative_domain_for_ip(self):
-        reversed_name = reversename.from_address(str(self.tested_instance))
-        expected = reversed_name.relativize(self.reverse_name_root)
-        self.assertEqual(expected, self.tested_instance.relative_domain)
+    def test_create_relative_domain_for_ip(self):
+        self.tested_instance.relative_domain
+
+        self.name_from_ip_mock.assert_called_once_with(
+            str(self.tested_instance.value)
+        )
+        name = self.name_from_ip_mock.return_value
+        name.relativize.assert_called_once_with(
+            self.class_to_test.reverse_domain
+        )
+
+    def test_relative_domain_value(self):
+        name = self.name_from_ip_mock.return_value
+        expected = name.relativize.return_value
+        actual = self.tested_instance.relative_domain
+        self.assertEqual(expected, actual)
 
     def test_lt_for_smaller_value(self):
-        smaller_ip = Mock()
-        self.comparison_mock.return_value = False
-        self.assertFalse(self.tested_instance < smaller_ip)
+        self.tested_instance.value.__lt__.return_value = False
+        self.assertFalse(self.tested_instance < Mock())
 
     def test_lt_for_larger_value(self):
-        larger_ip = Mock()
-        self.comparison_mock.return_value = True
-        self.assertTrue(self.tested_instance < larger_ip)
+        self.tested_instance.value.__lt__.return_value = True
+        self.assertTrue(self.tested_instance < Mock())
 
     def test_lt_for_ip_of_different_version(self):
-        different_version_ip = Mock()
-        self.comparison_mock.side_effect = TypeError
+        self.tested_instance.value.__lt__.side_effect = TypeError
         self.assertEqual(
             NotImplemented,
-            self.tested_instance.__lt__(different_version_ip)
+            self.tested_instance.__lt__(self.class_to_test(Mock()))
         )
 
 
-class IPv4AddressTest(IpAddressTestMixin, unittest.TestCase):
+class IPv4AddressTest(IPAddressTestMixin, unittest.TestCase):
     # pylint: disable=too-many-public-methods
-    reverse_name_root = reversename.ipv4_reverse_domain
-    constructor = IPv4Address
-    value_error_type = InvalidIPv4Error
-    ip_address = '122.44.55.99'
-    comparison_method = 'spam_lists.structures.ipaddress.IPv4Address.__lt__'
+    class_to_test = IPv4Address
 
 
-class IPv6AddressTest(IpAddressTestMixin, unittest.TestCase):
+class IPv6AddressTest(IPAddressTestMixin, unittest.TestCase):
     # pylint: disable=too-many-public-methods
-    reverse_name_root = reversename.ipv6_reverse_domain
-    constructor = IPv6Address
-    value_error_type = InvalidIPv6Error
-    ip_address = 'fe80::0202:b3ff:fe1e:8329'
-    comparison_method = 'spam_lists.structures.ipaddress.IPv6Address.__lt__'
+    class_to_test = IPv6Address
 
 
 class CreateHostTest(unittest.TestCase):
