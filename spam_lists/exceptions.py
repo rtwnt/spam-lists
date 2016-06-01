@@ -22,6 +22,10 @@ class InvalidHostError(SpamListsError, ValueError):
     '''The value is not a valid host'''
 
 
+class InvalidIPError(InvalidHostError):
+    ''' The value is not a valid IP address'''
+
+
 class InvalidIPv4Error(InvalidHostError):
     '''The value is not a valid IPv4 address'''
 
