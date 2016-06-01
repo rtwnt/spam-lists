@@ -26,11 +26,11 @@ class InvalidIPError(InvalidHostError):
     ''' The value is not a valid IP address'''
 
 
-class InvalidIPv4Error(InvalidHostError):
+class InvalidIPv4Error(InvalidIPError):
     '''The value is not a valid IPv4 address'''
 
 
-class InvalidIPv6Error(InvalidHostError):
+class InvalidIPv6Error(InvalidIPError):
     '''The value is not a valid IPv6 address'''
 
 
