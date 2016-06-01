@@ -46,7 +46,7 @@ class CachedFactoryMixin(object):
         return cls(*args, **kwargs)
 
 
-class Hostname(CachedFactoryMixin, name.Name):
+class Hostname(CachedFactoryMixin):
     ''' A class of objects representing hostname values.
 
     The instances are used as values tested by clients of
@@ -63,15 +63,9 @@ class Hostname(CachedFactoryMixin, name.Name):
         if not validators.domain(value):
             msg = "'{}' is not a valid hostname".format(value)
             raise_with_traceback(InvalidHostnameError(msg))
-        super(Hostname, self).__init__(value.split('.'))
-
-    @property
-    def relative_domain(self):
-        ''' Return a relative domain representing the host
-
-        :returns: this instance
-        '''
-        return self
+        hostname = name.Name(value.split('.'))
+        self.value = hostname
+        self.relative_domain = hostname
 
     def is_subdomain(self, other):
         ''' Test if the object is a subdomain of the
@@ -80,12 +74,20 @@ class Hostname(CachedFactoryMixin, name.Name):
         :param other: the object to which we compare this instance
         :returns: True if this instance is a subdomain of the other
         '''
+        compared = other.value if hasattr(other, 'value') else other
         try:
-            return name.Name.is_subdomain(self, other)
+            return self.value.is_subdomain(compared)
         except AttributeError:
             return False
 
     is_match = is_subdomain
+
+    def to_unicode(self):
+        ''' Get unicode string representing the object
+
+        :returns: the ip value as unicode string
+        '''
+        return self.value.to_unicode()
 
 
 hostname = Hostname.create
