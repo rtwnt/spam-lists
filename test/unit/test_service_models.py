@@ -528,18 +528,13 @@ class HostCollectionBaseTest(
     valid_urls = ['http://test.com', 'http://127.33.22.11']
 
     def setUp(self):
-        self.host_factory_patcher = patch(
-            'spam_lists.service_models.hostname_or_ip'
-        )
-        self.host_factory_mock = self.host_factory_patcher.start()
+        self.host_factory_mock = Mock()
         self.host_factory_mock.side_effect = host_collection_host_factory
         self.tested_instance = self.constructor(
             'test_host_collection',
-            self.classification
+            self.classification,
+            host_factory=self.host_factory_mock
         )
-
-    def tearDown(self):
-        self.host_factory_patcher.stop()
 
     def test_add_invalid_host(self):
         function = self.tested_instance.add

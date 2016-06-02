@@ -391,7 +391,12 @@ class BaseHostCollection(HostList):
     ''' Base class for containers storing ip addresses
     and domain names
     '''
-    def __init__(self, identifier, classification, hosts=None):
+    def __init__(
+            self,
+            identifier,
+            classification,
+            hosts=None,
+            host_factory=hostname_or_ip):
         ''' Create new instance
 
         :param identifier: an identifier of this instance of host collection
@@ -403,11 +408,13 @@ class BaseHostCollection(HostList):
         * __len__
         * pop
         * append
+        :param host_factory: a callable used to create hosts objects stored
+        in the collection or representing values searched in it.
         '''
         self.identifier = identifier
         self.classification = set(classification)
         self.hosts = hosts if hosts is not None else []
-        super(BaseHostCollection, self).__init__(hostname_or_ip)
+        super(BaseHostCollection, self).__init__(host_factory)
 
     def __len__(self):
         return len(self.hosts)
@@ -417,7 +424,8 @@ class BaseHostCollection(HostList):
             return self.__class__(
                 self.identifier,
                 self.classification,
-                self.hosts[index]
+                self.hosts[index],
+                self._host_factory
             )
         return self._host_factory(self.hosts[index])
 
