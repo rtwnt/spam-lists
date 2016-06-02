@@ -408,6 +408,12 @@ class BaseHostCollection(HostList):
         return len(self.hosts)
 
     def __getitem__(self, index):
+        if isinstance(index, slice):
+            return self.__class__(
+                self.identifier,
+                self.classification,
+                self.hosts[index]
+            )
         return self._host_factory(self.hosts[index])
 
     def _contains(self, host_object):
