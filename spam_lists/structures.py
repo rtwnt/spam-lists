@@ -173,6 +173,9 @@ class IPv6Address(IPAddress):
     invalid_ip_error_type = InvalidIPv6Error
 
 
+def cached(function):
+    return lru_cache()(function)
+
 hostname = Hostname.create
 ip_v4 = IPv4Address.create
 ip_v6 = IPv6Address.create
