@@ -486,9 +486,11 @@ def has_to_unicode(value):
 
 def host_collection_host_factory(host):
     host_object = host_list_host_factory(host)
+    _str = host_object.to_unicode()
 
     def test(other):
-        return other.to_unicode() in host_object.to_unicode()
+        return (has_to_unicode(other) and
+                other.to_unicode() in _str)
     host_object.is_match.side_effect = test
     host_object.is_subdomain.side_effect = test
     return host_object
