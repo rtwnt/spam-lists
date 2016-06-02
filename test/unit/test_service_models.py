@@ -480,6 +480,10 @@ def get_sorting_key(value):
         return name.from_text(value)
 
 
+def has_to_unicode(value):
+    return hasattr(value, 'to_unicode')
+
+
 def host_collection_host_factory(host):
     host_object = host_list_host_factory(host)
 
