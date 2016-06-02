@@ -5,6 +5,7 @@ This module contains classes of objects serving as clients
 for remote and local spam listing services
 '''
 from __future__ import unicode_literals
+from bisect import bisect_right
 
 # pylint: disable=redefined-builtin
 from builtins import zip, str, range, object
@@ -474,3 +475,55 @@ class HostCollection(BaseHostCollection):
             if listed_obj.is_subdomain(host_obj):
                 self.hosts.pop(i)
         self.hosts.append(host_obj.to_unicode())
+
+
+class SortedHostCollection(BaseHostCollection):
+    ''' A container for ip addresses and hostnames,
+    keeping the items in sorted order.
+    '''
+    def _get_insertion_point(self, host_obj):
+        return bisect_right(self, host_obj)
+
+    def _get_match(self, host_object):
+        ''' Get an item matching given host object
+
+        The item may be either a parent domain or identical value.
+        Parent domains and existing identical values always precede
+        insertion point for given value - therefore, we treat
+        an item just before insertion point as potential match.
+
+        :param host_object: an object representing ip address
+        or hostname whose match we are trying to find
+        '''
+        i = self._get_insertion_point(host_object)
+        potential_match = None
+        try:
+            potential_match = self[i-1]
+        except IndexError:
+            pass
+
+        if host_object.is_match(potential_match):
+            return potential_match
+        return None
+
+    def _add_new(self, host_object):
+        ''' Add a new host to the collection
+
+        Before a new hostname can be added, all its subdomains
+        already present in the collection must be removed.
+        Since the collection is sorted, we can limit our
+        search for them to slice of the collection starting
+        from insertion point and ending with the last subdomain
+        detected
+        :param host_obj: an object representing value to be added.
+        It is assumed that, during execution of this method,
+        the value to be added is not currently listed.
+        '''
+        i = self._get_insertion_point(host_object)
+
+        for listed in self[i:]:
+            if not listed.is_subdomain(host_object):
+                break
+            self.hosts.pop(i)
+
+        self.hosts.insert(i, host_object.to_unicode())

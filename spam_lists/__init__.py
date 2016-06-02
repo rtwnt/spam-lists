@@ -81,6 +81,9 @@ interface.
 :var HostCollection: a class of objects representing custom host lists,
 implementing host list and url tester interfaces.
 
+:var SortedHostCollection: a class of objects representing custom
+sorted host lists, implementing host list and url tester interfaces.
+
 :var UrlTesterChain: a class of objects representing composite
 url testers, created by providing objects with url tester methods
 as arguments to constructor. It implements url tester interface.

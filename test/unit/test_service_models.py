@@ -15,7 +15,7 @@ from requests.exceptions import HTTPError
 from spam_lists.exceptions import UnathorizedAPIKeyError, UnknownCodeError, \
     InvalidURLError, InvalidHostError
 from spam_lists.service_models import DNSBL, GoogleSafeBrowsing, \
-    HostCollection, HostList, HpHosts, BitmaskingDNSBL
+    HostCollection, HostList, HpHosts, BitmaskingDNSBL, SortedHostCollection
 from spam_lists.structures import AddressListItem
 from test.compat import unittest, Mock, MagicMock, patch, lru_cache
 from test.unit.common_definitions import UrlTesterTestBaseMixin, \
@@ -590,6 +590,14 @@ class HostCollectionBaseTest(
 
 class HostCollectionTest(HostCollectionBaseTest, unittest.TestCase):
     constructor = HostCollection
+
+
+class SortedHostCollectionTest(HostCollectionBaseTest, unittest.TestCase):
+    constructor = SortedHostCollection
+
+    def _set_matching_hosts(self, hosts):
+        self.tested_instance.hosts = list(hosts)
+        self.tested_instance.hosts.sort(key=get_sorting_key)
 
 
 if __name__ == "__main__":
