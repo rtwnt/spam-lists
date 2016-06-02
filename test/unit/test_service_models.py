@@ -5,8 +5,10 @@ spam_lists.service_models module
 '''
 from __future__ import unicode_literals
 
+from dns import name
 from dns.resolver import NXDOMAIN
 from future.moves.urllib.parse import urlparse, parse_qs
+from ipaddress import ip_address
 from nose_parameterized import parameterized
 from requests.exceptions import HTTPError
 
@@ -464,6 +466,18 @@ class GoogleSafeBrowsingTest(UrlTesterTestMixin, unittest.TestCase):
             called_function,
             self.valid_urls
         )
+
+
+def get_sorting_key(value):
+    ''' Returns a sorting key used for sorting
+    host values during test
+
+    :param value: a host value for which we generate key
+    '''
+    try:
+        return ip_address(value)
+    except ValueError:
+        return name.from_text(value)
 
 
 def host_collection_host_factory(host):
