@@ -90,7 +90,7 @@ class Hostname(object):
         return self.value.to_unicode()
 
 
-class IPAddress(CachedFactoryMixin):
+class IPAddress(object):
     ''' A class of objects representing IP address values.
 
     The instances are used as values tested by clients of
