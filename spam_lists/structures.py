@@ -90,9 +90,6 @@ class Hostname(CachedFactoryMixin):
         return self.value.to_unicode()
 
 
-hostname = Hostname.create
-
-
 class IPAddress(CachedFactoryMixin):
     ''' A class of objects representing IP address values.
 
@@ -170,15 +167,14 @@ class IPv4Address(IPAddress):
     invalid_ip_error_type = InvalidIPv4Error
 
 
-ip_v4 = IPv4Address.create
-
-
 class IPv6Address(IPAddress):
     factory = ipaddress.IPv6Address
     reverse_domain = ipv6_reverse_domain
     invalid_ip_error_type = InvalidIPv6Error
 
 
+hostname = Hostname.create
+ip_v4 = IPv4Address.create
 ip_v6 = IPv6Address.create
 
 
