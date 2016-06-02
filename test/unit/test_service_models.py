@@ -12,14 +12,19 @@ from ipaddress import ip_address
 from nose_parameterized import parameterized
 from requests.exceptions import HTTPError
 
-from spam_lists.exceptions import UnathorizedAPIKeyError, UnknownCodeError, \
-    InvalidURLError, InvalidHostError
-from spam_lists.service_models import DNSBL, GoogleSafeBrowsing, \
-    HostCollection, HostList, HpHosts, BitmaskingDNSBL, SortedHostCollection
+from spam_lists.exceptions import (
+    UnathorizedAPIKeyError, UnknownCodeError, InvalidURLError,
+    InvalidHostError
+)
+from spam_lists.service_models import (
+    DNSBL, GoogleSafeBrowsing, HostCollection, HostList, HpHosts,
+    BitmaskingDNSBL, SortedHostCollection
+)
 from spam_lists.structures import AddressListItem
 from test.compat import unittest, Mock, MagicMock, patch, lru_cache
-from test.unit.common_definitions import UrlTesterTestBaseMixin, \
-    TestFunctionDoesNotHandleMixin
+from test.unit.common_definitions import (
+    UrlTesterTestBaseMixin, TestFunctionDoesNotHandleMixin
+)
 
 
 class UrlTesterTestMixin(UrlTesterTestBaseMixin):

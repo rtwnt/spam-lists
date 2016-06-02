@@ -10,16 +10,19 @@ from random import shuffle
 
 from builtins import next, range  # pylint: disable=redefined-builtin
 from nose_parameterized import parameterized
-from requests.exceptions import ConnectionError, InvalidSchema, InvalidURL, \
-    Timeout
+from requests.exceptions import (
+    ConnectionError, InvalidSchema, InvalidURL, Timeout
+)
 
 from spam_lists.exceptions import InvalidURLError, UnknownCodeError
 from spam_lists.structures import AddressListItem
-from spam_lists.utils import RedirectUrlResolver, UrlTesterChain, \
-    CachedIterable, GeneralizedUrlTester
+from spam_lists.utils import (
+    RedirectUrlResolver, UrlTesterChain, CachedIterable, GeneralizedUrlTester
+)
 from test.compat import unittest, Mock, patch, lru_cache, MagicMock
-from test.unit.common_definitions import UrlTesterTestBaseMixin, \
-    TestFunctionDoesNotHandleMixin
+from test.unit.common_definitions import (
+    UrlTesterTestBaseMixin, TestFunctionDoesNotHandleMixin
+)
 
 
 def get_response_mock(url):

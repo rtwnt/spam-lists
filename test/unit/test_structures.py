@@ -10,8 +10,9 @@ from builtins import str, range, object
 from nose_parameterized import parameterized
 
 from spam_lists.exceptions import InvalidHostError, InvalidHostnameError
-from spam_lists.structures import Hostname, create_host, IPv4Address, \
-    IPv6Address
+from spam_lists.structures import (
+    Hostname, create_host, IPv4Address, IPv6Address
+)
 from test.compat import unittest, Mock, patch, MagicMock
 
 

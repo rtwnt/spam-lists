@@ -9,8 +9,9 @@ from __future__ import unicode_literals
 
 from builtins import object  # pylint: disable=redefined-builtin
 from requests import Session
-from requests.exceptions import ConnectionError, InvalidSchema, InvalidURL, \
-    Timeout
+from requests.exceptions import (
+    ConnectionError, InvalidSchema, InvalidURL, Timeout
+)
 
 from .exceptions import InvalidURLError
 from .validation import is_valid_url

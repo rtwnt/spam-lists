@@ -11,8 +11,9 @@ from builtins import object  # pylint: disable=redefined-builtin
 from nose_parameterized import parameterized
 
 from spam_lists.exceptions import InvalidURLError, InvalidHostError
-from spam_lists.validation import accepts_valid_urls, is_valid_url, \
-    accepts_valid_host
+from spam_lists.validation import (
+    accepts_valid_urls, is_valid_url, accepts_valid_host
+)
 from test.compat import Mock, patch
 
 

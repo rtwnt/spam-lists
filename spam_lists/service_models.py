@@ -16,8 +16,9 @@ from future.utils import raise_from
 from requests import get, post
 from requests.exceptions import HTTPError
 
-from .exceptions import UnathorizedAPIKeyError, UnknownCodeError, \
-    InvalidHostError
+from .exceptions import (
+    UnathorizedAPIKeyError, UnknownCodeError, InvalidHostError
+)
 from .structures import AddressListItem, hostname_or_ip, non_ipv6_host
 from .validation import accepts_valid_urls, accepts_valid_host
 
