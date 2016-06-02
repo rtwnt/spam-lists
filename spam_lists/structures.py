@@ -159,6 +159,7 @@ ip_v4 = cached(IPv4Address)
 ip_v6 = cached(IPv6Address)
 
 
+@cached
 def create_host(factories, value):
     ''' Create an instance of host object for given value, using
     the factories.

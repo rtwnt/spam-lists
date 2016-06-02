@@ -146,7 +146,7 @@ class CreateHostTest(unittest.TestCase):
     the function during tests
     '''
     def setUp(self):
-        self.factories = [Mock() for _ in range(5)]
+        self.factories = tuple(Mock() for _ in range(5))
 
     @parameterized.expand([
         ('v4', '127.0.0.1'),
