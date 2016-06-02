@@ -396,8 +396,12 @@ class BaseHostCollection(HostList):
         :param identifier: an identifier of this instance of host collection
         :param classification: a list or tuple containing strings representing
         types of items, assigned to each element of the collection
-        :param hosts: an object storing ip adresses and hostnames. It
-        must be iterable and have .add and .remove methods.
+        :param hosts: an object storing ip adresses and hostnames.
+        It must have the following methods:
+        * __getitem__
+        * __len__
+        * pop
+        * append
         '''
         self.identifier = identifier
         self.classification = set(classification)
