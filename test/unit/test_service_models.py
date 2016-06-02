@@ -493,6 +493,23 @@ def host_collection_host_factory(host):
                 other.to_unicode() in _str)
     host_object.is_match.side_effect = test
     host_object.is_subdomain.side_effect = test
+
+    def less_than(other):
+        ''' An implementation of __lt__ expected
+        from host objects by bisect_right
+
+        :param other: a value to be compared
+        '''
+        host_object_key = get_sorting_key(_str)
+        other_value = other.to_unicode() if has_to_unicode(other) else other
+        other_key = get_sorting_key(other_value)
+        try:
+            result = host_object_key < other_key
+        except TypeError:
+            result = _str < other_value
+        return result
+
+    host_object.__lt__.side_effect = less_than
     return host_object
 
 
