@@ -441,6 +441,23 @@ class BaseHostCollection(HostList):
             return
         self._add_new(host_obj)
 
+    def _add_new(self, host_object):
+        ''' Add a new host to the collection
+
+        A new host is defined as a value not currently listed
+        (in case of both hostnames and ip) or not currently
+        covered by another value (in case of hostnames, which
+        could be covered by their parent domain).
+
+        Before a new hostname can be added, all its subdomains
+        already present in the collection must be removed.
+
+        :param host_obj: an object representing value to be added.
+        It is assumed that, during execution of this method,
+        the value to be added is not currently listed.
+        '''
+        raise NotImplementedError
+
 
 class HostCollection(BaseHostCollection):
     ''' Provides a container for ip addresses and domain names.
