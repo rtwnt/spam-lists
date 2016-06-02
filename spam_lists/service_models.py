@@ -404,6 +404,9 @@ class BaseHostCollection(HostList):
         self.hosts = hosts if hosts is not None else []
         super(BaseHostCollection, self).__init__(hostname_or_ip)
 
+    def __len__(self):
+        return len(self.hosts)
+
     def __getitem__(self, index):
         return self._host_factory(self.hosts[index])
 
