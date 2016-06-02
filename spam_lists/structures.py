@@ -176,9 +176,9 @@ class IPv6Address(IPAddress):
 def cached(function):
     return lru_cache()(function)
 
-hostname = Hostname.create
-ip_v4 = IPv4Address.create
-ip_v6 = IPv6Address.create
+hostname = cached(Hostname)
+ip_v4 = cached(IPv4Address)
+ip_v6 = cached(IPv6Address)
 
 
 def create_host(factories, value):
