@@ -513,21 +513,12 @@ def host_collection_host_factory(host):
     return host_object
 
 
-class HostCollectionTest(
+class HostCollectionBaseTest(
         HostListTestMixin,
         TestFunctionDoesNotHandleMixin,
-        unittest.TestCase
 ):
     # pylint: disable=too-many-public-methods
-    ''' Tests for HostCollection class
-
-    :var host_factory_patcher: an object used for patching the host
-    factory used by HostCollection instances.
-
-    The host factory may be used by the HostCollection constructor
-    (although its not used in this case), so I chose patching instead
-    of injecting a mock of a host factory instance after creating
-    a HostCollection instance
+    ''' Tests for subclasses or BaseHostCollection
 
     :var host_factory_mock: a mocked implementation of
      host factory used by tested instance. Uses
@@ -541,10 +532,11 @@ class HostCollectionTest(
             'spam_lists.service_models.hostname_or_ip'
         )
         self.host_factory_mock = self.host_factory_patcher.start()
-        side_effect = host_collection_host_factory
-        self.host_factory_mock.side_effect = side_effect
-        self.tested_instance = HostCollection('test_host_collection',
-                                              self.classification)
+        self.host_factory_mock.side_effect = host_collection_host_factory
+        self.tested_instance = self.constructor(
+            'test_host_collection',
+            self.classification
+        )
 
     def tearDown(self):
         self.host_factory_patcher.stop()
@@ -567,7 +559,7 @@ class HostCollectionTest(
         ''' A subdomain to a domain already listed in the collection
         is expected to be ignored when added to the collection '''
         initial_hosts = ['domain.com']
-        self.tested_instance.hosts = list(initial_hosts)
+        self._set_matching_hosts(initial_hosts)
         self.tested_instance.add('subdomain.domain.com')
         self.assertCountEqual(initial_hosts, self.tested_instance.hosts)
 
@@ -576,7 +568,7 @@ class HostCollectionTest(
         already exists in the collection '''
         value = 'domain.com'
         initial_hosts = ['host.com', value]
-        self.tested_instance.hosts = list(initial_hosts)
+        self._set_matching_hosts(initial_hosts)
         self.tested_instance.add(value)
         self.assertCountEqual(initial_hosts, self.tested_instance.hosts)
 
@@ -586,14 +578,18 @@ class HostCollectionTest(
         superdomain = 'domain.com'
         subdomain = 'sub.domain.com'
         initial_hosts = ['host1.com', subdomain]
-        self.tested_instance.hosts = list(initial_hosts)
+        self._set_matching_hosts(initial_hosts)
         self.tested_instance.add(superdomain)
         initial_hosts.remove(subdomain)
         initial_hosts.append(superdomain)
         self.assertCountEqual(initial_hosts, self.tested_instance.hosts)
 
     def _set_matching_hosts(self, hosts):
-        self.tested_instance.hosts = hosts
+        self.tested_instance.hosts = list(hosts)
+
+
+class HostCollectionTest(HostCollectionBaseTest, unittest.TestCase):
+    constructor = HostCollection
 
 
 if __name__ == "__main__":
