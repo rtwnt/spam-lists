@@ -9,10 +9,7 @@ from spam_lists.exceptions import InvalidHostError
 from spam_lists.host_collections import HostCollection, SortedHostCollection
 from test.compat import unittest, Mock
 from test.unit.common_definitions import (
-    TestFunctionDoesNotHandleMixin
-)
-from test.unit.test_service_models import (
-    host_list_host_factory, HostListTestMixin
+    TestFunctionDoesNotHandleMixin, host_list_host_factory, HostListTestMixin
 )
 
 
