@@ -11,7 +11,7 @@ class SpamListsError(Exception):
 
 
 class SpamListsValueError(SpamListsError, ValueError):
-    '''An inapropriate value was used in SpamLists library '''
+    '''An inapropriate value was used in spam-lists library '''
 
 
 class UnknownCodeError(SpamListsError, KeyError):

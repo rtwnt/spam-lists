@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 '''
 ====================
-SpamLists Library
+spam-lists library
 ====================
 
-SpamLists provides common interfaces for querying whitelists and
+spam-lists provides common interfaces for querying whitelists and
 blacklists containing web addresses: hostnames, IP addresses or urls.
 
 It supports the following third party services:
