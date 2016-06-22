@@ -155,7 +155,7 @@ class HpHostsTest(HostListTestMixin, unittest.TestCase):
     '''
     @classmethod
     def setUpClass(cls):
-        cls.tested_instance = HpHosts('spambl_test_suite')
+        cls.tested_instance = HpHosts('spam_lists_test_suite')
 
     def setUp(self):
         self.listed_hosts = []
@@ -166,7 +166,7 @@ class HpHostsTest(HostListTestMixin, unittest.TestCase):
             []
         )
         self.host_factory_mock = Mock()
-        self.tested_instance = HpHosts('spambl_test_suite')
+        self.tested_instance = HpHosts('spam_lists_test_suite')
         self.tested_instance._host_factory = self.host_factory_mock
         self.host_factory_mock.side_effect = host_list_host_factory
 
