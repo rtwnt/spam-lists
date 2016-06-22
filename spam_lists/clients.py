@@ -28,7 +28,7 @@ from .structures import (
 from .validation import accepts_valid_urls
 
 
-from .service_models import HostList
+from spam_lists.host_list import HostList
 
 
 class DNSBL(HostList):

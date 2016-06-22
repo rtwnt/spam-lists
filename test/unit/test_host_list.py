@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 '''
 This module contains unit tests for functions and classes provided by
-spam_lists.service_models module
+spam_lists.host_list module
 '''
 from __future__ import unicode_literals
 
-from spam_lists.service_models import HostList
+from spam_lists.host_list import HostList
 from test.compat import unittest, Mock, patch
 from test.unit.common_definitions import (
     HostListTestMixin, host_list_host_factory
@@ -39,12 +39,12 @@ class HostListTest(HostListTestMixin, unittest.TestCase):
         self.host_factory_mock.side_effect = host_list_host_factory
         self.tested_instance = HostList(self.host_factory_mock)
         self._contains_patcher = patch(
-            'spam_lists.service_models.HostList._contains'
+            'spam_lists.host_list.HostList._contains'
         )
         self._contains_mock = self._contains_patcher.start()
         self._contains_mock.side_effect = lambda h: h in self.listed_hosts
         host_data_getter_name = (
-            'spam_lists.service_models.HostList._get_match_and_classification'
+            'spam_lists.host_list.HostList._get_match_and_classification'
         )
         self.host_data_getter_patcher = patch(host_data_getter_name)
         self.host_data_getter_mock = self.host_data_getter_patcher.start()

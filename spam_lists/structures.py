@@ -3,7 +3,7 @@
 '''
 This module defines classes of objects containing various data, and
 functions for creating proper objects for given arguments. They are used
-by service models in spam_lists.service_models module
+by service models in spam_lists.host_list module
 '''
 
 from __future__ import unicode_literals

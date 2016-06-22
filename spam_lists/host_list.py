@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 
 '''
-This module contains classes of objects serving as clients
-for remote and local spam listing services
+This module contains a definition of HostList - a common base class
+for classes representing host lists, like clients of online host
+blacklists or custom host whitelists and blacklists.
 '''
 from __future__ import unicode_literals
 
