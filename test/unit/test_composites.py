@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 '''
 This module contains unit tests for functions and classes provided by
-spam_lists.utils module
+spam_lists.composites module
 '''
 from __future__ import unicode_literals
 
@@ -16,7 +16,7 @@ from requests.exceptions import (
 
 from spam_lists.exceptions import InvalidURLError, UnknownCodeError
 from spam_lists.structures import AddressListItem
-from spam_lists.utils import (
+from spam_lists.composites import (
     RedirectUrlResolver, UrlTesterChain, CachedIterable, GeneralizedUrlTester
 )
 from test.compat import unittest, Mock, patch, lru_cache, MagicMock
@@ -102,7 +102,7 @@ class RedirectUrlResolverTest(unittest.TestCase):
         self.redirect_results = ResolveRedirectsSideEffects()
         self.resolve_redirects_mock.side_effect = self.redirect_results
         self.resolver = RedirectUrlResolver(session_mock)
-        self.patcher = patch('spam_lists.utils.is_valid_url')
+        self.patcher = patch('spam_lists.composites.is_valid_url')
         self.is_valid_url_mock = self.patcher.start()
 
     def tearDown(self):
@@ -258,7 +258,7 @@ class RedirectUrlResolverTest(unittest.TestCase):
         ]
         self._test_get_new_locations(histories)
 
-    @patch('spam_lists.utils.CachedIterable')
+    @patch('spam_lists.composites.CachedIterable')
     def test_get_urls_and_locations(self, cached_iterable_mock):
         ''' The method get_urls_and_locations is expected to return
         an instance of CachedIterable.
