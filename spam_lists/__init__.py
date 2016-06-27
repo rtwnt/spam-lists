@@ -113,7 +113,7 @@ from .clients import (
     SPAMHAUS_DBL, SPAMHAUS_ZEN, SURBL_MULTI, HpHosts, GoogleSafeBrowsing
 )
 from .host_collections import HostCollection, SortedHostCollection
-from spam_lists.composites import UrlTesterChain, GeneralizedUrlTester
+from .composites import UrlTesterChain, GeneralizedUrlTester
 
 __title__ = 'spam-lists'
 __version__ = '0.9'

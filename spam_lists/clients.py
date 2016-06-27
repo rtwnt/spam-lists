@@ -20,15 +20,13 @@ from requests import get, post
 from requests.exceptions import HTTPError
 
 from .exceptions import UnathorizedAPIKeyError, UnknownCodeError
+from .host_list import HostList
 from .structures import (
     AddressListItem, non_ipv6_host, ip_address, registered_domain,
     registered_domain_or_ip
 )
 
 from .validation import accepts_valid_urls
-
-
-from spam_lists.host_list import HostList
 
 
 class DNSBL(HostList):

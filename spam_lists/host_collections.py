@@ -7,7 +7,7 @@ custom host collections and their dependencies
 from __future__ import unicode_literals
 from bisect import bisect_right
 
-from spam_lists.host_list import HostList
+from .host_list import HostList
 from .structures import hostname_or_ip
 
 
