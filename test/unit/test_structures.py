@@ -16,7 +16,34 @@ from spam_lists.structures import (
 from test.compat import unittest, Mock, patch, MagicMock
 
 
-class HostnameTest(unittest.TestCase):
+class BaseHostTest(object):
+    ''' A class providing tests for subclasses of Host class
+
+    :var tested_instance: an instance of tested class to be used
+    in tests
+    :var class_to_test: a class to be tested
+    '''
+
+    def setUp(self):
+        self.tested_instance.value = MagicMock()
+
+    def test_lt_for_smaller_value(self):
+        self.tested_instance.value.__lt__.return_value = False
+        self.assertFalse(self.tested_instance < Mock())
+
+    def test_lt_for_larger_value(self):
+        self.tested_instance.value.__lt__.return_value = True
+        self.assertTrue(self.tested_instance < Mock())
+
+    def test_lt_for_not_comparable(self):
+        self.tested_instance.value.__lt__.side_effect = TypeError
+        self.assertEqual(
+            NotImplemented,
+            self.tested_instance.__lt__(Mock())
+        )
+
+
+class HostnameTest(BaseHostTest, unittest.TestCase):
     # pylint: disable=too-many-public-methods
     ''' Tests for Hostname class
 
@@ -34,13 +61,15 @@ class HostnameTest(unittest.TestCase):
     :var unrelated_domain: a Hostname instance representing
     a domain unrelated to the one represented by tested instance
     '''
+    class_to_test = Hostname
     superdomain_str = 'superdomain.com'
     domain_str = 'domain.'+superdomain_str
     subdomain_str = 'subdomain.'+domain_str
-    superdomain = Hostname(superdomain_str)
-    domain = Hostname(domain_str)
-    subdomain = Hostname(subdomain_str)
-    unrelated_domain = Hostname('other.com')
+    superdomain = class_to_test(superdomain_str)
+    domain = class_to_test(domain_str)
+    subdomain = class_to_test(subdomain_str)
+    unrelated_domain = class_to_test('other.com')
+    tested_instance = class_to_test('compared.com')
 
     @parameterized.expand([
         ('hostname', '-e'),
@@ -65,7 +94,7 @@ class HostnameTest(unittest.TestCase):
             self.assertFalse(actual)
 
 
-class IPAddressTestMixin(object):
+class IPAddressTestMixin(BaseHostTest):
     ''' A class providing tests for subclasses of IPAddress
 
     :var class_to_test: a subclass of IPAddress to be tested
@@ -82,7 +111,7 @@ class IPAddressTestMixin(object):
         self.name_from_ip_mock = self.name_from_ip_patcher.start()
 
         self.tested_instance = self.class_to_test(Mock())
-        self.tested_instance.value = MagicMock()
+        super(IPAddressTestMixin, self).setUp()
 
     def tearDown(self):
         self.value_constructor_patcher.stop()
@@ -112,21 +141,6 @@ class IPAddressTestMixin(object):
         expected = name.relativize.return_value
         actual = self.tested_instance.relative_domain
         self.assertEqual(expected, actual)
-
-    def test_lt_for_smaller_value(self):
-        self.tested_instance.value.__lt__.return_value = False
-        self.assertFalse(self.tested_instance < Mock())
-
-    def test_lt_for_larger_value(self):
-        self.tested_instance.value.__lt__.return_value = True
-        self.assertTrue(self.tested_instance < Mock())
-
-    def test_lt_for_ip_of_different_version(self):
-        self.tested_instance.value.__lt__.side_effect = TypeError
-        self.assertEqual(
-            NotImplemented,
-            self.tested_instance.__lt__(self.class_to_test(Mock()))
-        )
 
 
 class IPv4AddressTest(IPAddressTestMixin, unittest.TestCase):

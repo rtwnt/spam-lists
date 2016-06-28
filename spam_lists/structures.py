@@ -26,7 +26,26 @@ from .exceptions import (
 from .compat import lru_cache
 
 
-class Hostname(object):
+class Host(object):
+    ''' Base class for host objects '''
+    def __lt__(self, other):
+        ''' Check if the other is smaller
+
+        This method is necessary for sorting and search
+        algorithms using bisect_right. It handles TypeError
+        by returning NotImplemented
+
+        :param other: a value to be compared
+        :returns: result of comparison as implemented in base
+        classes, or NotImplemented
+        '''
+        try:
+            return self.value < other
+        except TypeError:
+            return NotImplemented
+
+
+class Hostname(Host):
     ''' A class of objects representing hostname values.
 
     The instances are used as values tested by clients of
@@ -70,7 +89,7 @@ class Hostname(object):
         return self.value.to_unicode()
 
 
-class IPAddress(object):
+class IPAddress(Host):
     ''' A class of objects representing IP address values.
 
     The instances are used as values tested by clients of
@@ -121,24 +140,6 @@ class IPAddress(object):
 
     def is_match(self, other):
         return self == other
-
-    def __lt__(self, other):
-        ''' Check if the other is smaller
-
-        This method is necessary for sorting and search
-        algorithms using bisect_right. It handles TypeError
-        raised by __lt__ method of parent class (intended
-        to be ipaddress.IPv4Address or ipaddress.IPv6Address)
-        by returning NotImplemented
-
-        :param other: a value to be compared
-        :returns: result of comparison as implemented in base
-        classes, or NotImplemented
-        '''
-        try:
-            return self.value < other
-        except TypeError:
-            return NotImplemented
 
 
 class IPv4Address(IPAddress):
