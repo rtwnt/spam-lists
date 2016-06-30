@@ -32,16 +32,22 @@ class Host(object):
         ''' Check if the other is smaller
 
         This method is necessary for sorting and search
-        algorithms using bisect_right. It handles TypeError
-        by returning NotImplemented
+        algorithms using bisect_right.
 
         :param other: a value to be compared
-        :returns: result of comparison as implemented in base
-        classes, or NotImplemented
+        :returns: result of comparison between value attributes of
+        both this object and the other, or of comparison between
+        their unicode string representations.
+
+        In case of the other not having necessary attributes,
+        NotImplemented constant is returned.
         '''
         try:
-            return self.value < other
-        except TypeError:
+            try:
+                return self.value < other.value
+            except TypeError:
+                return self.to_unicode() < other.to_unicode()
+        except AttributeError:
             return NotImplemented
 
 
