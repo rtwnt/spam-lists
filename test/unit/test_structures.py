@@ -38,21 +38,28 @@ class BaseHostTest(object):
     def test_lt_for_not_comparable_values(self):
         self.tested_instance.value.__lt__.side_effect = TypeError
 
-        str_value = self.tested_instance.value.to_string()
+        str_value = self.tested_instance.value.to_unicode()
         other = Mock()
-        other_str_value = other.value.to_string()
+        other_str_value = 'other_str'
+        other.to_unicode.return_value = other_str_value
 
         self.assertEqual(
             str_value < other_str_value,
             self.tested_instance < other
         )
 
-    @parameterized.expand([
-        ('value_attribute', []),
-        ('to_unicode_method', ['value'])
-    ])
-    def test_lt_for_other_not_having(self, _, specification):
-        other = Mock(spec=specification)
+    def test_lt_for_other_not_having_value_attribute(self):
+        other = Mock(spec=[])
+        self.assertEqual(
+            NotImplemented,
+            self.tested_instance.__lt__(other)
+        )
+
+    def test_lt_for_other_not_having_to_unicode_method(self):
+        other = Mock(spec=['value'])
+        value = MagicMock()
+        value.__lt__.side_effect = TypeError
+        self.tested_instance.value = value
         self.assertEqual(
             NotImplemented,
             self.tested_instance.__lt__(other)
