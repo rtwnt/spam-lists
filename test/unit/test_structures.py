@@ -35,19 +35,6 @@ class BaseHostTest(object):
         self.tested_instance.value.__lt__.return_value = True
         self.assertTrue(self.tested_instance < Mock())
 
-    def test_lt_for_not_comparable_values(self):
-        self.tested_instance.value.__lt__.side_effect = TypeError
-
-        str_value = self.tested_instance.value.to_unicode()
-        other = Mock()
-        other_str_value = 'other_str'
-        other.to_unicode.return_value = other_str_value
-
-        self.assertEqual(
-            str_value < other_str_value,
-            self.tested_instance < other
-        )
-
     def test_lt_for_other_not_having_value_attribute(self):
         other = Mock(spec=[])
         self.assertEqual(
@@ -116,6 +103,20 @@ class HostnameTest(BaseHostTest, unittest.TestCase):
         else:
             self.assertFalse(actual)
 
+    @parameterized.expand([
+        ('returns_false', False),
+        ('returns_true', True)
+    ])
+    def test_lt_for_not_comparable_values(self, _, result):
+        self.tested_instance.value.__lt__.side_effect = TypeError
+
+        str_value = self.tested_instance.to_unicode()
+        str_value.__lt__.return_value = result
+        other = Mock()
+
+        assertion = self.assertTrue if result else self.assertFalse
+        assertion(self.tested_instance < other)
+
 
 class IPAddressTestMixin(BaseHostTest):
     ''' A class providing tests for subclasses of IPAddress
@@ -164,6 +165,19 @@ class IPAddressTestMixin(BaseHostTest):
         expected = name.relativize.return_value
         actual = self.tested_instance.relative_domain
         self.assertEqual(expected, actual)
+
+    def test_lt_for_not_comparable_values(self):
+        self.tested_instance.value.__lt__.side_effect = TypeError
+
+        str_value = self.tested_instance.to_unicode()
+        other = Mock()
+        other_str_value = 'other_str'
+        other.to_unicode.return_value = other_str_value
+
+        self.assertEqual(
+            str_value < other_str_value,
+            self.tested_instance < other
+        )
 
 
 class IPv4AddressTest(IPAddressTestMixin, unittest.TestCase):
