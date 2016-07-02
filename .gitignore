@@ -15,5 +15,6 @@ test/integration/google_safe_browsing_api_key.txt
 #development documentation, notes, etc.
 .doc
 
-#setuptools
+# Distribution / packaging
+dist/
 *.egg-info/
