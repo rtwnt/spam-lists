@@ -137,7 +137,7 @@ class SortedHostCollectionTest(HostCollectionBaseTest, unittest.TestCase):
 
     def _set_matching_hosts(self, hosts):
         self.tested_instance.hosts = list(hosts)
-        self.tested_instance.hosts.sort(key=get_sorting_key)
+        self.tested_instance.hosts.sort(key=self.host_factory_mock)
 
 
 if __name__ == "__main__":
