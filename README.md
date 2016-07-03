@@ -56,5 +56,16 @@ Filtering recognized spam urls out of a sequence of values returns a generator o
 
 For further information, read [spam_lists package docstring](https://github.com/piotr-rusin/spam-lists/blob/master/spam_lists/__init__.py).
 
+## Installation
+Install using pip:
+```
+$ pip install spam-lists
+```
+
+For testing and development, install test extras:
+```
+$ pip install spam-lists[test]
+```
+
 ## License
 Apache 2.0 See [LICENSE](https://github.com/piotr-rusin/spam-lists/blob/master/LICENSE)
