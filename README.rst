@@ -34,11 +34,11 @@ Simple test for membership of a host value in a host blacklist:
     True
 
 Lookup method returns an instance of
-spam\_lists.structures.AddressListItem - a named tuple containing: - a
-listed host that is a parent domain of a searched domain, or a listed ip
-address equal to one searched in the blacklist - source of the returned
-information as an instance of the client used to search for the value -
-a set of classificiation terms associated with the value
+spam\_lists.structures.AddressListItem - a named tuple containing:
+- a listed host that is a parent domain of a searched domain, or a listed ip
+address equal to one searched in the blacklist
+- source of the returned information as an instance of the client used to search for the value
+- a set of classificiation terms associated with the value
 
 .. code:: python
 
@@ -83,13 +83,13 @@ Installation
 
 Install using pip:
 
-::
+.. code:: bash
 
     $ pip install spam-lists
 
 For testing and development, install test extras:
 
-::
+.. code:: bash
 
     $ pip install spam-lists[test]
 
