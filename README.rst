@@ -7,16 +7,12 @@ whitelists.
 Features
 --------
 
--  client classes for `Google Safe Browsing Lookup API
-   <https://developers.google.com/safe-browsing/v3/lookup-guide>`__ and
-   `hpHosts <https://www.hosts-file.net/>`__ services, provided by
+-  client classes for `Google Safe Browsing Lookup API`_ and hpHosts_ services, provided by
    spam\_lists.clients module.
 -  support for custom DNSBL service clients, using DNSBL and BitmaskingDNSBL
    classes from the spam\_lists.clients module
 -  preconfigured instances of BitmaskingDNSBL and DNSBL for the
-   following services: `SURBL <http://www.surbl.org/lists#multi>`__,
-   `Spamhaus ZEN <https://www.spamhaus.org/zen/>`__, `Spamhaus DBL
-   <https://www.spamhaus.org/dbl/>`__
+   following services: SURBL_, `Spamhaus ZEN`_, `Spamhaus DBL`_
 -  combining multiple url testers into a composite tester, using
    UrlTesterChain and GeneralizedUrlTester from spam\_lists.composites
    module
@@ -25,6 +21,13 @@ Features
    in values searched for in a whitelist by using RedirectResolver or
    GeneralizedUrlTester classes from spam\_lists.composites module
 -  support for Python 2 and 3
+
+.. _Google Safe Browsing Lookup API: https://developers.google.com/
+   safe-browsing/v3/lookup-guide
+.. _hpHosts: https://www.hosts-file.net/
+.. _SURBL: http://www.surbl.org/lists#multi
+.. _Spamhaus ZEN: https://www.spamhaus.org/zen/
+.. _Spamhaus DBL: https://www.spamhaus.org/dbl/
 
 Usage
 -----
@@ -85,9 +88,10 @@ generator are instances of the AddressListItem named tuple:
     >>> list(result)
     [AddressListItem(value=u'dbltest.com', ...)]
 
-For further information, read `spam\_lists package docstring
-<https://github.com/piotr-rusin/spam-lists/blob/master/spam_lists/
-__init__.py>`__.
+For further information, read `spam_lists package docstring`__.
+
+.. __: https://github.com/piotr-rusin/spam-lists/
+   blob/master/spam_lists/__init__.py
 
 Installation
 ------------
@@ -104,8 +108,11 @@ To be able to run tests, install test extras:
 
     $ pip install spam-lists[test]
 
-You can also install dev-tools extras, currently containing `pylint
-<https://www.pylint.org/>`__ and `restview <https://mg.pov.lt/restview/>`__:
+You can also install dev-tools extras, currently containing pylint_ and
+restview_:
+
+.. _pylint: https://www.pylint.org/
+.. _restview: https://mg.pov.lt/restview/
 
 .. code:: bash
 
@@ -115,5 +122,6 @@ License
 -------
 
 | Apache 2.0
-| See `LICENSE <https://github.com/piotr-rusin/spam-lists/blob/master/
-  LICENSE>`_
+| See LICENSE__
+
+.. __: https://github.com/piotr-rusin/spam-lists/blob/master/LICENSE
