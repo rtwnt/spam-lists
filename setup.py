@@ -50,7 +50,7 @@ setup(
     author=author,
     author_email='piotr.rusin88@gmail.com',
     url='https://github.com/piotr-rusin/spam-lists',
-    packages=['spam_lists'],
+    packages=['spam_lists', 'test', 'test.integration', 'test.unit'],
     install_requires=install_requires,
     license=_license,
     classifiers=(
