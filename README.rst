@@ -61,7 +61,7 @@ Testing if there is any spam url in a sequence:
     True
 
 Filtering recognized spam urls out of a sequence of values returns a
-generator object...
+generator object that yields the spam urls:
 
 .. code:: python
 
@@ -71,8 +71,8 @@ generator object...
     >>> list(result)
     ['http://dbltest.com']
 
-... as does calling lookup\_matching, but here the values yielded by the
-generator are instances of the AddressListItem named tuple:
+Calling lookup\_matching returns a generator object yielding instances of the
+AddressListItem named tuple for matching urls:
 
 .. code:: python
 
