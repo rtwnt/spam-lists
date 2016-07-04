@@ -45,8 +45,7 @@ else:
 setup(
     name=name,
     version=version,
-    description=('A library for querying custom and third-party'
-                 ' web address whitelists and blacklists'),
+    description='Web address blacklist/whitelist library for Python',
     long_description=readme,
     author=author,
     author_email='piotr.rusin88@gmail.com',
