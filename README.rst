@@ -7,19 +7,14 @@ whitelists.
 Features
 --------
 
--  client classes for `Google Safe Browsing Lookup API`_ and hpHosts_ services, provided by
-   spam\_lists.clients module.
--  support for custom DNSBL service clients, using DNSBL and BitmaskingDNSBL
-   classes from the spam\_lists.clients module
--  preconfigured instances of BitmaskingDNSBL and DNSBL for the
-   following services: SURBL_, `Spamhaus ZEN`_, `Spamhaus DBL`_
--  combining multiple url testers into a composite tester, using
-   UrlTesterChain and GeneralizedUrlTester from spam\_lists.composites
-   module
--  redirect resolution: all reachable response urls and unavailable
-   addresses stored in HTTP Location headers for given urls can be included
-   in values searched for in a whitelist by using RedirectResolver or
-   GeneralizedUrlTester classes from spam\_lists.composites module
+-  client classes for `Google Safe Browsing Lookup API`_ and hpHosts_
+   services
+-  support for custom DNSBL service clients
+-  preconfigured clients for SURBL_, `Spamhaus ZEN`_ and `Spamhaus DBL`_
+-  support for querying and populating custom host whitelists and blacklists
+-  combining multiple url testers into a composite tester
+-  optional querying for redirect url addresses when using a composite
+   url tester
 -  support for Python 2 and 3
 
 .. _Google Safe Browsing Lookup API: https://developers.google.com/
