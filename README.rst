@@ -35,8 +35,7 @@ Simple test for membership of a host value in a host blacklist:
     >>> 'dbltest.com' in SPAMHAUS_DBL
     True
 
-Lookup method returns an instance of
-spam\_lists.structures.AddressListItem - a named tuple containing:
+Lookup method returns a named tuple containing:
 
 -  a listed host that is a parent of a searched domain, or a listed ip address
    equal to one searched in the blacklist
