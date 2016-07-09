@@ -45,8 +45,8 @@ class DNSBL(HostList):
         :param classification_map: item classes associated with
         DNSBL query return codes
         :param host_factory: a callable object that returns an object
-         representing host and providing method for getting a relative
-         domain pertaining to it.
+        representing host and providing method for getting a relative
+        domain pertaining to it.
         '''
         self._identifier = identifier
         self._query_suffix = name.from_text(query_suffix)
@@ -58,9 +58,9 @@ class DNSBL(HostList):
         ''' Query DNSBL service for given value
 
         :param host_object: an object representing host,
-         created by _host_factory
+        created by _host_factory
         :returns: an instance of dns.resolver.Answer for
-         given value, if it is listed. Otherwise, it returns None
+        given value, if it is listed. Otherwise, it returns None
         '''
         host_to_query = host_object.relative_domain
         query_name = host_to_query.derelativize(self._query_suffix)
@@ -117,7 +117,6 @@ class BitmaskingDNSBL(DNSBL):
     sums of classification codes
 
     Each classification code is a power of two.
-
     '''
     def _get_entry_classification(self, code):
         codes = get_powers_of_2(code)
@@ -143,9 +142,9 @@ class HpHosts(HostList):
 
         :param host_object: an object representing a host value
         :param classification: if True: hpHosts is queried also
-         for classification for given host, if listed
+        for classification for given host, if listed
         :returns: content of response to GET request to hpHosts
-         for data on the given host
+        for data on the given host
         '''
         template = 'http://verify.hosts-file.net/?v={}&s={}'
         url = template.format(self.app_id, host_object.to_unicode())
@@ -165,7 +164,7 @@ class HpHosts(HostList):
 
 
 class GoogleSafeBrowsing(object):
-    ''' Google Safe Browsing lookup API client '''
+    ''' Google Safe Browsing Lookup API client '''
     protocol_version = '3.1'
     max_urls_per_request = 500
 
@@ -224,10 +223,10 @@ class GoogleSafeBrowsing(object):
         ''' Test urls for being listed by the service
 
         :param urls: a sequence of urls  to be tested
-        :returns: a tuple containing chunk of urls and a response pertaining
-          to them if the code of response was 200, which means at least one
-          of the queried URLs is matched in either the phishing, malware,
-           or unwanted software lists.
+        :returns: a tuple containing chunk of urls and a response
+        pertaining to them if the code of response was 200, which
+        means at least one of the queried URLs is matched in eithe
+        the phishing, malware, or unwanted software lists.
         '''
         urls = list(set(urls))
         for i in range(0, len(urls), self.max_urls_per_request):
