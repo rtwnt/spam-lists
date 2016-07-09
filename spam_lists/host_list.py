@@ -17,7 +17,7 @@ from .validation import accepts_valid_urls, accepts_valid_host
 
 
 class HostList(object):
-    ''' A class of clients for local or remote host list services '''
+    ''' A base class for objects representing host lists'''
     def __init__(self, host_factory):
         ''' Constructor
 
