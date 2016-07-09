@@ -93,7 +93,7 @@ class BaseHostCollection(HostList):
 
 
 class HostCollection(BaseHostCollection):
-    ''' Provides a container for ip addresses and domain names.
+    ''' Represents a custom host list.
 
     May be used as a local whitelist or blacklist.
     '''
@@ -110,8 +110,8 @@ class HostCollection(BaseHostCollection):
 
 
 class SortedHostCollection(BaseHostCollection):
-    ''' A container for ip addresses and hostnames,
-    keeping the items in sorted order.
+    ''' Represent a custom host list that keeps its items in
+    sorted order.
     '''
     def _get_insertion_point(self, host_obj):
         return bisect_right(self, host_obj)
