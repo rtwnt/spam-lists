@@ -40,15 +40,26 @@ class Host(object):
         their unicode string representations.
 
         In case of the other not having necessary attributes,
-        NotImplemented constant is returned.
+        a TypeError is raised
         '''
         try:
             try:
-                return self.value < other.value
+                result = self.value.__lt__(other.value)
             except TypeError:
-                return self.to_unicode() < other.to_unicode()
+                return self._compare_strings(other)
+            else:
+                if result == NotImplemented:
+                    result = self._compare_strings(other)
+                return result
         except AttributeError:
-            return NotImplemented
+            msg = 'Unorderable types: {}() < {}()'.format(
+                self.__class__.__name__,
+                other.__class__.__name__
+            )
+            raise TypeError(msg)
+
+    def _compare_strings(self, other):
+        return self.to_unicode() < other.to_unicode()
 
 
 class Hostname(Host):

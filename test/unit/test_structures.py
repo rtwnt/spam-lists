@@ -35,21 +35,27 @@ class BaseHostTest(object):
         self.tested_instance.value.__lt__.return_value = True
         self.assertTrue(self.tested_instance < Mock())
 
-    def test_lt_for_other_not_having_value_attribute(self):
+    def test_lt_for_missing_value_attribute(self):
         other = Mock(spec=[])
-        self.assertEqual(
-            NotImplemented,
-            self.tested_instance.__lt__(other)
+        self.assertRaises(
+            TypeError,
+            self.tested_instance.__lt__,
+            other
         )
 
-    def test_lt_for_other_not_having_to_unicode_method(self):
+    @parameterized.expand([
+        ('type_error', TypeError),
+        ('not_implemented_return_value', lambda o: NotImplemented)
+    ])
+    def test_lt_for_missing_to_unicode_method_to_handle(self, _, side_effect):
         other = Mock(spec=['value'])
         value = MagicMock()
-        value.__lt__.side_effect = TypeError
+        value.__lt__.side_effect = side_effect
         self.tested_instance.value = value
-        self.assertEqual(
-            NotImplemented,
-            self.tested_instance.__lt__(other)
+        self.assertRaises(
+            TypeError,
+            self.tested_instance.__lt__,
+            other
         )
 
 
