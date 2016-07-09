@@ -30,7 +30,7 @@ from .validation import accepts_valid_urls
 
 
 class DNSBL(HostList):
-    ''' Represents a DNSBL service '''
+    ''' Represents a DNSBL service client '''
     def __init__(
             self,
             identifier,
