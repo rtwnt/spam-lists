@@ -38,9 +38,8 @@ class Host(object):
         :returns: result of comparison between value attributes of
         both this object and the other, or of comparison between
         their unicode string representations.
-
-        In case of the other not having necessary attributes,
-        a TypeError is raised
+        :raises TypeError: in case of the other not having either value
+        or to_unicode attributes.
         '''
         try:
             try:
