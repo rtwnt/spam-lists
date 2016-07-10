@@ -29,7 +29,7 @@ from .compat import lru_cache
 class Host(object):
     ''' Base class for host objects '''
     def __lt__(self, other):
-        ''' Check if the other is smaller
+        ''' Check if self is less than the other
 
         This method is necessary for sorting and search
         algorithms using bisect_right.
