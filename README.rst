@@ -115,7 +115,7 @@ restview_:
 License
 -------
 
-| Apache 2.0
+| MIT
 | See LICENSE__
 
 .. __: https://github.com/piotr-rusin/spam-lists/blob/master/LICENSE
