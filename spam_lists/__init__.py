@@ -105,7 +105,7 @@ the data set for which we query service(s) represented by
 the url tester.
 
 :copyright: (c) 2016 by Piotr Rusin.
-:license: Apache 2.0, see LICENSE for more details.
+:license: MIT, see LICENSE for more details.
 '''
 from __future__ import unicode_literals
 
@@ -118,5 +118,5 @@ from .composites import UrlTesterChain, GeneralizedUrlTester
 __title__ = 'spam-lists'
 __version__ = '1.0.0b7'
 __author__ = 'Piotr Rusin'
-__license__ = 'Apache 2.0'
+__license__ = 'MIT'
 __copyright__ = 'Copyright 2016 Piotr Rusin'
