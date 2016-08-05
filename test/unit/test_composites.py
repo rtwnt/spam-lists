@@ -17,7 +17,7 @@ from requests.exceptions import (
 from spam_lists.exceptions import InvalidURLError, UnknownCodeError
 from spam_lists.structures import AddressListItem
 from spam_lists.composites import (
-    RedirectUrlResolver, UrlTesterChain, CachedIterable, GeneralizedUrlTester
+    RedirectUrlResolver, URLTesterChain, CachedIterable, GeneralizedUrlTester
 )
 from test.compat import unittest, Mock, patch, lru_cache, MagicMock
 from test.unit.common_definitions import (
@@ -282,7 +282,7 @@ class UrlTesterChainTest(
         unittest.TestCase
 ):
     # pylint: disable=too-many-public-methods
-    ''' Tests for UrlTesterChain class
+    ''' Tests for URLTesterChain class
 
     This class uses get_url_tester_mock function to populate list of
     url testers used by the tested instance
@@ -307,7 +307,7 @@ class UrlTesterChainTest(
             tester.lookup_matching.return_value = []
             tester.filter_matching.return_value = []
             url_testers.append(tester)
-        self.tested_instance = UrlTesterChain(*url_testers)
+        self.tested_instance = URLTesterChain(*url_testers)
 
     def _add_url_tester(self, source_id, matching_urls):
         ''' Add a preconfigured url tester mock to the tested instance
@@ -344,7 +344,7 @@ class UrlTesterChainTest(
         The method groups given urls by their source ids: identifiers
          of services expected to report urls associated with them as
          matching. Then, mocks representing url testers are added
-         to the tested instance of UrlTesterChain. They are shuffled
+         to the tested instance of URLTesterChain. They are shuffled
          to ensure some of mocked services reporting a match
          will be queried before some that do not.
 

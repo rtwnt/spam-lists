@@ -84,7 +84,7 @@ implementing host list and url tester interfaces.
 :var SortedHostCollection: a class of objects representing custom
 sorted host lists, implementing host list and url tester interfaces.
 
-:var UrlTesterChain: a class of objects representing composite
+:var URLTesterChain: a class of objects representing composite
 url testers, created by providing objects with url tester methods
 as arguments to constructor. It implements url tester interface.
 
@@ -113,7 +113,7 @@ from .clients import (
     SPAMHAUS_DBL, SPAMHAUS_ZEN, SURBL_MULTI, HpHosts, GoogleSafeBrowsing
 )
 from .host_collections import HostCollection, SortedHostCollection
-from .composites import UrlTesterChain, GeneralizedUrlTester
+from .composites import URLTesterChain, GeneralizedUrlTester
 
 __title__ = 'spam-lists'
 __version__ = '1.0.0b7'

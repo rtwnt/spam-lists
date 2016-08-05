@@ -128,7 +128,7 @@ class RedirectUrlResolver(object):
         return CachedIterable(location_generator, initial_cache)
 
 
-class UrlTesterChain(object):
+class URLTesterChain(object):
     '''A url tester using a sequence of other url testers'''
     def __init__(self, *url_testers):
         '''Constructor
