@@ -17,7 +17,7 @@ from requests.exceptions import (
 from spam_lists.exceptions import InvalidURLError, UnknownCodeError
 from spam_lists.structures import AddressListItem
 from spam_lists.composites import (
-    RedirectURLResolver, URLTesterChain, CachedIterable, GeneralizedUrlTester
+    RedirectURLResolver, URLTesterChain, CachedIterable, GeneralizedURLTester
 )
 from test.compat import unittest, Mock, patch, lru_cache, MagicMock
 from test.unit.common_definitions import (
@@ -436,7 +436,7 @@ class CachedIterableTest(unittest.TestCase):
 
 class GeneralizedUrlTesterTest(unittest.TestCase):
     # pylint: disable=too-many-public-methods
-    ''' Tests for GeneralizedUrlTester class
+    ''' Tests for GeneralizedURLTester class
 
     :var no_resolution_setup: a parameter setup for test methods
     requiring no explicit parameter to use (or not use)
@@ -448,7 +448,7 @@ class GeneralizedUrlTesterTest(unittest.TestCase):
     Contains names of method of tested instance to be called.
     :var test_urls: a list of urls passed as argument to methods of
     tested_instance
-    :var tested_instance: instance of GeneralizedUrlTester to be
+    :var tested_instance: instance of GeneralizedURLTester to be
     tested.
     :var whitelist_mock: an object representing an instance of
     whitelist used by tested_instance
@@ -475,7 +475,7 @@ class GeneralizedUrlTesterTest(unittest.TestCase):
         self.resolver_mock = Mock()
         self.resolver_mock.get_urls_and_locations.return_value = MagicMock()
         self.url_tester_mock = Mock()
-        self.tested_instance = GeneralizedUrlTester(
+        self.tested_instance = GeneralizedURLTester(
             self.url_tester_mock,
             self.whitelist_mock,
             self.resolver_mock

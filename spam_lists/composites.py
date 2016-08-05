@@ -174,7 +174,7 @@ class URLTesterChain(object):
                     yield url
 
 
-class GeneralizedUrlTester(object):
+class GeneralizedURLTester(object):
     ''' A url tester using redirect resolution, whitelist
     and another url tester
     '''

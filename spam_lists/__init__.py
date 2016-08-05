@@ -88,7 +88,7 @@ sorted host lists, implementing host list and url tester interfaces.
 url testers, created by providing objects with url tester methods
 as arguments to constructor. It implements url tester interface.
 
-:var GeneralizedUrlTester: a class adding url whitelist and redirect
+:var GeneralizedURLTester: a class adding url whitelist and redirect
 resolution to a url tester to be used. Instances are created by calling
 the constructor with the following arguments:
 
@@ -97,7 +97,7 @@ the constructor with the following arguments:
     method of the url tester interface.
     * (optionally) an instance of redirect url resolver to use
 
-GeneralizedUrlTester implements an interface similar to the url tester
+GeneralizedURLTester implements an interface similar to the url tester
 interface, with methods any_match, filter_matching and lookup_matching
 all receiving an additional argument: a boolean value specifying if
 we should include results of redirect url resolution for given urls in
@@ -113,7 +113,7 @@ from .clients import (
     SPAMHAUS_DBL, SPAMHAUS_ZEN, SURBL_MULTI, HpHosts, GoogleSafeBrowsing
 )
 from .host_collections import HostCollection, SortedHostCollection
-from .composites import URLTesterChain, GeneralizedUrlTester
+from .composites import URLTesterChain, GeneralizedURLTester
 
 __title__ = 'spam-lists'
 __version__ = '1.0.0b7'
