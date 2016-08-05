@@ -38,7 +38,7 @@ def get_classification(classification, return_codes):
     return set(v for k, v in list(classification.items()) if k in return_codes)
 
 
-class UrlTesterClientTestMixin(object):
+class URLTesterClientTestMixin(object):
     '''  A class containing integration test methods for
     url tester clients
 
@@ -87,7 +87,7 @@ class UrlTesterClientTestMixin(object):
         self.assertCountEqual(expected, actual)
 
 
-class HostListClientTestMixin(UrlTesterClientTestMixin):
+class HostListClientTestMixin(URLTesterClientTestMixin):
     '''  A class containing integration test methods for
     host list clients
 
@@ -227,7 +227,7 @@ REASON_TO_SKIP_GSB_TEST = (
 
 
 @unittest.skipIf(not SAFE_BROWSING_API_KEY, REASON_TO_SKIP_GSB_TEST)
-class GoogleSafeBrowsingTest(UrlTesterClientTestMixin, unittest.TestCase):
+class GoogleSafeBrowsingTest(URLTesterClientTestMixin, unittest.TestCase):
     # pylint: disable=too-many-public-methods
     listed_url = 'http://www.gumblar.cn/'
     not_listed_url = 'http://www.google.com/'
