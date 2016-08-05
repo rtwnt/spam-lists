@@ -120,7 +120,7 @@ class AcceptsValidHostTest(ValidationDecoratorTestMixin, unittest.TestCase):
         self._test_wrapper_for_invalid(value)
 
 
-class IsValidUrlTest(unittest.TestCase):
+class IsValidURLTest(unittest.TestCase):
     # pylint: disable=too-many-public-methods
     ''' Tests for is_valid_url function '''
     @parameterized.expand([
