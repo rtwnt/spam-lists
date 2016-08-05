@@ -13,7 +13,7 @@ from spam_lists.clients import (
 )
 from test.compat import unittest, Mock, patch
 from test.unit.common_definitions import (
-    HostListTestMixin, host_list_host_factory, UrlTesterTestMixin
+    HostListTestMixin, host_list_host_factory, URLTesterTestMixin
 )
 
 
@@ -213,12 +213,12 @@ def create_gsb_post(expected_401, spam_urls, classification):
     return post
 
 
-class GoogleSafeBrowsingTest(UrlTesterTestMixin, unittest.TestCase):
+class GoogleSafeBrowsingTest(URLTesterTestMixin, unittest.TestCase):
     # pylint: disable=too-many-public-methods
     ''' Tests for GoogleSafeBrowsing class
 
     This class adds an additional test method to the ones provided
-    by UrlTesterTestMixin: test_unathorized_query_with. This method
+    by URLTesterTestMixin: test_unathorized_query_with. This method
     is used to test methods of GoogleSafeBrowsing class for expected
     behaviour while calling Google Safe Browsing lookup API with
     an unathorized API key

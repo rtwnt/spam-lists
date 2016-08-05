@@ -59,7 +59,7 @@ class URLTesterTestBaseMixin(object):
         self._test_any_match_returns_false(self.valid_urls)
 
 
-class UrlTesterTestMixin(URLTesterTestBaseMixin):
+class URLTesterTestMixin(URLTesterTestBaseMixin):
     ''' A class providing pre-generated tests for classes
     having any_match, filter_matching and lookup_matching
     methods '''
@@ -120,7 +120,7 @@ def get_hosts(urls):
     return [urlparse(u).hostname for u in urls]
 
 
-class HostListTestMixin(UrlTesterTestMixin):
+class HostListTestMixin(URLTesterTestMixin):
     ''' A common test case for all classes that represent
     a host list stored locally or by a remote service '''
     valid_host_input = [
