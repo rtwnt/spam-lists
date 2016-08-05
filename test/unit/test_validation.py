@@ -67,7 +67,7 @@ class ValidationDecoratorTestMixin(object):
         self.function.assert_not_called()
 
 
-class AcceptValidUrlsTest(ValidationDecoratorTestMixin, unittest.TestCase):
+class AcceptValidURLsTest(ValidationDecoratorTestMixin, unittest.TestCase):
     # pylint: disable=too-many-public-methods
     ''' Tests for accepts_valid_urls decorator '''
     exception_type = InvalidURLError
