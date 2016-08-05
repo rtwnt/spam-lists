@@ -434,7 +434,7 @@ class CachedIterableTest(unittest.TestCase):
         self.assertSequenceEqual(first_run_result, second_run_result)
 
 
-class GeneralizedUrlTesterTest(unittest.TestCase):
+class GeneralizedURLTesterTest(unittest.TestCase):
     # pylint: disable=too-many-public-methods
     ''' Tests for GeneralizedURLTester class
 
