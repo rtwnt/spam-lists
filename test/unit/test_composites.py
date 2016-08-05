@@ -66,7 +66,7 @@ class ResolveRedirectsSideEffects(object):
             raise exception_type
 
 
-class RedirectUrlResolverTest(unittest.TestCase):
+class RedirectURLResolverTest(unittest.TestCase):
     # pylint: disable=too-many-public-methods
     ''' Tests for RedirectURLResolver class
 
