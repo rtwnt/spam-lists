@@ -40,14 +40,14 @@ def get_classification(classification, return_codes):
 
 class URLTesterClientTestMixin(object):
     '''  A class containing integration test methods for
-    url tester clients
+    URL tester clients
 
     :var tested_client: an instance of client to be tested
-    :var urls_without_listed: urls without values listed by the service
+    :var urls_without_listed: URLs without values listed by the service
     to be queried
-    :var urls_with_listed: urls with values listed by the service
+    :var urls_with_listed: URLs with values listed by the service
     to be queried
-    :var listed_url: a url listed (or: with a host listed) by the service
+    :var listed_url: a URL listed (or: with a host listed) by the service
     to be queried
     :var listed_item: an instance of AddressListItem representing
     an item listed by the service to be queried
@@ -94,11 +94,11 @@ class HostListClientTestMixin(URLTesterClientTestMixin):
     :var listed: an item listed by a service to be queried
     :var not_listed: an item not listed by a service to be queried
     :var tested_client: an instance of client to be tested
-    :var urls_without_listed: urls without values listed by the service
+    :var urls_without_listed: URLs without values listed by the service
     to be queried
-    :var urls_with_listed: urls with values listed by the service
+    :var urls_with_listed: URLs with values listed by the service
     to be queried
-    :var listed_url: a url listed (or: with a host listed) by the service
+    :var listed_url: a URL listed (or: with a host listed) by the service
     to be queried
     :var listed_item: an instance of AddressListItem representing
     an item listed by the service to be queried

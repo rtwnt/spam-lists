@@ -186,8 +186,8 @@ def create_gsb_post(expected_401, spam_urls, classification):
 
     :param expected_401: if True, the code of response mock returned
     by the returned function will be 401
-    :param spam_urls: a list of urls to be recognized as spam
-    :param classification: a classification used for spam urls
+    :param spam_urls: a list of URLs to be recognized as spam
+    :param classification: a classification used for spam URLs
     :returns: mocked implementation of post function
     '''
     def post(_, body):

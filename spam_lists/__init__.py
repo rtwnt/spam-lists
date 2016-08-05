@@ -5,7 +5,7 @@ spam-lists library
 ====================
 
 spam-lists provides common interfaces for querying whitelists and
-blacklists containing web addresses: hostnames, IP addresses or urls.
+blacklists containing web addresses: hostnames, IP addresses or URLs.
 
 It supports the following third party services:
 
@@ -43,66 +43,66 @@ the following interfaces:
         listed, an instance of spam_lists.structures.AddressListItem is
         returned, otherwise the method returns None.
 
-    * url tester interface, containing methods that receive an iterable
-    containing urls for which we query service(s) represented by
+    * URL tester interface, containing methods that receive an iterable
+    containing URLs for which we query service(s) represented by
     an object.
 
     The methods return values depending on recognizing (or not) any of
-    the url values as matching criteria used by the service
+    the URL values as matching criteria used by the service
     (hostnames, IP addresses, etc.)
 
     The interface contains the following methods:
 
-        * any_match: checks if any of the urls is recognized as
+        * any_match: checks if any of the URLs is recognized as
         a match. Returns a boolean value
-        * filter_matching: returns a generator yielding matching urls
+        * filter_matching: returns a generator yielding matching URLs
         * lookup_matching: returns a generator yielding instances of
         spam_lists.structures.AddressListItem representing matching
-        criteria for matching urls.
+        criteria for matching URLs.
 
 The following objects are part of the API:
 
 :var SPAMHAUS_DBL: Spamhaus DBL service client, implementing host list
-and url tester interfaces.
+and URL tester interfaces.
 
 :var SPAMHAUS_ZEN: Spamhaus ZEN service client, implementing host list
-and url tester interfaces.
+and URL tester interfaces.
 
-:var SURBL_MULTI: SURBL service client, implementing host list and url
+:var SURBL_MULTI: SURBL service client, implementing host list and URL
 tester interfaces.
 
 :var HpHosts: a class of objects used as clients for hpHosts service,
-implementing host list and url tester interfaces.
+implementing host list and URL tester interfaces.
 
 :var GoogleSafeBrowsing: a class of objects used as clients for
-Google Safe Browsing Lookup API service, implementing url tester
+Google Safe Browsing Lookup API service, implementing URL tester
 interface.
 
 :var HostCollection: a class of objects representing custom host lists,
-implementing host list and url tester interfaces.
+implementing host list and URL tester interfaces.
 
 :var SortedHostCollection: a class of objects representing custom
-sorted host lists, implementing host list and url tester interfaces.
+sorted host lists, implementing host list and URL tester interfaces.
 
 :var URLTesterChain: a class of objects representing composite
-url testers, created by providing objects with url tester methods
-as arguments to constructor. It implements url tester interface.
+URL testers, created by providing objects with URL tester methods
+as arguments to constructor. It implements URL tester interface.
 
-:var GeneralizedURLTester: a class adding url whitelist and redirect
-resolution to a url tester to be used. Instances are created by calling
+:var GeneralizedURLTester: a class adding URL whitelist and redirect
+resolution to a URL tester to be used. Instances are created by calling
 the constructor with the following arguments:
 
-    * the url tester object
+    * the URL tester object
     * (optionally) a whitelist object implementing filter_matching
-    method of the url tester interface.
-    * (optionally) an instance of redirect url resolver to use
+    method of the URL tester interface.
+    * (optionally) an instance of redirect URL resolver to use
 
-GeneralizedURLTester implements an interface similar to the url tester
+GeneralizedURLTester implements an interface similar to the URL tester
 interface, with methods any_match, filter_matching and lookup_matching
 all receiving an additional argument: a boolean value specifying if
-we should include results of redirect url resolution for given urls in
+we should include results of redirect URL resolution for given URLs in
 the data set for which we query service(s) represented by
-the url tester.
+the URL tester.
 
 :copyright: (c) 2016 by Piotr Rusin.
 :license: MIT, see LICENSE for more details.

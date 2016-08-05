@@ -28,7 +28,7 @@ from test.unit.common_definitions import (
 def get_response_mock(url):
     ''' Get mock representing response to a request
 
-    :param url: response url
+    :param url: response URL
     :returns: an instance of mock representing a response
     '''
     response = Mock()
@@ -70,7 +70,7 @@ class RedirectURLResolverTest(unittest.TestCase):
     # pylint: disable=too-many-public-methods
     ''' Tests for RedirectURLResolver class
 
-    :var valid_urls: a list of strings representing valid urls used
+    :var valid_urls: a list of strings representing valid URLs used
      in tests
     :var head_mock: a mocked implementation of head function
     used by the tested class to perform HEAD requests. Uses an instance
@@ -118,8 +118,8 @@ class RedirectURLResolverTest(unittest.TestCase):
         ''' Prepare mocks for their calls to have expected side effects
 
         :param url_histories: a sequence containing sequences of
-        url addresses of all responses to a request to a redirecting url
-        :param exceptions: a dictionary mapping initial urls of
+        URL addresses of all responses to a request to a redirecting URL
+        :param exceptions: a dictionary mapping initial URLs of
         redirection chains to exceptions raised when attempting to
         get response to a request to final location
         :param last_location: a value for location response header,
@@ -198,15 +198,15 @@ class RedirectURLResolverTest(unittest.TestCase):
     def test_get_locations_for(self, _, history,
                                exception_type, triggered_by_valid_url=True):
         ''' The get_locations method is expected to yield all
-         valid urls appearing as url addresses and location headers in
-         response histories for given urls
+         valid URLs appearing as URL addresses and location headers in
+         response histories for given URLs
 
-        :param history: url addresses of all responses in redirection chain
+        :param history: URL addresses of all responses in redirection chain
         :param exception_type: a type of exception to be raised while
         getting a response to the last location header value
         :param triggered_by_valid_url: if True, the value of the last
         location header - the one that tiggered an exception - is
-        a valid url, and therefore it is also expected to be yielded
+        a valid URL, and therefore it is also expected to be yielded
         '''
         expected = history[1:]
         exceptions = {history[0]: exception_type}
@@ -230,8 +230,8 @@ class RedirectURLResolverTest(unittest.TestCase):
         self.assertCountEqual(expected, actual)
 
     def test_get_new_locations(self):
-        ''' The method is expected to yield only new urls,
-        that is urls that were not part of the original input '''
+        ''' The method is expected to yield only new URLs,
+        that is URLs that were not part of the original input '''
         no_redirects = 'http://noredirects.com'
         histories = [
             [no_redirects],
@@ -246,7 +246,7 @@ class RedirectURLResolverTest(unittest.TestCase):
 
     def test_get_new_unique_locations(self):
         ''' The generator returned by get_new_locations is expected
-        to yield no urls that it yielded previously '''
+        to yield no URLs that it yielded previously '''
         duplicated_part = [
             'http://first.com',
             'http://second.com',
@@ -285,7 +285,7 @@ class URLTesterChainTest(
     ''' Tests for URLTesterChain class
 
     This class uses get_url_tester_mock function to populate list of
-    url testers used by the tested instance
+    URL testers used by the tested instance
 
     :var classification: a set of classifications used in tests
     :var tested_instance: an instance of tested class
@@ -310,11 +310,11 @@ class URLTesterChainTest(
         self.tested_instance = URLTesterChain(*url_testers)
 
     def _add_url_tester(self, source_id, matching_urls):
-        ''' Add a preconfigured url tester mock to the tested instance
+        ''' Add a preconfigured URL tester mock to the tested instance
 
-        :param source_id: an identifier for a mocked url tester
-        :param matching_urls: a list of urls expected to be matched by
-        a service represented by the mocked url tester
+        :param source_id: an identifier for a mocked URL tester
+        :param matching_urls: a list of URLs expected to be matched by
+        a service represented by the mocked URL tester
         '''
         tester = get_url_tester_mock(source_id)
 
@@ -339,11 +339,11 @@ class URLTesterChainTest(
                 in list(urls.items()) for i in ids]
 
     def _set_matching_urls(self, urls):
-        ''' Set urls expected to be matched during a test
+        ''' Set URLs expected to be matched during a test
 
-        The method groups given urls by their source ids: identifiers
-         of services expected to report urls associated with them as
-         matching. Then, mocks representing url testers are added
+        The method groups given URLs by their source ids: identifiers
+         of services expected to report URLs associated with them as
+         matching. Then, mocks representing URL testers are added
          to the tested instance of URLTesterChain. They are shuffled
          to ensure some of mocked services reporting a match
          will be queried before some that do not.
@@ -446,13 +446,13 @@ class GeneralizedURLTesterTest(unittest.TestCase):
     testing calls with and without redirect resolution, depending
     on value of a parameter, with False assumed as default.
     Contains names of method of tested instance to be called.
-    :var test_urls: a list of urls passed as argument to methods of
+    :var test_urls: a list of URLs passed as argument to methods of
     tested_instance
     :var tested_instance: instance of GeneralizedURLTester to be
     tested.
     :var whitelist_mock: an object representing an instance of
     whitelist used by tested_instance
-    :var url_tester_mock: an object representing a url tester instance
+    :var url_tester_mock: an object representing a URL tester instance
     to be used by tested instance
     :var resolver_mock: an object representing an instance of
     redirect resolver to be used by tested instance

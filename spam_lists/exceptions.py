@@ -7,7 +7,7 @@ from __future__ import unicode_literals
 
 
 class SpamListsError(Exception):
-    '''There was an error during testing a url or host'''
+    '''There was an error during testing a URL or host'''
 
 
 class SpamListsValueError(SpamListsError, ValueError):
@@ -43,4 +43,4 @@ class InvalidHostnameError(InvalidHostError):
 
 
 class InvalidURLError(SpamListsValueError):
-    '''The value is not a valid url'''
+    '''The value is not a valid URL'''

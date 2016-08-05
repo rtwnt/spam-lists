@@ -91,22 +91,22 @@ class HostList(object):
 
     @accepts_valid_urls
     def any_match(self, urls):
-        ''' Check if any of given urls has a listed host
+        ''' Check if any of given URLs has a listed host
 
-        :param urls: an iterable containing urls
+        :param urls: an iterable containing URLs
         :returns: True if any host is listed
-        :raises InvalidURLError: if there are any invalid urls in the sequence
+        :raises InvalidURLError: if there are any invalid URLs in the sequence
         '''
         return any(urlparse(u).hostname in self for u in urls)
 
     @accepts_valid_urls
     def lookup_matching(self, urls):
-        '''Get objects representing hosts in given urls
+        '''Get objects representing hosts in given URLs
         that match listed hosts
 
-        :param urls: an iterable containing urls
+        :param urls: an iterable containing URLs
         :returns: items representing hosts matching the listed ones
-        :raises InvalidURLError: if there are any invalid urls in the sequence
+        :raises InvalidURLError: if there are any invalid URLs in the sequence
         '''
         hosts = (urlparse(u).hostname for u in urls)
         for val in hosts:
@@ -116,11 +116,11 @@ class HostList(object):
 
     @accepts_valid_urls
     def filter_matching(self, urls):
-        ''' Get urls with hosts matching listed ones
+        ''' Get URLs with hosts matching listed ones
 
-        :param urls: an iterable containing url addresses to filter
-        :returns: a list containing matching urls
-        :raises InvalidURLError: if there are any invalid urls in the sequence
+        :param urls: an iterable containing URL addresses to filter
+        :returns: a list containing matching URLs
+        :raises InvalidURLError: if there are any invalid URLs in the sequence
         '''
         def is_match(url):
             return urlparse(url).hostname in self

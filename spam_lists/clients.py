@@ -200,7 +200,7 @@ class GoogleSafeBrowsing(object):
     def _query_once(self, urls):
         ''' Perform a single POST request using lookup API
 
-        :param urls: a sequence of urls to put in request body
+        :param urls: a sequence of URLs to put in request body
         :returns: a response object
         :raises UnathorizedAPIKeyError: when the API key for this instance
         is not valid
@@ -220,10 +220,10 @@ class GoogleSafeBrowsing(object):
         return response
 
     def _query(self, urls):
-        ''' Test urls for being listed by the service
+        ''' Test URLs for being listed by the service
 
-        :param urls: a sequence of urls  to be tested
-        :returns: a tuple containing chunk of urls and a response
+        :param urls: a sequence of URLs  to be tested
+        :returns: a tuple containing chunk of URLs and a response
         pertaining to them if the code of response was 200, which
         means at least one of the queried URLs is matched in eithe
         the phishing, malware, or unwanted software lists.
@@ -237,19 +237,19 @@ class GoogleSafeBrowsing(object):
 
     @accepts_valid_urls
     def any_match(self, urls):
-        ''' Check if the service recognizes any of given urls as spam
+        ''' Check if the service recognizes any of given URLs as spam
 
-        :param urls: a sequence of urls to be tested
-        :returns: True if any of the urls was recognized as spam
-        :raises InvalidURLError: if there are any invalid urls in the sequence
+        :param urls: a sequence of URLs to be tested
+        :returns: True if any of the URLs was recognized as spam
+        :raises InvalidURLError: if there are any invalid URLs in the sequence
         '''
         return any(self._query(urls))
 
     def _get_match_and_classification(self, urls):
-        ''' Get classification for all matching urls
+        ''' Get classification for all matching URLs
 
-        :param urls: a sequence of urls to test
-        :return: a tuple containing matching url and classification
+        :param urls: a sequence of URLs to test
+        :return: a tuple containing matching URL and classification
         string pertaining to it
         '''
         for url_list, response in self._query(urls):
@@ -260,11 +260,11 @@ class GoogleSafeBrowsing(object):
 
     @accepts_valid_urls
     def lookup_matching(self, urls):
-        ''' Get items for all listed urls
+        ''' Get items for all listed URLs
 
-        :param urls: a sequence of urls to be tested
-        :returns: objects representing listed urls
-        :raises InvalidURLError: if there are any invalid urls in the sequence
+        :param urls: a sequence of URLs to be tested
+        :returns: objects representing listed URLs
+        :raises InvalidURLError: if there are any invalid URLs in the sequence
         '''
         for url, _class in self._get_match_and_classification(urls):
             classification = set(_class.split(','))
@@ -272,11 +272,11 @@ class GoogleSafeBrowsing(object):
 
     @accepts_valid_urls
     def filter_matching(self, urls):
-        ''' Get all listed urls
+        ''' Get all listed URLs
 
-        :param urls: a sequence of urls to be tested
-        :returns: spam urls
-        :raises InvalidURLError: if there are any invalid urls in the sequence
+        :param urls: a sequence of URLs to be tested
+        :returns: spam URLs
+        :raises InvalidURLError: if there are any invalid URLs in the sequence
         '''
         for url, _ in self._get_match_and_classification(urls):
             yield url

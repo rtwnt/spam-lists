@@ -34,10 +34,10 @@ URL_REGEX = re.compile(r'^[a-z0-9\.\-\+]*://'  # scheme
 
 
 def is_valid_url(value):
-    ''' Check if given value is valid url string
+    ''' Check if given value is valid URL string
 
     :param value: a value to test
-    :returns: True if the value is valid url string
+    :returns: True if the value is valid URL string
     '''
     match = URL_REGEX.match(value)
     host_str = urlparse(value).hostname
@@ -68,7 +68,7 @@ def accepts_valid_host(func):
 
 def accepts_valid_urls(func):
     ''' Return a wrapper that runs given method only for arguments
-    that are valid url values
+    that are valid URL values
 
     :param func: a method to be wrapped
     :returns: a wrapper that adds argument validation
@@ -76,15 +76,15 @@ def accepts_valid_urls(func):
     @functools.wraps(func)
     def wrapper(obj, urls, *args, **kwargs):
         '''Run the function and return its return value
-         if all given urls are valid - otherwise raise InvalidURLError
+         if all given URLs are valid - otherwise raise InvalidURLError
         :param obj: an object in whose class f is defined
-        :param urls: an iterable containing urls
+        :param urls: an iterable containing URLs
         :returns: a return value of the function f
-        :raises InvalidURLError: if the iterable contains invalid urls
+        :raises InvalidURLError: if the iterable contains invalid URLs
         '''
         invalid_urls = [u for u in urls if not is_valid_url(u)]
         if invalid_urls:
-            msg_tpl = 'The values: {} are not valid urls'
+            msg_tpl = 'The values: {} are not valid URLs'
             msg = msg_tpl.format(','.join(invalid_urls))
             raise InvalidURLError(msg)
         return func(obj, urls, *args, **kwargs)

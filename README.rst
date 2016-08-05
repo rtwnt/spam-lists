@@ -12,9 +12,9 @@ Features
 -  support for custom DNSBL service clients
 -  preconfigured clients for SURBL_, `Spamhaus ZEN`_ and `Spamhaus DBL`_
 -  support for querying and populating custom host whitelists and blacklists
--  combining multiple url testers into a composite tester
--  optional querying for redirect url addresses when using a composite
-   url tester
+-  combining multiple URL testers into a composite tester
+-  optional querying for redirect URL addresses when using a composite
+   URL tester
 -  support for Python 2 and 3
 
 .. _Google Safe Browsing Lookup API: https://developers.google.com/
@@ -48,7 +48,7 @@ Lookup method returns a named tuple containing:
     >>> SPAMHAUS_DBL.lookup('dbltest.com')
     AddressListItem(value=u'dbltest.com', ...)
 
-Testing if there is any spam url in a sequence:
+Testing if there is any spam URL in a sequence:
 
 .. code:: python
 
@@ -60,8 +60,8 @@ Testing if there is any spam url in a sequence:
     >>> SPAMHAUS_DBL.any_match(urls_to_test)
     True
 
-Filtering recognized spam urls out of a sequence of values returns a
-generator object that yields the spam urls:
+Filtering recognized spam URLs out of a sequence of values returns a
+generator object that yields the spam URLs:
 
 .. code:: python
 
@@ -72,7 +72,7 @@ generator object that yields the spam urls:
     ['http://dbltest.com']
 
 Calling lookup\_matching returns a generator object yielding instances of the
-AddressListItem named tuple for matching urls:
+AddressListItem named tuple for matching URLs:
 
 .. code:: python
 
