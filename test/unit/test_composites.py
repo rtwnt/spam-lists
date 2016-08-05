@@ -21,7 +21,7 @@ from spam_lists.composites import (
 )
 from test.compat import unittest, Mock, patch, lru_cache, MagicMock
 from test.unit.common_definitions import (
-    UrlTesterTestBaseMixin, TestFunctionDoesNotHandleMixin
+    URLTesterTestBaseMixin, TestFunctionDoesNotHandleMixin
 )
 
 
@@ -277,7 +277,7 @@ def get_url_tester_mock(identifier):
 
 
 class URLTesterChainTest(
-        UrlTesterTestBaseMixin,
+        URLTesterTestBaseMixin,
         TestFunctionDoesNotHandleMixin,
         unittest.TestCase
 ):

@@ -14,7 +14,7 @@ from spam_lists.structures import AddressListItem
 from test.compat import MagicMock, patch, lru_cache
 
 
-class UrlTesterTestBaseMixin(object):
+class URLTesterTestBaseMixin(object):
     ''' A class providing basic methods for performing tests for classes
     having any_match, filter_matching and lookup_matching methods
 
@@ -59,7 +59,7 @@ class UrlTesterTestBaseMixin(object):
         self._test_any_match_returns_false(self.valid_urls)
 
 
-class UrlTesterTestMixin(UrlTesterTestBaseMixin):
+class UrlTesterTestMixin(URLTesterTestBaseMixin):
     ''' A class providing pre-generated tests for classes
     having any_match, filter_matching and lookup_matching
     methods '''
