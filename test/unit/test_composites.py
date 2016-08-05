@@ -276,7 +276,7 @@ def get_url_tester_mock(identifier):
     return source
 
 
-class UrlTesterChainTest(
+class URLTesterChainTest(
         UrlTesterTestBaseMixin,
         TestFunctionDoesNotHandleMixin,
         unittest.TestCase
