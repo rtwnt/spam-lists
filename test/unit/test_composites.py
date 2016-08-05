@@ -17,7 +17,7 @@ from requests.exceptions import (
 from spam_lists.exceptions import InvalidURLError, UnknownCodeError
 from spam_lists.structures import AddressListItem
 from spam_lists.composites import (
-    RedirectUrlResolver, URLTesterChain, CachedIterable, GeneralizedUrlTester
+    RedirectURLResolver, URLTesterChain, CachedIterable, GeneralizedUrlTester
 )
 from test.compat import unittest, Mock, patch, lru_cache, MagicMock
 from test.unit.common_definitions import (
@@ -68,7 +68,7 @@ class ResolveRedirectsSideEffects(object):
 
 class RedirectUrlResolverTest(unittest.TestCase):
     # pylint: disable=too-many-public-methods
-    ''' Tests for RedirectUrlResolver class
+    ''' Tests for RedirectURLResolver class
 
     :var valid_urls: a list of strings representing valid urls used
      in tests
@@ -81,7 +81,7 @@ class RedirectUrlResolverTest(unittest.TestCase):
     :var redirect_results: points to an instance of
     ResolveRedirectsSideEffects used as a replacement implementation
     for requests.Session.resolve_redirects
-    :var resolver: an instance of RedirectUrlResolver to be tested
+    :var resolver: an instance of RedirectURLResolver to be tested
     :var patcher: an object used to patch is_valid_url function
     :var is_valid_url_mock: a mocked implementation of
      the is_valid_url function
@@ -101,7 +101,7 @@ class RedirectUrlResolverTest(unittest.TestCase):
         self.resolve_redirects_mock = session_mock.resolve_redirects
         self.redirect_results = ResolveRedirectsSideEffects()
         self.resolve_redirects_mock.side_effect = self.redirect_results
-        self.resolver = RedirectUrlResolver(session_mock)
+        self.resolver = RedirectURLResolver(session_mock)
         self.patcher = patch('spam_lists.composites.is_valid_url')
         self.is_valid_url_mock = self.patcher.start()
 

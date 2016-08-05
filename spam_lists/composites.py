@@ -44,7 +44,7 @@ class CachedIterable(object):
             yield i
 
 
-class RedirectUrlResolver(object):
+class RedirectURLResolver(object):
     ''' A class used for getting all redirect urls for
     given url
 
@@ -179,7 +179,7 @@ class GeneralizedUrlTester(object):
     and another url tester
     '''
     def __init__(self, url_tester, whitelist=None,
-                 redirect_resolver=RedirectUrlResolver()):
+                 redirect_resolver=RedirectURLResolver()):
         ''' Constructor
 
         :param url_tester: an object with any_match, filter_matching
