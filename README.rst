@@ -35,7 +35,7 @@ Simple test for membership of a host value in a host blacklist:
     >>> 'dbltest.com' in SPAMHAUS_DBL
     True
 
-Lookup method returns a named tuple containing:
+:code:`lookup(host_value)` method returns a named tuple containing:
 
 -  a listed host that is a parent of a searched domain, or a listed ip address
    equal to one searched in the blacklist
@@ -71,8 +71,8 @@ generator object that yields the spam URLs:
     >>> list(result)
     ['http://dbltest.com']
 
-Calling lookup\_matching returns a generator object yielding instances of the
-AddressListItem named tuple for matching URLs:
+Calling :code:`lookup_matching(urls)` returns a generator object yielding
+instances of the AddressListItem named tuple for matching URLs:
 
 .. code:: python
 
