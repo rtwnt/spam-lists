@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-'''
+"""
 ====================
 spam-lists library
 ====================
@@ -106,7 +106,7 @@ the URL tester.
 
 :copyright: (c) 2016 by Piotr Rusin.
 :license: MIT, see LICENSE for more details.
-'''
+"""
 from __future__ import unicode_literals
 
 from .clients import (

@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-'''
+"""
 This module contains unit tests for functions and classes provided by
 spam_lists.structures module
-'''
+"""
 from __future__ import unicode_literals
 
 # pylint: disable=redefined-builtin
@@ -17,12 +17,12 @@ from test.compat import unittest, Mock, patch, MagicMock
 
 
 class BaseHostTest(object):
-    ''' A class providing tests for subclasses of Host class
+    """ A class providing tests for subclasses of Host class
 
     :var tested_instance: an instance of tested class to be used
     in tests
     :var class_to_test: a class to be tested
-    '''
+    """
 
     def setUp(self):
         self.tested_instance.value = MagicMock()
@@ -61,7 +61,7 @@ class BaseHostTest(object):
 
 class HostnameTest(BaseHostTest, unittest.TestCase):
     # pylint: disable=too-many-public-methods
-    ''' Tests for Hostname class
+    """ Tests for Hostname class
 
     :var superdomain_str: a string value representing a parent of
      a domain used to create tested instance
@@ -76,7 +76,7 @@ class HostnameTest(BaseHostTest, unittest.TestCase):
     of the tested instance
     :var unrelated_domain: a Hostname instance representing
     a domain unrelated to the one represented by tested instance
-    '''
+    """
     class_to_test = Hostname
     superdomain_str = 'superdomain.com'
     domain_str = 'domain.'+superdomain_str
@@ -125,10 +125,10 @@ class HostnameTest(BaseHostTest, unittest.TestCase):
 
 
 class IPAddressTestMixin(BaseHostTest):
-    ''' A class providing tests for subclasses of IPAddress
+    """ A class providing tests for subclasses of IPAddress
 
     :var class_to_test: a subclass of IPAddress to be tested
-    '''
+    """
     def setUp(self):
         self.value_constructor_patcher = patch.object(
             self.class_to_test,
@@ -198,11 +198,11 @@ class IPv6AddressTest(IPAddressTestMixin, unittest.TestCase):
 
 class CreateHostTest(unittest.TestCase):
     # pylint: disable=too-many-public-methods
-    ''' Tests for create_host function
+    """ Tests for create_host function
 
     :var factories: a list of mocks representing factories used by
     the function during tests
-    '''
+    """
     def setUp(self):
         self.factories = tuple(Mock() for _ in range(5))
 
@@ -217,8 +217,8 @@ class CreateHostTest(unittest.TestCase):
         self.assertEqual(actual, expected)
 
     def test_host_for_hostname(self):
-        ''' The function is expected to return an object
-        returned by a host factory for given hostname'''
+        """ The function is expected to return an object
+        returned by a host factory for given hostname"""
         for i, factory in enumerate(self.factories):
             if i != 1:
                 factory.side_effect = InvalidHostError

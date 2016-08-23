@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-'''
+"""
 A module providing a compatibility layer for python 2 and 3.
 
 Most of the compatibility-related features are already provided
@@ -11,7 +11,7 @@ errors, etc.
 
 For now, it contains only code responsible for importing
 functools.lru_cache or cachetools.func.lru_cache
-'''
+"""
 # pylint: disable=unused-import
 # pylint: disable=import-error
 

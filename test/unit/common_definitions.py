@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-'''
+"""
 This module contains definitions used by some of the test_ modules
-'''
+"""
 from __future__ import unicode_literals
 
 from builtins import object  # pylint: disable=redefined-builtin
@@ -15,11 +15,11 @@ from test.compat import MagicMock, patch, lru_cache
 
 
 class URLTesterTestBaseMixin(object):
-    ''' A class providing basic methods for performing tests for classes
+    """ A class providing basic methods for performing tests for classes
     having any_match, filter_matching and lookup_matching methods
 
     The methods are to be used to write and generate actual test methods
-    '''
+    """
     valid_urls = ['http://test.com', 'http://127.33.22.11',
                   'https://[2001:ddd:ccc:123::55]']
 
@@ -60,9 +60,9 @@ class URLTesterTestBaseMixin(object):
 
 
 class URLTesterTestMixin(URLTesterTestBaseMixin):
-    ''' A class providing pre-generated tests for classes
+    """ A class providing pre-generated tests for classes
     having any_match, filter_matching and lookup_matching
-    methods '''
+    methods """
     classification = set(['TEST'])
     valid_url_input = [
         ('ipv4_url', ['http://55.44.33.21']),
@@ -121,8 +121,8 @@ def get_hosts(urls):
 
 
 class HostListTestMixin(URLTesterTestMixin):
-    ''' A common test case for all classes that represent
-    a host list stored locally or by a remote service '''
+    """ A common test case for all classes that represent
+    a host list stored locally or by a remote service """
     valid_host_input = [
         ('ipv4', '255.0.120.1'),
         ('hostname', 'test.pl'),
@@ -197,7 +197,7 @@ class TestFunctionDoesNotHandleMixin(object):
 
     def _test_function_does_not_handle(self, exception_type, exception_origin,
                                        function, *args, **kwargs):
-        '''
+        """
         Test if a given function does not handle an error
         raised by a dependency
 
@@ -209,7 +209,7 @@ class TestFunctionDoesNotHandleMixin(object):
         the tested function
         :param **kwargs: keyword arguments to be passed to
         the tested function
-        '''
+        """
         exception_origin.side_effect = exception_type
         with self.assertRaises(exception_type):
             result = function(*args, **kwargs)

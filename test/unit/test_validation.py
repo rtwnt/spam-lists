@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-'''
+"""
 This module contains unit tests for functions and classes provided by
 spam_lists.validation module
-'''
+"""
 from __future__ import unicode_literals
 
 import unittest
@@ -18,7 +18,7 @@ from test.compat import Mock, patch
 
 
 class ValidationDecoratorTestMixin(object):
-    ''' Provides tests for decorators and wrappers responsible for
+    """ Provides tests for decorators and wrappers responsible for
      testing validity of arguments of decorated methods
 
     :var validity_tester_patcher: an object used for patching
@@ -39,7 +39,7 @@ class ValidationDecoratorTestMixin(object):
     :var decorator:
     :var validity_tester: a fully qualified name of a function used by
      the tested wrapper as argument validator
-    '''
+    """
     def setUp(self):
         self.validity_tester_patcher = patch(self.validity_tester)
         self.validity_tester_mock = self.validity_tester_patcher.start()
@@ -69,7 +69,7 @@ class ValidationDecoratorTestMixin(object):
 
 class AcceptValidURLsTest(ValidationDecoratorTestMixin, unittest.TestCase):
     # pylint: disable=too-many-public-methods
-    ''' Tests for accepts_valid_urls decorator '''
+    """ Tests for accepts_valid_urls decorator """
     exception_type = InvalidURLError
     decorator = staticmethod(accepts_valid_urls)
     validity_tester = 'spam_lists.validation.is_valid_url'
@@ -96,7 +96,7 @@ class AcceptValidURLsTest(ValidationDecoratorTestMixin, unittest.TestCase):
 
 class AcceptsValidHostTest(ValidationDecoratorTestMixin, unittest.TestCase):
     # pylint: disable=too-many-public-methods
-    ''' Tests for accepts_valid_host decorator '''
+    """ Tests for accepts_valid_host decorator """
     exception_type = InvalidHostError
     decorator = staticmethod(accepts_valid_host)
     validity_tester = 'spam_lists.validation.is_valid_host'
@@ -122,7 +122,7 @@ class AcceptsValidHostTest(ValidationDecoratorTestMixin, unittest.TestCase):
 
 class IsValidURLTest(unittest.TestCase):
     # pylint: disable=too-many-public-methods
-    ''' Tests for is_valid_url function '''
+    """ Tests for is_valid_url function """
     @parameterized.expand([
         ('http_scheme', 'http://test.url.com'),
         ('https_scheme', 'https://google.com'),

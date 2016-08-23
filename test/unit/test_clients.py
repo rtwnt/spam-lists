@@ -32,7 +32,7 @@ class DNSQuerySideEffects(object):
 
 
 class DNSBLTestMixin(HostListTestMixin):
-    ''' Tests for DNSBL class
+    """ Tests for DNSBL class
 
     This test case adds additional test method to the ones inherited
     from HostListTestMixin: test_code_error_raised_by, which
@@ -51,7 +51,7 @@ class DNSBLTestMixin(HostListTestMixin):
     :var dns_query_patcher: an object used for patching query function
      used by DNSBL instance.
     :var dns_query_mock: a mocked implementation of the query function
-    '''
+    """
     query_domain_str = 'test.query.domain'
     host_with_unknown_code = 'hostwithunknowncode.com'
 
@@ -109,22 +109,22 @@ class BitmaskingDNSBLTest(DNSBLTestMixin, unittest.TestCase):
 
 
 def create_hp_hosts_get(classification, listed_hosts):
-    ''' Get a function to replace get function used by HpHosts
+    """ Get a function to replace get function used by HpHosts
 
     :param classification: a classification for given hosts
     :param listed_hosts: listed hosts for generating responses
     :returns: a function providing side effects of Mock instance
     for the get function
-    '''
+    """
     class_str = ','.join(classification)
 
     def hp_hosts_get(url):
-        ''' Get mock representing response object for GET request
+        """ Get mock representing response object for GET request
 
         :param url: a request address
         :returns: a Mock instance representing response object expected
         by HpHosts
-        '''
+        """
         query_string = urlparse(url).query
         query_data = parse_qs(query_string)
         content = 'Not Listed'
@@ -139,7 +139,7 @@ def create_hp_hosts_get(classification, listed_hosts):
 
 class HpHostsTest(HostListTestMixin, unittest.TestCase):
     # pylint: disable=too-many-public-methods
-    ''' Tests for HpHosts class
+    """ Tests for HpHosts class
 
     :var listed_hosts: a list of host values assumed to be listed
     for tests
@@ -152,7 +152,7 @@ class HpHostsTest(HostListTestMixin, unittest.TestCase):
     :var host_factory_mock: a mocked implementation of
      host factory used by tested instance. Uses host_list_host_factory
       as its implementation
-    '''
+    """
     @classmethod
     def setUpClass(cls):
         cls.tested_instance = HpHosts('spam_lists_test_suite')
@@ -182,22 +182,22 @@ class HpHostsTest(HostListTestMixin, unittest.TestCase):
 
 
 def create_gsb_post(expected_401, spam_urls, classification):
-    ''' Get mock for post function used by GoogleSafeBrowsing
+    """ Get mock for post function used by GoogleSafeBrowsing
 
     :param expected_401: if True, the code of response mock returned
     by the returned function will be 401
     :param spam_urls: a list of URLs to be recognized as spam
     :param classification: a classification used for spam URLs
     :returns: mocked implementation of post function
-    '''
+    """
     def post(_, body):
-        ''' Get mock of a response to a POST query to GSB lookup API
+        """ Get mock of a response to a POST query to GSB lookup API
 
         :param body: a request body
         :returns: a Mock instance representing the response. Properties
         of the object depend on external values provided by the creator
         of the method: expected_401, spam_urls and classification
-        '''
+        """
         response = Mock()
         if expected_401:
             response.status_code = 401
@@ -215,7 +215,7 @@ def create_gsb_post(expected_401, spam_urls, classification):
 
 class GoogleSafeBrowsingTest(URLTesterTestMixin, unittest.TestCase):
     # pylint: disable=too-many-public-methods
-    ''' Tests for GoogleSafeBrowsing class
+    """ Tests for GoogleSafeBrowsing class
 
     This class adds an additional test method to the ones provided
     by URLTesterTestMixin: test_unathorized_query_with. This method
@@ -229,7 +229,7 @@ class GoogleSafeBrowsingTest(URLTesterTestMixin, unittest.TestCase):
     :var mocked_post: a mocked implementation of the post function
     for the tested instance. Uses a function returned by
      create_gsb_post function as its implementation.
-    '''
+    """
     def _get_expected_items_for_urls(self, urls):
         return self._get_expected_items(urls)
 

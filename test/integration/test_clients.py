@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
-'''
+"""
 This module contains integration tests for supported
 third party services
 
 The purpose of the tests is to signal changes in the services that
 require changes in the implementation of their clients.
-'''
+"""
 from __future__ import unicode_literals
 
 import os.path
@@ -39,7 +39,7 @@ def get_classification(classification, return_codes):
 
 
 class URLTesterClientTestMixin(object):
-    '''  A class containing integration test methods for
+    """  A class containing integration test methods for
     URL tester clients
 
     :var tested_client: an instance of client to be tested
@@ -51,7 +51,7 @@ class URLTesterClientTestMixin(object):
     to be queried
     :var listed_item: an instance of AddressListItem representing
     an item listed by the service to be queried
-    '''
+    """
     def test_any_match_for_not_listed(self):
         actual = self.tested_client.any_match(self.urls_without_listed)
         self.assertFalse(actual)
@@ -88,7 +88,7 @@ class URLTesterClientTestMixin(object):
 
 
 class HostListClientTestMixin(URLTesterClientTestMixin):
-    '''  A class containing integration test methods for
+    """  A class containing integration test methods for
     host list clients
 
     :var listed: an item listed by a service to be queried
@@ -102,7 +102,7 @@ class HostListClientTestMixin(URLTesterClientTestMixin):
     to be queried
     :var listed_item: an instance of AddressListItem representing
     an item listed by the service to be queried
-    '''
+    """
     @classmethod
     def setUpClass(cls):
         cls.listed_url = url_from_host(cls.listed)

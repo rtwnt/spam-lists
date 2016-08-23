@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-'''
+"""
 This module contains classes of clients of online services that
 can be queried to check if a given hostname, IP address or URL
 is recognized as spam.
@@ -8,7 +8,7 @@ is recognized as spam.
 It also contains instances of those of the classes that represent clients
 of services that can be ready for use without providing custom, user-specific
 data, like API codes or application identifiers.
-'''
+"""
 from __future__ import unicode_literals
 
 # pylint: disable=redefined-builtin
@@ -30,14 +30,14 @@ from .validation import accepts_valid_urls
 
 
 class DNSBL(HostList):
-    ''' Represents a DNSBL service client '''
+    """ Represents a DNSBL service client """
     def __init__(
             self,
             identifier,
             query_suffix,
             classification_map,
             host_factory):
-        ''' Create new DNSBL object
+        """ Create new DNSBL object
 
         :param identifier: a value designating DNSBL service provider:
         its name or url address.
@@ -47,7 +47,7 @@ class DNSBL(HostList):
         :param host_factory: a callable object that returns an object
         representing host and providing method for getting a relative
         domain pertaining to it.
-        '''
+        """
         self._identifier = identifier
         self._query_suffix = name.from_text(query_suffix)
         self._classification_map = classification_map
@@ -55,13 +55,13 @@ class DNSBL(HostList):
         super(DNSBL, self).__init__(host_factory)
 
     def _query(self, host_object):
-        ''' Query DNSBL service for given value
+        """ Query DNSBL service for given value
 
         :param host_object: an object representing host,
         created by _host_factory
         :returns: an instance of dns.resolver.Answer for
         given value, if it is listed. Otherwise, it returns None
-        '''
+        """
         host_to_query = host_object.relative_domain
         query_name = host_to_query.derelativize(self._query_suffix)
         try:
@@ -96,7 +96,7 @@ class DNSBL(HostList):
 
 
 def get_powers_of_2(_sum):
-    ''' Get powers of with a given sum
+    """ Get powers of with a given sum
 
     This function transforms given integer to a binary string.
     A reversed value limited to digits of binary number is extracted
@@ -108,16 +108,16 @@ def get_powers_of_2(_sum):
 
     :param _sum: a sum of all elements of the sequence to be returned
     :returns: a list of powers of two whose sum is given
-    '''
+    """
     return [2**y for y, x in enumerate(bin(_sum)[:1:-1]) if int(x)]
 
 
 class BitmaskingDNSBL(DNSBL):
-    ''' A class representing DNSBL services mapping listed items to
+    """ A class representing DNSBL services mapping listed items to
     sums of classification codes
 
     Each classification code is a power of two.
-    '''
+    """
     def _get_entry_classification(self, code):
         codes = get_powers_of_2(code)
         return [cl for c in codes for cl
@@ -125,27 +125,27 @@ class BitmaskingDNSBL(DNSBL):
 
 
 class HpHosts(HostList):
-    ''' hpHosts client '''
+    """ hpHosts client """
     identifier = ' http://www.hosts-file.net/'
     _NOT_LISTED = 'Not Listed'
 
     def __init__(self, client_name):
-        '''Constructor
+        """Constructor
 
         :param client_name: name of client using the service
-        '''
+        """
         self.app_id = client_name
         super(HpHosts, self).__init__(non_ipv6_host)
 
     def _query(self, host_object, classification=False):
-        ''' Query the client for data of given host
+        """ Query the client for data of given host
 
         :param host_object: an object representing a host value
         :param classification: if True: hpHosts is queried also
         for classification for given host, if listed
         :returns: content of response to GET request to hpHosts
         for data on the given host
-        '''
+        """
         template = 'http://verify.hosts-file.net/?v={}&s={}'
         url = template.format(self.app_id, host_object.to_unicode())
         url = url + '&class=true' if classification else url
@@ -164,18 +164,18 @@ class HpHosts(HostList):
 
 
 class GoogleSafeBrowsing(object):
-    ''' Google Safe Browsing Lookup API client '''
+    """ Google Safe Browsing Lookup API client """
     protocol_version = '3.1'
     max_urls_per_request = 500
 
     def __init__(self, client_name, app_version, api_key):
-        ''' Create new instance
+        """ Create new instance
 
         :param client_name: name of application using the API
         :param app_version: version of the application
         :param api_key: API key given by Google:
         https://developers.google.com/safe-browsing/key_signup
-        '''
+        """
         self.api_key = api_key
         self.client_name = client_name
         self.app_version = app_version
@@ -183,7 +183,7 @@ class GoogleSafeBrowsing(object):
 
     @property
     def _request_address(self):
-        ''' Get address of POST request to the service '''
+        """ Get address of POST request to the service """
         if not self._request_address_val:
             template = (
                 'https://sb-ssl.google.com/safebrowsing/api/lookup'
@@ -198,7 +198,7 @@ class GoogleSafeBrowsing(object):
         return self._request_address_val
 
     def _query_once(self, urls):
-        ''' Perform a single POST request using lookup API
+        """ Perform a single POST request using lookup API
 
         :param urls: a sequence of URLs to put in request body
         :returns: a response object
@@ -206,7 +206,7 @@ class GoogleSafeBrowsing(object):
         is not valid
         :raises HTTPError: if the HTTPError was raised for a HTTP code
         other than 401, the exception is reraised
-        '''
+        """
         request_body = '{}\n{}'.format(len(urls), '\n'.join(urls))
         response = post(self._request_address, request_body)
         try:
@@ -220,14 +220,14 @@ class GoogleSafeBrowsing(object):
         return response
 
     def _query(self, urls):
-        ''' Test URLs for being listed by the service
+        """ Test URLs for being listed by the service
 
         :param urls: a sequence of URLs  to be tested
         :returns: a tuple containing chunk of URLs and a response
         pertaining to them if the code of response was 200, which
         means at least one of the queried URLs is matched in eithe
         the phishing, malware, or unwanted software lists.
-        '''
+        """
         urls = list(set(urls))
         for i in range(0, len(urls), self.max_urls_per_request):
             chunk = urls[i:i+self.max_urls_per_request]
@@ -237,21 +237,21 @@ class GoogleSafeBrowsing(object):
 
     @accepts_valid_urls
     def any_match(self, urls):
-        ''' Check if the service recognizes any of given URLs as spam
+        """ Check if the service recognizes any of given URLs as spam
 
         :param urls: a sequence of URLs to be tested
         :returns: True if any of the URLs was recognized as spam
         :raises InvalidURLError: if there are any invalid URLs in the sequence
-        '''
+        """
         return any(self._query(urls))
 
     def _get_match_and_classification(self, urls):
-        ''' Get classification for all matching URLs
+        """ Get classification for all matching URLs
 
         :param urls: a sequence of URLs to test
         :return: a tuple containing matching URL and classification
         string pertaining to it
-        '''
+        """
         for url_list, response in self._query(urls):
             classification_set = response.text.splitlines()
             for url, _class in zip(url_list, classification_set):
@@ -260,24 +260,24 @@ class GoogleSafeBrowsing(object):
 
     @accepts_valid_urls
     def lookup_matching(self, urls):
-        ''' Get items for all listed URLs
+        """ Get items for all listed URLs
 
         :param urls: a sequence of URLs to be tested
         :returns: objects representing listed URLs
         :raises InvalidURLError: if there are any invalid URLs in the sequence
-        '''
+        """
         for url, _class in self._get_match_and_classification(urls):
             classification = set(_class.split(','))
             yield AddressListItem(url, self, classification)
 
     @accepts_valid_urls
     def filter_matching(self, urls):
-        ''' Get all listed URLs
+        """ Get all listed URLs
 
         :param urls: a sequence of URLs to be tested
         :returns: spam URLs
         :raises InvalidURLError: if there are any invalid URLs in the sequence
-        '''
+        """
         for url, _ in self._get_match_and_classification(urls):
             yield url
 

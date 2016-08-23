@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-'''
+"""
 A common module for compatibility related imports and
 definitions used during testing
-'''
+"""
 # pylint: disable=unused-import
 
 from __future__ import unicode_literals

@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-'''
+"""
 This module contains various utilities to be used to create
 composite spam URL checkers.
-'''
+"""
 
 from __future__ import unicode_literals
 
@@ -18,19 +18,19 @@ from .validation import is_valid_url
 
 
 class CachedIterable(object):
-    '''An iterable returning items from an iterator
+    """An iterable returning items from an iterator
     and caching them for future runs
 
     Items are returned in fixed order.
-    '''
+    """
     def __init__(self, iterator, initial_cache=None):
-        ''' Constructor
+        """ Constructor
 
         :param iterator: an iterator, wrom which items
          will be returned and cached
         :param initial_cache: values added to cache before
          the first run
-        '''
+        """
         if initial_cache is None:
             initial_cache = []
         self._cache = list(initial_cache)
@@ -45,7 +45,7 @@ class CachedIterable(object):
 
 
 class RedirectURLResolver(object):
-    ''' A class used for getting all redirect URLs for
+    """ A class used for getting all redirect URLs for
     given URL
 
     The URLs include:
@@ -53,20 +53,20 @@ class RedirectURLResolver(object):
      response history
     * value of location header for the last response, if it is
     a valid URL but we still couldn't get a response for it
-    '''
+    """
     def __init__(self, requests_session=Session()):
-        '''
+        """
         Constructor
 
         :param requests_session: a session object implementing
         methods:
         * head(url) (for HEAD request)
         * resolve_redirects(response, request)
-        '''
+        """
         self.session = requests_session
 
     def get_locations(self, url):
-        ''' Get valid location header values from
+        """ Get valid location header values from
         responses for given URL
 
         :param url: a URL address. If a HEAD request sent to it
@@ -77,7 +77,7 @@ class RedirectURLResolver(object):
         URL string, it's included as the last yielded value. If it's
         not, the previous value is the last one.
         :raises ValuError: if the argument is not a valid URL
-        '''
+        """
         if not is_valid_url(url):
             raise InvalidURLError('{} is not a valid URL'.format(url))
         try:
@@ -99,7 +99,7 @@ class RedirectURLResolver(object):
                 yield last_url
 
     def get_new_locations(self, urls):
-        ''' Get valid location header values for all given URLs
+        """ Get valid location header values for all given URLs
 
         The returned values are new, that is: they do not repeat any
         value contained in the original input. Only unique values
@@ -108,7 +108,7 @@ class RedirectURLResolver(object):
         :param urls: a list of URL addresses
         :returns: valid location header values from responses
         to the URLs
-        '''
+        """
         seen = set(urls)
         for i in urls:
             for k in self.get_locations(i):
@@ -117,53 +117,53 @@ class RedirectURLResolver(object):
                     yield k
 
     def get_urls_and_locations(self, urls):
-        ''' Get URLs and their redirection addresses
+        """ Get URLs and their redirection addresses
 
         :param urls: a list of URL addresses
         :returns: an instance of CachedIterable containing given URLs
         and valid location header values of their responses
-        '''
+        """
         location_generator = self.get_new_locations(urls)
         initial_cache = list(set(urls))
         return CachedIterable(location_generator, initial_cache)
 
 
 class URLTesterChain(object):
-    '''A URL tester using a sequence of other URL testers'''
+    """A URL tester using a sequence of other URL testers"""
     def __init__(self, *url_testers):
-        '''Constructor
+        """Constructor
 
         :param url_testers: a list of objects having any_match(urls)
         and lookup_matching(urls) methods
-        '''
+        """
         self.url_testers = list(url_testers)
 
     def any_match(self, urls):
-        ''' Check if any of given URLs is a match
+        """ Check if any of given URLs is a match
 
         :param urls: a sequence of URLs to be tested
         :returns: True if any of the URLs is a match
-        '''
+        """
         return any(t.any_match(urls) for t in self.url_testers)
 
     def lookup_matching(self, urls):
-        '''Get objects representing match criteria
+        """Get objects representing match criteria
         (hosts, whole URLs, etc) for given URLs
 
         :param urls: an iterable containing URLs
         :returns: items representing match criteria
-        '''
+        """
         for tester in self.url_testers:
             for item in tester.lookup_matching(urls):
                 yield item
 
     def filter_matching(self, urls):
-        ''' Get those of given ruls that match listing criteria
+        """ Get those of given ruls that match listing criteria
         (hosts, whole URLs, etc.)
 
         :param urls: an iterable containing URLs
         :returns: matching URLs
-        '''
+        """
         seen = set()
         urls = set(urls)
         for tester in self.url_testers:
@@ -175,12 +175,12 @@ class URLTesterChain(object):
 
 
 class GeneralizedURLTester(object):
-    ''' A URL tester using redirect resolution, whitelist
+    """ A URL tester using redirect resolution, whitelist
     and another URL tester
-    '''
+    """
     def __init__(self, url_tester, whitelist=None,
                  redirect_resolver=RedirectURLResolver()):
-        ''' Constructor
+        """ Constructor
 
         :param url_tester: an object with any_match, filter_matching
         and lookup_matching methods that can be used for testing URLs
@@ -188,20 +188,20 @@ class GeneralizedURLTester(object):
         for filtering URLs to be tested against the url_tester
         :param redirect_resolver: an object used for getting valid
         location header values to test them with the other URL values.
-        '''
+        """
         self.url_tester = url_tester
         self.whitelist = whitelist
         self.redirect_resolver = redirect_resolver
 
     def _get_results_for(self, function, urls, resolve_redirects):
-        ''' Get results of given function for given arguments
+        """ Get results of given function for given arguments
 
         :param function: a function to be called
         :param urls: an iterable containing initial URL values
         :param resolve_redirects: a boolean value. If True, all valid
         redirect location values will be resolved for given URLs and
         tested with them
-        '''
+        """
         urls_to_test = urls
         if resolve_redirects:
             urls_to_test = self.redirect_resolver.get_urls_and_locations(urls)
@@ -211,14 +211,14 @@ class GeneralizedURLTester(object):
         return function(urls_to_test)
 
     def any_match(self, urls, resolve_redirects=True):
-        ''' Check if any of given URLs is a match
+        """ Check if any of given URLs is a match
 
         :param urls: an iterable containing initial URL values
         :param resolve_redirects: a boolean value. If True, all valid
         redirect location values will be resolved for given URLs and
         tested with them
         :returns: True if any of the URLs is a match
-        '''
+        """
         return self._get_results_for(
             self.url_tester.any_match,
             urls,
@@ -226,7 +226,7 @@ class GeneralizedURLTester(object):
         )
 
     def filter_matching(self, urls, resolve_redirects=True):
-        ''' Get those of given ruls that match listing criteria
+        """ Get those of given ruls that match listing criteria
         (hosts, whole URLs, etc.)
 
         :param urls: an iterable containing initial URL values
@@ -234,7 +234,7 @@ class GeneralizedURLTester(object):
         redirect location values will be resolved for given URLs and
         tested with them
         :returns: matching URLs
-        '''
+        """
         return self._get_results_for(
             self.url_tester.filter_matching,
             urls,
@@ -242,7 +242,7 @@ class GeneralizedURLTester(object):
         )
 
     def lookup_matching(self, urls, resolve_redirects=True):
-        '''Get objects representing match criteria
+        """Get objects representing match criteria
         (hosts, whole URLs, etc) for given URLs
 
         :param urls: an iterable containing initial URL values
@@ -250,7 +250,7 @@ class GeneralizedURLTester(object):
         redirect location values will be resolved for given URLs and
         tested with them
         :returns: items representing match criteria
-        '''
+        """
         return self._get_results_for(
             self.url_tester.lookup_matching,
             urls,
