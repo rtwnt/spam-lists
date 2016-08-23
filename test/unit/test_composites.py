@@ -342,11 +342,11 @@ class URLTesterChainTest(
         """ Set URLs expected to be matched during a test
 
         The method groups given URLs by their source ids: identifiers
-         of services expected to report URLs associated with them as
-         matching. Then, mocks representing URL testers are added
-         to the tested instance of URLTesterChain. They are shuffled
-         to ensure some of mocked services reporting a match
-         will be queried before some that do not.
+        of services expected to report URLs associated with them as
+        matching. Then, mocks representing URL testers are added
+        to the tested instance of URLTesterChain. They are shuffled
+        to ensure some of mocked services reporting a match
+        will be queried before some that do not.
 
         :param urls: a dictionary containing
         """

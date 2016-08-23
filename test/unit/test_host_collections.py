@@ -97,7 +97,8 @@ class HostCollectionBaseTest(
 
     def test_add_for_subdomain(self):
         """ A subdomain to a domain already listed in the collection
-        is expected to be ignored when added to the collection """
+        is expected to be ignored when added to the collection
+        """
         initial_hosts = ['domain.com']
         self._set_matching_hosts(initial_hosts)
         self.tested_instance.add('subdomain.domain.com')
@@ -105,7 +106,8 @@ class HostCollectionBaseTest(
 
     def test_add_for_the_same_value(self):
         """A value being added to the collection is being ignored if it
-        already exists in the collection """
+        already exists in the collection
+        """
         value = 'domain.com'
         initial_hosts = ['host.com', value]
         self._set_matching_hosts(initial_hosts)
@@ -114,7 +116,8 @@ class HostCollectionBaseTest(
 
     def test_add_a_superdomain(self):
         """ A superdomain of a domain listed in the collection
-        is expected to replace its subdomain when added """
+        is expected to replace its subdomain when added
+        """
         superdomain = 'domain.com'
         subdomain = 'sub.domain.com'
         initial_hosts = ['host1.com', subdomain]
