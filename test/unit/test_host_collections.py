@@ -65,10 +65,10 @@ class HostCollectionBaseTest(
     # pylint: disable=too-many-public-methods
     """ Tests for subclasses or BaseHostCollection
 
-    :var host_factory_mock: a mocked implementation of
+    :ivar host_factory_mock: a mocked implementation of
      host factory used by tested instance. Uses
       host_collection_host_factory as its implementation
-    :var tested_instance: an instance of tested class
+    :ivar tested_instance: an instance of tested class
     """
     valid_urls = ['http://test.com', 'http://127.33.22.11']
 

@@ -40,17 +40,18 @@ class DNSBLTestMixin(HostListTestMixin):
     and DNSBL.lookup_matching) for their behaviour for cases of an
     unknown integer code being returned.
 
-    :var query_domain_str: a string used as a suffix for DNS queries
+    :cvar query_domain_str: a string used as a suffix for DNS queries
     to a service
-    :var host_with_unknown_code: a host value used by the additional
+    :cvar host_with_unknown_code: a host value used by the additional
     test method (test_code_error_raised_by)
-    :var host_factory_mock: a mocked implementation of host factory
+
+    :ivar host_factory_mock: a mocked implementation of host factory
     used by tested instance. Uses host_list_host_factory as its implementation
-    :var dnsbl_factory: constructor of instance of tested class
-    :var tested_instance: an instance of tested class
-    :var dns_query_patcher: an object used for patching query function
+    :ivar dnsbl_factory: constructor of instance of tested class
+    :ivar tested_instance: an instance of tested class
+    :ivar dns_query_patcher: an object used for patching query function
      used by DNSBL instance.
-    :var dns_query_mock: a mocked implementation of the query function
+    :ivar dns_query_mock: a mocked implementation of the query function
     """
     query_domain_str = 'test.query.domain'
     host_with_unknown_code = 'hostwithunknowncode.com'
@@ -141,15 +142,16 @@ class HpHostsTest(HostListTestMixin, unittest.TestCase):
     # pylint: disable=too-many-public-methods
     """ Tests for HpHosts class
 
-    :var listed_hosts: a list of host values assumed to be listed
+    :cvar tested_instance: an instance of tested class
+
+    :ivar listed_hosts: a list of host values assumed to be listed
     for tests
-    :var get_patcher: an object used for patching get function used
+    :ivar get_patcher: an object used for patching get function used
      by HpHosts instance.
-    :var tested_instance: an instance of tested class
-    :var get_mock: a mocked implementation of the get function. Uses
+    :ivar get_mock: a mocked implementation of the get function. Uses
     a function returned by create_hp_hosts_get for given classification
     and list of hosts
-    :var host_factory_mock: a mocked implementation of
+    :ivar host_factory_mock: a mocked implementation of
      host factory used by tested instance. Uses host_list_host_factory
       as its implementation
     """
@@ -223,10 +225,11 @@ class GoogleSafeBrowsingTest(URLTesterTestMixin, unittest.TestCase):
     behaviour while calling Google Safe Browsing lookup API with
     an unathorized API key
 
-    :var tested_instance: an instance of tested class
-    :var post_patcher: an object used for patching post function used
+    :cvar tested_instance: an instance of tested class
+
+    :ivar post_patcher: an object used for patching post function used
     by GoogleSafeBrowsing instance
-    :var mocked_post: a mocked implementation of the post function
+    :ivar mocked_post: a mocked implementation of the post function
     for the tested instance. Uses a function returned by
      create_gsb_post function as its implementation.
     """

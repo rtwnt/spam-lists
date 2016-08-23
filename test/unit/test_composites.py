@@ -46,10 +46,10 @@ class ResolveRedirectsSideEffects(object):
 
     The side effects include both response object mocks and exceptions.
 
-    :var redirect_responses: a dictionary mapping response mocks
+    :ivar responses: a dictionary mapping response mocks
     to objects representing response arguments of
     the requests.Session.resolve_redirects method.
-    :var exceptions: a dictionary mapping exception types to
+    :ivar exceptions: a dictionary mapping exception types to
     objects representing response arguments of the resolve_redirects
     method
     """
@@ -70,20 +70,23 @@ class RedirectURLResolverTest(unittest.TestCase):
     # pylint: disable=too-many-public-methods
     """ Tests for RedirectURLResolver class
 
-    :var valid_urls: a list of strings representing valid URLs used
-     in tests
-    :var head_mock: a mocked implementation of head function
+    :cvar redirect_url_chain: a list containing valid URLs.
+    It represents a redirect URL chain with multiple addresses.
+    :cvar no_redirect_url_chain: a list containing a single valid URL.
+    It represents a redirect URL chain with a single address.
+
+    :ivar head_mock: a mocked implementation of head function
     used by the tested class to perform HEAD requests. Uses an instance
     of HeadSideEffects as its implementation
-    :var resolve_redirects_mock: a mock for
+    :ivar resolve_redirects_mock: a mock for
     requests.Session.resolve_redirects function. An instance of
     ResolveRedirectsSideEffects is used as its implementation
-    :var redirect_results: points to an instance of
+    :ivar redirect_results: points to an instance of
     ResolveRedirectsSideEffects used as a replacement implementation
     for requests.Session.resolve_redirects
-    :var resolver: an instance of RedirectURLResolver to be tested
-    :var patcher: an object used to patch is_valid_url function
-    :var is_valid_url_mock: a mocked implementation of
+    :ivar resolver: an instance of RedirectURLResolver to be tested
+    :ivar patcher: an object used to patch is_valid_url function
+    :ivar is_valid_url_mock: a mocked implementation of
      the is_valid_url function
     """
     redirect_url_chain = [
@@ -287,8 +290,9 @@ class URLTesterChainTest(
     This class uses get_url_tester_mock function to populate list of
     URL testers used by the tested instance
 
-    :var classification: a set of classifications used in tests
-    :var tested_instance: an instance of tested class
+    :cvar classification: a set of classifications used in tests
+
+    :ivar tested_instance: an instance of tested class
     """
     classification = set(['TEST'])
     url_to_source_id = {
@@ -411,10 +415,10 @@ class CachedIterableTest(unittest.TestCase):
     # pylint: disable=too-many-public-methods
     """ Tests for CachedIterable class
 
-    :var iterator_mock: a mock object representing iterator injected
+    :ivar iterator_mock: a mock object representing iterator injected
     into the tested instance
-    :var cache: a list of values set as initial cache for tested instance
-    :var tested_instance: an instance of CachedIterable to be tested
+    :ivar cache: a list of values set as initial cache for tested instance
+    :ivar tested_instance: an instance of CachedIterable to be tested
     """
     def setUp(self):
         self.iterator_mock = MagicMock()
@@ -438,23 +442,23 @@ class GeneralizedURLTesterTest(unittest.TestCase):
     # pylint: disable=too-many-public-methods
     """ Tests for GeneralizedURLTester class
 
-    :var no_resolution_setup: a parameter setup for test methods
+    :cvar test_urls: a list of URLs passed as argument to methods of
+    :cvar no_resolution_setup: a parameter setup for test methods
     requiring no explicit parameter to use (or not use)
     redirect resolution in tested calls. Contains names of
     method of tested instance to be called
-    :var common_setup: a parameter setup for test methods
+    :cvar common_setup: a parameter setup for test methods
     testing calls with and without redirect resolution, depending
     on value of a parameter, with False assumed as default.
     Contains names of method of tested instance to be called.
-    :var test_urls: a list of URLs passed as argument to methods of
-    tested_instance
-    :var tested_instance: instance of GeneralizedURLTester to be
+
+    :ivar tested_instance: instance of GeneralizedURLTester to be
     tested.
-    :var whitelist_mock: an object representing an instance of
+    :ivar whitelist_mock: an object representing an instance of
     whitelist used by tested_instance
-    :var url_tester_mock: an object representing a URL tester instance
+    :ivar url_tester_mock: an object representing a URL tester instance
     to be used by tested instance
-    :var resolver_mock: an object representing an instance of
+    :ivar resolver_mock: an object representing an instance of
     redirect resolver to be used by tested instance
     """
     test_urls = ['http:abc.com', 'http://def.com', 'http://xyz.com']

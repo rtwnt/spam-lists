@@ -20,16 +20,16 @@ class HostListTest(HostListTestMixin, unittest.TestCase):
     These methods are ought to be implemented by its subclasses. Here,
     we mock these methods so that HostList can be tested.
 
-    :var listed_hosts: a list of all host values assumed to be listed for
+    :ivar listed_hosts: a list of all host values assumed to be listed for
     a given test
-    :var host_factory_mock: a mocked implementation of host factory
+    :ivar host_factory_mock: a mocked implementation of host factory
     used by tested instance. Uses host_list_host_factory as its implementation
-    :var tested_instance: an instance of tested class
-    :var _contains_patcher: a patcher for HostList._contains method
-    :var _contains_mock: a mock for HostList._contains method.
-    :var host_data_getter_patcher: a patcher for
+    :ivar tested_instance: an instance of tested class
+    :ivar _contains_patcher: a patcher for HostList._contains method
+    :ivar _contains_mock: a mock for HostList._contains method.
+    :ivar host_data_getter_patcher: a patcher for
     HostList._get_match_and_classification method
-    :var host_data_getter_mock: a mock for
+    :ivar host_data_getter_mock: a mock for
     HostList._get_match_and_classification method. Uses
      host_list_host_factory as its implementation.
     """

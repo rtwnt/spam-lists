@@ -21,23 +21,23 @@ class ValidationDecoratorTestMixin(object):
     """ Provides tests for decorators and wrappers responsible for
      testing validity of arguments of decorated methods
 
-    :var validity_tester_patcher: an object used for patching
+    :ivar validity_tester_patcher: an object used for patching
      a function responsible for testing validity of arguments of
      a decorated function
-    :var validity_tester_mock: a mocked implementation for
+    :ivar validity_tester_mock: a mocked implementation for
      the validity tester
-    :var obj: a mock representing object having the method decorated
+    :ivar obj: a mock representing object having the method decorated
      by the decorator
-    :var function: a mock representing function to be decorated
-    :var decorated_function: a result of applying decorator to
+    :ivar function: a mock representing function to be decorated
+    :ivar decorated_function: a result of applying decorator to
      the function
 
      Additionally, the test cases using this mixin are expected to have
      the following attributes:
 
-    :var exception_type:
-    :var decorator:
-    :var validity_tester: a fully qualified name of a function used by
+    :cvar exception_type:
+    :cvar decorator:
+    :cvar validity_tester: a fully qualified name of a function used by
      the tested wrapper as argument validator
     """
     def setUp(self):

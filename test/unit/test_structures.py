@@ -19,9 +19,9 @@ from test.compat import unittest, Mock, patch, MagicMock
 class BaseHostTest(object):
     """ A class providing tests for subclasses of Host class
 
-    :var tested_instance: an instance of tested class to be used
+    :ivar tested_instance: an instance of tested class to be used
     in tests
-    :var class_to_test: a class to be tested
+    :cvar class_to_test: a class to be tested
     """
 
     def setUp(self):
@@ -63,18 +63,18 @@ class HostnameTest(BaseHostTest, unittest.TestCase):
     # pylint: disable=too-many-public-methods
     """ Tests for Hostname class
 
-    :var superdomain_str: a string value representing a parent of
+    :cvar superdomain_str: a string value representing a parent of
      a domain used to create tested instance
-    :var domain_str: a string value used as an argument to
+    :cvar domain_str: a string value used as an argument to
     constructor when creating tested instance
-    :var subdomain_str: a string value representing a child domain
+    :cvar subdomain_str: a string value representing a child domain
     to the one used to create tested instance
-    :var superdomain: a Hostname instance representing a parent
+    :cvar superdomain: a Hostname instance representing a parent
     of the tested instance
-    :var domain: a Hostname instance to be tested
-    :var subdomain: a Hostname instance representing a child
+    :cvar domain: a Hostname instance to be tested
+    :cvar subdomain: a Hostname instance representing a child
     of the tested instance
-    :var unrelated_domain: a Hostname instance representing
+    :cvar unrelated_domain: a Hostname instance representing
     a domain unrelated to the one represented by tested instance
     """
     class_to_test = Hostname
@@ -127,7 +127,7 @@ class HostnameTest(BaseHostTest, unittest.TestCase):
 class IPAddressTestMixin(BaseHostTest):
     """ A class providing tests for subclasses of IPAddress
 
-    :var class_to_test: a subclass of IPAddress to be tested
+    :cvar class_to_test: a subclass of IPAddress to be tested
     """
     def setUp(self):
         self.value_constructor_patcher = patch.object(
@@ -200,7 +200,7 @@ class CreateHostTest(unittest.TestCase):
     # pylint: disable=too-many-public-methods
     """ Tests for create_host function
 
-    :var factories: a list of mocks representing factories used by
+    :cvar factories: a list of mocks representing factories used by
     the function during tests
     """
     def setUp(self):

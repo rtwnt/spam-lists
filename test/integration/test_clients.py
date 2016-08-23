@@ -42,14 +42,15 @@ class URLTesterClientTestMixin(object):
     """  A class containing integration test methods for
     URL tester clients
 
-    :var tested_client: an instance of client to be tested
-    :var urls_without_listed: URLs without values listed by the service
+    :cvar tested_client: an instance of client to be tested
+
+    :ivar urls_without_listed: URLs without values listed by the service
     to be queried
-    :var urls_with_listed: URLs with values listed by the service
+    :ivar urls_with_listed: URLs with values listed by the service
     to be queried
-    :var listed_url: a URL listed (or: with a host listed) by the service
+    :ivar listed_url: a URL listed (or: with a host listed) by the service
     to be queried
-    :var listed_item: an instance of AddressListItem representing
+    :ivar listed_item: an instance of AddressListItem representing
     an item listed by the service to be queried
     """
     def test_any_match_for_not_listed(self):
@@ -91,17 +92,18 @@ class HostListClientTestMixin(URLTesterClientTestMixin):
     """  A class containing integration test methods for
     host list clients
 
-    :var listed: an item listed by a service to be queried
-    :var not_listed: an item not listed by a service to be queried
-    :var tested_client: an instance of client to be tested
-    :var urls_without_listed: URLs without values listed by the service
+    :cvar listed: an item listed by a service to be queried
+    :cvar not_listed: an item not listed by a service to be queried
+    :cvar tested_client: an instance of client to be tested
+    :cvar urls_without_listed: URLs without values listed by the service
     to be queried
-    :var urls_with_listed: URLs with values listed by the service
+    :cvar urls_with_listed: URLs with values listed by the service
     to be queried
-    :var listed_url: a URL listed (or: with a host listed) by the service
+    :cvar listed_url: a URL listed (or: with a host listed) by the service
     to be queried
-    :var listed_item: an instance of AddressListItem representing
+    :cvar listed_item: an instance of AddressListItem representing
     an item listed by the service to be queried
+    :cvar classification: classification of the listed item
     """
     @classmethod
     def setUpClass(cls):
