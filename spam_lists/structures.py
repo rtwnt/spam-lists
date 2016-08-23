@@ -267,3 +267,6 @@ def non_ipv6_host(value):
     return create_host(factories, value)
 
 AddressListItem = namedtuple('AddressListItem', 'value source classification')
+""" A named tuple containing data of an item listed by the services and
+custom host lists
+"""
