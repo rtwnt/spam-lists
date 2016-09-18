@@ -102,16 +102,6 @@ To be able to run tests, install test extras:
 
     $ pip install spam-lists[test]
 
-You can also install dev extras, currently containing pylint_ and
-restview_:
-
-.. _pylint: https://www.pylint.org/
-.. _restview: https://mg.pov.lt/restview/
-
-.. code:: bash
-
-    $ pip install spam-lists[dev]
-
 License
 -------
 
