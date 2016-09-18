@@ -38,7 +38,7 @@ if sys.version_info.major < 3:
 
     if sys.version_info < (2, 7, 9):
         ''' request[security] extras '''
-        install_requires += ['pyOpenSSL>=0.13', 'ndg-httpsclient', 'pyasn1']
+        install_requires += ['pyOpenSSL>=0.13', 'ndg-httpsclient']
 else:
     install_requires += ['dnspython3']
 
