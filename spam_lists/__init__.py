@@ -116,7 +116,7 @@ from .host_collections import HostCollection, SortedHostCollection
 from .composites import URLTesterChain, GeneralizedURLTester
 
 __title__ = 'spam-lists'
-__version__ = '1.0.0b7'
+__version__ = '1.0.0'
 __author__ = 'Piotr Rusin'
 __license__ = 'MIT'
 __copyright__ = 'Copyright 2016 Piotr Rusin'
