@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 from codecs import open
 import re
-from setuptools import setup
 import sys
+
+from setuptools import setup
 
 
 def read_attributes(string, *names):
