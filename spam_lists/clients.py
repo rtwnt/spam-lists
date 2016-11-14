@@ -291,12 +291,8 @@ SPAMHAUS_PBL_CLASSIFICATION = (
 )
 
 SPAMHAUS_ZEN_CLASSIFICATION = {
-    2: (
-        'Direct UBE sources, spam operations & spam services'
-    ),
-    3: (
-        'Direct snowshoe spam sources detected via automation'
-    ),
+    2: 'Direct UBE sources, spam operations & spam services',
+    3: 'Direct snowshoe spam sources detected via automation',
     4: SPAMHAUS_XBL_CLASSIFICATION,
     5: SPAMHAUS_XBL_CLASSIFICATION,
     6: SPAMHAUS_XBL_CLASSIFICATION,
