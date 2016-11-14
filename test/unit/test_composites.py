@@ -168,7 +168,7 @@ class RedirectURLResolverTest(unittest.TestCase):
 
     @parameterized.expand([
         ('initial_url_causing_timeout', no_redirect_url_chain, Timeout),
-        ('last_url_casuing_timeout', redirect_url_chain, Timeout),
+        ('last_url_causing_timeout', redirect_url_chain, Timeout),
         ('initial_invalid_url', no_redirect_url_chain, InvalidURL, False),
         ('last_invalid_url', redirect_url_chain, InvalidURL, False),
         (
