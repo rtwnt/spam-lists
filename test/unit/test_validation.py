@@ -158,6 +158,7 @@ class IsValidURLTest(unittest.TestCase):
         else:
             self.assertFalse(actual)
 
+
 if __name__ == "__main__":
     # import sys;sys.argv = ['', 'Test.testName']
     unittest.main()

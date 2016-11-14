@@ -191,6 +191,7 @@ class SURBLMultiDomainTest(SURBLTest, unittest.TestCase):
     not_listed = 'test.com'
     not_listed_2 = 'google.com'
 
+
 HP_HOSTS = HpHosts('spam-lists-test-suite')
 
 

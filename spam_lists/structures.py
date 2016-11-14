@@ -173,6 +173,7 @@ class IPv6Address(IPAddress):
 def cached(function):
     return lru_cache()(function)
 
+
 hostname = cached(Hostname)
 ip_v4 = cached(IPv4Address)
 ip_v6 = cached(IPv6Address)
@@ -265,6 +266,7 @@ def non_ipv6_host(value):
     """
     factories = ip_v4, registered_domain
     return create_host(factories, value)
+
 
 AddressListItem = namedtuple('AddressListItem', 'value source classification')
 """ A named tuple containing data of an item listed by the services and

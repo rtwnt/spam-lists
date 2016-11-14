@@ -25,6 +25,7 @@ def is_valid_host(value):
     host_validators = validators.ipv4, validators.ipv6, validators.domain
     return any(f(value) for f in host_validators)
 
+
 URL_REGEX = re.compile(r'^[a-z0-9\.\-\+]*://'  # scheme
                        r'(?:\S+(?::\S*)?@)?'  # authentication
                        r'(?:[^/:]+|\[[0-9a-f:\.]+\])'  # host
