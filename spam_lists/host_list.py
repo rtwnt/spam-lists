@@ -122,6 +122,6 @@ class HostList(object):
         :returns: a list containing matching URLs
         :raises InvalidURLError: if there are any invalid URLs in the sequence
         """
-        def is_match(url):
-            return urlparse(url).hostname in self
-        return (u for u in urls if is_match(u))
+        for url in urls:
+            if urlparse(url).hostname in self:
+                yield url
