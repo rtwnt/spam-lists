@@ -116,8 +116,12 @@ class RedirectURLResolverTest(unittest.TestCase):
         with self.assertRaises(InvalidURLError):
             next(self.resolver.get_locations('http://test.com'))
 
-    def _set_up_side_effects(self, url_histories, exceptions=None,
-                             last_location=''):
+    def _set_up_side_effects(
+            self,
+            url_histories,
+            exceptions=None,
+            last_location=''
+    ):
         """ Prepare mocks for their calls to have expected side effects
 
         :param url_histories: a sequence containing sequences of
@@ -198,8 +202,13 @@ class RedirectURLResolverTest(unittest.TestCase):
             False
         )
     ])
-    def test_get_locations_for(self, _, history,
-                               exception_type, triggered_by_valid_url=True):
+    def test_get_locations_for(
+            self,
+            _,
+            history,
+            exception_type,
+            triggered_by_valid_url=True
+    ):
         """ The get_locations method is expected to yield all
          valid URLs appearing as URL addresses and location headers in
          response histories for given URLs
@@ -516,8 +525,11 @@ class GeneralizedURLTesterTest(unittest.TestCase):
         self.resolver_mock.assert_not_called()
 
     @parameterized.expand(common_setup)
-    def test_url_tester_results_for(self, function_name,
-                                    resolve_redirects=False):
+    def test_url_tester_results_for(
+            self,
+            function_name,
+            resolve_redirects=False
+    ):
         """ Each method must return result of a method of url_tester
         called during its execution"""
         url_tester_function = getattr(self.url_tester_mock, function_name)

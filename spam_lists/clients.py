@@ -36,7 +36,8 @@ class DNSBL(HostList):
             identifier,
             query_suffix,
             classification_map,
-            host_factory):
+            host_factory
+    ):
         """ Create new DNSBL object
 
         :param identifier: a value designating DNSBL service provider:

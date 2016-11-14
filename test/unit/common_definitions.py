@@ -195,8 +195,14 @@ def host_list_host_factory(host):
 
 class TestFunctionDoesNotHandleMixin(object):
 
-    def _test_function_does_not_handle(self, exception_type, exception_origin,
-                                       function, *args, **kwargs):
+    def _test_function_does_not_handle(
+            self,
+            exception_type,
+            exception_origin,
+            function,
+            *args,
+            **kwargs
+    ):
         """
         Test if a given function does not handle an error
         raised by a dependency

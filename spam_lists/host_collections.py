@@ -20,7 +20,8 @@ class BaseHostCollection(HostList):
             identifier,
             classification,
             hosts=None,
-            host_factory=hostname_or_ip):
+            host_factory=hostname_or_ip
+    ):
         """ Create new instance
 
         :param identifier: an identifier of this instance of host collection
