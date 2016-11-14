@@ -225,8 +225,8 @@ except IOError:
 
 
 REASON_TO_SKIP_GSB_TEST = (
-    'No api key provided. Provide the key in file: {}'.format(GSB_API_KEY_FILE)
-    )
+    'No API key provided. Provide the key in file: {}'.format(GSB_API_KEY_FILE)
+)
 
 
 @unittest.skipIf(not SAFE_BROWSING_API_KEY, REASON_TO_SKIP_GSB_TEST)
