@@ -156,6 +156,7 @@ class IPAddressTestMixin(BaseHostTest):
         )
 
     def test_create_relative_domain_for_ip(self):
+        # pylint: disable=W0104
         self.tested_instance.relative_domain
 
         self.name_from_ip_mock.assert_called_once_with(
