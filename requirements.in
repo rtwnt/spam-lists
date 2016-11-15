@@ -1,0 +1,12 @@
+future
+requests
+tldextract
+validators
+dnspython
+
+# for Python < 3:
+cachetools
+ipaddress
+
+# for Python < 2.7.9:
+ndg-httpsclient

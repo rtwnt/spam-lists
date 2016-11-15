@@ -1,0 +1,4 @@
+nose-parameterized
+
+# for Python < 3:
+mock
