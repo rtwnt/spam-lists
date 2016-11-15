@@ -30,18 +30,23 @@ with open('README.rst', 'r', 'utf-8') as f:
     readme = f.read()
 
 
-install_requires = ['future', 'requests', 'tldextract', 'validators']
+install_requires = [
+    'future',
+    'requests',
+    'tldextract',
+    'validators',
+    'dnspython'
+]
+
 tests_require = ['nose-parameterized']
 
 if sys.version_info.major < 3:
-    install_requires += ['cachetools', 'dnspython', 'ipaddress']
+    install_requires += ['cachetools', 'ipaddress']
     tests_require += ['mock']
 
     if sys.version_info < (2, 7, 9):
         ''' request[security] extras '''
         install_requires += ['pyOpenSSL>=0.13', 'ndg-httpsclient']
-else:
-    install_requires += ['dnspython3']
 
 setup(
     name=name,
