@@ -40,13 +40,18 @@ install_requires = [
 
 tests_require = ['nose-parameterized']
 
-if sys.version_info.major < 3:
-    install_requires += ['cachetools', 'ipaddress']
+version = sys.version_info
+
+if version < (3, 3):
+    install_requires += ['ipaddress']
     tests_require += ['mock']
 
-    if sys.version_info < (2, 7, 9):
-        ''' request[security] extras '''
-        install_requires += ['ndg-httpsclient']
+if version < (3, 2):
+    install_requires += ['cachetools']
+
+if version < (2, 7, 9):
+    # request[security] extras
+    install_requires += ['ndg-httpsclient']
 
 setup(
     name=name,
