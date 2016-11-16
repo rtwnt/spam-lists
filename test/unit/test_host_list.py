@@ -1,8 +1,5 @@
 # -*- coding: utf-8 -*-
-"""
-This module contains unit tests for functions and classes provided by
-spam_lists.host_list module
-"""
+"""Tests for HostList class."""
 from __future__ import unicode_literals
 
 from spam_lists.host_list import HostList
@@ -13,8 +10,7 @@ from test.unit.common_definitions import (
 
 
 class HostListTest(HostListTestMixin, unittest.TestCase):
-    # pylint: disable=too-many-public-methods
-    """ Tests for HostList class
+    """Tests for HostList class.
 
     HostList does not provide implementation of some methods it uses.
     These methods are ought to be implemented by its subclasses. Here,
@@ -31,8 +27,11 @@ class HostListTest(HostListTestMixin, unittest.TestCase):
     HostList._get_match_and_classification method
     :ivar host_data_getter_mock: a mock for
     HostList._get_match_and_classification method. Uses
-     host_list_host_factory as its implementation.
+    host_list_host_factory as its implementation.
     """
+
+    # pylint: disable=too-many-public-methods
+
     def setUp(self):
         self.listed_hosts = []
         self.host_factory_mock = Mock()

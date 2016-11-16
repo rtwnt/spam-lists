@@ -1,8 +1,5 @@
 # -*- coding: utf-8 -*-
-"""
-This module contains unit tests for functions and classes provided by
-spam_lists.validation module
-"""
+"""Tests for functions and classes defined in spam_lists.validation."""
 from __future__ import unicode_literals
 
 import unittest
@@ -18,27 +15,26 @@ from test.compat import Mock, patch
 
 
 class ValidationDecoratorTestMixin(object):
-    """ Provides tests for decorators and wrappers responsible for
-     testing validity of arguments of decorated methods
+    """Tests for validators implemented as decorators and wrappers.
 
     :ivar validity_tester_patcher: an object used for patching
-     a function responsible for testing validity of arguments of
-     a decorated function
+    a function responsible for testing validity of arguments of
+    a decorated function
     :ivar validity_tester_mock: a mocked implementation for
-     the validity tester
+    the validity tester
     :ivar obj: a mock representing object having the method decorated
-     by the decorator
+    by the decorator
     :ivar function: a mock representing function to be decorated
     :ivar decorated_function: a result of applying decorator to
-     the function
+    the function
 
-     Additionally, the test cases using this mixin are expected to have
-     the following attributes:
+    Additionally, the test cases using this mixin are expected to have
+    the following attributes:
 
-    :cvar exception_type:
-    :cvar decorator:
+    :cvar exception_type: a type of exception to be raised in case
+    of a failed validation
     :cvar validity_tester: a fully qualified name of a function used by
-     the tested wrapper as argument validator
+    the tested wrapper as argument validator
     """
     def setUp(self):
         self.validity_tester_patcher = patch(self.validity_tester)
@@ -68,8 +64,9 @@ class ValidationDecoratorTestMixin(object):
 
 
 class AcceptValidURLsTest(ValidationDecoratorTestMixin, unittest.TestCase):
+    """Tests for accepts_valid_urls decorator."""
+
     # pylint: disable=too-many-public-methods
-    """ Tests for accepts_valid_urls decorator """
     exception_type = InvalidURLError
     decorator = staticmethod(accepts_valid_urls)
     validity_tester = 'spam_lists.validation.is_valid_url'
@@ -80,6 +77,7 @@ class AcceptValidURLsTest(ValidationDecoratorTestMixin, unittest.TestCase):
         ('ipv6_host', ['http://[2001:db8:abc:123::42]'])
     ])
     def test_for_urls_with_valid(self, _, urls):
+        """Test if no error is raised for URLs with valid hosts."""
         self._test_wrapper_for_valid(urls)
 
     @parameterized.expand([
@@ -91,12 +89,14 @@ class AcceptValidURLsTest(ValidationDecoratorTestMixin, unittest.TestCase):
         ('invalid_ipv6', ['http://[2001:db8:abcef:123::42]']),
         ('invalid_ipv6', ['http://[2001:db8:abch:123::42]'])])
     def test_for_urls_with(self, _, urls):
+        """Test if InvalidURLError is raised for invalid URLs."""
         self._test_wrapper_for_invalid(urls)
 
 
 class AcceptsValidHostTest(ValidationDecoratorTestMixin, unittest.TestCase):
+    """Tests for accepts_valid_host decorator."""
+
     # pylint: disable=too-many-public-methods
-    """ Tests for accepts_valid_host decorator """
     exception_type = InvalidHostError
     decorator = staticmethod(accepts_valid_host)
     validity_tester = 'spam_lists.validation.is_valid_host'
@@ -107,6 +107,7 @@ class AcceptsValidHostTest(ValidationDecoratorTestMixin, unittest.TestCase):
         ('ipv6', '2001:db8:abc:123::42')
     ])
     def test_for_valid(self, _, value):
+        """Test if no error is raised for valid hosts."""
         self._test_wrapper_for_valid(value)
 
     @parameterized.expand([
@@ -117,12 +118,15 @@ class AcceptsValidHostTest(ValidationDecoratorTestMixin, unittest.TestCase):
         ('ipv6', '2001:db8:abch:123::42')
     ])
     def test_for_invalid(self, _, value):
+        """Test if InvalidHostError is raised for an invalid host."""
         self._test_wrapper_for_invalid(value)
 
 
 class IsValidURLTest(unittest.TestCase):
+    """Tests for is_valid_url function."""
+
     # pylint: disable=too-many-public-methods
-    """ Tests for is_valid_url function """
+
     @parameterized.expand([
         ('http_scheme', 'http://test.url.com'),
         ('https_scheme', 'https://google.com'),
@@ -152,6 +156,12 @@ class IsValidURLTest(unittest.TestCase):
         ('invalid_hostname', 'http://-invalid.domain.com', False)
     ])
     def test_for_url_with(self, _, url, expected=True):
+        """Test expected result for given URL.
+
+        :param url: a URL for which the function is tested
+        :param expected: a value expected to be returned by the function
+        for the URL
+        """
         actual = is_valid_url(url)
         if expected:
             self.assertTrue(actual)

@@ -1,8 +1,5 @@
 # -*- coding: utf-8 -*-
-"""
-This module contains unit tests for functions and classes provided by
-spam_lists.composites module
-"""
+"""Tests for classes provided by spam_lists.composites module."""
 from __future__ import unicode_literals
 
 from collections import defaultdict
@@ -26,7 +23,7 @@ from test.unit.common_definitions import (
 
 
 def get_response_mock(url):
-    """ Get mock representing response to a request
+    """Get a mock representing a response to a request.
 
     :param url: response URL
     :returns: an instance of mock representing a response
@@ -37,27 +34,47 @@ def get_response_mock(url):
 
 
 class HeadSideEffects(dict):
+    """A side effect provider for requests.Session.head method."""
+
     def __call__(self, url):
+        """Call the mock to get a response mock for the URL.
+
+        :param url: a URL address of a HEAD request
+        :returns: a mock representing a response to the HEAD request
+        """
         return self.get(url)
 
 
 class ResolveRedirectsSideEffects(object):
-    """' Provides side effects for redirect resolution
+    """Provides side effects for redirect resolution.
 
-    The side effects include both response object mocks and exceptions.
+    The side effects include both returning response object mocks and
+    raising exceptions.
 
-    :ivar responses: a dictionary mapping response mocks
-    to objects representing response arguments of
-    the requests.Session.resolve_redirects method.
+    :ivar responses: a dictionary mapping response mocks to objects
+    representing response arguments of
+    the requests.Session.resolve_redirects method
     :ivar exceptions: a dictionary mapping exception types to
     objects representing response arguments of the resolve_redirects
     method
     """
+
     def __init__(self):
+        """Initialize a new instance."""
         self.responses = {}
         self.exceptions = {}
 
     def __call__(self, response, request):
+        """Call the mocked function.
+
+        :param response: first response in the chain of responses to
+        a HTTP request
+        :param request: a HTTP request object
+        :returns: mocks for response objects returned by a redirect
+        resolver
+        :raises exception_type: a type of exception to be raised
+        by the resolve_redirects method for given response
+        """
         yielded = self.responses.get(response, [])
         exception_type = self.exceptions.get(response)
         for i in yielded:
@@ -67,8 +84,7 @@ class ResolveRedirectsSideEffects(object):
 
 
 class RedirectURLResolverTest(unittest.TestCase):
-    # pylint: disable=too-many-public-methods
-    """ Tests for RedirectURLResolver class
+    """Tests for RedirectURLResolver class.
 
     :cvar redirect_url_chain: a list containing valid URLs.
     It represents a redirect URL chain with multiple addresses.
@@ -77,18 +93,21 @@ class RedirectURLResolverTest(unittest.TestCase):
 
     :ivar head_mock: a mocked implementation of head function
     used by the tested class to perform HEAD requests. Uses an instance
-    of HeadSideEffects as its implementation
+    of HeadSideEffects as its implementation.
     :ivar resolve_redirects_mock: a mock for
     requests.Session.resolve_redirects function. An instance of
-    ResolveRedirectsSideEffects is used as its implementation
+    ResolveRedirectsSideEffects is used as its implementation.
     :ivar redirect_results: points to an instance of
     ResolveRedirectsSideEffects used as a replacement implementation
     for requests.Session.resolve_redirects
     :ivar resolver: an instance of RedirectURLResolver to be tested
     :ivar patcher: an object used to patch is_valid_url function
     :ivar is_valid_url_mock: a mocked implementation of
-     the is_valid_url function
+    the is_valid_url function
     """
+
+    # pylint: disable=too-many-public-methods
+
     redirect_url_chain = [
         'http://test.com',
         'http://first.com',
@@ -112,6 +131,7 @@ class RedirectURLResolverTest(unittest.TestCase):
         self.patcher.stop()
 
     def test_get_locations_for_invalid(self):
+        """Test if InvalidURLError is raised for invalid initial URL."""
         self.is_valid_url_mock.return_value = False
         with self.assertRaises(InvalidURLError):
             next(self.resolver.get_locations('http://test.com'))
@@ -122,15 +142,15 @@ class RedirectURLResolverTest(unittest.TestCase):
             exceptions=None,
             last_location=''
     ):
-        """ Prepare mocks for their calls to have expected side effects
+        """Prepare mocks for their calls to have expected side effects.
 
         :param url_histories: a sequence containing sequences of
         URL addresses of all responses to a request to a redirecting URL
         :param exceptions: a dictionary mapping initial URLs of
         redirection chains to exceptions raised when attempting to
-        get response to a request to final location
+        get response to a request for the final value of location header
         :param last_location: a value for location response header,
-        specifying the location of the last request, if it couldn't be
+        specifying the location of the last request if it couldn't be
         completed
         """
         for history in url_histories:
@@ -153,6 +173,11 @@ class RedirectURLResolverTest(unittest.TestCase):
         ('urls', redirect_url_chain)
     ])
     def test_get_locations_yields(self, _, history):
+        """Test if the method yields expected results.
+
+        :param history: a list of URL addresses of all responses to
+        a HEAD request
+        """
         expected = history[1:]
         self._set_up_side_effects([history])
         self._test_get_locations(history[0], expected)
@@ -163,6 +188,15 @@ class RedirectURLResolverTest(unittest.TestCase):
         [Timeout],
     ])
     def test_get_locations_arg_raising(self, exception_type):
+        """Test the method for the first URL causing an error.
+
+        If the URL passed to the method causes raising of the exception
+        while preparing the first response, the return value of
+        the method is expected to yield no URLs.
+
+        :param exception_type: a type of exception raised when handling
+        the first HEAD request
+        """
         self.head_mock.side_effect = exception_type
         self._test_get_locations('http://error_source', [])
 
@@ -209,9 +243,11 @@ class RedirectURLResolverTest(unittest.TestCase):
             exception_type,
             triggered_by_valid_url=True
     ):
-        """ The get_locations method is expected to yield all
-         valid URLs appearing as URL addresses and location headers in
-         response histories for given URLs
+        """Test if expected values are yielded.
+
+        The get_locations method is expected to yield all valid URLs
+        appearing as URL addresses and location headers in response
+        histories for given URLs.
 
         :param history: URL addresses of all responses in redirection chain
         :param exception_type: a type of exception to be raised while
@@ -242,8 +278,11 @@ class RedirectURLResolverTest(unittest.TestCase):
         self.assertCountEqual(expected, actual)
 
     def test_get_new_locations(self):
-        """ The method is expected to yield only new URLs,
-        that is URLs that were not part of the original input """
+        """Test if expected values are yielded.
+
+        The method is expected to yield only new URLs, that is: URLs
+        that were not part of the original input.
+        """
         no_redirects = 'http://noredirects.com'
         histories = [
             [no_redirects],
@@ -257,8 +296,11 @@ class RedirectURLResolverTest(unittest.TestCase):
         self._test_get_new_locations(histories)
 
     def test_get_new_unique_locations(self):
-        """ The generator returned by get_new_locations is expected
-        to yield no URLs that it yielded previously """
+        """Test if  each redirect URL is yielded only once.
+
+        The generator returned by get_new_locations is expected
+        to yield no previously yielded URLs.
+        """
         duplicated_part = [
             'http://first.com',
             'http://second.com',
@@ -272,8 +314,10 @@ class RedirectURLResolverTest(unittest.TestCase):
 
     @patch('spam_lists.composites.CachedIterable')
     def test_get_urls_and_locations(self, cached_iterable_mock):
-        """ The method get_urls_and_locations is expected to return
-        an instance of CachedIterable.
+        """Test if an instance of CachedIterable is returned.
+
+        :param cached_iterable_mock: a mock of CachedIterable
+        class object
         """
         expected = Mock()
         cached_iterable_mock.return_value = expected
@@ -283,6 +327,12 @@ class RedirectURLResolverTest(unittest.TestCase):
 
 @lru_cache()
 def get_url_tester_mock(identifier):
+    """Get a mock of a URL tester object.
+
+    :param identifier: an identifier for a URL tester object
+    to be returned
+    :returns: an instance of Mock representing a URL tester object
+    """
     source = Mock()
     source.identifier = identifier
     return source
@@ -293,16 +343,17 @@ class URLTesterChainTest(
         TestFunctionDoesNotHandleMixin,
         unittest.TestCase
 ):
-    # pylint: disable=too-many-public-methods
-    """ Tests for URLTesterChain class
+    """Tests for URLTesterChain class.
 
     This class uses get_url_tester_mock function to populate list of
-    URL testers used by the tested instance
+    URL testers used by the tested instance.
 
     :cvar classification: a set of classifications used in tests
 
     :ivar tested_instance: an instance of tested class
     """
+
+    # pylint: disable=too-many-public-methods
     classification = set(['TEST'])
     url_to_source_id = {
         'http://55.44.21.12': ['source_1', 'source_2'],
@@ -323,7 +374,7 @@ class URLTesterChainTest(
         self.tested_instance = URLTesterChain(*url_testers)
 
     def _add_url_tester(self, source_id, matching_urls):
-        """ Add a preconfigured URL tester mock to the tested instance
+        """Add a preconfigured URL tester mock to the tested instance.
 
         :param source_id: an identifier for a mocked URL tester
         :param matching_urls: a list of URLs expected to be matched by
@@ -352,7 +403,7 @@ class URLTesterChainTest(
                 in list(urls.items()) for i in ids]
 
     def _set_matching_urls(self, urls):
-        """ Set URLs expected to be matched during a test
+        """Set URLs expected to be matched during a test.
 
         The method groups given URLs by their source ids: identifiers
         of services expected to report URLs associated with them as
@@ -361,7 +412,8 @@ class URLTesterChainTest(
         to ensure some of mocked services reporting a match
         will be queried before some that do not.
 
-        :param urls: a dictionary containing
+        :param urls: a dictionary mapping URLs to list of identifiers
+        of sources recognizing them as matching
         """
         by_source_id = defaultdict(list)
         for url, ids in list(urls.items()):
@@ -372,6 +424,7 @@ class URLTesterChainTest(
         shuffle(self.tested_instance.url_testers)
 
     def test_any_match_expecting_true(self):
+        """Test if True is returned for URLs containing matching values."""
         self._test_any_match_for(self.url_to_source_id)
 
     @parameterized.expand([
@@ -379,6 +432,11 @@ class URLTesterChainTest(
         ('matching_urls', url_to_source_id)
     ])
     def test_lookup_matching_for(self, _, matching_urls):
+        """Test if matched values are returned for matching URLs.
+
+        :param matching_urls: a dictionary mapping URLs to list of
+        identifiers of sources recognizing them as matching
+        """
         self._test_lookup_matching_for(matching_urls)
 
     @parameterized.expand([
@@ -386,6 +444,12 @@ class URLTesterChainTest(
         ('matching_urls', url_to_source_id)
     ])
     def test_filter_matching_for(self, _, matching_urls):
+        """Test if matching URLs are returned.
+
+        :param matching_urls: a dictionary mapping URLs to list of
+        identifiers of sources recognizing them as matching
+        """
+
         self._test_filter_matching_for(matching_urls)
 
     @parameterized.expand([
@@ -409,6 +473,11 @@ class URLTesterChainTest(
         )
     ])
     def test_(self, _, function_name, error_type):
+        """Test if a method raises an error.
+
+        :param function_name: a name of a method to be tested
+        :param error_type: a type of error expected to be raised
+        """
         function = getattr(self.tested_instance, function_name)
         for tester in reversed(self.tested_instance.url_testers):
             error_source = getattr(tester, function_name)
@@ -421,26 +490,30 @@ class URLTesterChainTest(
 
 
 class CachedIterableTest(unittest.TestCase):
-    # pylint: disable=too-many-public-methods
-    """ Tests for CachedIterable class
+    """Tests for CachedIterable class.
 
     :ivar iterator_mock: a mock object representing iterator injected
     into the tested instance
-    :ivar cache: a list of values set as initial cache for tested instance
+    :ivar cache: a list of values set as initial cache for
+    the tested instance
     :ivar tested_instance: an instance of CachedIterable to be tested
     """
+
+    # pylint: disable=too-many-public-methods
     def setUp(self):
         self.iterator_mock = MagicMock()
         self.cache = range(3)
         self.tested_instance = CachedIterable(self.iterator_mock, self.cache)
 
     def test_cached_returned_first(self):
+        """Test if cached values precede the ones from the iterator."""
         for i in self.tested_instance:
             if i == self.cache[-1]:
                 break
         self.iterator_mock.__iter__.assert_not_called()
 
     def test_fixed_order(self):
+        """Test if the order of items is preserved in second iteration."""
         self.iterator_mock.__iter__.return_value = range(4, 10)
         first_run_result = list(self.tested_instance)[:9]
         second_run_result = list(self.tested_instance)[:9]
@@ -448,28 +521,29 @@ class CachedIterableTest(unittest.TestCase):
 
 
 class GeneralizedURLTesterTest(unittest.TestCase):
-    # pylint: disable=too-many-public-methods
-    """ Tests for GeneralizedURLTester class
+    """Tests for GeneralizedURLTester class.
 
-    :cvar test_urls: a list of URLs passed as argument to methods of
+    :cvar test_urls: a list of URLs passed as argument to tested methods
     :cvar no_resolution_setup: a parameter setup for test methods
-    requiring no explicit parameter to use (or not use)
-    redirect resolution in tested calls. Contains names of
-    method of tested instance to be called
-    :cvar common_setup: a parameter setup for test methods
-    testing calls with and without redirect resolution, depending
-    on value of a parameter, with False assumed as default.
-    Contains names of method of tested instance to be called.
+    requiring no explicit parameter to use (or not use) redirect
+    resolution in tested calls. Contains names of methods of tested
+    instance to be called
+    :cvar common_setup: a parameter setup for test methods testing calls
+    with and without redirect resolution, depending on value of
+    a parameter, with False assumed as default. Contains names of
+    methods of tested instance to be called.
 
     :ivar tested_instance: instance of GeneralizedURLTester to be
-    tested.
+    tested
     :ivar whitelist_mock: an object representing an instance of
-    whitelist used by tested_instance
+    a whitelist used by tested_instance
     :ivar url_tester_mock: an object representing a URL tester instance
     to be used by tested instance
     :ivar resolver_mock: an object representing an instance of
     redirect resolver to be used by tested instance
     """
+
+    # pylint: disable=too-many-public-methods
     test_urls = ['http:abc.com', 'http://def.com', 'http://xyz.com']
     no_resolution_setup = [
         ['any_match'],
@@ -500,6 +574,12 @@ class GeneralizedURLTesterTest(unittest.TestCase):
 
     @parameterized.expand(common_setup)
     def test_whitelist_used_with(self, function_name, resolve_redirects=False):
+        """Test if the whitelist is used during a method call.
+
+        :param function_name: a name of a method to be tested
+        :param resolve_redirects: a value of resolve_redirects argument
+        of the tested method
+        """
         self._call_for(function_name, resolve_redirects)
         urls_and_locations = self.test_urls
         if resolve_redirects:
@@ -511,16 +591,26 @@ class GeneralizedURLTesterTest(unittest.TestCase):
 
     @parameterized.expand(no_resolution_setup)
     def test_resolution_with(self, function_name):
-        """ Redirect resolution must be performed during all calls
-        that receive resolve_redirects=True as argument """
+        """Test if redirect resolution is performed.
+
+        Redirect resolution must be performed during all method calls
+        that receive resolve_redirects=True as argument.
+
+        :param function_name: a name of a method to be tested
+        """
         self._call_for(function_name, True)
         resolver_function = self.resolver_mock.get_urls_and_locations
         resolver_function.assert_called_once_with(self.test_urls)
 
     @parameterized.expand(no_resolution_setup)
     def test_no_resolution_with(self, function_name):
-        """ Redirect resolution must not be performed during all calls
-        that receive resolve_redirects=True as argument """
+        """Test if redirect resolution is not performed.
+
+        Redirect resolution must not be performed during all calls
+        that receive resolve_redirects=False as argument.
+
+        :param function_name: a name of a method to be tested
+        """
         self._call_for(function_name, False)
         self.resolver_mock.assert_not_called()
 
@@ -530,8 +620,15 @@ class GeneralizedURLTesterTest(unittest.TestCase):
             function_name,
             resolve_redirects=False
     ):
-        """ Each method must return result of a method of url_tester
-        called during its execution"""
+        """Test if expected results are returned.
+
+        Each method must return result of a method of url_tester
+        called during its execution.
+
+        :param function_name: a name of a method to be tested
+        :param resolve_redirects: a value of resolve_redirects argument
+        of the tested method
+        """
         url_tester_function = getattr(self.url_tester_mock, function_name)
         expected = url_tester_function()
         actual = self._call_for(function_name, resolve_redirects)

@@ -1,9 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""
-This module contains classes of objects representing
-custom host collections and their dependencies
-"""
+"""Classes of objects used to create custom host collections."""
 from __future__ import unicode_literals
 from bisect import bisect_right
 
@@ -12,9 +9,8 @@ from .structures import hostname_or_ip
 
 
 class BaseHostCollection(HostList):
-    """ Base class for containers storing ip addresses
-    and domain names
-    """
+    """Base class for containers storing ip addresses and domain names."""
+
     def __init__(
             self,
             identifier,
@@ -22,17 +18,17 @@ class BaseHostCollection(HostList):
             hosts=None,
             host_factory=hostname_or_ip
     ):
-        """ Create new instance
+        """Initialize a new instance.
 
         :param identifier: an identifier of this instance of host collection
         :param classification: a list or tuple containing strings representing
         types of items, assigned to each element of the collection
         :param hosts: an object storing ip adresses and hostnames.
         It must have the following methods:
-        * __getitem__
-        * __len__
-        * pop
-        * append
+            * __getitem__
+            * __len__
+            * pop
+            * append
         :param host_factory: a callable used to create hosts objects stored
         in the collection or representing values searched in it.
         """
@@ -42,9 +38,11 @@ class BaseHostCollection(HostList):
         super(BaseHostCollection, self).__init__(host_factory)
 
     def __len__(self):
+        """Get the number of elements in the collection."""
         return len(self.hosts)
 
     def __getitem__(self, index):
+        """Get an element of the collection with given index."""
         if isinstance(index, slice):
             return self.__class__(
                 self.identifier,
@@ -64,7 +62,7 @@ class BaseHostCollection(HostList):
         return match, _class
 
     def add(self, host_value):
-        """ Add the given value to collection
+        """Add the given value to the collection.
 
         :param host: an ip address or a hostname
         :raises InvalidHostError: raised when the given value
@@ -76,15 +74,15 @@ class BaseHostCollection(HostList):
         self._add_new(host_obj)
 
     def _add_new(self, host_object):
-        """ Add a new host to the collection
+        """Add a new host to the collection.
 
         A new host is defined as a value not currently listed
-        (in case of both hostnames and ip) or not currently
-        covered by another value (in case of hostnames, which
-        could be covered by their parent domain).
+        (in case of both hostnames and ip) or not currently covered by
+        another value, for eaxmple: a hostname whose parent domain is
+        not yet listed.
 
-        Before a new hostname can be added, all its subdomains
-        already present in the collection must be removed.
+        Before a new hostname can be added, all its subdomains already
+        present in the collection must be removed.
 
         :param host_obj: an object representing value to be added.
         It is assumed that, during execution of this method,
@@ -94,10 +92,11 @@ class BaseHostCollection(HostList):
 
 
 class HostCollection(BaseHostCollection):
-    """ Represents a custom host list.
+    """Represents a custom host list.
 
     May be used as a local whitelist or blacklist.
     """
+
     def _get_match(self, host_object):
         for val in self:
             if host_object.is_match(val):
@@ -111,14 +110,13 @@ class HostCollection(BaseHostCollection):
 
 
 class SortedHostCollection(BaseHostCollection):
-    """ Represent a custom host list that keeps its items in
-    sorted order.
-    """
+    """Represents a custom sorted collection of hosts."""
+
     def _get_insertion_point(self, host_obj):
         return bisect_right(self, host_obj)
 
     def _get_match(self, host_object):
-        """ Get an item matching given host object
+        """Get an item matching the given host object.
 
         The item may be either a parent domain or identical value.
         Parent domains and existing identical values always precede
@@ -140,14 +138,14 @@ class SortedHostCollection(BaseHostCollection):
         return None
 
     def _add_new(self, host_object):
-        """ Add a new host to the collection
+        """Add a new host to the collection.
 
-        Before a new hostname can be added, all its subdomains
-        already present in the collection must be removed.
-        Since the collection is sorted, we can limit our
-        search for them to slice of the collection starting
-        from insertion point and ending with the last subdomain
-        detected
+        Before a new hostname can be added, all its subdomains already
+        present in the collection must be removed. Since the collection
+        is sorted, we can limit our search for them to a slice of
+        the collection starting from insertion point and ending with
+        the last detected subdomain.
+
         :param host_obj: an object representing value to be added.
         It is assumed that, during execution of this method,
         the value to be added is not currently listed.

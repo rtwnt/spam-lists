@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
-"""
-This module contains integration tests for supported
-third party services
+"""Integration tests for supported third party services.
 
 The purpose of the tests is to signal changes in the services that
 require changes in the implementation of their clients.
@@ -24,23 +22,44 @@ from test.compat import unittest
 
 
 def ip_or_registered_domain(host):
+    """"Get an IP or a registered domain extracted from the host.
+
+    :param host: a valid IP address or a hostname
+    :returns: the host value if it is an IP address or a registered
+    domain extracted from it if it is a hostname.
+    """
     registered_domain = tldextract.extract(host).registered_domain
     return host if not registered_domain else registered_domain
 
 
 def url_from_host(host):
+    """Get a URL with given host.
+
+    :param host: a host value to be used in the URL
+    :returns: a URL to be used during testing
+    """
     if ipv6(host):
         host = '['+host+']'
     return 'http://'+host
 
 
 def get_classification(classification, return_codes):
+    """Get expected classification for a host listed by a DNSBL service.
+
+    :param classification: a dictionary with service return codes as
+    its keys and classification terms pertaining to them as its values
+    :param return_codes: a sequence of return codes expected to be
+    returned by the service in response to a query for testing membership
+    of a host used during tests
+    :returns: a set with classification terms, expected to be identical
+    to a set stored in an AddressListItem instance returned by a client
+    whose integration with a DNSBL service is being tested
+    """
     return set(v for k, v in list(classification.items()) if k in return_codes)
 
 
 class URLTesterClientTestMixin(object):
-    """  A class containing integration test methods for
-    URL tester clients
+    """Integration tests for URL tester clients.
 
     :cvar tested_client: an instance of client to be tested
 
@@ -53,15 +72,19 @@ class URLTesterClientTestMixin(object):
     :ivar listed_item: an instance of AddressListItem representing
     an item listed by the service to be queried
     """
+
     def test_any_match_for_not_listed(self):
+        """Test if False is returned for URLs without a match."""
         actual = self.tested_client.any_match(self.urls_without_listed)
         self.assertFalse(actual)
 
     def test_any_match_for_listed(self):
+        """Test if True is returned for URLs containing a match."""
         actual = self.tested_client.any_match(self.urls_with_listed)
         self.assertTrue(actual)
 
     def test_filter_matching_not_listed(self):
+        """Test if the method detects no matching URLs."""
         generator = self.tested_client.filter_matching(
             self.urls_without_listed
         )
@@ -69,12 +92,14 @@ class URLTesterClientTestMixin(object):
         self.assertCountEqual([], actual)
 
     def test_filter_matching_for_listed(self):
+        """Test if matching URLs are returned."""
         expected = [self.listed_url]
         filter_matching = self.tested_client.filter_matching
         actual = list(filter_matching(self.urls_with_listed))
         self.assertCountEqual(expected, actual)
 
     def test_lookup_matching_not_listed(self):
+        """Test if no objects are returned."""
         generator = self.tested_client.lookup_matching(
             self.urls_without_listed
         )
@@ -82,6 +107,7 @@ class URLTesterClientTestMixin(object):
         self.assertCountEqual([], actual)
 
     def test_lookup_matching_for_listed(self):
+        """Test if objects representing  matching URLs are returned."""
         expected = [self.listed_item]
         lookup_matching = self.tested_client.lookup_matching
         actual = list(lookup_matching(self.urls_with_listed))
@@ -89,8 +115,7 @@ class URLTesterClientTestMixin(object):
 
 
 class HostListClientTestMixin(URLTesterClientTestMixin):
-    """  A class containing integration test methods for
-    host list clients
+    """Integration tests for clients querying for hosts.
 
     :cvar listed: an item listed by a service to be queried
     :cvar not_listed: an item not listed by a service to be queried
@@ -105,6 +130,7 @@ class HostListClientTestMixin(URLTesterClientTestMixin):
     an item listed by the service to be queried
     :cvar classification: classification of the listed item
     """
+
     @classmethod
     def setUpClass(cls):
         cls.listed_url = url_from_host(cls.listed)
@@ -121,18 +147,22 @@ class HostListClientTestMixin(URLTesterClientTestMixin):
         )
 
     def test__contains__for_not_listed(self):
+        """Test if False is returned for an unlisted host."""
         actual = self.not_listed in self.tested_client
         self.assertFalse(actual)
 
     def test_contains_for_listed(self):
+        """Test if True is returned for a listed host."""
         actual = self.listed in self.tested_client
         self.assertTrue(actual)
 
     def test_lookup_for_not_listed(self):
+        """Test if None is returned for an unlisted host."""
         actual = self.tested_client.lookup(self.not_listed)
         self.assertIsNone(actual)
 
     def test_lookup_for_listed(self):
+        """Test if a value representing a listed host is returned."""
         actual = self.tested_client.lookup(self.listed)
         self.assertEqual(self.listed_item, actual)
 
@@ -146,6 +176,8 @@ REASON_TO_SKIP = (
 
 # @unittest.skip(REASON_TO_SKIP)
 class SpamhausZenTest(HostListClientTestMixin, unittest.TestCase):
+    """Tests for the client of Spamhaus ZEN service."""
+
     # pylint: disable=too-many-public-methods
     tested_client = SPAMHAUS_ZEN
     listed = '127.0.0.2'
@@ -159,6 +191,8 @@ class SpamhausZenTest(HostListClientTestMixin, unittest.TestCase):
 
 # @unittest.skip(REASON_TO_SKIP)
 class SpamhausDBLTest(HostListClientTestMixin, unittest.TestCase):
+    """Tests for the client of Spamhaus DBL service."""
+
     # pylint: disable=too-many-public-methods
     tested_client = SPAMHAUS_DBL
     listed = 'dbltest.com'
@@ -171,6 +205,8 @@ class SpamhausDBLTest(HostListClientTestMixin, unittest.TestCase):
 
 
 class SURBLTest(HostListClientTestMixin):
+    """Tests for the client of SURBL MULTI service."""
+
     tested_client = SURBL_MULTI
     classification = get_classification(
         SURBL_MULTI_CLASSIFICATION,
@@ -179,6 +215,11 @@ class SURBLTest(HostListClientTestMixin):
 
 
 class SURBLMultiIPTest(SURBLTest, unittest.TestCase):
+    """Tests for the client of SURBL MULTI service.
+
+    These tests involve querying for an IP address value.
+    """
+
     # pylint: disable=too-many-public-methods
     listed = '127.0.0.2'
     not_listed = '127.0.0.1'
@@ -186,6 +227,11 @@ class SURBLMultiIPTest(SURBLTest, unittest.TestCase):
 
 
 class SURBLMultiDomainTest(SURBLTest, unittest.TestCase):
+    """Tests for the client of SURBL MULTI service.
+
+    These tests involve querying for a hostname value.
+    """
+
     # pylint: disable=too-many-public-methods
     listed = 'surbl-org-permanent-test-point.com'
     not_listed = 'test.com'
@@ -196,6 +242,11 @@ HP_HOSTS = HpHosts('spam-lists-test-suite')
 
 
 class HpHostsIPTest(HostListClientTestMixin, unittest.TestCase):
+    """Tests for the hpHosts service client.
+
+    These tests involve querying for an IP address value.
+    """
+
     # pylint: disable=too-many-public-methods
     listed = '174.36.207.146'
     not_listed = '64.233.160.0'
@@ -205,6 +256,11 @@ class HpHostsIPTest(HostListClientTestMixin, unittest.TestCase):
 
 
 class HpHostsDomainTest(HostListClientTestMixin, unittest.TestCase):
+    """Tests for the hpHosts service client.
+
+    These tests involve querying for a hostname value.
+    """
+
     # pylint: disable=too-many-public-methods
     listed = 'ecardmountain.com'
     not_listed = 'google.com'
@@ -231,6 +287,8 @@ REASON_TO_SKIP_GSB_TEST = (
 
 @unittest.skipIf(not SAFE_BROWSING_API_KEY, REASON_TO_SKIP_GSB_TEST)
 class GoogleSafeBrowsingTest(URLTesterClientTestMixin, unittest.TestCase):
+    """Tests for the Google Safe Browsing Lookup API client."""
+
     # pylint: disable=too-many-public-methods
     listed_url = 'http://www.gumblar.cn/'
     not_listed_url = 'http://www.google.com/'

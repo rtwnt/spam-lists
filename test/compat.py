@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
-"""
-A common module for compatibility related imports and
-definitions used during testing
-"""
+"""Python 2 and 3 compatibility layer for tests."""
+
 # pylint: disable=unused-import
 
 from __future__ import unicode_literals
@@ -21,7 +19,16 @@ from spam_lists.compat import lru_cache  # @NoMove @UnusedImport
 
 
 class Py2TestCase(unittest.TestCase):
+    """Adapter for tests executed with Python 2 interpreter."""
+
     def assertCountEqual(self, expected_sequence, actual_sequence, msg=None):
+        """Test if both sequences have the same number of items.
+
+        :param first: the first sequence
+        :param second: the second sequence
+        :param msg: a message to be displayed if the test fails
+        :returns: a result of the test
+        """
         return assertCountEqual(self, expected_sequence, actual_sequence, msg)
 
 
