@@ -1,0 +1,12 @@
+#
+# This file has been generated with the following command:
+#    pip-compile --output-file test-requirements.txt test-requirements.in
+#
+# Python version environment markers had to be added separately.
+#
+
+funcsigs==1.0.2; python_version < '3.3' # via mock
+mock==2.0.0; python_version < '3.3'
+nose-parameterized==0.5.0
+pbr==1.10.0                             # via mock
+six==1.10.0                             # via mock
