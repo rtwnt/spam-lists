@@ -15,7 +15,7 @@ from __future__ import unicode_literals
 from builtins import zip, str, range, object
 from dns import name
 from dns.resolver import NXDOMAIN, query
-from future.utils import raise_from
+from six import raise_from
 from requests import get, post
 from requests.exceptions import HTTPError
 
